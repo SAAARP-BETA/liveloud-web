@@ -4,7 +4,6 @@ export const metadata = {
   title: 'App',
   description: 'Navbar',
 };
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
