@@ -19,7 +19,7 @@ export default function Login() {
   useEffect(() => {
     if (isAuthenticated) {
       const redirectTimer = setTimeout(() => {
-        router.replace('/app/home/homepage');
+        router.replace('/home');
       }, 100);
       return () => clearTimeout(redirectTimer);
     }

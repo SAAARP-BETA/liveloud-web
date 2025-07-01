@@ -1,11 +1,13 @@
+// -------------------------------
+// ✅ API Configuration
+// -------------------------------
 export const UNSPLASH_ACCESS_KEY = 'ytAR3Kj5h29tNC6hZMQLFY4uRK3rp-zzLLiEnOE5RyE';
 
 export const API_ENDPOINTS = {
   AUTH: process.env.NEXT_PUBLIC_AUTH_API_URL,
+  SEARCH: process.env.NEXT_PUBLIC_SEARCH_API_URL,
 };
-
-// -------------------------------
-// ✅ Helper for GET Requests
+//✅ General API Helpers
 // -------------------------------
 export const fetchFromApi = async (endpoint, path, options = {}) => {
   try {
@@ -27,9 +29,6 @@ export const fetchFromApi = async (endpoint, path, options = {}) => {
   }
 };
 
-// -------------------------------
-// ✅ Helper for POST
-// -------------------------------
 export const postToApi = async (endpoint, path, data, headers = {}) => {
   return fetchFromApi(endpoint, path, {
     method: 'POST',
@@ -41,9 +40,6 @@ export const postToApi = async (endpoint, path, data, headers = {}) => {
   });
 };
 
-// -------------------------------
-// ✅ Helper for PUT
-// -------------------------------
 export const putToApi = async (endpoint, path, data, headers = {}) => {
   return fetchFromApi(endpoint, path, {
     method: 'PUT',
@@ -55,12 +51,48 @@ export const putToApi = async (endpoint, path, data, headers = {}) => {
   });
 };
 
-// -------------------------------
-// ✅ Helper for DELETE
-// -------------------------------
 export const deleteFromApi = async (endpoint, path, headers = {}) => {
   return fetchFromApi(endpoint, path, {
     method: 'DELETE',
     headers
   });
 };
+
+// -------------------------------
+// ✅ Search Service
+// -------------------------------
+export const searchService = {
+  async globalSearch(query, type = 'all', page = 1, limit = 10) {
+    const params = new URLSearchParams({
+      query,
+      type,
+      page: page.toString(),
+      limit: limit.toString()
+    });
+
+    const response = await fetch(`${API_ENDPOINTS.SEARCH}/?${params}`);
+    
+    if (!response.ok) {
+      throw new Error(`Search failed: ${response.status}`);
+    }
+    
+    return response.json();
+  },
+
+  async getSuggestions(query) {
+    const params = new URLSearchParams({ query });
+    const response = await fetch(`${API_ENDPOINTS.SEARCH}/suggestions?${params}`);
+    
+    if (!response.ok) {
+      throw new Error(`Suggestions failed: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+};
+// -------------------------------
+// ✅ API Configuration
+// -------------------------------
+
+
+

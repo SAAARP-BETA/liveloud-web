@@ -41,7 +41,7 @@ export default function Signup() {
       const success = await signup({ username: fullName, email, password });
 
       if (success) {
-        router.replace('/app/home/homepage');
+        router.replace('/app/home');
       } else {
         alert(error || 'Signup failed. Please try again.');
       }

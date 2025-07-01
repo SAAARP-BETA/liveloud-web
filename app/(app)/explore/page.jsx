@@ -14,7 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { debounce } from "lodash";
-import { API_BASE_URL } from "../../utils/config";
+import { API_ENDPOINTS} from "../../utils/config";
 
 // Mock data and utilities (since we don't have the actual context)
 const mockUser = {
@@ -337,7 +337,7 @@ export default function SearchPage() {
   // API calls
   const fetchTrendingTags = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/posts/tags/trending`);
+      const response = await fetch(`${API_ENDPOINTS.SEARCH}/posts/tags/trending`);
       if (response.ok) {
         const data = await response.json();
         setTrendingTags(data.tags || []);
@@ -375,7 +375,7 @@ export default function SearchPage() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/search/suggestions?query=${encodeURIComponent(query)}`
+        `${API_ENDPOINTS.SEARCH}/search/suggestions?query=${encodeURIComponent(query)}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -398,7 +398,7 @@ export default function SearchPage() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/search?query=${encodeURIComponent(
+        `${API_ENDPOINTS.SEARCH}/search?query=${encodeURIComponent(
           query
         )}&type=${type}&page=${page}&limit=10`
       );
