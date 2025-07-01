@@ -1,32 +1,66 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_SEARCH_API_URL || 'http://localhost:3006/api';
+export const UNSPLASH_ACCESS_KEY = 'ytAR3Kj5h29tNC6hZMQLFY4uRK3rp-zzLLiEnOE5RyE';
 
+export const API_ENDPOINTS = {
+  AUTH: process.env.NEXT_PUBLIC_AUTH_API_URL,
+};
 
-export const searchService = {
-  async globalSearch(query, type = 'all', page = 1, limit = 10) {
-    const params = new URLSearchParams({
-      query,
-      type,
-      page: page.toString(),
-      limit: limit.toString()
-    });
+// -------------------------------
+// ✅ Helper for GET Requests
+// -------------------------------
+export const fetchFromApi = async (endpoint, path, options = {}) => {
+  try {
+    const baseUrl = API_ENDPOINTS[endpoint];
+    if (!baseUrl) throw new Error(`Endpoint '${endpoint}' is not defined.`);
 
-    const response = await fetch(`${API_BASE_URL}/?${params}`);
-    
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    const url = `${baseUrl}/${cleanPath}`;
+
+    const response = await fetch(url, options);
     if (!response.ok) {
-      throw new Error(`Search failed: ${response.status}`);
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
-    
-    return response.json();
-  },
 
-  async getSuggestions(query) {
-    const params = new URLSearchParams({ query });
-    const response = await fetch(`${API_BASE_URL}/suggestions?${params}`);
-    
-    if (!response.ok) {
-      throw new Error(`Suggestions failed: ${response.status}`);
-    }
-    
-    return response.json();
+    return await response.json();
+  } catch (error) {
+    console.error(`❌ Error fetching from ${endpoint}:`, error);
+    throw error;
   }
+};
+
+// -------------------------------
+// ✅ Helper for POST
+// -------------------------------
+export const postToApi = async (endpoint, path, data, headers = {}) => {
+  return fetchFromApi(endpoint, path, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
+    },
+    body: JSON.stringify(data)
+  });
+};
+
+// -------------------------------
+// ✅ Helper for PUT
+// -------------------------------
+export const putToApi = async (endpoint, path, data, headers = {}) => {
+  return fetchFromApi(endpoint, path, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
+    },
+    body: JSON.stringify(data)
+  });
+};
+
+// -------------------------------
+// ✅ Helper for DELETE
+// -------------------------------
+export const deleteFromApi = async (endpoint, path, headers = {}) => {
+  return fetchFromApi(endpoint, path, {
+    method: 'DELETE',
+    headers
+  });
 };
