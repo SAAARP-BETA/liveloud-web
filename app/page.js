@@ -1,7 +1,11 @@
-import Image from "next/image";
+'use client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function Home() {
-  return (
-    <div className="flex">helloHome</div>
-  );
+export default function Page() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/explore');
+  }, []);
+  return null;
 }
