@@ -1,0 +1,177 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext'; // adjust this path based on your project
+import Image from 'next/image';
+import google from '@/app/assets/googleicon1.png'
+import metaMask from '@/app/assets/metamaskicon1.png'
+
+export default function Login() {
+  const router = useRouter();
+  const [email, setEmail] = useState('test@test.com');
+  const [password, setPassword] = useState('Azxs@123');
+  const [isChecked, setIsChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { login, error, clearError, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirectTimer = setTimeout(() => {
+        router.replace('/app/home/homepage');
+      }, 100);
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [isAuthenticated]);
+
+  // Clear auth error on mount/unmount
+  useEffect(() => {
+    clearError();
+    return () => clearError();
+  }, []);
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      alert('Please enter your email and password');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const success = await login(email, password);
+      if (!success) {
+        console.log('Login failed:', error);
+      }
+    } catch (err) {
+      alert('An unexpected error occurred');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    alert('Google login will be available soon!');
+  };
+
+  const handleWalletConnect = () => {
+    alert('Wallet connection will be available soon!');
+  };
+
+  return (
+    <div className="min-h-screen bg-white px-6 py-10">
+      <h1 className="text-sky-500 text-2xl font-bold text-center">Login to Your Account</h1>
+      <p className="text-gray-500 text-center mt-1">And Say It All Unfiltered</p>
+
+      {error && (
+        <div className="mt-4 p-3 bg-red-100 rounded-md">
+          <p className="text-red-700 text-center">{error}</p>
+        </div>
+      )}
+
+      <div className="mt-6">
+        <label className="text-base font-semibold">Email Address</label>
+        <input
+          className="bg-white rounded-md h-10 px-3 border border-gray-300 mt-1 w-full"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (error) clearError();
+          }}
+          type="email"
+          placeholder="you@example.com"
+          disabled={isLoading}
+        />
+      </div>
+
+      <div className="mt-4">
+        <label className="text-base font-semibold">Password</label>
+        <input
+          className="bg-white rounded-md h-10 px-3 border border-gray-300 mt-1 w-full"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (error) clearError();
+          }}
+          type="password"
+          placeholder="Enter your password"
+          disabled={isLoading}
+        />
+      </div>
+
+      <div className="flex items-center mt-2">
+        <button
+          onClick={() => setIsChecked(!isChecked)}
+          className={`w-4 h-4 border-2 rounded mr-2 flex items-center justify-center ${
+            isChecked ? 'border-sky-500 bg-sky-500' : 'border-gray-400'
+          }`}
+          disabled={isLoading}
+        >
+          {isChecked && <span className="text-xs text-white font-bold">✓</span>}
+        </button>
+        <span className="text-base">Keep me signed in</span>
+        <button
+          className="ml-auto text-sky-500 text-sm"
+          onClick={() => router.push('/auth/forgot-password')}
+          disabled={isLoading}
+        >
+          Forgot Password?
+        </button>
+      </div>
+
+      <button
+        className={`mt-6 w-full bg-sky-500 py-3 rounded-full text-white text-lg font-bold ${
+          isLoading ? 'opacity-70 cursor-not-allowed' : ''
+        }`}
+        onClick={handleLogin}
+        disabled={isLoading}
+      >
+        {isLoading ? 'Logging in...' : 'Log In'}
+      </button>
+
+      <p className="text-center text-gray-500 mt-4">Or continue with</p>
+
+      <button
+        className="mt-4 w-full border border-gray-300 py-3 rounded-full flex items-center justify-center"
+        onClick={handleGoogleLogin}
+        disabled={isLoading}
+      >
+        <Image
+          src={google}
+          alt="Google Icon"
+          width={24}
+          height={24}
+          className="mr-2"
+        />
+        <span className="text-base font-semibold">Continue with Google</span>
+      </button>
+
+      <button
+        className="mt-3 w-full border border-gray-300 py-3 rounded-full flex items-center justify-center"
+        onClick={handleWalletConnect}
+        disabled={isLoading}
+      >
+        <Image
+          src={metaMask}
+          alt="Metamask Icon"
+          width={24}
+          height={24}
+          className="mr-2"
+        />
+        <span className="text-base font-semibold">Connect Wallet</span>
+      </button>
+
+      <p className="mt-6 text-center text-gray-500">
+        Don't have an account?{' '}
+        <button
+          className="text-sky-500 font-semibold"
+          onClick={() => router.push('/signup')}
+          disabled={isLoading}
+        >
+          Sign up for free
+        </button>
+      </p>
+    </div>
+  );
+}
