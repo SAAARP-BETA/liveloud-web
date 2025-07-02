@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
 import {
   Heart,
   MessageCircle,
@@ -44,7 +44,8 @@ const PointsDisplay = ({ points, loading }) => {
     pointsToNext: 100,
   };
   const progressPercentage = Math.min(
-    ((points.totalPoints % levelInfo.pointsToNext) / levelInfo.pointsToNext) * 100,
+    ((points.totalPoints % levelInfo.pointsToNext) / levelInfo.pointsToNext) *
+      100,
     100
   );
 
@@ -83,7 +84,8 @@ const PointsDisplay = ({ points, loading }) => {
           <span className="text-xs text-gray-600">
             {Math.max(
               0,
-              levelInfo.pointsToNext - (points.totalPoints % levelInfo.pointsToNext)
+              levelInfo.pointsToNext -
+                (points.totalPoints % levelInfo.pointsToNext)
             )}{" "}
             pts to go
           </span>
@@ -265,7 +267,9 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             </button>
           </div>
         </div>
-        <div className="max-h-[calc(90vh-80px)] overflow-y-auto">{children}</div>
+        <div className="max-h-[calc(90vh-80px)] overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -273,7 +277,17 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 
 // Main Profile Component
 export default function ProfilePage() {
-  const { user, token, isAuthenticated, loading, error: authError, getProfile, refreshToken, clearError, logout } = useAuth();
+  const {
+    user,
+    token,
+    isAuthenticated,
+    loading,
+    error: authError,
+    getProfile,
+    refreshToken,
+    clearError,
+    logout,
+  } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [userPoints, setUserPoints] = useState(null);
@@ -315,12 +329,16 @@ export default function ProfilePage() {
             if (postsResponse.status === 401) {
               const refreshed = await refreshToken();
               if (refreshed) {
-                const retryResponse = await fetch(`/api/users/${user._id}/posts`, {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                });
-                if (!retryResponse.ok) throw new Error("Failed to fetch posts after token refresh");
+                const retryResponse = await fetch(
+                  `/api/users/${user._id}/posts`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
+                if (!retryResponse.ok)
+                  throw new Error("Failed to fetch posts after token refresh");
                 const postsData = await retryResponse.json();
                 setPosts(postsData);
               } else {
@@ -344,12 +362,16 @@ export default function ProfilePage() {
             if (pointsResponse.status === 401) {
               const refreshed = await refreshToken();
               if (refreshed) {
-                const retryResponse = await fetch(`/api/users/${user._id}/points`, {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                });
-                if (!retryResponse.ok) throw new Error("Failed to fetch points after token refresh");
+                const retryResponse = await fetch(
+                  `/api/users/${user._id}/points`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
+                if (!retryResponse.ok)
+                  throw new Error("Failed to fetch points after token refresh");
                 const pointsData = await retryResponse.json();
                 setUserPoints(pointsData);
               } else {
@@ -379,7 +401,16 @@ export default function ProfilePage() {
     };
 
     fetchData();
-  }, [loading, isAuthenticated, user, token, getProfile, refreshToken, logout, router]);
+  }, [
+    loading,
+    isAuthenticated,
+    user,
+    token,
+    getProfile,
+    refreshToken,
+    logout,
+    router,
+  ]);
 
   // Handle scroll for header animation
   const handleScroll = () => {
@@ -397,14 +428,13 @@ export default function ProfilePage() {
     }
   };
 
- useEffect(() => {
-  const scrollContainer = scrollContainerRef.current;
-  if (!scrollContainer) return;
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
-  scrollContainer.addEventListener("scroll", handleScroll);
-  return () => scrollContainer.removeEventListener("scroll", handleScroll);
-}, []);
-
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Post interaction handlers
   const handleLike = async (postId) => {
@@ -425,14 +455,17 @@ export default function ProfilePage() {
                 Authorization: `Bearer ${token}`,
               },
             });
-            if (!retryResponse.ok) throw new Error("Failed to like/unlike post after token refresh");
+            if (!retryResponse.ok)
+              throw new Error("Failed to like/unlike post after token refresh");
             setPosts((prev) =>
               prev.map((post) =>
                 post.id === postId
                   ? {
                       ...post,
                       isLiked: !post.isLiked,
-                      likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+                      likeCount: post.isLiked
+                        ? post.likeCount - 1
+                        : post.likeCount + 1,
                     }
                   : post
               )
@@ -450,7 +483,9 @@ export default function ProfilePage() {
               ? {
                   ...post,
                   isLiked: !post.isLiked,
-                  likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+                  likeCount: post.isLiked
+                    ? post.likeCount - 1
+                    : post.likeCount + 1,
                 }
               : post
           )
@@ -489,7 +524,8 @@ export default function ProfilePage() {
                 Authorization: `Bearer ${token}`,
               },
             });
-            if (!retryResponse.ok) throw new Error("Failed to amplify post after token refresh");
+            if (!retryResponse.ok)
+              throw new Error("Failed to amplify post after token refresh");
             setPosts((prev) =>
               prev.map((post) =>
                 post.id === postId
@@ -552,7 +588,8 @@ export default function ProfilePage() {
                 Authorization: `Bearer ${token}`,
               },
             });
-            if (!retryResponse.ok) throw new Error("Failed to bookmark post after token refresh");
+            if (!retryResponse.ok)
+              throw new Error("Failed to bookmark post after token refresh");
             setPosts((prev) =>
               prev.map((post) =>
                 post.id === postId
@@ -603,7 +640,8 @@ export default function ProfilePage() {
                 Authorization: `Bearer ${token}`,
               },
             });
-            if (!retryResponse.ok) throw new Error("Failed to delete post after token refresh");
+            if (!retryResponse.ok)
+              throw new Error("Failed to delete post after token refresh");
             setPosts((prev) => prev.filter((post) => post.id !== postId));
             setIsPostModalVisible(false);
           } else {
@@ -650,13 +688,19 @@ export default function ProfilePage() {
         if (response.status === 401) {
           const refreshed = await refreshToken();
           if (refreshed) {
-            const retryResponse = await fetch(`/api/users/${profileData._id}/follow`, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            if (!retryResponse.ok) throw new Error("Failed to follow/unfollow user after token refresh");
+            const retryResponse = await fetch(
+              `/api/users/${profileData._id}/follow`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            if (!retryResponse.ok)
+              throw new Error(
+                "Failed to follow/unfollow user after token refresh"
+              );
             setIsFollowing(!isFollowing);
             setProfileData((prev) => ({
               ...prev,
@@ -694,18 +738,18 @@ export default function ProfilePage() {
     Math.min(120, 120 - (200 - headerHeight) * 0.6)
   );
 
-  if (loading || dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading || dataLoading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-gray-50">
+  //       <div className="text-center">
+  //         <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
+  //         <p className="mt-4 text-gray-600">Loading...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  if (!authError || !dataError) {
+  if (authError || dataError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -749,12 +793,13 @@ export default function ProfilePage() {
       >
         <div className="relative w-full h-full">
           <img
-            src={profileData.coverPhoto}
+            src={profileData?.coverPhoto || "https://placehold.co/600x400"}
             alt="Cover"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/60" />
         </div>
+
         <div className="absolute top-4 left-0 right-0 px-4 flex items-center justify-between">
           <button
             onClick={() => router.back()}
@@ -767,14 +812,17 @@ export default function ProfilePage() {
               showHeaderTitle ? "opacity-100" : "opacity-0"
             }`}
           >
-            <span className="text-white font-semibold">{profileData.username}</span>
-            {profileData.isVerified && (
+            <span className="text-white font-semibold">
+              {profileData?.username}
+            </span>
+            {(profileData?.isVerified && (
               <CheckCircle size={16} className="ml-1 text-blue-400" />
-            )}
+            )) ||
+              null}
           </div>
           <button
             onClick={() => setIsMoreModalVisible(true)}
-            className="w-10 h-10 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/30 transition-colors"
+            className="w-10 h-10 rounded-full cursor-pointer bg-black/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/30 transition-colors"
           >
             <MoreHorizontal size={24} />
           </button>
@@ -798,8 +846,10 @@ export default function ProfilePage() {
             }}
           >
             <img
-              src={profileData.profilePicture}
-              alt={profileData.username}
+              src={
+                profileData?.profilePicture || "https://placehold.co/120x120"
+              }
+              alt={profileData?.username || "Profile"}
               className="w-full h-full object-cover"
             />
             {isMyProfile && (
@@ -810,39 +860,46 @@ export default function ProfilePage() {
           </div>
           <div className="mt-4 text-center">
             <div className="flex items-center justify-center">
-              <h1 className="text-2xl font-bold text-gray-900">{profileData.name}</h1>
-              {profileData.isVerified && (
+              <h1 className="text-2xl font-bold text-gray-900">
+                {profileData?.name || "Anonymous User"}
+              </h1>
+              {profileData?.isVerified && (
                 <CheckCircle size={20} className="ml-2 text-blue-500" />
               )}
               {userPoints && (
                 <div className="ml-2 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full">
                   <span className="text-xs font-bold text-white">
-                    LV.{userPoints.levelInfo.level}
+                    LV.{userPoints?.levelInfo.level || 1}
                   </span>
                 </div>
               )}
             </div>
-            <p className="text-base text-gray-500 mt-1">@{profileData.username}</p>
-            {profileData.bio && (
+            <p className="text-base text-gray-500 mt-1">
+              @{profileData?.username || "anonymous"}
+            </p>
+            {profileData?.bio && (
               <p className="text-gray-700 text-center mt-3 leading-relaxed max-w-md mx-auto">
-                {profileData.bio}
+                {profileData?.bio ||
+                  "This user prefers to keep their bio private."}
               </p>
             )}
             <div className="flex justify-center mt-4 space-x-6">
               <button className="text-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors">
                 <p className="text-lg font-bold text-gray-800">
-                  {profileData.followersCount.toLocaleString()}
+                  {profileData?.followersCount.toLocaleString() || 0}
                 </p>
                 <p className="text-sm text-gray-500">Followers</p>
               </button>
               <button className="text-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors">
                 <p className="text-lg font-bold text-gray-800">
-                  {profileData.followingCount.toLocaleString()}
+                  {profileData?.followingCount.toLocaleString() || 0}
                 </p>
                 <p className="text-sm text-gray-500">Following</p>
               </button>
               <div className="text-center px-3 py-2">
-                <p className="text-lg font-bold text-gray-800">{posts.length}</p>
+                <p className="text-lg font-bold text-gray-800">
+                  {posts?.length || 0}
+                </p>
                 <p className="text-sm text-gray-500">Posts</p>
               </div>
             </div>
@@ -863,7 +920,7 @@ export default function ProfilePage() {
                 <>
                   <button
                     onClick={handleFollow}
-                    className={`flex-1 py-2.5 rounded-full font-medium transition-colors ${
+                    className={`flex-1 py-2.5 rounded-full cursor-pointer font-medium transition-colors ${
                       isFollowing
                         ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
                         : "bg-sky-500 text-white hover:bg-sky-600"
@@ -871,10 +928,7 @@ export default function ProfilePage() {
                   >
                     {isFollowing ? "Following" : "Follow"}
                   </button>
-                  <button className="ml-3 flex-1 py-2.5 bg-gray-100 rounded-full font-medium text-gray-900 hover:bg-gray-200 transition-colors">
-                    Message
-                  </button>
-                  <button className="ml-3 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                  <button className="ml-3 w-10 h-10 bg-gray-100 cursor-pointer rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
                     <MoreHorizontal size={18} className="text-gray-600" />
                   </button>
                 </>
@@ -884,32 +938,42 @@ export default function ProfilePage() {
           {userPoints && (
             <>
               <PointsDisplay points={userPoints} loading={dataLoading} />
-              <StreakDisplay consecutiveDays={userPoints.consecutiveLoginDays} />
+              <StreakDisplay
+                consecutiveDays={userPoints?.consecutiveLoginDays || 0}
+              />
             </>
           )}
           <div className="mt-5 pt-4 border-t border-gray-100 flex flex-col max-w-md mx-auto">
-            {profileData.location && (
+            {profileData?.location && (
               <div className="flex items-center mb-2">
                 <MapPin size={16} className="text-gray-500" />
-                <span className="ml-2 text-gray-500">{profileData.location}</span>
+                <span className="ml-2 text-gray-500">
+                  {profileData.location}
+                </span>
               </div>
             )}
-            {profileData.website && (
+
+            {profileData?.website && (
               <div className="flex items-center mb-2">
                 <Link size={16} className="text-gray-500" />
-                <span className="ml-2 text-gray-500">{profileData.website}</span>
+                <span className="ml-2 text-gray-500">
+                  {profileData.website}
+                </span>
               </div>
             )}
-            <div className="flex items-center mb-2">
-              <Calendar size={16} className="text-gray-500" />
-              <span className="ml-2 text-gray-500">
-                Joined{" "}
-                {new Date(profileData.createdAt).toLocaleDateString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </span>
-            </div>
+
+            {profileData?.createdAt && (
+              <div className="flex items-center mb-2">
+                <Calendar size={16} className="text-gray-500" />
+                <span className="ml-2 text-gray-500">
+                  Joined{" "}
+                  {new Date(profileData.createdAt).toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex bg-white border-b border-gray-100 sticky top-0 z-30">
@@ -958,7 +1022,7 @@ export default function ProfilePage() {
                   <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
                     {isMyProfile
                       ? "Start sharing your thoughts, photos, and experiences with the world."
-                      : `${profileData.username} hasn't posted anything yet.`}
+                      : `${profileData?.username} hasn't posted anything yet.`}
                   </p>
                   {isMyProfile && (
                     <button className="px-6 py-2.5 bg-sky-500 text-white rounded-full font-medium hover:bg-sky-600 transition-colors">
@@ -984,8 +1048,8 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 ))}
-              {posts.filter((post) => post.media && post.media.length > 0).length ===
-                0 && (
+              {posts.filter((post) => post.media && post.media.length > 0)
+                .length === 0 && (
                 <div className="w-full text-center py-12">
                   <ImageIcon size={48} className="text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-700 mb-2">
@@ -994,7 +1058,7 @@ export default function ProfilePage() {
                   <p className="text-sm text-gray-500">
                     {isMyProfile
                       ? "Share photos and videos with your followers."
-                      : `${profileData.username} hasn't posted any media yet.`}
+                      : `${profileData?.username} hasn't posted any media yet.`}
                   </p>
                 </div>
               )}
