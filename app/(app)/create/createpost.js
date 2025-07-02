@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Camera, MapPin, Users, Smile, Image, X, Edit, Plus } from 'lucide-react';
 // import image from '../public/globe.svg';
 import { useRouter } from 'next/navigation';
+// import { useAuth } from '@context/AuthContext';
 
 const FilteredImage = ({ src, filterType, className }) => {
   const filterStyles = {
@@ -24,10 +25,11 @@ const FilteredImage = ({ src, filterType, className }) => {
   );
 };
 
-const CreatePost = ({isAuthenticated, token}) => {
+const CreatePost = ({isAuthenticated , token, user}) => {
   // Constants
   const MAX_CHAR_LIMIT = 1000;
   const MEDIA_LIMIT = 4;
+  
   
   // State
   const [content, setContent] = useState('');
@@ -42,6 +44,7 @@ const CreatePost = ({isAuthenticated, token}) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   
   
   // UI State
@@ -52,6 +55,8 @@ const CreatePost = ({isAuthenticated, token}) => {
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageIndex, setEditingImageIndex] = useState(null);
   
+  // useAuth
+  // const { user, token, isAuthenticated, loading } = useAuth();
   
   const router = useRouter();
   
@@ -60,7 +65,7 @@ const CreatePost = ({isAuthenticated, token}) => {
   
   const charCount = content.length;
 // memoised value
-const isApproachingLimit = useMemo(
+  const isApproachingLimit = useMemo(
     () => charCount > MAX_CHAR_LIMIT * 0.8,
     [charCount]
   );
@@ -103,20 +108,22 @@ const API_ENDPOINTS = {
 // check auth and fetch trending tags 
 
 useEffect(() => {
+    if(loading) return;
+
     if (!isAuthenticated) {
       const shouldLogin = window.confirm(
         'You need to be logged in to create a post. Do you want to login now?'
       );
 
       if (shouldLogin) {
-        router.push('/auth/login'); // Adjust the route as needed
+        router.push('/login'); // Adjust the route as needed
       }
 
       return;
     }
 
     fetchTrendingTags();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, loading,  router]);
 
   // Computed values
 
@@ -447,6 +454,16 @@ const handleSubmit = useCallback(async () => {
     // navigate
   ]);
 
+  if(loading){
+     return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
 
@@ -473,10 +490,9 @@ const handleSubmit = useCallback(async () => {
     }`}
 >
   Post
-</button>
-
-    </div>
+    </button>
   </div>
+</div>
 
       {/* Main Content */}
       <div className="bg-white mt-4 rounded-md max-w-2xl w-full mx-auto shadow-sm">
@@ -484,12 +500,12 @@ const handleSubmit = useCallback(async () => {
         {/* User Info Header */}
 <div className="flex items-center px-4 pt-4">
   <img
-    // src={} // Replace with actual image path or user.profilePic
+    src={user?.profilePic || '/default-avatar.png'} // Replace with actual image path or user.profilePic
     alt="User"
     className="w-10 h-10 bg-black rounded-full object-cover"
   />
   <div className="ml-3">
-    <p className="text-sm text-gray-900">Elvish Bhaii</p>
+    <p className="text-sm text-gray-900">{user?.name || user?.username || 'User'}</p>
     {/* Optional: small caption like “Public” or timestamp */}
     {/* <p className="text-xs text-gray-500">Posting publicly</p> */}
   </div>
