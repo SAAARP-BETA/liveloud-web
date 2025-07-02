@@ -164,7 +164,7 @@ export default function LeftSidebar() {
 
       {/* Desktop Left Sidebar */}
       <motion.aside
-        className="hidden sm:flex fixed top-0 left-0 h-screen w-64 px-6 py-8 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl z-50 flex-col"
+        className="hidden sm:flex fixed top-0 left-36 h-screen w-64 px-6 py-8 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl z-50 flex-col"
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
