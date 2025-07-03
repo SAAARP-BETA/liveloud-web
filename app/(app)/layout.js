@@ -1,10 +1,13 @@
-import LeftSidebar from "@/components/LeftSidebar";
+import LeftSidebar from "@/Components/LeftSidebar";
+import ProtectedRoute from "@/app/components/ProtectedRoute";
 
 export default function AppLayout({ children }) {
   return (
-    <div className="flex">
-      <LeftSidebar />
-      <main className="flex-1 ml-70 p-4">{children}</main>
-    </div>
+    <ProtectedRoute>
+      <div className="flex">
+        <LeftSidebar />
+        <main className="flex-1 ml-70 p-4">{children}</main>
+      </div>
+    </ProtectedRoute>
   );
 }

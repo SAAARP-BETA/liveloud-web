@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/context/AuthContext'; // adjust path if needed
+import { useAuth } from '@/app/context/AuthContext';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faCheck } from '@fortawesome/free-solid-svg-icons';
@@ -41,7 +41,7 @@ export default function Signup() {
       const success = await signup({ username: fullName, email, password });
 
       if (success) {
-        router.replace('/app/home');
+        router.push('/home');
       } else {
         alert(error || 'Signup failed. Please try again.');
       }

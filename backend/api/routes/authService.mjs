@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from '@/app/utils/config';
-import { storeAuthData } from '@/backend/utils/authUtils';
+import { storeAuthData, getAuthToken, clearAuthData } from '@/backend/utils/authUtils';
 
 // Custom error class
 class AuthenticationError extends Error {
@@ -122,9 +122,21 @@ const authService = {
   // ----------------- GET PROFILE -----------------
   getProfile: async () => {
     try {
+      const token = getAuthToken();
+      
+      if (!token) {
+        throw new AuthenticationError(
+          'No authentication token found',
+          'NO_TOKEN'
+        );
+      }
+
       const response = await fetch(`${API_ENDPOINTS.AUTH}/profile`, {
         method: 'GET',
-        credentials: 'include', // ✅ sends cookie
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       const data = await response.json();
@@ -149,7 +161,7 @@ const authService = {
     try {
       const response = await fetch(`${API_ENDPOINTS.AUTH}/validate`, {
         method: 'GET',
-        credentials: 'include', // ✅ send cookie to validate session
+        credentials: 'include', 
       });
 
       const data = await response.json();
@@ -161,7 +173,7 @@ const authService = {
         );
       }
 
-      return data; // { valid: true, user: {...} }
+      return data; 
     } catch (error) {
       throw error instanceof AuthenticationError
         ? error
@@ -172,25 +184,32 @@ const authService = {
   // ----------------- LOGOUT -----------------
   logout: async () => {
     try {
+      const token = getAuthToken();
+      
+      await clearAuthData();
+      
+      if (!token) {
+        return { message: "Logged out successfully" };
+      }
+
       const response = await fetch(`${API_ENDPOINTS.AUTH}/logout`, {
         method: 'POST',
-        credentials: 'include', // ✅ to clear the cookie
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new AuthenticationError(
-          data.message || 'Logout failed',
-          data.code || 'LOGOUT_FAILED'
-        );
+        console.warn('Server logout failed, but local data cleared');
       }
 
-      return data; // { message: "Logged out successfully" }
+      return data || { message: "Logged out successfully" };
     } catch (error) {
-      throw error instanceof AuthenticationError
-        ? error
-        : new AuthenticationError(error.message, 'LOGOUT_FAILED');
+      console.warn('Logout error:', error);
+      return { message: "Logged out successfully" };
     }
   },
 };

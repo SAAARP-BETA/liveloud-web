@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext'; // adjust this path based on your project
+import { useAuth } from '../../context/AuthContext';
 import Image from 'next/image';
 import google from '@/app/assets/googleicon1.png'
 import metaMask from '@/app/assets/metamaskicon1.png'
@@ -13,19 +13,8 @@ export default function Login() {
   const [password, setPassword] = useState('Azxs@123');
   const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login, error, clearError, isAuthenticated } = useAuth();
+  const { login, error, clearError } = useAuth();
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      const redirectTimer = setTimeout(() => {
-        router.replace('/home');
-      }, 100);
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [isAuthenticated]);
-
-  // Clear auth error on mount/unmount
   useEffect(() => {
     clearError();
     return () => clearError();
@@ -40,7 +29,9 @@ export default function Login() {
     setIsLoading(true);
     try {
       const success = await login(email, password);
-      if (!success) {
+      if (success) {
+        router.push('/home');
+      } else {
         console.log('Login failed:', error);
       }
     } catch (err) {

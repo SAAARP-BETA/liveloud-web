@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import authService from '@/backend/api/routes/authService.mjs'; // Adjust if needed
+import authService from '@/backend/api/routes/authService.mjs';
+import { getAuthData, clearAuthData } from '@/backend/utils/authUtils';
 
 export const AuthContext = createContext({
   user: null,
@@ -24,24 +25,37 @@ export const AuthProvider = ({ children }) => {
 
   const [error, setError] = useState(null);
 
-  // Load profile from backend on first render
+  // Load profile from localStorage and validate with backend on first render
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const profile = await authService.getProfile();
-        if (profile?._id) {
-          setAuthState({
-            user: profile,
-            isAuthenticated: true,
-            loading: false,
-          });
-        } else {
-          setAuthState({
-            user: null,
-            isAuthenticated: false,
-            loading: false,
-          });
+        // First check if we have stored auth data
+        const storedAuthData = await getAuthData();
+        
+        if (storedAuthData.token && storedAuthData.user) {
+          // We have stored data, try to validate with server
+          try {
+            const profile = await authService.getProfile();
+            if (profile?._id) {
+              setAuthState({
+                user: profile,
+                isAuthenticated: true,
+                loading: false,
+              });
+              return;
+            }
+          } catch (err) {
+            console.warn('Stored token invalid, clearing auth data');
+            await clearAuthData();
+          }
         }
+        
+        // No valid stored data or validation failed
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          loading: false,
+        });
       } catch (err) {
         console.error('Auth init failed:', err);
         setAuthState({
@@ -98,8 +112,8 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error in context:', err);
       setError(err.message || 'Login failed');
       return false;
-    }
-  };
+    }
+  };
 
   // ------------------ SIGNUP ------------------
   const signup = async (userData) => {
@@ -124,9 +138,10 @@ export const AuthProvider = ({ children }) => {
   // ------------------ LOGOUT ------------------
   const logout = async () => {
     try {
-      await authService.logout(); // Cookie will be cleared from server
+      await authService.logout(); 
     } catch (err) {
       console.error('Logout error:', err);
+      await clearAuthData();
     } finally {
       setAuthState({
         user: null,
@@ -148,6 +163,7 @@ export const AuthProvider = ({ children }) => {
       return profile;
     } catch (err) {
       console.error('Get profile error:', err);
+      await clearAuthData();
       setAuthState({
         user: null,
         isAuthenticated: false,
