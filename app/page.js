@@ -7,7 +7,7 @@ import { useAuth } from '@/app/context/AuthContext'; // Adjust path as needed
 export default function HomeRedirect() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-
+  console.log(isAuthenticated);
   useEffect(() => {
     if (isAuthenticated === false) {
       router.replace('/login'); // Next.js path (adjust if needed)

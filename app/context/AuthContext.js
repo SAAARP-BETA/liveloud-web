@@ -1,19 +1,16 @@
 'use client';
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import authService from '@/backend/api/routes/authService.mjs'; // Adjust path if needed
-import { getAuthData } from '@/backend/utils/authUtils'; // Adjust path if needed
+import authService from '@/backend/api/routes/authService.mjs'; // Adjust if needed
 
 export const AuthContext = createContext({
   user: null,
-  token: null,
   isAuthenticated: false,
   loading: true,
   error: null,
   login: () => {},
   signup: () => {},
   logout: () => {},
-  refreshToken: () => {},
   getProfile: () => {},
   clearError: () => {},
 });
@@ -21,32 +18,26 @@ export const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
     user: null,
-    token: null,
     isAuthenticated: false,
     loading: true,
   });
 
   const [error, setError] = useState(null);
 
+  // Load profile from backend on first render
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const authData = getAuthData();
-
-        if (authData?.token && authData?.user) {
+        const profile = await authService.getProfile();
+        if (profile?._id) {
           setAuthState({
-            user: authData.user,
-            token: authData.token,
+            user: profile,
             isAuthenticated: true,
             loading: false,
           });
-
-          const isValid = await authService.isAuthenticated();
-          if (!isValid) await logout();
         } else {
           setAuthState({
             user: null,
-            token: null,
             isAuthenticated: false,
             loading: false,
           });
@@ -55,7 +46,6 @@ export const AuthProvider = ({ children }) => {
         console.error('Auth init failed:', err);
         setAuthState({
           user: null,
-          token: null,
           isAuthenticated: false,
           loading: false,
         });
@@ -65,31 +55,60 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
+  // ------------------ LOGIN ------------------
+  // const login = async (email, password) => {
+  //   setError(null);
+  //   setAuthState((prev) => ({ ...prev, loading: true }));
+  //   try {
+  //     const response = await authService.login(email, password);
+  //     setAuthState({
+  //       user: response.user,
+  //       isAuthenticated: true,
+  //       loading: false,
+  //     });
+  //     return true;
+  //   } catch (err) {
+  //     console.error('Login error:', err);
+  //     setError(err.message || 'Login failed');
+  //     setAuthState((prev) => ({ ...prev, loading: false }));
+  //     return false;
+  //   }
+  // };
+
   const login = async (email, password) => {
     setError(null);
     try {
+      console.log('Attempting Login...');
       const response = await authService.login(email, password);
+      console.log('Login successful, received:', {
+        hasUser: !!response.user,
+        hasToken: !!response.token,
+        tokenLength: response.token?.length
+      });
+      
       setAuthState({
         user: response.user,
         token: response.token,
         isAuthenticated: true,
-        loading: false,
+        loading: false
       });
+      
       return true;
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Login error in context:', err);
       setError(err.message || 'Login failed');
       return false;
-    }
-  };
+    }
+  };
 
+  // ------------------ SIGNUP ------------------
   const signup = async (userData) => {
     setError(null);
+    setAuthState((prev) => ({ ...prev, loading: true }));
     try {
       const response = await authService.signup(userData);
       setAuthState({
         user: response.user,
-        token: response.token,
         isAuthenticated: true,
         loading: false,
       });
@@ -97,45 +116,31 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Signup error:', err);
       setError(err.message || 'Signup failed');
+      setAuthState((prev) => ({ ...prev, loading: false }));
       return false;
     }
   };
 
+  // ------------------ LOGOUT ------------------
   const logout = async () => {
     try {
-      await authService.logout();
+      await authService.logout(); // Cookie will be cleared from server
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
       setAuthState({
         user: null,
-        token: null,
         isAuthenticated: false,
         loading: false,
       });
     }
   };
 
-  const refreshToken = async () => {
-    try {
-      const response = await authService.refreshToken();
-      setAuthState((prev) => ({
-        ...prev,
-        token: response.token,
-        user: response.user,
-      }));
-      return true;
-    } catch (err) {
-      console.error('Token refresh error:', err);
-      await logout();
-      setError('Session expired. Please log in again.');
-      return false;
-    }
-  };
-
+  // ------------------ GET PROFILE ------------------
   const getProfile = async () => {
     try {
       const profile = await authService.getProfile();
+      if (!profile || !profile._id) throw new Error('Invalid profile');
       setAuthState((prev) => ({
         ...prev,
         user: profile,
@@ -143,7 +148,11 @@ export const AuthProvider = ({ children }) => {
       return profile;
     } catch (err) {
       console.error('Get profile error:', err);
-      await logout();
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+      });
       setError('Session expired. Please log in again.');
       return null;
     }
@@ -159,7 +168,6 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
-        refreshToken,
         getProfile,
         clearError,
       }}
