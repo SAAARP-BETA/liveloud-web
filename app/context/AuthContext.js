@@ -19,6 +19,7 @@ export const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
     user: null,
+    token:null, //solved issue in creating post (setting the token)
     isAuthenticated: false,
     loading: true,
   });
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }) => {
             if (profile?._id) {
               setAuthState({
                 user: profile,
+                token: storedAuthData.token, // Ensure we set the token
                 isAuthenticated: true,
                 loading: false,
               });
