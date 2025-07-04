@@ -771,7 +771,7 @@ const handleSubmit = useCallback(async () => {
       {/* Location Modal */}
       {showLocationModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-3xl mx-auto rounded-lg p-4 m-8">
+          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg p-4 m-8">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Add Location</h3>
               <button onClick={() => setShowLocationModal(false)}>
