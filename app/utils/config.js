@@ -6,6 +6,8 @@ export const UNSPLASH_ACCESS_KEY = 'ytAR3Kj5h29tNC6hZMQLFY4uRK3rp-zzLLiEnOE5RyE'
 export const API_ENDPOINTS = {
   AUTH: process.env.NEXT_PUBLIC_AUTH_API_URL,
   SEARCH: process.env.NEXT_PUBLIC_SEARCH_API_URL,
+  POINTS: process.env.NEXT_PUBLIC_POINTS_API_URL,
+
 };
 //✅ General API Helpers
 // -------------------------------

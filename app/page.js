@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useAuth } from '@/app/context/AuthContext'; // Adjust path as needed
+import { useAuth } from '@/app/context/AuthContext'; 
 
 export default function HomeRedirect() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function HomeRedirect() {
   console.log(isAuthenticated);
   useEffect(() => {
     if (isAuthenticated === false) {
-      router.replace('/login'); // Next.js path (adjust if needed)
+      router.replace('/login'); // Next.js path 
     } else if (isAuthenticated === true) {
       router.replace('/home');
     }

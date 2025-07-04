@@ -17,6 +17,7 @@ const tabs = [
   { name: "Create", href: "/create", icon: PlusCircle },
   { name: "Wallet", href: "/wallet", icon: Wallet },
   { name: "Profile", href: "/profile", icon: User },
+  { name: "leaderboard", href: "/leaderboard", icon: User },
 ]
 
 export default function LeftSidebar() {
