@@ -1,6 +1,6 @@
 export default function HomeLayout({ children }) {
   return (
-    <div className="flex h-screen">
+    <div>
       {children}     
       
     </div>

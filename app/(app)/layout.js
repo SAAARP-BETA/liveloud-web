@@ -6,7 +6,7 @@ export default function AppLayout({ children }) {
     <ProtectedRoute>
       <div className="flex">
         <LeftSidebar />
-        <main className="flex-1 ml-70 p-4">{children}</main>
+        <main className="flex-1 lg:ml-70 p-4">{children}</main>
       </div>
     </ProtectedRoute>
   );
