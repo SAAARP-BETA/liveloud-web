@@ -1,7 +1,7 @@
 'use client'
 import React from 'react';
-import { useRouter } from 'next/router';
-import { fonts } from '../../utils/fonts';
+import { useRouter } from 'next/navigation';
+import { fonts } from '../../app/utils/fonts';
 
 // Update EmptyFeed.js to handle session expiration
 const EmptyFeed = ({ isAuthenticated, handleCreatePost, error, onLogin }) => {
@@ -9,8 +9,8 @@ const EmptyFeed = ({ isAuthenticated, handleCreatePost, error, onLogin }) => {
 
   // Different message if there's an authentication error
   const hasAuthError = error && (
-    error.includes('session'),  
-    error.includes('expired'),  
+    error.includes('session') ||
+    error.includes('expired') ||
     error.includes('authentication')
   );
 
