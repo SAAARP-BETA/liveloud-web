@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, MessageCircle, Repeat, Bookmark, Heart, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../app/context/AuthContext';
-
+import { formatDistanceToNow } from 'date-fns';
 const PostCard = ({
   post,
   handleLikePost,
@@ -144,14 +144,14 @@ const PostCard = ({
           <div className="ml-3 flex-1">
             <div className="flex items-center">
               <span className="font-medium text-base text-gray-800">
-                {post.username}
+                {post.user.username}
               </span>
               {post.isVerified && (
                 <CheckCircle size={16} className="text-blue-500 ml-1" />
               )}
             </div>
             <span className="font-normal text-xs text-gray-500">
-              {post.timestamp}
+              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
             </span>
           </div>
         </button>
