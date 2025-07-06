@@ -2,11 +2,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
-import PostCard from '../../../Components/home/PostCard';
-import EmptyFeed from '../../../Components/home/EmptyFeed';
-import CommentModal from '../../../Components/ui/CommentModal';
-import AmplifyModal from '../../../Components/ui/AmplifyModal';
-import CustomModal from '../../../Components/ui/Modal';
+import PostCard from '@/Components/home/PostCard';
+import EmptyFeed from '@/Components/home/EmptyFeed';
+import CommentModal from '@/Components/ui/CommentModal';
+import AmplifyModal from '@/Components/ui/AmplifyModal';
+import CustomModal from '@/Components/ui/Modal';
+import ReportModal from '@/Components/ui/ReportModal';
 import Image from 'next/image';
 import {
   Plus as PlusIcon,
@@ -33,7 +34,7 @@ import {
   createPostHandlers,
   formatPostFromApi,
 } from '../../utils/postFunctions';
-import ReportModal from '@/Components/ui/ReportModal';
+
 // Constants
 const REFRESH_INTERVAL = 300000; // 5 minutes
 const MIN_FETCH_INTERVAL = 10000; // 10 seconds
@@ -97,7 +98,7 @@ const HomePage = () => {
       username: 'bob_wilson',
       user: 'user789',
       profilePic: '/api/placeholder/40/40',
-      content: 'Working on a new project today. Excited to share the progress soon! 💻',
+      content: 'Working on a new project today. Excited to share the progress soon!',
       timestamp: '4 hours ago',
       likeCount: 15,
       commentCount: 5,
@@ -591,9 +592,7 @@ const HomePage = () => {
         title="Post options"
         showHeader={false}
       >
-        <div className="w-full flex justify-center pt-2 pb-2">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
-        </div>
+        
 
         <div className="p-4">
           <h3 className="text-lg font-bold text-gray-800 mb-2">
@@ -621,7 +620,7 @@ const HomePage = () => {
               <button
                 key={index}
                 onClick={() => handleMenuOptionPress(option)}
-                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors ${
+                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
                   option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report'
                     ? 'hover:bg-red-50 text-red-600'
                     : 'hover:bg-gray-50 text-gray-700'
@@ -650,55 +649,27 @@ const HomePage = () => {
       <AmplifyModal
         visible={isAmplifyModalVisible}
         onClose={() => setAmplifyModalVisible(false)}
+        post={postToAmplify
+        
+        }
+        
         title="Amplify Post"
+        onSuccess={(postId) => {
+          // Update amplify count in current posts
+          const updatedPosts = posts.map(post => {
+            if (post.id === postId) {
+              return { 
+                ...post, 
+                amplifyCount: post.amplifyCount + 1,
+                hasAmplified: true 
+              };
+            }
+            return post;
+          });
+          setPosts(updatedPosts);
+        }}
       >
-        <div className="p-4">
-          {postToAmplify && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <Image
-                src={postToAmplify.profilePic || '/api/placeholder/40/40'}
-                alt={postToAmplify.username}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="ml-3">
-                <p className="font-semibold text-gray-800">{postToAmplify.username}</p>
-                <p className="text-sm text-gray-500 truncate">{postToAmplify.content}</p>
-              </div>
-            </div>
-          )}
-          
-          <textarea
-            placeholder="Add your thoughts... (optional)"
-            className="w-full p-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-          />
-          
-          <div className="flex justify-end space-x-3 mt-4">
-            <button
-              onClick={() => setAmplifyModalVisible(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                // Update amplify count
-                setPosts(prev => prev.map(post => 
-                  post.id === postToAmplify.id 
-                    ? { ...post, amplifyCount: post.amplifyCount + 1 }
-                    : post
-                ));
-                setAmplifyModalVisible(false);
-                alert('Post amplified successfully!');
-              }}
-              className="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600"
-            >
-              Amplify
-            </button>
-          </div>
-        </div>
+       
       </AmplifyModal>
 
       {/* Report Modal */}
@@ -706,74 +677,10 @@ const HomePage = () => {
         visible={isReportModalVisible}
         onClose={() => setReportModalVisible(false)}
         title="Report Post"
+        post={postToReport}
+        onSuccess={handleReportSuccess}
       >
-        <div className="p-4">
-          {postToReport && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <Image
-                src={postToReport.profilePic || '/api/placeholder/40/40'}
-                alt={postToReport.username}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="ml-3">
-                <p className="font-semibold text-gray-800">{postToReport.username}</p>
-                <p className="text-sm text-gray-500 truncate">{postToReport.content}</p>
-              </div>
-            </div>
-          )}
-          
-          <p className="text-gray-600 mb-4">
-            Why are you reporting this post?
-          </p>
-          
-          <div className="space-y-2 mb-4">
-            {[
-              'Spam or misleading',
-              'Harassment or bullying',
-              'Inappropriate content',
-              'Violence or threats',
-              'Copyright violation',
-              'Other'
-            ].map((reason, index) => (
-              <label key={index} className="flex items-center p-3 rounded-xl hover:bg-gray-50 cursor-pointer">
-                <input
-                  type="radio"
-                  name="reportReason"
-                  value={reason}
-                  className="mr-3"
-                />
-                <span className="text-gray-700">{reason}</span>
-              </label>
-            ))}
-          </div>
-          
-          <textarea
-            placeholder="Additional details (optional)"
-            className="w-full p-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-          />
-          
-          <div className="flex justify-end space-x-3 mt-4">
-            <button
-              onClick={() => setReportModalVisible(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                handleReportSuccess(postToReport.id);
-                setReportModalVisible(false);
-                alert('Report submitted successfully. Thank you for helping keep our community safe.');
-              }}
-              className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-            >
-              Submit Report
-            </button>
-          </div>
-        </div>
+        
       </ReportModal>
     </div>
   );

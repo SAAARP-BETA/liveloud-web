@@ -43,8 +43,8 @@ const CustomModal = ({
   const positionClass = {
     top: 'items-start mt-10',
     center: 'items-center justify-center',
-    bottom: 'items-end mb-10',
-  }[position] || 'items-end mb-10';
+    bottom: ' mb-10',
+  }[position] || ' mb-10';
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center bg-black/50 transition-all">

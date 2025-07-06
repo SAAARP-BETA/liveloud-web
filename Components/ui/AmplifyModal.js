@@ -93,7 +93,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50 rounded-2xl">
       <div 
         className="absolute inset-0 opacity-100"
         onClick={onClose}
@@ -120,7 +120,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
               </div>
 
               {post && (
-                <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+                <div className="flex items-center m-4 p-3 bg-gray-50 rounded-xl">
                   <img
                     src={post.profilePic}
                     alt="Profile"
@@ -139,7 +139,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
             </div>
 
             <button
-              className="flex items-center w-full px-6 py-4 border-t border-gray-100 hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
+              className="flex items-center w-full px-6 py-4 border-t border-gray-100 hover:bg-gray-50 disabled:opacity-50 cursor-pointer rounded-2xl"
               onClick={handleAmplify}
               disabled={loading}
             >
@@ -160,7 +160,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
             </button>
 
             <button
-              className="flex items-center w-full px-6 py-4 border-t border-gray-100 hover:bg-gray-50"
+              className="flex items-center w-full px-6 py-4 border-t border-gray-100 hover:bg-gray-50 disabled:opacity-50 cursor-pointer rounded-2xl"
               onClick={() => setMode('quote')}
             >
               <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">

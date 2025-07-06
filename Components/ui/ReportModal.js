@@ -1,7 +1,7 @@
 // components/ui/ReportModal.js
 'use client'
 import React, { useState, useEffect } from 'react';
-import { fonts } from '../../app/utils/fonts';
+// import { fonts } from '../../app/utils/fonts';
 import { reportReasons, handleReportPost } from '../../app/utils/postFunctions';
 
 // Flag icon component to replace Feather icons
@@ -20,7 +20,7 @@ const FlagIcon = ({ size = 20, color = '#64748B' }) => (
 );
 
 const ReportModal = ({ 
-  isVisible, 
+  visible, 
   onClose, 
   post, 
   token,
@@ -33,12 +33,12 @@ const ReportModal = ({
   
   // Reset state when modal opens
   useEffect(() => {
-    if (isVisible) {
+    if (visible) {
       setSelectedReason(null);
       setCustomReason('');
       setShowCustomInput(false);
     }
-  }, [isVisible]);
+  }, [visible]);
 
   // Handle reason selection
   const handleReasonSelect = (reason) => {
@@ -85,46 +85,46 @@ const ReportModal = ({
   };
 
   // If not visible, don't render anything
-  if (!isVisible) return null;
+  if (!visible) return null;
 
   return (
-    <div style={styles.overlay}>
+    <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
       {/* Backdrop */}
       <div 
-        style={styles.backdrop} 
+        className="absolute inset-0 opacity-100"
         onClick={onClose}
         role="button"
         tabIndex={0}
         aria-label="Close modal"
       />
       
-      <div style={styles.content}>
+      <div className="bg-white w-full max-w-md max-h-[90%] rounded-[20px] overflow-hidden shadow-lg z-20 flex flex-col">
         {/* Handle indicator for bottom sheet */}
-        <div style={styles.handleContainer}>
-          <div style={styles.handle} />
+        <div className="w-full flex items-center justify-center pt-3 pb-3">
+          <div className="w-10 h-[5px] rounded-[3px] bg-gray-300" />
         </div>
         
-        <div style={styles.header}>
-          <h2 style={{ ...styles.title, fontFamily: fonts.Bold }}>
+        <div className="p-4">
+          <h2 className="text-lg text-gray-800 mb-2 m-0" >
             Report Post
           </h2>
           
-          <p style={{ ...styles.subtitle, fontFamily: fonts.Regular }}>
+          <p className="text-base text-gray-500 mb-4 m-0" >
             Why are you reporting this post?
           </p>
 
           {post && (
-            <div style={styles.postPreview}>
+            <div className="flex flex-row items-center p-3 mb-4 bg-gray-50 rounded-xl">
               <img
                 src={post.profilePic}
                 alt="Profile"
-                style={styles.profilePic}
+                className="w-10 h-10 rounded-full"
               />
-              <div style={styles.postDetails}>
-                <p style={{ ...styles.username, fontFamily: fonts.Medium }}>
+              <div className="ml-3 flex-1">
+                <p className="text-base text-gray-800 mb-0.5 m-0" >
                   {post.username}
                 </p>
-                <p style={{ ...styles.postText, fontFamily: fonts.Regular }}>
+                <p className="text-sm text-gray-500 m-0" >
                   {post.content?.substring(0, 60) || post.text?.substring(0, 60)}
                   {(post.content?.length > 60 || post.text?.length > 60) ? '...' : ''}
                 </p>
@@ -134,43 +134,44 @@ const ReportModal = ({
         </div>
 
         {isSubmitting ? (
-          <div style={styles.loadingContainer}>
-            <div style={styles.spinner} />
-            <p style={{ ...styles.loadingText, fontFamily: fonts.Medium }}>
+          <div className="p-8 flex items-center justify-center flex-col">
+            <div className="w-8 h-8 border-3 border-gray-300 border-t-sky-500 rounded-full animate-spin" />
+            <p className="mt-4 text-base text-gray-500 m-0">
               Submitting report...
             </p>
           </div>
         ) : showCustomInput ? (
           // Custom reason input screen
-          <div style={styles.customInputContainer}>
-            <label style={{ ...styles.inputLabel, fontFamily: fonts.Medium }}>
+          <div className="p-4">
+            <label className="text-base text-gray-800 mb-2 block">
               Please provide details:
             </label>
             <textarea
-              style={{ ...styles.textInput, fontFamily: fonts.Regular }}
+              className="bg-gray-100 rounded-xl p-4 min-h-[100px] text-base resize-y w-full border-none outline-none"
+              
               placeholder="Explain why you're reporting this post..."
               value={customReason}
               onChange={(e) => setCustomReason(e.target.value)}
               autoFocus
               rows={4}
             />
-            <div style={styles.buttonContainer}>
+            <div className="flex flex-row mt-4">
               <button 
-                style={styles.backButton}
+                className="bg-gray-300 rounded-xl py-3 px-5 mr-3 border-none cursor-pointer"
                 onClick={() => {
                   setShowCustomInput(false);
                   setSelectedReason(null);
                 }}
               >
-                <span style={{ ...styles.backButtonText, fontFamily: fonts.Medium }}>
+                <span className="text-gray-600 text-base" >
                   Back
                 </span>
               </button>
               <button 
-                style={styles.submitButton}
+                className="bg-sky-500 rounded-xl py-3 px-5 border-none cursor-pointer"
                 onClick={() => submitReport('Other')}
               >
-                <span style={{ ...styles.submitButtonText, fontFamily: fonts.Medium }}>
+                <span className="text-white text-base" >
                   Submit Report
                 </span>
               </button>
@@ -178,17 +179,17 @@ const ReportModal = ({
           </div>
         ) : (
           // Reasons list
-          <div style={styles.reasonsList}>
+          <div className="max-h-80 overflow-y-auto">
             {reportReasons.map((reason) => (
               <button
                 key={reason.id}
-                style={styles.reasonItem}
+                className="flex flex-row items-center py-4 px-6 border-t border-gray-200 bg-transparent border-none w-full cursor-pointer text-left hover:bg-gray-100"
                 onClick={() => handleReasonSelect(reason)}
               >
-                <div style={styles.reasonIcon}>
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
                   <FlagIcon size={20} color="#64748B" />
                 </div>
-                <span style={{ ...styles.reasonText, fontFamily: fonts.Medium }}>
+                <span className="text-base text-gray-800" >
                   {reason.text}
                 </span>
               </button>
@@ -197,242 +198,16 @@ const ReportModal = ({
         )}
 
         <button
-          style={styles.cancelButton}
+          className="bg-gray-100 hover:bg-gray-200 p-4 flex items-center justify-center mt-2 border-none w-full cursor-pointer"
           onClick={onClose}
         >
-          <span style={{ ...styles.cancelButtonText, fontFamily: fonts.Medium }}>
+          <span className="text-base text-gray-600" >
             Cancel
           </span>
         </button>
       </div>
-
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
-};
-
-// Styles converted to JavaScript objects for Next.js
-const styles = {
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 1000,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-  },
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 1,
-  },
-  content: {
-    backgroundColor: 'white',
-    width: '100%',
-    maxWidth: '500px',
-    maxHeight: '90%',
-    borderTopLeftRadius: '20px',
-    borderTopRightRadius: '20px',
-    overflow: 'hidden',
-    boxShadow: '0 -3px 10px rgba(0, 0, 0, 0.1)',
-    zIndex: 2,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  handleContainer: {
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: '12px',
-    paddingBottom: '12px',
-  },
-  handle: {
-    width: '40px',
-    height: '5px',
-    borderRadius: '3px',
-    backgroundColor: '#E0E0E0',
-  },
-  header: {
-    padding: '16px',
-  },
-  title: {
-    fontSize: '18px',
-    color: '#1F2937',
-    marginBottom: '8px',
-    margin: 0,
-  },
-  subtitle: {
-    fontSize: '16px',
-    color: '#6B7280',
-    marginBottom: '16px',
-    margin: '0 0 16px 0',
-  },
-  postPreview: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: '12px',
-    marginBottom: '16px',
-    backgroundColor: '#F9FAFB',
-    borderRadius: '12px',
-  },
-  profilePic: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '20px',
-  },
-  postDetails: {
-    marginLeft: '12px',
-    flex: 1,
-  },
-  username: {
-    fontSize: '16px',
-    color: '#1F2937',
-    marginBottom: '2px',
-    margin: '0 0 2px 0',
-  },
-  postText: {
-    fontSize: '14px',
-    color: '#6B7280',
-    margin: 0,
-  },
-  reasonsList: {
-    maxHeight: '320px',
-    overflowY: 'auto',
-  },
-  reasonItem: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: '16px',
-    paddingBottom: '16px',
-    paddingLeft: '24px',
-    paddingRight: '24px',
-    borderTop: '1px solid #F3F4F6',
-    backgroundColor: 'transparent',
-    border: 'none',
-    width: '100%',
-    cursor: 'pointer',
-    textAlign: 'left',
-  },
-  reasonIcon: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '20px',
-    backgroundColor: '#F3F4F6',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: '16px',
-  },
-  reasonText: {
-    fontSize: '16px',
-    color: '#1F2937',
-  },
-  loadingContainer: {
-    padding: '32px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-  },
-  spinner: {
-    width: '32px',
-    height: '32px',
-    border: '3px solid #E5E7EB',
-    borderTop: '3px solid #0EA5E9',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  loadingText: {
-    marginTop: '16px',
-    fontSize: '16px',
-    color: '#6B7280',
-    margin: '16px 0 0 0',
-  },
-  customInputContainer: {
-    padding: '16px',
-  },
-  inputLabel: {
-    fontSize: '16px',
-    color: '#1F2937',
-    marginBottom: '8px',
-    display: 'block',
-  },
-  textInput: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: '12px',
-    padding: '16px',
-    minHeight: '100px',
-    fontSize: '16px',
-    resize: 'vertical',
-    width: '100%',
-    border: 'none',
-    outline: 'none',
-  },
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: '16px',
-  },
-  backButton: {
-    backgroundColor: '#E5E7EB',
-    borderRadius: '12px',
-    paddingTop: '12px',
-    paddingBottom: '12px',
-    paddingLeft: '20px',
-    paddingRight: '20px',
-    marginRight: '12px',
-    border: 'none',
-    cursor: 'pointer',
-  },
-  backButtonText: {
-    color: '#4B5563',
-    fontSize: '16px',
-  },
-  submitButton: {
-    backgroundColor: '#0EA5E9',
-    borderRadius: '12px',
-    paddingTop: '12px',
-    paddingBottom: '12px',
-    paddingLeft: '20px',
-    paddingRight: '20px',
-    border: 'none',
-    cursor: 'pointer',
-  },
-  submitButtonText: {
-    color: 'white',
-    fontSize: '16px',
-  },
-  cancelButton: {
-    backgroundColor: '#F3F4F6',
-    padding: '16px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: '8px',
-    border: 'none',
-    cursor: 'pointer',
-    width: '100%',
-  },
-  cancelButtonText: {
-    fontSize: '16px',
-    color: '#4B5563',
-  },
 };
 
 export default ReportModal;

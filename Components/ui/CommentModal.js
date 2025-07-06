@@ -386,7 +386,7 @@ const CustomModal = ({ visible, onClose, post, token, onSuccess }) => {
   
           {/* Original post preview */}
           {post && (
-            <div className="flex items-center mt-2">
+            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
               <img
                 src={post.profilePic}
                 alt="Profile"
@@ -401,7 +401,7 @@ const CustomModal = ({ visible, onClose, post, token, onSuccess }) => {
                     {post.timestamp}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 truncate">
+                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                   {post.content}
                 </p>
               </div>

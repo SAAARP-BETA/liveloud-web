@@ -35,14 +35,13 @@ export const handleLikePost = async (postId, user, token, setPosts) => {
       }
       return post;
     }));
-    const header = token ? { 'Authorization': `Bearer ${token}` } : {}
+    
     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}/like`, {
       method: 'POST',
-      header
-      // header: {
-        
-      //   // 'Content-Type': 'application/json'
-      // }
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     });
 
     if (!response.ok) {
