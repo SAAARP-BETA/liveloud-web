@@ -96,13 +96,22 @@ const CreatePost = () => {
 // const SOCIAL_API_URL = `http://192.168.1.13:3002/api/social`;
 // const UPLOAD_API_URL = `http://192.168.1.13:3003/api/upload`;
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+const API_SOCIAL = process.env.NEXT_PUBLIC_SOCIAL_API_URL;
+const API_MEDIA = process.env.NEXT_PUBLIC_MEDIA_API_URL;
 
 const API_ENDPOINTS = {
-  SOCIAL: `${API_BASE}/social`,
-  UPLOAD: `${API_BASE}/upload`,
-  MEDIA: `${API_BASE}/media`,
+  CREATE_POST: `${API_SOCIAL}/posts`,
+  TRENDING_TAGS: `${API_SOCIAL}/posts/tags/trending`,
+  UPLOAD_MEDIA: `${API_MEDIA}/upload/post`,
 };
+
+// const API_ENDPOINTS = {
+//   SOCIAL: API_SOCIAL,
+//   UPLOAD: `${API_SOCIAL}/upload/post`, 
+//   MEDIA: `${API_MEDIA}/api/media`, 
+// };
+
 
   const samplePeople = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson'];
 
@@ -129,6 +138,8 @@ useEffect(() => {
     }
 
     fetchTrendingTags();
+    console.log("ENV MEDIA:", process.env.NEXT_PUBLIC_MEDIA_API_URL);
+
   }, [isAuthenticated, loading,  router]);
 
   // Computed values
@@ -162,7 +173,7 @@ useEffect(() => {
 
 const fetchTrendingTags = useCallback(async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/tags/trending`, {
+     const response = await fetch(API_ENDPOINTS.TRENDING_TAGS, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -310,9 +321,11 @@ const uploadMedia = useCallback(async () => {
           });
         })
       );
+      // const uploadEndpoint = `${API_ENDPOINTS.MEDIA}`;
+      const uploadEndpoint = `${process.env.NEXT_PUBLIC_MEDIA_API_URL}/upload/post`;
 
-      const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/upload/post`;
-
+      console.log("Upload endpoint:", uploadEndpoint);
+      
       console.log('Uploading to:', uploadEndpoint);
       console.log('Images count:', base64Images.length);
       console.log('Metadata count:', mediaMetadata.length);
@@ -331,7 +344,7 @@ const uploadMedia = useCallback(async () => {
       });
 
       clearInterval(progressInterval);
-
+      console.log("Upload endpoint:", uploadEndpoint);
       console.log('Upload response status:', response.status);
 
       if (!response.ok) {
@@ -356,7 +369,8 @@ const uploadMedia = useCallback(async () => {
       setUploading(false);
     }
   }, [images, imageFilters, token]);
-  
+  console.log("ENV MEDIA:", process.env.NEXT_PUBLIC_MEDIA_API_URL);
+
   console.log('Token being used:', token);
 
 const handleSubmit = useCallback(async () => {
@@ -385,6 +399,7 @@ const handleSubmit = useCallback(async () => {
 
       if (images.length > 0) {
         try {
+         
           const uploadResults = await uploadMedia();
           mediaUrls = uploadResults.urls;
           mediaIds = uploadResults.metadata.map(item => item.publicId);
@@ -422,7 +437,7 @@ const handleSubmit = useCallback(async () => {
         postData.feeling = selectedFeeling.name;
       }
 
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts`, {
+      const response = await fetch(`${API_ENDPOINTS.CREATE_POST}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -438,7 +453,7 @@ const handleSubmit = useCallback(async () => {
       }
 
       window.alert('Post Created!\nYour post was published successfully.');
-      router.push('/app/home/homepage');
+      router.push('/home');
 
     } catch (error) {
       console.error('Error creating post:', error);
