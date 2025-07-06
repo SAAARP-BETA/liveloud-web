@@ -19,8 +19,9 @@ export const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
     user: null,
+    token: null,
     isAuthenticated: false,
-    loading: true,
+    loading: true
   });
 
   const [error, setError] = useState(null);
@@ -60,8 +61,9 @@ export const AuthProvider = ({ children }) => {
         console.error('Auth init failed:', err);
         setAuthState({
           user: null,
+          token: null,
           isAuthenticated: false,
-          loading: false,
+          loading: true
         });
       }
     };

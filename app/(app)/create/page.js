@@ -1,8 +1,10 @@
 "use client"
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Camera, MapPin, Users, Smile, Image, X, Edit, Plus } from 'lucide-react';
-// import image from '../public/globe.svg';
+// import image from '../../assets/default-avatar.png';
 import { useRouter } from 'next/navigation';
+// import { useAuth } from '@context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const FilteredImage = ({ src, filterType, className }) => {
   const filterStyles = {
@@ -24,10 +26,11 @@ const FilteredImage = ({ src, filterType, className }) => {
   );
 };
 
-const CreatePost = ({isAuthenticated, token}) => {
+const CreatePost = () => {
   // Constants
   const MAX_CHAR_LIMIT = 1000;
   const MEDIA_LIMIT = 4;
+  
   
   // State
   const [content, setContent] = useState('');
@@ -41,6 +44,7 @@ const CreatePost = ({isAuthenticated, token}) => {
   const [tags, setTags] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  // const [loading, setLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   
   
@@ -52,6 +56,10 @@ const CreatePost = ({isAuthenticated, token}) => {
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageIndex, setEditingImageIndex] = useState(null);
   
+  // useAuth
+  const { user, token, isAuthenticated } = useAuth();
+  console.log("token", token);
+  
   
   const router = useRouter();
   
@@ -60,7 +68,7 @@ const CreatePost = ({isAuthenticated, token}) => {
   
   const charCount = content.length;
 // memoised value
-const isApproachingLimit = useMemo(
+  const isApproachingLimit = useMemo(
     () => charCount > MAX_CHAR_LIMIT * 0.8,
     [charCount]
   );
@@ -88,11 +96,14 @@ const isApproachingLimit = useMemo(
 // const SOCIAL_API_URL = `http://192.168.1.13:3002/api/social`;
 // const UPLOAD_API_URL = `http://192.168.1.13:3003/api/upload`;
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 const API_ENDPOINTS = {
-  SOCIAL: `http://192.168.1.13:3002/api/social`,
-  UPLOAD:`http://192.168.1.13:3002/api/upload`,
-  MEDIA: 'https://your-api-url.com/api/media'
+  SOCIAL: `${API_BASE}/social`,
+  UPLOAD: `${API_BASE}/upload`,
+  MEDIA: `${API_BASE}/media`,
 };
+
   const samplePeople = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson'];
 
   const [trendyTags, setTrendyTags] = useState(['Systumm','Travel', 'Food', 'Photography', 'Nature', 'Fitness', 'Art']);
@@ -103,20 +114,22 @@ const API_ENDPOINTS = {
 // check auth and fetch trending tags 
 
 useEffect(() => {
+    if(loading) return;
+
     if (!isAuthenticated) {
       const shouldLogin = window.confirm(
         'You need to be logged in to create a post. Do you want to login now?'
       );
 
       if (shouldLogin) {
-        router.push('/auth/login'); // Adjust the route as needed
+        router.push('/login'); // Adjust the route as needed
       }
 
       return;
     }
 
     fetchTrendingTags();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, loading,  router]);
 
   // Computed values
 
@@ -343,7 +356,8 @@ const uploadMedia = useCallback(async () => {
       setUploading(false);
     }
   }, [images, imageFilters, token]);
-
+  
+  console.log('Token being used:', token);
 
 const handleSubmit = useCallback(async () => {
     if (!isAuthenticated) {
@@ -414,6 +428,7 @@ const handleSubmit = useCallback(async () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
+
         body: JSON.stringify(postData),
       });
 
@@ -447,6 +462,16 @@ const handleSubmit = useCallback(async () => {
     // navigate
   ]);
 
+  if(loading){
+     return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
 
@@ -473,28 +498,27 @@ const handleSubmit = useCallback(async () => {
     }`}
 >
   Post
-</button>
-
-    </div>
+    </button>
   </div>
+</div>
 
       {/* Main Content */}
-      <div className="bg-white mt-4 rounded-md max-w-2xl w-full mx-auto shadow-sm">
-        {/* Character Counter */}
+      <div className="bg-white mt-4 rounded-lg max-w-2xl w-full mx-auto shadow-sm">
         {/* User Info Header */}
 <div className="flex items-center px-4 pt-4">
   <img
-    // src={} // Replace with actual image path or user.profilePic
+    src={user?.profilePic || './default-avatar.png'} // Replace with actual image path or user.profilePic
     alt="User"
     className="w-10 h-10 bg-black rounded-full object-cover"
-  />
+    />
   <div className="ml-3">
-    <p className="text-sm text-gray-900">Elvish Bhaii</p>
+    <p className="text-sm text-gray-900">{user?.name || user?.username || 'User'}</p>
     {/* Optional: small caption like “Public” or timestamp */}
     {/* <p className="text-xs text-gray-500">Posting publicly</p> */}
   </div>
 </div>
 
+    {/* Character Counter */}
         {content.length > 0 && (
           <div className="flex items-center justify-center pt-4">
             <div
@@ -581,11 +605,11 @@ const handleSubmit = useCallback(async () => {
           <div className="px-4 mb-3">
             <div className="flex overflow-x-auto space-x-3 pb-2">
               {images.map((img, index) => (
-                <div key={index} className="relative w-28 h-28 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
+                <div key={index} className="relative w-28 h-28 rounded-lg overflow-hidden shadow-sm flex-shrink-0">
                   <FilteredImage
                     src={img}
                     filterType={imageFilters[index]}
-                    className="w-28 h-28 rounded-xl object-cover"
+                    className="w-28 h-28 rounded-lg object-cover"
                   />
                   <div className="absolute top-1 right-1 flex space-x-1">
                     <button
@@ -606,7 +630,7 @@ const handleSubmit = useCallback(async () => {
               {images.length < MEDIA_LIMIT && (
                 <button
                   onClick={() => setShowMediaOptions(true)}
-                  className="w-28 h-28 rounded-xl border-2 border-dashed border-sky-300 flex flex-col items-center justify-center bg-sky-50 flex-shrink-0"
+                  className="w-28 h-28 rounded-lg border-2 border-dashed border-sky-300 flex flex-col items-center justify-center bg-sky-50 flex-shrink-0"
                 >
                   <Plus className="text-sky-500" size={24} />
                   <span className="text-xs text-sky-500 mt-1 font-medium">Add More</span>
@@ -724,8 +748,9 @@ const handleSubmit = useCallback(async () => {
 
       {/* Media Options Modal */}
       {showMediaOptions && (
-        <div className="fixed inset-0 bg-black/50  flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-xl p-4 m-8"> 
+        <div className="fixed inset-0  bg-black/50  flex items-end z-50">
+        {/* //  <div className=" inset-0   bg-gray/50  flex items-end z-50"> */}
+          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg p-4 m-8"> 
             {/* max-w-md mx-auto */}
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Add Media</h3>
@@ -734,7 +759,7 @@ const handleSubmit = useCallback(async () => {
               </button>
             </div>
             <div className="space-y-3">
-              <label className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+              <label className="flex items-center p-3 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
                 <Camera className="text-blue-500 mr-3" size={24} />
                 <span>Upload Photos</span>
                 <input
@@ -753,7 +778,7 @@ const handleSubmit = useCallback(async () => {
       {/* Location Modal */}
       {showLocationModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-xl p-4 m-8">
+          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg p-4 m-8">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Add Location</h3>
               <button onClick={() => setShowLocationModal(false)}>
@@ -781,7 +806,7 @@ const handleSubmit = useCallback(async () => {
       {/* People Tag Modal */}
       {showPeopleTagModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-xl m-8 p-4">
+          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg m-8 p-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Tag People</h3>
               <button onClick={() => setShowPeopleTagModal(false)}>
@@ -809,7 +834,7 @@ const handleSubmit = useCallback(async () => {
       {/* Feeling Modal */}
       {showFeelingModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-xl m-8 p-4">
+          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg m-8 p-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">How are you feeling?</h3>
               <button onClick={() => setShowFeelingModal(false)}>
@@ -838,7 +863,7 @@ const handleSubmit = useCallback(async () => {
       {/* Image Editor Modal */}
       {showImageEditor && editingImageIndex !== null && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-xl p-4 m-8 ">
+          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg p-4 m-8 ">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Edit Image</h3>
               <button onClick={() => setShowImageEditor(false)}>

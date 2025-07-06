@@ -705,7 +705,7 @@ const HomePage = () => {
   // Render tab bar
   const renderTabBar = () => (
     <div className="bg-white border-b border-gray-200">
-      <div className="flex overflow-x-auto px-4 py-2 space-x-2">
+      <div className=" overflow-x-auto px-4 py-2 space-x-2">
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
           const canAccess = !feedType.requiresAuth || isAuthenticated;
@@ -734,7 +734,7 @@ const HomePage = () => {
   const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className=" max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
       {/* Custom Header */}
       <Navbar/>
 
@@ -742,7 +742,7 @@ const HomePage = () => {
       {renderTabBar()}
 
       <div 
-        className="flex-1 overflow-y-auto"
+        className=" overflow-y-auto"
         onScroll={handleScroll}
       >
         {/* Post composer - only show on home tab */}
@@ -801,18 +801,18 @@ const HomePage = () => {
           <div>
             {currentTabData.posts.map((post, index) => (
               <PostCard
-                key={post.id || index}
-                post={post}
-                handleLikePost={postHandlers.handleLikePost}
-                handleUnlikePost={postHandlers.handleUnlikePost}
-                handleCommentPost={postHandlers.handleCommentPost}
-                handleAmplifyPost={postHandlers.handleAmplifyPost}
-                handleBookmarkPost={postHandlers.handleBookmarkPost}
-                handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                setSelectedPost={setSelectedPost}
-                setModalVisible={setModalVisible}
-                username={post.user}
-              />
+                      key={post.id || index}
+                      post={post}
+                      handleLikePost={postHandlers.handleLikePost}
+                      handleUnlikePost={postHandlers.handleUnlikePost}
+                      handleCommentPost={postHandlers.handleCommentPost}
+                      handleAmplifyPost={postHandlers.handleAmplifyPost}
+                      handleBookmarkPost={postHandlers.handleBookmarkPost}
+                      handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                      setSelectedPost={setSelectedPost}
+                      setModalVisible={setModalVisible}
+                      username={user.username}
+                    />
             ))}
           </div>
         ) : !currentTabData.loading ? (
@@ -823,13 +823,9 @@ const HomePage = () => {
             feedType={activeTab}
             onLogin={() => {
               // Make sure we're really logged out first
-              if (isAuthenticated) {
-                logout().then(() => {
+              if (!isAuthenticated) {
                   router.push('/login');
-                });
-              } else {
-                router.push('/login');
-              }
+              }           
             }}
           />
         ) : null}
