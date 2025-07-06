@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Search,
   X,
@@ -28,14 +27,42 @@ import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
-import CustomModal from "../../../components/ui/Modal";
-import PressableButton from '../../../components/ui/PressableButton';
-import AmplifyModal from '../../../components/ui/AmplifyModal';
-import CommentModal from '../../../components/ui/CommentModal';
-import PostCard from '../../../components/Home/PostCard';
-import EmptyFeed from '../../../components/Home/EmptyFeed';
-import ReportModal from '../../../components/ui/ReportModal';
+
+
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import PostCard from '@/Components/home/PostCard';
+import EmptyFeed from '@/Components/home/EmptyFeed';
+import CommentModal from '@/Components/ui/CommentModal';
+import AmplifyModal from '@/Components/ui/AmplifyModal';
+import CustomModal from '@/Components/ui/Modal';
+import ReportModal from '@/Components/ui/ReportModal';
 import Image from 'next/image';
+import {
+  Plus as PlusIcon,
+  Image as PhotoIcon,
+  MessageCircle as ChatBubbleOvalLeftIcon,
+  RefreshCcw as ArrowPathIcon,
+  Bookmark as BookmarkIcon,
+  MoreHorizontal as EllipsisHorizontalIcon,
+  UserPlus as UserPlusIcon,
+  UserMinus as UserMinusIcon,
+  Info as InformationCircleIcon,
+  Flag as FlagIcon,
+  EyeOff as EyeSlashIcon,
+  X as XMarkIcon,
+  Trash2 as TrashIcon,
+  Link as LinkIcon
+} from 'lucide-react';
+
+// import {
+//   Heart as HeartIconSolid,
+//   Bookmark as BookmarkIconSolid
+// } from 'lucide-react';
+import {
+  createPostHandlers,
+  formatPostFromApi,
+} from '../../utils/postFunctions';
 
 // Constants
 const REFRESH_INTERVAL = 60000; // 1 minute
@@ -50,73 +77,6 @@ const FEED_TYPES = [
   { key: 'popular', title: 'Popular', endpoint: 'popular', requiresAuth: false },
 ];
 
-// Mock post handlers creator
-const createPostHandlers = (
-  user, 
-  token, 
-  setPosts, 
-  setPostToComment, 
-  setCommentModalVisible, 
-  setPostToAmplify, 
-  setAmplifyModalVisible,
-  setPostToReport,
-  setReportModalVisible
-) => ({
-  handleLikePost: async (postId) => {
-    console.log('Like post:', postId);
-  },
-  handleUnlikePost: async (postId) => {
-    console.log('Unlike post:', postId);
-  },
-  handleCommentPost: (post) => {
-    setPostToComment(post);
-    setCommentModalVisible(true);
-  },
-  handleAmplifyPost: (post) => {
-    setPostToAmplify(post);
-    setAmplifyModalVisible(true);
-  },
-  handleBookmarkPost: async (postId) => {
-    console.log('Bookmark post:', postId);
-  },
-  handleUnbookmarkPost: async (postId) => {
-    console.log('Unbookmark post:', postId);
-  },
-  handleInitiateReport: (post) => {
-    setPostToReport(post);
-    setReportModalVisible(true);
-  }
-});
-
-// Mock format function
-const formatPostFromApi = (post, index) => ({
-  id: post.id || index,
-  content: post.content || '',
-  user: post.user || 'anonymous',
-  userId: post.userId || post.user,
-  createdAt: post.createdAt || new Date().toISOString(),
-  likeCount: post.likeCount || 0,
-  commentCount: post.commentCount || 0,
-  amplifyCount: post.amplifyCount || 0,
-  hasLiked: post.hasLiked || false,
-  hasAmplified: post.hasAmplified || false,
-  isBookmarked: post.isBookmarked || false,
-  isFollowing: post.isFollowing || false,
-  ...post
-});
-
-// Mock Navbar component
-const Navbar = () => (
-  <div className="bg-white border-b border-gray-200 px-4 py-3">
-    <div className="flex items-center justify-between">
-      <h1 className="text-xl font-bold text-gray-900">Social Feed</h1>
-      <div className="flex items-center space-x-4">
-        <Search className="w-5 h-5 text-gray-500" />
-        <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-      </div>
-    </div>
-  </div>
-);
 
 const HomePage = () => {
   const router = useRouter();
@@ -736,7 +696,7 @@ const HomePage = () => {
   return (
     <div className=" max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
       {/* Custom Header */}
-      <Navbar/>
+      {/* <Navbar /> */}
 
       {/* Tab Bar */}
       {renderTabBar()}
@@ -864,50 +824,100 @@ const HomePage = () => {
 
       {/* Custom Modal for post options */}
       <CustomModal
-        isVisible={isModalVisible}
+        visible={isModalVisible}
         onClose={() => setModalVisible(false)}
         title="Post Options"
       >
-        <div className="py-2">
-          {filteredOptions.map((option, index) => {
-            const IconComponent = option.icon;
-            return (
-                <button
-  key={index}
-  onClick={() => handleMenuOptionPress(option)}
-  className="flex items-center w-full px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 transition-colors"
->
-  <IconComponent className="w-5 h-5 mr-3 text-gray-600" />
-  {option.text}
-</button>
+        
 
-            );
-          })}
+        <div className="p-4">
+          <h3 className="text-lg font-bold text-gray-800 mb-2">
+            Post options
+          </h3>
+
+          {selectedPost && (
+            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+              <Image
+                src={selectedPost.profilePic || '/api/placeholder/40/40'}
+                alt={selectedPost.username}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+              <div className="ml-3">
+                <p className="font-semibold text-gray-800">{selectedPost.username}</p>
+                <p className="text-sm text-gray-500 truncate">{selectedPost.content}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {filteredOptions.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleMenuOptionPress(option)}
+                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
+                  option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report'
+                    ? 'hover:bg-red-50 text-red-600'
+                    : 'hover:bg-gray-50 text-gray-700'
+                }`}
+              >
+                <option.icon className="w-5 h-5 mr-3" />
+                <span className="font-medium">{option.text}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </CustomModal>
 
-      {/* Amplify Modal */}
-      <AmplifyModal
-        isVisible={isAmplifyModalVisible}
-        onClose={() => setAmplifyModalVisible(false)}
-        post={postToAmplify}
-      />
-
       {/* Comment Modal */}
       <CommentModal
-        isVisible={isCommentModalVisible}
+        visible={isCommentModalVisible}
         onClose={() => setCommentModalVisible(false)}
+        title="Add Comment"
         post={postToComment}
         onSuccess={handleCommentSuccess}
-      />
+      >
+
+      </CommentModal>
+
+      {/* Amplify Modal */}
+      <AmplifyModal
+        visible={isAmplifyModalVisible}
+        onClose={() => setAmplifyModalVisible(false)}
+        post={postToAmplify
+        
+        }
+        
+        title="Amplify Post"
+        onSuccess={(postId) => {
+          // Update amplify count in current posts
+          const updatedPosts = posts.map(post => {
+            if (post.id === postId) {
+              return { 
+                ...post, 
+                amplifyCount: post.amplifyCount + 1,
+                hasAmplified: true 
+              };
+            }
+            return post;
+          });
+          setPosts(updatedPosts);
+        }}
+      >
+       
+      </AmplifyModal>
 
       {/* Report Modal */}
       <ReportModal
-        isVisible={isReportModalVisible}
+        visible={isReportModalVisible}
         onClose={() => setReportModalVisible(false)}
+        title="Report Post"
         post={postToReport}
-        onSuccess={() => handleReportSuccess(postToReport?.id)}
-      />
+        onSuccess={handleReportSuccess}
+      >
+        
+      </ReportModal>
     </div>
   );
 };

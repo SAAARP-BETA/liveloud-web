@@ -35,7 +35,6 @@ export const handleLikePost = async (postId, user, token, setPosts) => {
       }
       return post;
     }));
-
     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}/like`, {
       method: 'POST',
       headers: {
