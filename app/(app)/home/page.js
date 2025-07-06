@@ -45,8 +45,9 @@ const MIN_FETCH_INTERVAL = 5000; // 5 seconds
 const FEED_TYPES = [
   { key: 'home', title: 'Home', endpoint: 'home', requiresAuth: true },
   { key: 'trending', title: 'Trending', endpoint: 'trending', requiresAuth: false },
-  { key: 'recent', title: 'Recent', endpoint: 'recent', requiresAuth: false },
-  { key: 'following', title: 'Following', endpoint: 'following', requiresAuth: true },
+  { key: 'latest', title: 'Latest', endpoint: 'latest', requiresAuth: false },
+  { key: 'hot', title: 'Hot', endpoint: 'hot', requiresAuth: false },
+  { key: 'popular', title: 'Popular', endpoint: 'popular', requiresAuth: false },
 ];
 
 // Mock post handlers creator
@@ -123,18 +124,12 @@ const HomePage = () => {
 
   // State management
   const [activeTab, setActiveTab] = useState('home');
-  const [tabData, setTabData] = useState(() => {
-    const initialData = {};
-    FEED_TYPES.forEach(feed => {
-      initialData[feed.key] = {
-        posts: [],
-        loading: false,
-        error: null,
-        hasMore: true,
-        page: 1
-      };
-    });
-    return initialData;
+  const [tabData, setTabData] = useState({
+    home: { posts: [], page: 1, hasMore: true, loading: false, error: null },
+    trending: { posts: [], page: 1, hasMore: true, loading: false, error: null },
+    latest: { posts: [], page: 1, hasMore: true, loading: false, error: null },
+    hot: { posts: [], page: 1, hasMore: true, loading: false, error: null },
+    popular: { posts: [], page: 1, hasMore: true, loading: false, error: null },
   });
   
   const [refreshing, setRefreshing] = useState(false);
