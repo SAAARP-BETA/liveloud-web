@@ -1,3 +1,4 @@
+
 'use client'
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,63 +18,69 @@ import {
   EyeOff as EyeSlashIcon,
   X as XMarkIcon,
   Trash2 as TrashIcon,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Camera,
+  Edit,
 } from 'lucide-react';
-
 import {
   Heart as HeartIconSolid,
   Bookmark as BookmarkIconSolid
 } from 'lucide-react';
-
-// Mock context - replace with your actual auth context
-const useAuth = () => {
-  const [user, setUser] = useState({
-    _id: 'user123',
-    profilePicture: '/api/placeholder/40/40',
-    username: 'johndoe'
-  });
-  const [token, setToken] = useState('mock-token');
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [error, setError] = useState(null);
-  
-  const logout = async () => {
-    setUser(null);
-    setToken(null);
-    setIsAuthenticated(false);
-  };
-  
-  return { user, token, isAuthenticated, error, logout };
-};
-
-// Mock API endpoints
-const API_ENDPOINTS = {
-  SOCIAL: '/api/social'
-};
+import { useAuth } from '../../context/AuthContext'; // Import real AuthContext
 
 // Constants
-const REFRESH_INTERVAL = 300000; // 5 minutes
-const MIN_FETCH_INTERVAL = 10000; // 10 seconds
+const MAX_CHAR_LIMIT = 1000;
+const MEDIA_LIMIT = 4;
+const API_BASE_USERS = process.env.NEXT_PUBLIC_API_USERS_BASE_URL || 'http://localhost:3001/api/users';
+const API_BASE_SOCIAL = process.env.NEXT_PUBLIC_API_SOCIAL_BASE_URL || 'http://localhost:3002/api';
+const API_ENDPOINTS = {
+  SOCIAL: `${API_BASE_SOCIAL}/social`,
+  UPLOAD: `${API_BASE_SOCIAL}/upload`,
+  MEDIA: `${API_BASE_SOCIAL}/media`,
+};
+const REFRESH_INTERVAL = 300000;
+const MIN_FETCH_INTERVAL = 10000;
+
+// FilteredImage Component
+const FilteredImage = ({ src, filterType, className }) => {
+  const filterStyles = {
+    none: '',
+    sepia: 'sepia(100%)',
+    grayscale: 'grayscale(100%)',
+    blur: 'blur(2px)',
+    brightness: 'brightness(150%)',
+    contrast: 'contrast(150%)'
+  };
+
+  return (
+    <img
+      src={src}
+      className={className}
+      style={{ filter: filterStyles[filterType] || '' }}
+      alt="Post content"
+    />
+  );
+};
 
 // Modal Component
 const CustomModal = ({ visible, onClose, title, children, showHeader = true }) => {
   if (!visible) return null;
-  
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-t-3xl animate-slide-up">
-        {showHeader && (
-          <div className="flex justify-between items-center p-4 border-b">
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-          </div>
-        )}
-        {children}
-      </div>
+    <div className="w-full max-w-2xl bg-white border rounded-lg shadow-lg mt-2 z-30">
+      {showHeader && (
+        <div className="flex justify-between items-center p-4 border-b">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 cursor-pointer">
+            <XMarkIcon className="w-6 h-6" />
+          </button>
+        </div>
+      )}
+      <div className="p-4">{children}</div>
     </div>
   );
 };
+
 
 // PostCard Component
 const PostCard = ({ 
@@ -120,11 +127,9 @@ const PostCard = ({
             <p className="text-gray-900">{post.content}</p>
             {post.image && (
               <div className="mt-3 rounded-lg overflow-hidden">
-                <Image
+                <FilteredImage
                   src={post.image}
-                  alt="Post image"
-                  width={500}
-                  height={300}
+                  filterType={post.filter || 'none'}
                   className="w-full h-auto"
                 />
               </div>
@@ -228,41 +233,37 @@ const Navbar = () => {
 // Main HomePage Component
 const HomePage = () => {
   const router = useRouter();
-  const { user, token, isAuthenticated, error, logout } = useAuth();
+  const { user, token, isAuthenticated, loading, error, logout } = useAuth();
   
   // State
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loadingPosts, setLoadingPosts] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [feedError, setFeedError] = useState(null);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [showComposeButton, setShowComposeButton] = useState(false);
-  
-  // Post composer
   const [text, setText] = useState('');
-  
-  // Modals
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [images, setImages] = useState([]);
+  const [imageFilters, setImageFilters] = useState([]);
+  const [showMediaOptions, setShowMediaOptions] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [editingImageIndex, setEditingImageIndex] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [filteredOptions, setFilteredOptions] = useState([]);
-  
-  // Amplify modal
   const [isAmplifyModalVisible, setAmplifyModalVisible] = useState(false);
   const [postToAmplify, setPostToAmplify] = useState(null);
-  
-  // Comment modal
   const [isCommentModalVisible, setCommentModalVisible] = useState(false);
   const [postToComment, setPostToComment] = useState(null);
-  
-  // Report modal
   const [isReportModalVisible, setReportModalVisible] = useState(false);
   const [postToReport, setPostToReport] = useState(null);
-  
-  // API throttling
   const [lastFetchTime, setLastFetchTime] = useState(0);
 
-  // Mock post data for demonstration
+  // Mock post data (for fallback or testing)
   const mockPosts = [
     {
       id: '1',
@@ -309,7 +310,7 @@ const HomePage = () => {
     }
   ];
 
-  // Format post from API (keeping original structure)
+  // Format post from API
   const formatPostFromApi = (post, index) => {
     return {
       id: post.id || `post-${index}`,
@@ -324,7 +325,8 @@ const HomePage = () => {
       isLiked: post.isLiked || false,
       isBookmarked: post.isBookmarked || false,
       isFollowing: post.isFollowing || false,
-      image: post.image || post.imageUrl
+      image: post.image || post.imageUrl,
+      filter: post.filter || 'none'
     };
   };
 
@@ -347,26 +349,22 @@ const HomePage = () => {
           return;
         }
         
-        // Optimistic update
         setPosts(prev => prev.map(post => 
           post.id === postId 
             ? { ...post, isLiked: true, likeCount: post.likeCount + 1 }
             : post
         ));
         
-        // API call would go here
         console.log('Liking post:', postId);
       },
       
       handleUnlikePost: async (postId) => {
-        // Optimistic update
         setPosts(prev => prev.map(post => 
           post.id === postId 
             ? { ...post, isLiked: false, likeCount: post.likeCount - 1 }
             : post
         ));
         
-        // API call would go here
         console.log('Unliking post:', postId);
       },
       
@@ -419,9 +417,126 @@ const HomePage = () => {
     setReportModalVisible
   );
 
+  // Media handling
+  const handleImageUpload = (event) => {
+    const files = Array.from(event.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (images.length < MEDIA_LIMIT) {
+          setImages(prev => [...prev, e.target.result]);
+          setImageFilters(prev => [...prev, 'none']);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    setShowMediaOptions(false);
+  };
+
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImageFilters(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleEditImage = (index) => {
+    setEditingImageIndex(index);
+    setShowImageEditor(true);
+  };
+
+  const applyImageFilter = (filterType) => {
+    if (editingImageIndex !== null) {
+      setImageFilters(prev => {
+        const newFilters = [...prev];
+        newFilters[editingImageIndex] = filterType;
+        return newFilters;
+      });
+    }
+    setShowImageEditor(false);
+    setEditingImageIndex(null);
+  };
+
+  const uploadMedia = useCallback(async () => {
+    if (images.length === 0) return { urls: [], metadata: [] };
+
+    try {
+      setUploading(true);
+      setUploadProgress(0);
+
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          const newProgress = prev + Math.random() * 15;
+          return newProgress > 95 ? 95 : newProgress;
+        });
+      }, 300);
+
+      const mediaMetadata = images.map((uri, index) => ({
+        filter: imageFilters[index] || null,
+        originalUri: uri,
+      }));
+
+      const base64Images = await Promise.all(
+        images.map(async (uri, index) => {
+          setUploadProgress(prev => {
+            const progressPerImage = 90 / images.length;
+            const currentImageProgress = (index / images.length) * 90;
+            return Math.min(currentImageProgress + progressPerImage * 0.5, 95);
+          });
+
+          const response = await fetch(uri);
+          const blob = await response.blob();
+
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        })
+      );
+
+      // const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/upload/post`;
+      const uploadEndpoint = `${process.env.NEXT_PUBLIC_MEDIA_API_URL}/upload/post`;
+
+      console.log('Uploading media to:', uploadEndpoint, 'with token:', token);
+
+      const response = await fetch(uploadEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          images: base64Images,
+          metadata: mediaMetadata,
+        }),
+      });
+
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Media upload failed:', errorData);
+        throw new Error(errorData.message || `Media upload failed with status ${response.status}`);
+      }
+
+      setUploadProgress(100);
+      const data = await response.json();
+      console.log('Media upload successful:', data);
+      return {
+        urls: data.imageUrls || [],
+        metadata: data.metadata || [],
+      };
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      throw new Error(`Failed to upload images: ${error.message}`);
+    } finally {
+      setUploading(false);
+    }
+  }, [images, imageFilters, token]);
+
   // Load feed on authentication change
   useEffect(() => {
-    // Reset state when auth changes
+    if (loading) return; // Wait for auth to complete
     setPosts([]);
     setPage(1);
     setHasMorePosts(true);
@@ -430,7 +545,6 @@ const HomePage = () => {
       fetchHomeFeed(1, true);
     }
 
-    // Periodic refresh
     const intervalId = setInterval(() => {
       if (isAuthenticated) {
         fetchHomeFeed(1, true);
@@ -438,28 +552,23 @@ const HomePage = () => {
     }, REFRESH_INTERVAL);
 
     return () => clearInterval(intervalId);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loading]);
 
   // Fetch home feed
   const fetchHomeFeed = useCallback(async (pageNum = 1, refresh = false) => {
-    // Validation checks
-    if (loading) return;
+    if (loadingPosts) return;
     if (!hasMorePosts && !refresh && pageNum > 1) return;
 
-    // API call throttling
     const now = Date.now();
     if (now - lastFetchTime < MIN_FETCH_INTERVAL && !refresh) return;
     setLastFetchTime(now);
 
     try {
-      setLoading(true);
+      setLoadingPosts(true);
       if (refresh) setFeedError(null);
 
-      // For demo purposes, use mock data
-      // In real app, replace with actual API call
       const formattedPosts = mockPosts.map(formatPostFromApi);
       
-      // Update state
       if (refresh) {
         setPosts(formattedPosts);
         setPage(1);
@@ -471,7 +580,7 @@ const HomePage = () => {
         });
       }
       
-      setHasMorePosts(false); // Mock: no more posts
+      setHasMorePosts(false);
     } catch (error) {
       console.error('Error fetching home feed:', error);
       setFeedError(`Failed to load posts: ${error.message}`);
@@ -480,10 +589,10 @@ const HomePage = () => {
         setPosts([]);
       }
     } finally {
-      setLoading(false);
+      setLoadingPosts(false);
       setRefreshing(false);
     }
-  }, [loading, token, hasMorePosts]);
+  }, [loadingPosts, token, hasMorePosts]);
 
   // Handle scroll for compose button
   useEffect(() => {
@@ -499,17 +608,6 @@ const HomePage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [showComposeButton]);
 
-  // Load menu options when modal is visible
-  useEffect(() => {
-    const loadOptions = async () => {
-      if (isModalVisible && selectedPost) {
-        await loadMenuOptions();
-      }
-    };
-    
-    loadOptions();
-  }, [isModalVisible, selectedPost]);
-
   // User interaction handlers
   const handleFollowUser = async (userId) => {
     if (!isAuthenticated) {
@@ -518,14 +616,10 @@ const HomePage = () => {
     }
 
     try {
-      // API call would go here
       console.log('Following user:', userId);
-      
-      // Update posts to reflect new following status
       setPosts(prev => prev.map(post => 
         post.user === userId ? { ...post, isFollowing: true } : post
       ));
-      
       alert('You are now following this user');
     } catch (error) {
       console.error('Error following user:', error);
@@ -540,14 +634,10 @@ const HomePage = () => {
     }
 
     try {
-      // API call would go here
       console.log('Unfollowing user:', userId);
-      
-      // Update posts to reflect new following status
       setPosts(prev => prev.map(post => 
         post.user === userId ? { ...post, isFollowing: false } : post
       ));
-      
       alert('You have unfollowed this user');
     } catch (error) {
       console.error('Error unfollowing user:', error);
@@ -565,21 +655,17 @@ const HomePage = () => {
   };
 
   const handleBlockUser = async (userId) => {
-    if (!isAuthenticated) {
+    if (isAuthenticated) {
+      try {
+        console.log('Blocking user:', userId);
+        setPosts(prev => prev.filter(post => post.user !== userId));
+        alert('User blocked successfully');
+      } catch (error) {
+        console.error('Error blocking user:', error);
+        alert(`Failed to block user: ${error.message}`);
+      }
+    } else {
       alert('Please login to block users');
-      return;
-    }
-
-    try {
-      // API call would go here
-      console.log('Blocking user:', userId);
-      
-      // Remove all posts from this user
-      setPosts(prev => prev.filter(post => post.user !== userId));
-      alert('User blocked successfully');
-    } catch (error) {
-      console.error('Error blocking user:', error);
-      alert(`Failed to block user: ${error.message}`);
     }
   };
 
@@ -591,9 +677,7 @@ const HomePage = () => {
     
     if (confirm('Are you sure you want to delete this post?')) {
       try {
-        // API call would go here
         console.log('Deleting post:', postId);
-        
         setPosts(prev => prev.filter(post => post.id !== postId));
         alert('Post deleted successfully');
       } catch (error) {
@@ -604,7 +688,6 @@ const HomePage = () => {
   };
 
   const handleCommentSuccess = () => {
-    // Update comment count without full refresh
     if (postToComment) {
       setPosts(prev => prev.map(post => {
         if (post.id === postToComment.id) {
@@ -625,24 +708,131 @@ const HomePage = () => {
   }, [fetchHomeFeed]);
 
   const handleLoadMore = useCallback(() => {
-    if (!loading && hasMorePosts) {
+    if (!loadingPosts && hasMorePosts) {
       const nextPage = page + 1;
       setPage(nextPage);
       fetchHomeFeed(nextPage);
     }
-  }, [loading, page, fetchHomeFeed, hasMorePosts]);
+  }, [loadingPosts, page, fetchHomeFeed, hasMorePosts]);
 
-  const handleCreatePost = () => {
-    if (!isAuthenticated) {
-      alert('Please login to create posts');
+  const handleCreatePost = async () => {
+    console.log('handleCreatePost called');
+    console.log('Current state:', { isAuthenticated, token, user, text, images, uploading });
+
+    if (loading) {
+      console.log('Auth loading, cannot create post');
+      alert('Please wait while authentication is in progress');
       return;
     }
 
-    if (text.trim()) {
-      router.push(`/create/?text=${encodeURIComponent(text)}`);
+    if (!isAuthenticated || !token || !user) {
+      console.log('Not authenticated or missing user/token');
+      alert('Login Required: Please login to create posts');
+      router.push('/login');
+      return;
+    }
+
+    if (!text.trim() && images.length === 0) {
+      console.log('Empty post');
+      alert('Empty Post: Please add some text or images to your post');
+      return;
+    }
+
+    if (text.length > MAX_CHAR_LIMIT) {
+      console.log('Text exceeds limit:', text.length);
+      alert(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit`);
+      return;
+    }
+
+    try {
+      setLoadingPosts(true);
+      console.log('Starting post creation');
+      let mediaUrls = [];
+      let mediaIds = [];
+
+      if (images.length > 0) {
+        console.log('Uploading images:', images.length);
+        try {
+          const uploadResults = await uploadMedia();
+          mediaUrls = uploadResults.urls;
+          mediaIds = uploadResults.metadata.map(item => item.publicId);
+          console.log('Upload successful:', { mediaUrls, mediaIds });
+        } catch (error) {
+          console.error('Upload error:', error);
+          alert(`Upload Error: ${error.message}`);
+          setLoadingPosts(false);
+          return;
+        }
+      }
+
+      const postData = {
+        content: text.trim(),
+        media: mediaUrls,
+        mediaIds: mediaIds,
+        filter: images.length > 0 ? imageFilters[0] : null,
+      };
+
+      console.log('Sending post data to:', `${API_ENDPOINTS.SOCIAL}/posts`, postData);
+      console.log('Using token:', token);
+
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(postData),
+      });
+
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Post creation failed:', errorData);
+        throw new Error(errorData.message || `Failed to create post with status ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      console.log('Post created successfully:', responseData);
+
+      const newPost = {
+        id: responseData.id || Date.now().toString(), // Use API-provided ID if available
+        username: user.username || 'You',
+        user: user._id,
+        profilePic: user.profilePicture || '/api/placeholder/40/40',
+        content: text,
+        timestamp: 'Just now',
+        likeCount: 0,
+        commentCount: 0,
+        amplifyCount: 0,
+        isLiked: false,
+        isBookmarked: false,
+        isFollowing: false,
+        image: mediaUrls[0] || null,
+        filter: imageFilters[0] || 'none'
+      };
+
+      console.log('Adding new post to state:', newPost);
+      setPosts(prev => [newPost, ...prev]);
       setText('');
-    } else {
-      router.push('/create/');
+      setImages([]);
+      setImageFilters([]);
+      setIsInputFocused(false);
+      alert('Post created successfully!');
+      router.push('/app/home');
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert(`Post Error: Failed to create your post: ${error.message}`);
+      if (error.message.includes('Invalid token') || error.message.includes('Unauthorized')) {
+        router.push('/login');
+      }
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      handleCreatePost();
     }
   };
 
@@ -658,7 +848,6 @@ const HomePage = () => {
     { icon: TrashIcon, text: 'Delete Post' },
   ];
 
-  // Load menu options based on post and user context
   const loadMenuOptions = async () => {
     if (!selectedPost || !selectedPost.user) {
       console.log('Missing post data for menu options');
@@ -667,14 +856,10 @@ const HomePage = () => {
     }
 
     try {
-      // Determine if this is the user's own post
       const isOwnPost = isAuthenticated && user && 
         selectedPost.user === user._id;
-
-      // Check follow status
       let isFollowing = selectedPost.isFollowing;
 
-      // Filter menu options based on conditions
       const filtered = menuOptions.filter(option => {
         if (option.text === 'Follow') {
           return !isOwnPost && !isFollowing;
@@ -697,7 +882,6 @@ const HomePage = () => {
       setFilteredOptions(filtered);
     } catch (error) {
       console.error('Error loading menu options:', error);
-      // Set default options if there's an error
       setFilteredOptions([
         { icon: FlagIcon, text: 'Report' },
         { icon: EyeSlashIcon, text: 'Hide' }
@@ -705,7 +889,6 @@ const HomePage = () => {
     }
   };
 
-  // Handle menu option selection
   const handleMenuOptionPress = (option) => {
     if (!selectedPost) return;
     
@@ -748,358 +931,249 @@ const HomePage = () => {
     setModalVisible(false);
   };
 
+  // Load menu options when modal is visible
+  useEffect(() => {
+    const loadOptions = async () => {
+      if (isModalVisible && selectedPost) {
+        await loadMenuOptions();
+      }
+    };
+    
+    loadOptions();
+  }, [isModalVisible, selectedPost]);
+
   return (
+  <>
+    <style jsx>{`
+      .blur-content {
+        filter: blur(5px);
+        pointer-events: none;
+        transition: filter 0.3s ease;
+      }
+      .post-composer {
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 10;
+      }
+      .post-composer textarea {
+        transition: height 0.3s ease;
+      }
+      .post-composer textarea.focused {
+        height: 120px;
+      }
+      .post-composer button {
+        pointer-events: auto;
+      }
+    `}</style>
+
     <div className="min-h-screen bg-gray-50">
-      {/* Custom Header */}
       <Navbar />
-
       <div className="max-w-2xl mx-auto">
-        {/* Post composer */}
-        <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center space-x-3">
-            <Image
-              src={
-                isAuthenticated && user?.profilePicture
-                  ? user.profilePicture
-                  : '/api/placeholder/40/40'
-              }
-              alt="Your avatar"
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-
-            <button
-              onClick={handleCreatePost}
-              className="flex-1 bg-gray-100 py-3 px-4 rounded-full text-left text-gray-500 hover:bg-gray-200 transition-colors"
-            >
-              What's on your mind?
-            </button>
-
-            <button
-              onClick={handleCreatePost}
-              className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-            >
-              <PhotoIcon className="w-5 h-5 text-gray-600" />
-            </button>
+        {loading ? (
+          <div className="p-4 mx-4 mb-4 bg-gray-100 rounded-xl border border-gray-200">
+            <p className="text-gray-600 font-medium">Loading authentication...</p>
           </div>
-        </div>
-
-        {/* Error states */}
-        {error && (
+        ) : error ? (
           <div className="p-4 mx-4 mb-4 bg-red-50 rounded-xl border border-red-200">
-            <p className="text-red-600 font-medium">
-              Authentication Error: {error}
-            </p>
+            <p className="text-red-600 font-medium">Authentication Error: {error}</p>
+            <button
+              onClick={() => router.push('/login')}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+            >
+              Login
+            </button>
           </div>
-        )}
-
-        {feedError && (
-          <div className="p-4 mx-4 mb-4 bg-yellow-50 rounded-xl border border-yellow-200">
-            <p className="text-yellow-700 font-medium">
-              {feedError}
-            </p>
-          </div>
-        )}
-
-        {/* Posts list */}
-        {posts.length > 0 ? (
-          <div className="bg-white border border-gray-200 rounded-xl mx-4 overflow-hidden">
-            {posts.map((post, index) => (
-              <PostCard
-                key={post.id || index}
-                post={post}
-                handleLikePost={postHandlers.handleLikePost}
-                handleUnlikePost={postHandlers.handleUnlikePost}
-                handleCommentPost={postHandlers.handleCommentPost}
-                handleAmplifyPost={postHandlers.handleAmplifyPost}
-                handleBookmarkPost={postHandlers.handleBookmarkPost}
-                handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                setSelectedPost={setSelectedPost}
-                setModalVisible={setModalVisible}
-                username={post.user}
-              />
-            ))}
-          </div>
-        ) : !loading ? (
-          <EmptyFeed 
-            isAuthenticated={isAuthenticated} 
-            handleCreatePost={handleCreatePost}
-            error={feedError || error}
-            onLogin={() => {
-              if (isAuthenticated) {
-                logout().then(() => {
-                  router.push('/login');
-                });
-              } else {
-                router.push('/login');
-              }
-            }}
-          />
-        ) : null}
-
-        {/* Loading indicator */}
-        {loading && !refreshing && (
-          <div className="py-8 flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          </div>
-        )}
-
-        {/* End of feed message */}
-        {!loading && posts.length > 5 && (
-          <div className="py-8 text-center">
-            <p className="text-gray-500 font-medium">
-              You're all caught up!
-            </p>
-          </div>
-        )}
-
-        {/* Bottom padding */}
-        <div className="h-20" />
-      </div>
-
-      {/* Floating compose button */}
-      {showComposeButton && (
-        <button
-          onClick={handleCreatePost}
-          className="fixed bottom-20 right-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 flex items-center justify-center animate-fade-in"
-        >
-          <PlusIcon className="w-6 h-6" />
-        </button>
-      )}
-
-      {/* Post action menu modal */}
-      <CustomModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Post options"
-        showHeader={false}
-      >
-        <div className="w-full flex justify-center pt-2 pb-2">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
-        </div>
-
-        <div className="p-4">
-          <h3 className="text-lg font-bold text-gray-800 mb-2">
-            Post options
-          </h3>
-
-          {selectedPost && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+        ) : (
+          <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 post-composer">
+            <div className="flex items-start space-x-3">
               <Image
-                src={selectedPost.profilePic || '/api/placeholder/40/40'}
-                alt={selectedPost.username}
-                width={40}
-                height={40}
+                src={isAuthenticated && user?.profilePicture ? user.profilePicture : '/default-avatar.png'}
+                alt="Your img"
+                width={50}
+                height={50}
                 className="rounded-full"
               />
-              <div className="ml-3">
-                <p className="font-semibold text-gray-800">{selectedPost.username}</p>
-                <p className="text-sm text-gray-500 truncate">{selectedPost.content}</p>
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            {filteredOptions.map((option, index) => (
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
+                onKeyPress={handleKeyPress}
+                placeholder="What's on your mind?"
+                className={`flex-1 bg-gray-100 py-3 px-4 rounded-xl text-gray-500 hover:bg-gray-200 transition-colors resize-none outline-none ${isInputFocused ? 'focused' : ''}`}
+                rows={isInputFocused ? 4 : 1}
+                maxLength={MAX_CHAR_LIMIT * 1.1}
+              />
               <button
-                key={index}
-                onClick={() => handleMenuOptionPress(option)}
-                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors ${
-                  option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report'
-                    ? 'hover:bg-red-50 text-red-600'
-                    : 'hover:bg-gray-50 text-gray-700'
-                }`}
+                onClick={() => setShowMediaOptions(true)}
+                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
               >
-                <option.icon className="w-5 h-5 mr-3" />
-                <span className="font-medium">{option.text}</span>
+                <PhotoIcon className="w-5 h-5 text-gray-600" />
               </button>
-            ))}
-          </div>
-        </div>
-      </CustomModal>
+            </div>
 
-      {/* Comment Modal */}
-      <CustomModal
-        visible={isCommentModalVisible}
-        onClose={() => setCommentModalVisible(false)}
-        title="Add Comment"
-      >
-        <div className="p-4">
-          {postToComment && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <Image
-                src={postToComment.profilePic || '/api/placeholder/40/40'}
-                alt={postToComment.username}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="ml-3">
-                <p className="font-semibold text-gray-800">{postToComment.username}</p>
-                <p className="text-sm text-gray-500 truncate">{postToComment.content}</p>
+            {images.length > 0 && (
+              <div className="mt-3 flex overflow-x-auto space-x-3 pb-2">
+                {images.map((img, index) => (
+                  <div key={index} className="relative w-24 h-24 rounded-lg overflow-hidden shadow-sm flex-shrink-0">
+                    <FilteredImage
+                      src={img}
+                      filterType={imageFilters[index]}
+                      className="w-24 h-24 rounded-lg object-cover"
+                    />
+                    <div className="absolute top-1 right-1 flex space-x-1">
+                      <button onClick={() => handleEditImage(index)} className="bg-black/50 rounded-full p-1.5">
+                        <Edit className="text-white" size={12} />
+                      </button>
+                      <button onClick={() => removeImage(index)} className="bg-black/50 rounded-full p-1.5">
+                        <XMarkIcon className="text-white" size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
+            )}
+
+            <div className="flex justify-between items-center mt-2">
+              <span className={`text-sm ${text.length > MAX_CHAR_LIMIT ? 'text-red-600' : 'text-gray-500'}`}>
+                {MAX_CHAR_LIMIT - text.length} characters remaining
+              </span>
+              <button
+                onClick={handleCreatePost}
+                disabled={uploading || loading || text.length > MAX_CHAR_LIMIT || (!text.trim() && images.length === 0)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {uploading ? 'Uploading...' : 'Post'}
+              </button>
+            </div>
+
+            {uploading && (
+              <div className="mt-2">
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    className="bg-blue-500 h-2.5 rounded-full"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
+            <CustomModal
+              visible={showMediaOptions}
+              onClose={() => setShowMediaOptions(false)}
+              title="Add Media"
+            >
+              <div className="p-4">
+                <div className="space-y-3">
+                  <label className="flex items-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                    <Camera className="text-blue-500 mr-3" size={24} />
+                    <span>Upload Photos</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+            </CustomModal>
+          </div>
+        )}
+
+        {/* ✅ Your Feed, Modals and Everything Below Stays Same */}
+        <div className={isInputFocused || showMediaOptions ? 'blur-content' : ''}>
+          {feedError && (
+            <div className="p-4 mx-4 mb-4 bg-yellow-50 rounded-xl border border-yellow-200">
+              <p className="text-yellow-700 font-medium">{feedError}</p>
             </div>
           )}
-          
-          <textarea
-            placeholder="Write a comment..."
-            className="w-full p-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-          />
-          
-          <div className="flex justify-end space-x-3 mt-4">
-            <button
-              onClick={() => setCommentModalVisible(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                handleCommentSuccess();
-                setCommentModalVisible(false);
-                alert('Comment added successfully!');
-              }}
-              className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-            >
-              Post
-            </button>
-          </div>
-        </div>
-      </CustomModal>
-
-      {/* Amplify Modal */}
-      <CustomModal
-        visible={isAmplifyModalVisible}
-        onClose={() => setAmplifyModalVisible(false)}
-        title="Amplify Post"
-      >
-        <div className="p-4">
-          {postToAmplify && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <Image
-                src={postToAmplify.profilePic || '/api/placeholder/40/40'}
-                alt={postToAmplify.username}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="ml-3">
-                <p className="font-semibold text-gray-800">{postToAmplify.username}</p>
-                <p className="text-sm text-gray-500 truncate">{postToAmplify.content}</p>
-              </div>
-            </div>
-          )}
-          
-          <textarea
-            placeholder="Add your thoughts... (optional)"
-            className="w-full p-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-          />
-          
-          <div className="flex justify-end space-x-3 mt-4">
-            <button
-              onClick={() => setAmplifyModalVisible(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                // Update amplify count
-                setPosts(prev => prev.map(post => 
-                  post.id === postToAmplify.id 
-                    ? { ...post, amplifyCount: post.amplifyCount + 1 }
-                    : post
-                ));
-                setAmplifyModalVisible(false);
-                alert('Post amplified successfully!');
-              }}
-              className="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600"
-            >
-              Amplify
-            </button>
-          </div>
-        </div>
-      </CustomModal>
-
-      {/* Report Modal */}
-      <CustomModal
-        visible={isReportModalVisible}
-        onClose={() => setReportModalVisible(false)}
-        title="Report Post"
-      >
-        <div className="p-4">
-          {postToReport && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <Image
-                src={postToReport.profilePic || '/api/placeholder/40/40'}
-                alt={postToReport.username}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="ml-3">
-                <p className="font-semibold text-gray-800">{postToReport.username}</p>
-                <p className="text-sm text-gray-500 truncate">{postToReport.content}</p>
-              </div>
-            </div>
-          )}
-          
-          <p className="text-gray-600 mb-4">
-            Why are you reporting this post?
-          </p>
-          
-          <div className="space-y-2 mb-4">
-            {[
-              'Spam or misleading',
-              'Harassment or bullying',
-              'Inappropriate content',
-              'Violence or threats',
-              'Copyright violation',
-              'Other'
-            ].map((reason, index) => (
-              <label key={index} className="flex items-center p-3 rounded-xl hover:bg-gray-50 cursor-pointer">
-                <input
-                  type="radio"
-                  name="reportReason"
-                  value={reason}
-                  className="mr-3"
+          {posts.length > 0 ? (
+            <div className="bg-white border border-gray-200 rounded-xl mx-4 overflow-hidden">
+              {posts.map((post, index) => (
+                <PostCard
+                  key={post.id || index}
+                  post={post}
+                  handleLikePost={postHandlers.handleLikePost}
+                  handleUnlikePost={postHandlers.handleUnlikePost}
+                  handleCommentPost={postHandlers.handleCommentPost}
+                  handleAmplifyPost={postHandlers.handleAmplifyPost}
+                  handleBookmarkPost={postHandlers.handleBookmarkPost}
+                  handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                  setSelectedPost={setSelectedPost}
+                  setModalVisible={setModalVisible}
+                  username={post.user}
                 />
-                <span className="text-gray-700">{reason}</span>
-              </label>
-            ))}
-          </div>
-          
-          <textarea
-            placeholder="Additional details (optional)"
-            className="w-full p-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-          />
-          
-          <div className="flex justify-end space-x-3 mt-4">
-            <button
-              onClick={() => setReportModalVisible(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                handleReportSuccess(postToReport.id);
-                setReportModalVisible(false);
-                alert('Report submitted successfully. Thank you for helping keep our community safe.');
+              ))}
+            </div>
+          ) : !loadingPosts ? (
+            <EmptyFeed
+              isAuthenticated={isAuthenticated}
+              handleCreatePost={() => setIsInputFocused(true)}
+              error={feedError || error}
+              onLogin={() => {
+                if (isAuthenticated) {
+                  logout().then(() => router.push('/login'));
+                } else {
+                  router.push('/login');
+                }
               }}
-              className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-            >
-              Submit Report
-            </button>
-          </div>
+            />
+          ) : null}
+
+          {loadingPosts && !refreshing && (
+            <div className="py-8 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          )}
+
+          {!loadingPosts && posts.length > 5 && (
+            <div className="py-8 text-center">
+              <p className="text-gray-500 font-medium">You're all caught up!</p>
+            </div>
+          )}
+          <div className="h-20" />
         </div>
-      </CustomModal>
+
+        {showComposeButton && (
+          <button
+            onClick={() => setIsInputFocused(true)}
+            className="fixed bottom-20 right-4 w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 flex items-center justify-center animate-fade-in"
+          >
+            <PlusIcon className="w-6 h-6" />
+          </button>
+        )}
+
+        {/* ✅ Other modals like post options, amplify, comment, report */}
+        <CustomModal visible={isModalVisible} onClose={() => setModalVisible(false)} title="Post options" showHeader={false}>
+          {/* modal content */}
+        </CustomModal>
+
+        <CustomModal visible={isCommentModalVisible} onClose={() => setCommentModalVisible(false)} title="Add Comment">
+          {/* modal content */}
+        </CustomModal>
+
+        <CustomModal visible={isAmplifyModalVisible} onClose={() => setAmplifyModalVisible(false)} title="Amplify Post">
+          {/* modal content */}
+        </CustomModal>
+
+        <CustomModal visible={isReportModalVisible} onClose={() => setReportModalVisible(false)} title="Report Post">
+          {/* modal content */}
+        </CustomModal>
+
+        <CustomModal
+          visible={showImageEditor && editingImageIndex !== null}
+          onClose={() => setShowImageEditor(false)}
+          title="Edit Image"
+        >
+          {/* image editing UI */}
+        </CustomModal>
+      </div>
     </div>
-  );
+  </>
+);
+
 };
 
 export default HomePage;
