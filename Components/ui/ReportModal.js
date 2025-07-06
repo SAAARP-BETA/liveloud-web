@@ -1,8 +1,8 @@
 // components/ui/ReportModal.js
 'use client'
 import React, { useState, useEffect } from 'react';
-import { fonts } from '../../utils/fonts';
-import { reportReasons, handleReportPost } from '../../utils/postFunctions';
+import { fonts } from '../../app/utils/fonts';
+import { reportReasons, handleReportPost } from '../../app/utils/postFunctions';
 
 // Flag icon component to replace Feather icons
 const FlagIcon = ({ size = 20, color = '#64748B' }) => (

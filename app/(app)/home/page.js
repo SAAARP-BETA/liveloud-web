@@ -1,11 +1,16 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
+import PostCard from '../../../Components/home/PostCard';
+import EmptyFeed from '../../../Components/home/EmptyFeed';
+import CommentModal from '../../../Components/ui/CommentModal';
+import AmplifyModal from '../../../Components/ui/AmplifyModal';
+import CustomModal from '../../../Components/ui/Modal';
 import Image from 'next/image';
 import {
   Plus as PlusIcon,
   Image as PhotoIcon,
-  Heart as HeartIcon,
   MessageCircle as ChatBubbleOvalLeftIcon,
   RefreshCcw as ArrowPathIcon,
   Bookmark as BookmarkIcon,
@@ -20,210 +25,18 @@ import {
   Link as LinkIcon
 } from 'lucide-react';
 
+// import {
+//   Heart as HeartIconSolid,
+//   Bookmark as BookmarkIconSolid
+// } from 'lucide-react';
 import {
-  Heart as HeartIconSolid,
-  Bookmark as BookmarkIconSolid
-} from 'lucide-react';
-
-// Mock context - replace with your actual auth context
-const useAuth = () => {
-  const [user, setUser] = useState({
-    _id: 'user123',
-    profilePicture: '/api/placeholder/40/40',
-    username: 'johndoe'
-  });
-  const [token, setToken] = useState('mock-token');
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [error, setError] = useState(null);
-  
-  const logout = async () => {
-    setUser(null);
-    setToken(null);
-    setIsAuthenticated(false);
-  };
-  
-  return { user, token, isAuthenticated, error, logout };
-};
-
-// Mock API endpoints
-const API_ENDPOINTS = {
-  SOCIAL: '/api/social'
-};
-
+  createPostHandlers,
+  formatPostFromApi,
+} from '../../utils/postFunctions';
+import ReportModal from '@/Components/ui/ReportModal';
 // Constants
 const REFRESH_INTERVAL = 300000; // 5 minutes
 const MIN_FETCH_INTERVAL = 10000; // 10 seconds
-
-// Modal Component
-const CustomModal = ({ visible, onClose, title, children, showHeader = true }) => {
-  if (!visible) return null;
-  
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-t-3xl animate-slide-up">
-        {showHeader && (
-          <div className="flex justify-between items-center p-4 border-b">
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-          </div>
-        )}
-        {children}
-      </div>
-    </div>
-  );
-};
-
-// PostCard Component
-const PostCard = ({ 
-  post, 
-  handleLikePost, 
-  handleUnlikePost, 
-  handleCommentPost, 
-  handleAmplifyPost, 
-  handleBookmarkPost, 
-  handleUnbookmarkPost, 
-  setSelectedPost, 
-  setModalVisible 
-}) => {
-  const handleMenuClick = () => {
-    setSelectedPost(post);
-    setModalVisible(true);
-  };
-
-  return (
-    <div className="bg-white border-b border-gray-200 p-4">
-      <div className="flex items-start space-x-3">
-        <Image
-          src={post.profilePic || '/api/placeholder/40/40'}
-          alt={post.username}
-          width={40}
-          height={40}
-          className="rounded-full"
-        />
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-gray-900">{post.username}</h3>
-              <p className="text-sm text-gray-500">{post.timestamp}</p>
-            </div>
-            <button
-              onClick={handleMenuClick}
-              className="p-1 rounded-full hover:bg-gray-100"
-            >
-              <EllipsisHorizontalIcon className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-          
-          <div className="mt-2">
-            <p className="text-gray-900">{post.content}</p>
-            {post.image && (
-              <div className="mt-3 rounded-lg overflow-hidden">
-                <Image
-                  src={post.image}
-                  alt="Post image"
-                  width={500}
-                  height={300}
-                  className="w-full h-auto"
-                />
-              </div>
-            )}
-          </div>
-          
-          <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100">
-            <button
-              onClick={() => post.isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id)}
-              className="flex items-center space-x-2 text-gray-500 hover:text-red-500"
-            >
-              {post.isLiked ? (
-                <HeartIconSolid className="w-5 h-5 text-red-500" />
-              ) : (
-                <HeartIcon className="w-5 h-5" />
-              )}
-              <span className="text-sm">{post.likeCount}</span>
-            </button>
-            
-            <button
-              onClick={() => handleCommentPost(post)}
-              className="flex items-center space-x-2 text-gray-500 hover:text-blue-500"
-            >
-              <ChatBubbleOvalLeftIcon className="w-5 h-5" />
-              <span className="text-sm">{post.commentCount}</span>
-            </button>
-            
-            <button
-              onClick={() => handleAmplifyPost(post)}
-              className="flex items-center space-x-2 text-gray-500 hover:text-green-500"
-            >
-              <ArrowPathIcon className="w-5 h-5" />
-              <span className="text-sm">{post.amplifyCount}</span>
-            </button>
-            
-            <button
-              onClick={() => post.isBookmarked ? handleUnbookmarkPost(post.id) : handleBookmarkPost(post.id)}
-              className="text-gray-500 hover:text-yellow-500"
-            >
-              {post.isBookmarked ? (
-                <BookmarkIconSolid className="w-5 h-5 text-yellow-500" />
-              ) : (
-                <BookmarkIcon className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// EmptyFeed Component
-const EmptyFeed = ({ isAuthenticated, handleCreatePost, error, onLogin }) => {
-  return (
-    <div className="flex flex-col items-center justify-center p-8 text-center">
-      <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <PhotoIcon className="w-10 h-10 text-gray-400" />
-      </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {error ? 'Something went wrong' : 'No posts yet'}
-      </h3>
-      <p className="text-gray-500 mb-6">
-        {error ? 'Please try again later' : 'Be the first to share something!'}
-      </p>
-      {isAuthenticated ? (
-        <button
-          onClick={handleCreatePost}
-          className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600"
-        >
-          Create Post
-        </button>
-      ) : (
-        <button
-          onClick={onLogin}
-          className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600"
-        >
-          Login to Post
-        </button>
-      )}
-    </div>
-  );
-};
-
-// Navbar Component
-const Navbar = () => {
-  return (
-    <nav className="bg-white border-b border-gray-200 px-4 py-3">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Social Feed</h1>
-        <div className="flex items-center space-x-4">
-          <button className="p-2 rounded-full hover:bg-gray-100">
-            <PlusIcon className="w-6 h-6 text-gray-600" />
-          </button>
-        </div>
-      </div>
-    </nav>
-  );
-};
 
 // Main HomePage Component
 const HomePage = () => {
@@ -309,103 +122,6 @@ const HomePage = () => {
     }
   ];
 
-  // Format post from API (keeping original structure)
-  const formatPostFromApi = (post, index) => {
-    return {
-      id: post.id || `post-${index}`,
-      username: post.username || 'Unknown User',
-      user: post.user || post.userId,
-      profilePic: post.profilePic || '/api/placeholder/40/40',
-      content: post.content || post.text,
-      timestamp: post.timestamp || post.createdAt,
-      likeCount: post.likeCount || 0,
-      commentCount: post.commentCount || 0,
-      amplifyCount: post.amplifyCount || 0,
-      isLiked: post.isLiked || false,
-      isBookmarked: post.isBookmarked || false,
-      isFollowing: post.isFollowing || false,
-      image: post.image || post.imageUrl
-    };
-  };
-
-  // Create post handlers
-  const createPostHandlers = (
-    user, 
-    token, 
-    setPosts, 
-    setPostToComment, 
-    setCommentModalVisible, 
-    setPostToAmplify, 
-    setAmplifyModalVisible,
-    setPostToReport,
-    setReportModalVisible
-  ) => {
-    return {
-      handleLikePost: async (postId) => {
-        if (!isAuthenticated) {
-          alert('Please login to like posts');
-          return;
-        }
-        
-        // Optimistic update
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, isLiked: true, likeCount: post.likeCount + 1 }
-            : post
-        ));
-        
-        // API call would go here
-        console.log('Liking post:', postId);
-      },
-      
-      handleUnlikePost: async (postId) => {
-        // Optimistic update
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, isLiked: false, likeCount: post.likeCount - 1 }
-            : post
-        ));
-        
-        // API call would go here
-        console.log('Unliking post:', postId);
-      },
-      
-      handleCommentPost: (post) => {
-        setPostToComment(post);
-        setCommentModalVisible(true);
-      },
-      
-      handleAmplifyPost: (post) => {
-        setPostToAmplify(post);
-        setAmplifyModalVisible(true);
-      },
-      
-      handleBookmarkPost: async (postId) => {
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, isBookmarked: true }
-            : post
-        ));
-        
-        console.log('Bookmarking post:', postId);
-      },
-      
-      handleUnbookmarkPost: async (postId) => {
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, isBookmarked: false }
-            : post
-        ));
-        
-        console.log('Unbookmarking post:', postId);
-      },
-      
-      handleInitiateReport: (post) => {
-        setPostToReport(post);
-        setReportModalVisible(true);
-      }
-    };
-  };
 
   const postHandlers = createPostHandlers(
     user, 
@@ -751,7 +467,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Custom Header */}
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="max-w-2xl mx-auto">
         {/* Post composer */}
@@ -920,57 +636,18 @@ const HomePage = () => {
       </CustomModal>
 
       {/* Comment Modal */}
-      <CustomModal
+      <CommentModal
         visible={isCommentModalVisible}
         onClose={() => setCommentModalVisible(false)}
         title="Add Comment"
+        post={postToComment}
+        onSuccess={handleCommentSuccess}
       >
-        <div className="p-4">
-          {postToComment && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <Image
-                src={postToComment.profilePic || '/api/placeholder/40/40'}
-                alt={postToComment.username}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="ml-3">
-                <p className="font-semibold text-gray-800">{postToComment.username}</p>
-                <p className="text-sm text-gray-500 truncate">{postToComment.content}</p>
-              </div>
-            </div>
-          )}
-          
-          <textarea
-            placeholder="Write a comment..."
-            className="w-full p-3 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-          />
-          
-          <div className="flex justify-end space-x-3 mt-4">
-            <button
-              onClick={() => setCommentModalVisible(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                handleCommentSuccess();
-                setCommentModalVisible(false);
-                alert('Comment added successfully!');
-              }}
-              className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-            >
-              Post
-            </button>
-          </div>
-        </div>
-      </CustomModal>
+
+      </CommentModal>
 
       {/* Amplify Modal */}
-      <CustomModal
+      <AmplifyModal
         visible={isAmplifyModalVisible}
         onClose={() => setAmplifyModalVisible(false)}
         title="Amplify Post"
@@ -1022,10 +699,10 @@ const HomePage = () => {
             </button>
           </div>
         </div>
-      </CustomModal>
+      </AmplifyModal>
 
       {/* Report Modal */}
-      <CustomModal
+      <ReportModal
         visible={isReportModalVisible}
         onClose={() => setReportModalVisible(false)}
         title="Report Post"
@@ -1097,7 +774,7 @@ const HomePage = () => {
             </button>
           </div>
         </div>
-      </CustomModal>
+      </ReportModal>
     </div>
   );
 };

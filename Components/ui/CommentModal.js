@@ -1,10 +1,11 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { X, Heart, MessageCircle, Send, CheckCircle } from 'lucide-react';
+import { API_ENDPOINTS } from '../../app/utils/config';
+// const API_URL = "http://192.168.1.13:3002/api/";
 
-const API_URL = "http://192.168.1.13:3002/api/";
 
-const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
+const CustomModal = ({ visible, onClose, post, token, onSuccess }) => {
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
@@ -15,17 +16,17 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
 
   // Reset state when modal closes
   useEffect(() => {
-    if (!isVisible) {
+    if (!visible) {
       setReplyTo(null);
     }
-  }, [isVisible]);
+  }, [visible]);
 
   // Fetch comments when post changes or modal opens
   useEffect(() => {
-    if (isVisible && post) {
+    if (visible && post) {
       fetchComments(1, true);
     }
-  }, [isVisible, post]);
+  }, [visible, post]);
 
   // Fetch comments
   const fetchComments = async (pageNum = 1, refresh = false) => {
@@ -33,7 +34,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
 
     try {
       setLoadingComments(true);
-      const response = await fetch(`${API_URL}posts/${post.id}/comments?page=${pageNum}&limit=10`, {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comments?page=${pageNum}&limit=10`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -103,7 +104,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
 
       // If replying to a comment
       if (replyTo) {
-        const response = await fetch(`${API_URL}posts/${post.id}/comment/${replyTo._id}/reply`, {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${replyTo._id}/reply`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -133,7 +134,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
         setReplyTo(null);
       } else {
         // Regular comment
-        const response = await fetch(`${API_URL}posts/${post.id}/comment`, {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}posts/${post.id}/comment`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -211,7 +212,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
     }
 
     try {
-      const response = await fetch(`${API_URL}posts/${post.id}/comment/${commentId}/unlike`, {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}posts/${post.id}/comment/${commentId}/unlike`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -261,7 +262,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
   // Render a comment item
   const CommentItem = ({ item }) => {
     const isLiked = item.likes && item.likes.some(like => like._id === post.user?._id);
-
+  
     return (
       <div className="p-4 border-b border-gray-100">
         <div className="flex">
@@ -285,11 +286,11 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
             <p className="text-sm text-gray-800 mt-1">
               {item.content}
             </p>
-
+  
             {/* Comment actions */}
             <div className="flex items-center mt-2">
               <button
-                className="flex items-center mr-4 hover:bg-gray-100 p-1 rounded"
+                className="flex items-center mr-4 hover:bg-gray-100 p-1 rounded cursor-pointer"
                 onClick={() => isLiked ? handleUnlikeComment(item._id) : handleLikeComment(item._id)}
               >
                 <Heart
@@ -300,9 +301,9 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
                   {item.likes?.length || 0}
                 </span>
               </button>
-
+  
               <button
-                className="flex items-center hover:bg-gray-100 p-1 rounded"
+                className="flex items-center hover:bg-gray-100 p-1 rounded cursor-pointer"
                 onClick={() => handleReplyToComment(item)}
               >
                 <MessageCircle size={12} className="text-gray-500" />
@@ -311,7 +312,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
                 </span>
               </button>
             </div>
-
+  
             {/* Render replies if any */}
             {item.replies && item.replies.length > 0 && (
               <div className="mt-3 pl-4 border-l-2 border-gray-200">
@@ -356,20 +357,20 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
     </div>
   );
 
-  if (!isVisible) return null;
+  if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
       <div 
         className="absolute inset-0"
         onClick={onClose}
       />
-
-      <div className="bg-white rounded-t-3xl w-full max-w-lg mx-4 mb-0 relative animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col">
+  
+      <div className="bg-white rounded-2xl w-full max-w-lg mx-4 relative animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col">
         <div className="w-full flex items-center justify-center pt-4 pb-2">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
         </div>
-
+  
         <div className="p-4 border-b border-gray-100">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-xl font-bold text-gray-800">
@@ -377,12 +378,12 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
             </h2>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
             >
               <X size={20} className="text-gray-600" />
             </button>
           </div>
-
+  
           {/* Original post preview */}
           {post && (
             <div className="flex items-center mt-2">
@@ -407,7 +408,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
             </div>
           )}
         </div>
-
+  
         {/* Comments list */}
         <div 
           className="flex-1 overflow-y-auto"
@@ -428,7 +429,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
             </div>
           )}
         </div>
-
+  
         {/* Reply indicator */}
         {replyTo && (
           <div className="flex items-center justify-between bg-gray-100 px-4 py-2">
@@ -439,16 +440,16 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
             </p>
             <button 
               onClick={cancelReply}
-              className="p-1 hover:bg-gray-200 rounded"
+              className="p-1 hover:bg-gray-200 rounded cursor-pointer"
             >
               <X size={16} className="text-gray-600" />
             </button>
           </div>
         )}
-
+  
         {/* Comment input */}
-        <div className="p-4 border-t border-gray-100 bg-white">
-          <div className="flex items-center">
+        <div className="p-4 border-t border-gray-100 bg-white rounded-2xl">
+          <div className="flex items-center ">
             <textarea
               className="flex-1 bg-gray-50 rounded-full px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
               placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
@@ -464,7 +465,7 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
               }}
             />
             <button
-              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center ${
+              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${
                 commentText.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300'
               }`}
               onClick={handleSubmitComment}
@@ -483,4 +484,4 @@ const CommentModal = ({ isVisible, onClose, post, token, onSuccess }) => {
   );
 };
 
-export default CommentModal;
+export default CustomModal;

@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import { X, Repeat, Edit, ArrowLeft } from 'lucide-react';
 
-const API_URL = "http://192.168.1.13:3002/api/";
+// const API_URL = "http://192.168.1.13:3002/api/";
+import { API_ENDPOINTS } from '../../app/utils/config';
 
-const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
+const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
   const [quoteContent, setQuoteContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState('options'); // 'options', 'quote'
@@ -19,7 +20,7 @@ const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}posts/${post.id}/amplify`, {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/amplify`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -61,7 +62,7 @@ const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}posts/${post.id}/quote`, {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/quote`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -89,18 +90,18 @@ const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
     }
   };
 
-  if (!isVisible) return null;
+  if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
       <div 
-        className="absolute inset-0"
+        className="absolute inset-0 opacity-100"
         onClick={onClose}
       />
 
-      <div className="bg-white rounded-t-3xl w-full max-w-lg mx-4 mb-0 relative animate-in slide-in-from-bottom duration-300">
+<div className="bg-white rounded-2xl w-full max-w-lg mx-4 relative transform transition-all duration-300">
         <div className="w-full flex items-center justify-center pt-4 pb-2">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          <div className="w-10 h-1 bg-gray-300 rounded" />
         </div>
 
         {mode === 'options' ? (
@@ -112,7 +113,7 @@ const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-gray-100 rounded-full"
+                  className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
                 >
                   <X size={20} className="text-gray-600" />
                 </button>
@@ -138,7 +139,7 @@ const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
             </div>
 
             <button
-              className="flex items-center w-full px-6 py-4 border-t border-gray-100 hover:bg-gray-50 disabled:opacity-50"
+              className="flex items-center w-full px-6 py-4 border-t border-gray-100 hover:bg-gray-50 disabled:opacity-50 cursor-pointer"
               onClick={handleAmplify}
               disabled={loading}
             >
@@ -146,7 +147,7 @@ const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
                 <Repeat size={20} className="text-gray-600" />
               </div>
               <div className="flex-1 text-left">
-                <p className="font-medium text-gray-800">
+                <p className="font-medium text-gray-800 cursor-pointer">
                   Amplify
                 </p>
                 <p className="text-sm text-gray-600">
@@ -165,8 +166,8 @@ const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
               <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
                 <Edit size={20} className="text-gray-600" />
               </div>
-              <div className="flex-1 text-left">
-                <p className="font-medium text-gray-800">
+              <div className="flex-1 text-left cursor-pointer">
+                <p className="font-medium text-gray-800 ">
                   Quote
                 </p>
                 <p className="text-sm text-gray-600">
@@ -175,24 +176,17 @@ const AmplifyModal = ({ isVisible, onClose, post, token, onSuccess }) => {
               </div>
             </button>
 
-            <button
-              className="w-full p-4 bg-gray-100 text-center mt-2 hover:bg-gray-200"
-              onClick={onClose}
-            >
-              <span className="font-medium text-gray-600">
-                Cancel
-              </span>
-            </button>
+            
           </>
         ) : (
           <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 cursor-pointer">
               <h2 className="text-xl font-bold text-gray-800">
                 Quote this post
               </h2>
               <button 
                 onClick={() => setMode('options')}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
               >
                 <ArrowLeft size={20} className="text-gray-600" />
               </button>

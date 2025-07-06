@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
     user: null,
     isAuthenticated: false,
+    token:null,
     loading: true,
   });
 
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }) => {
             if (profile?._id) {
               setAuthState({
                 user: profile,
+                token: storedAuthData.token,
                 isAuthenticated: true,
                 loading: false,
               });
