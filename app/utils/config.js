@@ -4,16 +4,14 @@
 export const UNSPLASH_ACCESS_KEY = 'ytAR3Kj5h29tNC6hZMQLFY4uRK3rp-zzLLiEnOE5RyE';
 
 export const API_ENDPOINTS = {
-  AUTH: process.env.NEXT_PUBLIC_AUTH_API_URL,
-  USER: process.env.NEXT_PUBLIC_USER_API_URL,
-    SOCIAL: process.env.NEXT_PUBLIC_SOCIAL_API_URL,
-    MEDIA: process.env.NEXT_PUBLIC_MEDIA_API_URL,
-    NOTIFICATION: process.env.NEXT_PUBLIC_NOTIFICATION_API_URL,
-    MESSAGING: process.env.NEXT_PUBLIC_MESSAGING_API_URL,
-  SEARCH: process.env.NEXT_PUBLIC_SEARCH_API_URL,
-  POINTS: process.env.NEXT_PUBLIC_POINTS_API_URL,
-    
-    
+  AUTH: process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:3000/api/auth',
+  USER: process.env.NEXT_PUBLIC_USER_API_URL || 'http://localhost:3001/api/user',
+  SOCIAL: process.env.NEXT_PUBLIC_SOCIAL_API_URL || 'http://localhost:3002/api/social',
+  MEDIA: process.env.NEXT_PUBLIC_MEDIA_API_URL || 'http://localhost:3003/api/upload',
+  NOTIFICATION: process.env.NEXT_PUBLIC_NOTIFICATION_API_URL || 'http://localhost:3004/api/notification',
+  MESSAGING: process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:3005/api/messaging',
+  SEARCH: process.env.NEXT_PUBLIC_SEARCH_API_URL || 'http://localhost:3006/api/search',
+  POINTS: process.env.NEXT_PUBLIC_POINTS_API_URL || 'http://localhost:3007/api/points',
 };
 //✅ General API Helpers
 // -------------------------------
