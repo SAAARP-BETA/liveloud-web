@@ -816,31 +816,32 @@ const handleKeyPress = (e) => {
 
   // Render tab bar
   const renderTabBar = () => (
-    <div className="bg-white border-b border-gray-200">
-      <div className=" overflow-x-auto px-4 py-2 space-x-2">
-        {FEED_TYPES.map((feedType) => {
-          const isActive = activeTab === feedType.key;
-          const canAccess = !feedType.requiresAuth || isAuthenticated;
-          
-          return (
-            <button
-              key={feedType.key}
-              onClick={() => canAccess && handleTabChange(feedType.key)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
-                isActive 
-                  ? 'bg-sky-500 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              } ${!canAccess ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={!canAccess}
-            >
-              {feedType.title}
-              {feedType.requiresAuth && !isAuthenticated && ' 🔒'}
-            </button>
-          );
-        })}
-      </div>
+  <div className="bg-white border-b border-gray-200">
+    <div className="flex justify-center overflow-x-auto px-4 py-2 space-x-2 min-w-max">
+      {FEED_TYPES.map((feedType) => {
+        const isActive = activeTab === feedType.key;
+        const canAccess = !feedType.requiresAuth || isAuthenticated;
+        
+        return (
+          <button
+            key={feedType.key}
+            onClick={() => canAccess && handleTabChange(feedType.key)}
+            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
+              isActive 
+                ? 'bg-sky-500 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            } ${!canAccess ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!canAccess}
+          >
+            {feedType.title}
+            {feedType.requiresAuth && !isAuthenticated && ' 🔒'}
+          </button>
+        );
+      })}
     </div>
-  );
+  </div>
+);
+
 
   const currentTabData = getCurrentTabData();
   const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
