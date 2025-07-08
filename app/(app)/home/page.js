@@ -36,6 +36,7 @@ import { useAuth } from "../../context/AuthContext";
 
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
 import PostCard from '@/Components/home/PostCard';
 import EmptyFeed from '@/Components/home/EmptyFeed';
 import CommentModal from '@/Components/ui/CommentModal';
@@ -99,33 +100,35 @@ const HomePage = () => {
     hot: { posts: [], page: 1, hasMore: true, loading: false, error: null },
     popular: { posts: [], page: 1, hasMore: true, loading: false, error: null },
   });
-  
+
   const [refreshing, setRefreshing] = useState(false);
   const [showComposeButton, setShowComposeButton] = useState(false);
-  
+  const [progress, setProgress] = useState(0);
+
+
   // Post composer
   const [text, setText] = useState('');
-  
+
   // Modals
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [filteredOptions, setFilteredOptions] = useState([]);
-  
+
   // Amplify modal
   const [isAmplifyModalVisible, setAmplifyModalVisible] = useState(false);
   const [postToAmplify, setPostToAmplify] = useState(null);
-  
+
   // Comment modal
   const [isCommentModalVisible, setCommentModalVisible] = useState(false);
   const [postToComment, setPostToComment] = useState(null);
-  
+
   // Report modal
   const [isReportModalVisible, setReportModalVisible] = useState(false);
   const [postToReport, setPostToReport] = useState(null);
-  
+
   // API throttling
   const [lastFetchTime, setLastFetchTime] = useState({});
-  
+
   // Scroll handling
   const [scrollY, setScrollY] = useState(0);
 
@@ -135,13 +138,13 @@ const HomePage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const fileInputRef = useRef(null);
 
-    // useEffect(() => {
+  // useEffect(() => {
   //   const fetchUserInfo = async () => {
   //     if (user?.username) {
   //       try {
   //         const res = await fetch(`${API_ENDPOINTS.USERS}/profiles/${user.username}`);
   //         console.log("res", res);
-          
+
   //         if (!res.ok) throw new Error('Failed to fetch user info');
   //         const data = await res.json();
   //         setUserInfo(data);
@@ -153,7 +156,7 @@ const HomePage = () => {
   //   };
   //   fetchUserInfo();
   // }, [user]);
-  
+
   // Helper function to update tab data
   const updateTabData = (tabKey, updates) => {
     setTabData(prev => ({
@@ -164,21 +167,21 @@ const HomePage = () => {
 
   // Get current tab data
   const getCurrentTabData = () => tabData[activeTab];
-  
+
   // Create post handlers with updated setPosts function
   const postHandlers = createPostHandlers(
-    user, 
-    token, 
+    user,
+    token,
     (updater) => {
       if (typeof updater === 'function') {
         updateTabData(activeTab, { posts: updater(getCurrentTabData().posts) });
       } else {
         updateTabData(activeTab, { posts: updater });
       }
-    }, 
-    setPostToComment, 
-    setCommentModalVisible, 
-    setPostToAmplify, 
+    },
+    setPostToComment,
+    setCommentModalVisible,
+    setPostToAmplify,
     setAmplifyModalVisible,
     setPostToReport,
     setReportModalVisible
@@ -191,14 +194,14 @@ const HomePage = () => {
         await loadMenuOptions();
       }
     };
-    
+
     loadOptions();
   }, [isModalVisible, selectedPost]);
 
   // Load feed when tab changes or authentication changes
   useEffect(() => {
     const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
-    
+
     // Check if feed requires authentication
     if (currentFeedType?.requiresAuth && !isAuthenticated) {
       return;
@@ -214,7 +217,7 @@ const HomePage = () => {
   // Periodic refresh for active tab
   useEffect(() => {
     const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
-    
+
     if (currentFeedType?.requiresAuth && !isAuthenticated) {
       return;
     }
@@ -230,7 +233,7 @@ const HomePage = () => {
   const handleScroll = useCallback((e) => {
     const currentScrollY = e.target.scrollTop;
     setScrollY(currentScrollY);
-    
+
     // Show compose button when scrolling down
     if (currentScrollY > 100) {
       setShowComposeButton(true);
@@ -248,17 +251,17 @@ const HomePage = () => {
     console.log('Feed config:', feedConfig);
     console.log('API Base URL:', API_ENDPOINTS.SOCIAL); // Add this to see what endpoint is being used
     if (!feedConfig) return;
-    
+
     // Validation checks
     if (currentTabData.loading) return;
     if (!currentTabData.hasMore && !refresh && pageNum > 1) return;
 
     // Check authentication requirement
     if (feedConfig.requiresAuth && !isAuthenticated) {
-      updateTabData(feedType, { 
+      updateTabData(feedType, {
         error: 'Please log in to view this feed',
         posts: [],
-        hasMore: false 
+        hasMore: false
       });
       return;
     }
@@ -267,7 +270,7 @@ const HomePage = () => {
     const now = Date.now();
     const lastFetch = lastFetchTime[feedType] || 0;
     if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) return;
-    
+
     setLastFetchTime(prev => ({ ...prev, [feedType]: now }));
 
     try {
@@ -283,7 +286,7 @@ const HomePage = () => {
       if (token && feedConfig.requiresAuth) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      
+
       const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=10`;
 
       const response = await fetch(url, {
@@ -295,10 +298,10 @@ const HomePage = () => {
       if (response.status === 401 || response.status === 403) {
         if (feedConfig.requiresAuth) {
           console.log('Authentication failure in feed fetch, token may be expired');
-          updateTabData(feedType, { 
+          updateTabData(feedType, {
             error: 'Your session has expired. Please log in again.',
             posts: [],
-            hasMore: false 
+            hasMore: false
           });
           await logout();
           return;
@@ -307,8 +310,8 @@ const HomePage = () => {
 
       // Handle response status
       if (response.status === 429) {
-        updateTabData(feedType, { 
-          error: 'Rate limited. Please wait a moment before refreshing.' 
+        updateTabData(feedType, {
+          error: 'Rate limited. Please wait a moment before refreshing.'
         });
         return;
       }
@@ -319,7 +322,7 @@ const HomePage = () => {
 
       const responseText = await response.text();
       const data = JSON.parse(responseText);
-      
+
       if (!data.posts || !Array.isArray(data.posts)) {
         throw new Error('Invalid server response format');
       }
@@ -334,42 +337,42 @@ const HomePage = () => {
 
       // Update state
       if (refresh) {
-        updateTabData(feedType, { 
-          posts: formattedPosts, 
-          page: 1, 
+        updateTabData(feedType, {
+          posts: formattedPosts,
+          page: 1,
           hasMore,
-          error: null 
+          error: null
         });
       } else {
         const existingIds = new Set(currentTabData.posts.map(p => p.id));
         const uniqueNewPosts = formattedPosts.filter(p => !existingIds.has(p.id));
-        
-        updateTabData(feedType, { 
+
+        updateTabData(feedType, {
           posts: [...currentTabData.posts, ...uniqueNewPosts],
           page: pageNum,
-          hasMore 
+          hasMore
         });
       }
     } catch (error) {
       console.error(`Error fetching ${feedType} feed:`, error);
-      
+
       // Check if this might be an auth error
       if (error.message && (
-          error.message.includes('unauthorized') || 
-          error.message.includes('forbidden') ||
-          error.message.includes('authentication')
+        error.message.includes('unauthorized') ||
+        error.message.includes('forbidden') ||
+        error.message.includes('authentication')
       ) && feedConfig.requiresAuth) {
         console.log('Likely authentication error, logging out');
-        updateTabData(feedType, { 
+        updateTabData(feedType, {
           error: 'Your session has expired. Please log in again.',
           posts: refresh ? [] : currentTabData.posts,
-          hasMore: false 
+          hasMore: false
         });
         await logout();
       } else {
-        updateTabData(feedType, { 
+        updateTabData(feedType, {
           error: `Failed to load posts: ${error.message}`,
-          posts: refresh ? [] : currentTabData.posts 
+          posts: refresh ? [] : currentTabData.posts
         });
       }
     } finally {
@@ -390,59 +393,104 @@ const HomePage = () => {
   const gradientColors = isOverLimit
     ? ['#FF6B6B', '#FF0000']
     : isApproachingLimit
-    ? ['#FFD166', '#FF9F1C']
-    : ['#06D6A0', '#1B9AAA'];
+      ? ['#FFD166', '#FF9F1C']
+      : ['#06D6A0', '#1B9AAA'];
 
-    const uploadMedia = async () => {
-      const formData = new FormData();
-      images.forEach((image, index) => {
-        const byteString = atob(image.split(',')[1]);
-        const mimeString = image.split(',')[0].split(':')[1].split(';')[0];
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
-      const blob = new Blob([ab], { type: mimeString });
-      formData.append('files', blob, `image-${index}.jpg`);
-    });
+      // media upload
+const uploadMedia = async () => {
+  if (images.length === 0) return { urls: [], metadata: [] };
 
-    const res = await fetch(`${API_ENDPOINTS.MEDIA}/upload/post`, {
+  try {
+    setProgress(10); // Start
+
+    const base64Images = await Promise.all(
+      images.map(async (image, i) => {
+        if (image.startsWith('data:image')) return image;
+
+        const response = await fetch(image);
+        const blob = await response.blob();
+
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            setProgress(20 + i * (50 / images.length)); // Simulate mid-progress
+            resolve(reader.result);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      })
+    );
+
+    const metadata = images.map((_, index) => ({
+      filter: imageFilters[index] || null,
+      originalUri: images[index],
+    }));
+
+    setProgress(75); // Before upload
+
+    const res = await fetch(`${API_ENDPOINTS.MEDIA}/post`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: formData,
+      body: JSON.stringify({ images: base64Images, metadata }),
     });
-    
-    if (!res.ok) throw new Error('Failed to upload media');
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to upload media');
+    }
+
     const data = await res.json();
-    return data.urls; // Expecting { urls: [ ... ] }
-  };
-  
-// create post handlers
+    setProgress(100); // Done
+    return {
+      urls: data.imageUrls || [],
+      metadata: data.metadata || [],
+    };
+  } catch (error) {
+    setProgress(0);
+    throw new Error(error.message || 'Upload failed');
+  }
+};
+
+
+
+  // create post handlers
 const handleCreatePost = async () => {
   if (!isAuthenticated) {
-    alert('Please login to create posts');
+    toast.error('Please login to create posts');
     return;
   }
-  
+
   if (!text.trim() && images.length === 0) {
-    alert('Please add some text or images to your post');
+    toast.error('Please add some text or images to your post');
     return;
   }
-  
+
   if (isOverLimit) {
-    alert(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`);
+    toast.error(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`);
     return;
   }
-  
+
   try {
+    setProgress(5);
+
     let mediaUrls = [];
+    let mediaIds = [];
+
     if (images.length > 0) {
-      mediaUrls = await uploadMedia();
+      const uploadResults = await uploadMedia();
+      if (!uploadResults || !uploadResults.urls || !uploadResults.metadata) {
+        throw new Error('Invalid upload response');
+      }
+      mediaUrls = uploadResults.urls;
+      mediaIds = uploadResults.metadata.map(item => item.publicId);
     }
-    
+
+    setProgress(90); // Almost done
+
     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts`, {
       method: 'POST',
       headers: {
@@ -450,54 +498,61 @@ const handleCreatePost = async () => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        content: text,
+        content: text.trim() || '[media-only-post]',
         media: mediaUrls,
+        mediaIds: mediaIds,
       }),
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to create post');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to create post');
     }
-    
-    alert('Post created successfully!');
+
+    setProgress(100);
+    toast.success('Post created successfully!');
     setText('');
     setImages([]);
     setImageFilters([]);
     setIsInputFocused(false);
+    setProgress(0);
   } catch (error) {
     console.error('Error creating post:', error);
-    alert(`Failed to create post: ${error.message}`);
+    toast.error(`Failed to create post: ${error.message}`);
+    setProgress(0);
   }
 };
 
-const handleMediaButtonClick = () => {
-  if (fileInputRef.current) {
-    fileInputRef.current.click();
-  }
-};
 
-const handleImageUpload = (event) => {
-  const files = Array.from(event.target.files);
-  files.forEach(file => {
-    if (images.length < MEDIA_LIMIT) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImages(prev => [...prev, e.target.result]);
-        setImageFilters(prev => [...prev, 'none']);
-      };
-      reader.readAsDataURL(file);
+
+  const handleMediaButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
-  });
-  if (fileInputRef.current) {
-    fileInputRef.current.value = '';
-  }
-};
+  };
 
-const handleKeyPress = (e) => {
-  if (e.key === 'Enter' && e.ctrlKey) {
-    handleCreatePost();
-  }
-};
+  const handleImageUpload = (event) => {
+    const files = Array.from(event.target.files);
+    files.forEach(file => {
+      if (images.length < MEDIA_LIMIT) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImages(prev => [...prev, e.target.result]);
+          setImageFilters(prev => [...prev, 'none']);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      handleCreatePost();
+    }
+  };
 
 
   // User interaction handlers
@@ -521,9 +576,9 @@ const handleKeyPress = (e) => {
       }
 
       alert('You are now following this user');
-      
+
       // Update posts in current tab to reflect new following status
-      const updatedPosts = getCurrentTabData().posts.map(post => 
+      const updatedPosts = getCurrentTabData().posts.map(post =>
         post.userId === userId ? { ...post, isFollowing: true } : post
       );
       updateTabData(activeTab, { posts: updatedPosts });
@@ -538,7 +593,7 @@ const handleKeyPress = (e) => {
       alert('Please login to unfollow users');
       return;
     }
-  
+
     try {
       const response = await fetch(`${API_ENDPOINTS.SOCIAL}/followers/${userId}/unfollow`, {
         method: 'POST',
@@ -547,13 +602,13 @@ const handleKeyPress = (e) => {
           'Authorization': `Bearer ${token}`
         }
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to unfollow user');
       }
-  
+
       alert('You have unfollowed this user');
-      
+
       // Update posts in current tab to reflect new following status
       const updatedPosts = getCurrentTabData().posts.map(post => {
         if (post.user === userId) {
@@ -633,19 +688,6 @@ const handleKeyPress = (e) => {
     }
   }, [getCurrentTabData, fetchFeed, activeTab]);
 
-  // const handleCreatePost = () => {
-  //   if (!isAuthenticated) {
-  //     alert('Please login to create posts');
-  //     return;
-  //   }
-
-  //   if (text.trim()) {
-  //     router.push(`/create/createpost?initialText=${encodeURIComponent(text)}`);
-  //     setText('');
-  //   } else {
-  //     router.push('/create/createpost');
-  //   }
-  // };
 
   // Check follow status for menu options
   const checkFollowStatus = async (userId) => {
@@ -688,7 +730,7 @@ const handleKeyPress = (e) => {
 
     try {
       // Determine if this is the user's own post
-      const isOwnPost = isAuthenticated && user && 
+      const isOwnPost = isAuthenticated && user &&
         selectedPost.user === user._id;
 
       // Check follow status if needed
@@ -728,7 +770,7 @@ const handleKeyPress = (e) => {
         }
         return true;
       });
-      
+
       console.log('Filtered options:', filtered.length);
       setFilteredOptions(filtered);
     } catch (error) {
@@ -746,7 +788,7 @@ const handleKeyPress = (e) => {
       alert('Please login to delete posts');
       return;
     }
-    
+
     if (confirm('Are you sure you want to delete this post?')) {
       try {
         const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}`, {
@@ -778,10 +820,10 @@ const handleKeyPress = (e) => {
   // Handle menu option selection
   const handleMenuOptionPress = (option) => {
     if (!selectedPost) return;
-    
+
     const userId = selectedPost?.user;
-    
-    switch(option.text) {
+
+    switch (option.text) {
       case 'Follow':
         if (isAuthenticated) {
           handleFollowUser(userId);
@@ -810,7 +852,7 @@ const handleKeyPress = (e) => {
         break;
       default:
     }
-    
+
     setModalVisible(false);
   };
 
@@ -821,16 +863,15 @@ const handleKeyPress = (e) => {
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
           const canAccess = !feedType.requiresAuth || isAuthenticated;
-          
+
           return (
             <button
               key={feedType.key}
               onClick={() => canAccess && handleTabChange(feedType.key)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
-                isActive 
-                  ? 'bg-sky-500 text-white' 
+              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${isActive
+                  ? 'bg-sky-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              } ${!canAccess ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${!canAccess ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!canAccess}
             >
               {feedType.title}
@@ -847,198 +888,167 @@ const handleKeyPress = (e) => {
 
   return (
     <div className=" max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
+      <Toaster position="top-right" />
       {/* Custom Header */}
       {/* <Navbar /> */}
 
       {/* Tab Bar */}
       {renderTabBar()}
-      <style jsx>{`
-        .blur-content {
-          filter: ${isInputFocused || images.length > 0 ? 'blur(4px)' : 'none'};
-          pointer-events: ${isInputFocused || images.length > 0 ? 'none' : 'auto'};
-          transition: filter 0.3s ease;
-          }
-          .post-composer {
-            position: relative;
-            z-index: 10;
-            }
-            .char-counter-bottom {
-              width: 40px;
-              height: 40px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              }
-              .char-counter-inner {
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                background: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                }
-                .char-counter-text {
-                  font-size: 12px;
-                  font-weight: 500;
-                  }
-                  .char-counter-text.over-limit {
-                    color: #FF0000;
-        }
-        .char-counter-text.approaching-limit {
-          color: #FF9F1C;
-          }
-          .char-counter-text.normal {
-            color: #1B9AAA;
-            }
-            .image-preview-container {
-              overflow-x: auto;
-              scrollbar-width: thin;
-              scrollbar-color: #d1d5db transparent;
-              }
-              `}</style>
 
-{!isAuthenticated ? (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
-            <button
-              onClick={() => router.push('/login')}
-              className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-            >
-              Log In
-            </button>
-          </div>
+         {!isAuthenticated ? (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
+          <button
+            onClick={() => router.push('/login')}
+            className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+          >
+            Log In
+          </button>
         </div>
-      ) : (
-        <div className="max-w-2xl mx-auto">
-          <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 post-composer">
-             
-            <div className="flex items-center mb-2 space-x-3">
-              <Image
-                src={userInfo?.profilePicture || '/api/placeholder/40/40'}
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full "
-              />
-               <span className=" text-gray-700">@{user.username}</span>
-              {/* <span className="font-semibold text-gray-700">@{userInfo?.username || 'Loading...'}</span> */}
-            </div>
+      </div>
+    ) : (
+      <div className="max-w-2xl mx-auto">
+        <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 relative z-10">
+          <div className="flex items-center mb-2 space-x-3">
+            <Image
+              src={userInfo?.profilePicture || '/api/placeholder/40/40'}
+              alt="Profile"
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+            <span className="text-gray-700">@{user.username}</span>
+          </div>
 
-            <div className="flex items-start space-x-3">
-              <textarea
-                className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="What's on your mind?"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onFocus={() => setIsInputFocused(true)}
-                onBlur={() => setIsInputFocused(text.trim().length > 0)}
-                onKeyDown={handleKeyPress}
-                rows={isInputFocused ? 5 : 2}
-                style={{ transition: 'all 0.3s ease' }}
-              />
-              <div>
-                <button
-                  onClick={handleMediaButtonClick}
-                  disabled={images.length >= MEDIA_LIMIT}
-                  className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
-                    images.length >= MEDIA_LIMIT ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  <PhotoIcon className="w-5 h-5 text-gray-600" />
-                </button>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  ref={fileInputRef}
-                  className="hidden"
-                />
-              </div>
-            </div>
+          <div className="flex items-start space-x-3">
+      
 
-            {images.length > 0 && (
-              <div className="mt-2 flex overflow-x-auto space-x-3 image-preview-container">
-                {images.map((img, index) => (
-                  <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden">
-                    <Image
-                      src={img}
-                      alt="Uploaded"
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 object-cover"
-                    />
-                    <button
-                      onClick={() => {
-                        setImages(prev => prev.filter((_, i) => i !== index));
-                        setImageFilters(prev => prev.filter((_, i) => i !== index));
-                      }}
-                      className="absolute top-1 right-1 bg-black/50 rounded-full p-1"
-                    >
-                      <XMarkIcon className="w-4 h-4 text-white" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between mt-2">
-              <div
-                className="char-counter-bottom"
-                style={{
-                  background: `linear-gradient(135deg, ${gradientColors.join(', ')})`
-                }}
-              >
-                <div className="char-counter-inner">
-                  <span
-                    className={`char-counter-text ${
-                      isOverLimit ? 'over-limit' :
-                      isApproachingLimit ? 'approaching-limit' :
-                      'normal'
-                    }`}
-                  >
-                    {MAX_CHAR_LIMIT - charCount}
-                  </span>
-                </div>
-              </div>
+            <textarea
+              className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              placeholder="What's on your mind?"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(text.trim().length > 0)}
+              onKeyDown={handleKeyPress}
+              rows={isInputFocused ? 5 : 2}
+            />
+            <div>
               <button
-                onClick={handleCreatePost}
-                disabled={!text.trim() && images.length === 0 || isOverLimit}
-                className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                onClick={handleMediaButtonClick}
+                disabled={images.length >= MEDIA_LIMIT}
+                className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
+                  images.length >= MEDIA_LIMIT ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14" />
-                  <path d="M12 5l7 7-7 7" />
-                </svg>
+                <PhotoIcon className="w-5 h-5 text-gray-600" />
               </button>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                ref={fileInputRef}
+                className="hidden"
+              />
             </div>
           </div>
 
-          {/* <div className="blur-content">
-            <div className="m-4 p-4 text-center text-gray-600">
-              No posts to display. Start sharing your thoughts!
+          {images.length > 0 && (
+            <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-thin scrollbar-thumb-gray-300">
+              {images.map((img, index) => (
+                <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden">
+                  <Image
+                    src={img}
+                    alt="Uploaded"
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 object-cover"
+                  />
+                  <button
+                    onClick={() => {
+                      setImages((prev) => prev.filter((_, i) => i !== index));
+                      setImageFilters((prev) => prev.filter((_, i) => i !== index));
+                    }}
+                    className="absolute top-1 right-1 bg-black/50 rounded-full p-1"
+                  >
+                    <XMarkIcon className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              ))}
             </div>
-          </div> */}
-        </div>
-      )}
+          )}
+<div className="flex justify-between mt-2">
+  
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{
+              background: `linear-gradient(135deg, ${gradientColors.join(', ')})`
+            }}
+          >
+            <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
+              <span
+                className={`text-xs font-medium ${
+                  isOverLimit
+                    ? 'text-red-600'
+                    : isApproachingLimit
+                    ? 'text-yellow-500'
+                    : 'text-cyan-600'
+                }`}
+              >
+                {MAX_CHAR_LIMIT - charCount}
+              </span>
+            </div>
+          </div>
 
+          <button
+            onClick={handleCreatePost}
+            disabled={
+              (!text.trim() && images.length === 0) || isOverLimit
+            }
+            className="p-2 cursor-pointer flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            {/* <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg> */}
+            Post
+          </button>
+           </div>
+            {progress > 0 && progress < 100 && (
+  <div className="w-full mt-2">
+    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+      <div
+        className="h-2 bg-blue-500 transition-all duration-300"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+    <p className="text-sm text-gray-600 mt-1">{Math.floor(progress)}% uploading...</p>
+  </div>
+)}
+       
+      </div>
+      </div>
+    )}
 
-      <div 
-        className=" overflow-y-auto blur-content"
-        onScroll={handleScroll}
-      >
+    <div
+      className={`overflow-y-auto transition-all duration-300 ${
+        isInputFocused || images.length > 0
+          ? 'blur-sm pointer-events-none'
+          : 'pointer-events-auto'
+      }`}
+      onScroll={handleScroll}
+    >
         {/* Post composer - only show on home tab */}
         {/* {activeTab === 'home' && (
           // <div className="m-4 p-3 bg-white rounded-xl shadow-sm border border-gray-100">
@@ -1095,31 +1105,31 @@ const handleKeyPress = (e) => {
           <div>
             {currentTabData.posts.map((post, index) => (
               <PostCard
-                      key={post.id || index}
-                      post={post}
-                      handleLikePost={postHandlers.handleLikePost}
-                      handleUnlikePost={postHandlers.handleUnlikePost}
-                      handleCommentPost={postHandlers.handleCommentPost}
-                      handleAmplifyPost={postHandlers.handleAmplifyPost}
-                      handleBookmarkPost={postHandlers.handleBookmarkPost}
-                      handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                      setSelectedPost={setSelectedPost}
-                      setModalVisible={setModalVisible}
-                      username={user.username}
-                    />
+                key={post.id || index}
+                post={post}
+                handleLikePost={postHandlers.handleLikePost}
+                handleUnlikePost={postHandlers.handleUnlikePost}
+                handleCommentPost={postHandlers.handleCommentPost}
+                handleAmplifyPost={postHandlers.handleAmplifyPost}
+                handleBookmarkPost={postHandlers.handleBookmarkPost}
+                handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                setSelectedPost={setSelectedPost}
+                setModalVisible={setModalVisible}
+                username={user.username}
+              />
             ))}
           </div>
         ) : !currentTabData.loading ? (
-          <EmptyFeed 
-            isAuthenticated={isAuthenticated} 
+          <EmptyFeed
+            isAuthenticated={isAuthenticated}
             handleCreatePost={handleCreatePost}
             error={currentTabData.error || error}
             feedType={activeTab}
             onLogin={() => {
               // Make sure we're really logged out first
               if (!isAuthenticated) {
-                  router.push('/login');
-              }           
+                router.push('/login');
+              }
             }}
           />
         ) : null}
@@ -1162,7 +1172,7 @@ const handleKeyPress = (e) => {
         onClose={() => setModalVisible(false)}
         title="Post Options"
       >
-        
+
 
         <div className="p-4">
           <h3 className="text-lg font-bold text-gray-800 mb-2">
@@ -1190,11 +1200,10 @@ const handleKeyPress = (e) => {
               <button
                 key={index}
                 onClick={() => handleMenuOptionPress(option)}
-                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
-                  option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report'
+                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report'
                     ? 'hover:bg-red-50 text-red-600'
                     : 'hover:bg-gray-50 text-gray-700'
-                }`}
+                  }`}
               >
                 <option.icon className="w-5 h-5 mr-3" />
                 <span className="font-medium">{option.text}</span>
@@ -1220,18 +1229,18 @@ const handleKeyPress = (e) => {
         visible={isAmplifyModalVisible}
         onClose={() => setAmplifyModalVisible(false)}
         post={postToAmplify
-        
+
         }
-        
+
         title="Amplify Post"
         onSuccess={(postId) => {
           // Update amplify count in current posts
           const updatedPosts = posts.map(post => {
             if (post.id === postId) {
-              return { 
-                ...post, 
+              return {
+                ...post,
                 amplifyCount: post.amplifyCount + 1,
-                hasAmplified: true 
+                hasAmplified: true
               };
             }
             return post;
@@ -1239,7 +1248,7 @@ const handleKeyPress = (e) => {
           setPosts(updatedPosts);
         }}
       >
-       
+
       </AmplifyModal>
 
       {/* Report Modal */}
@@ -1250,7 +1259,7 @@ const handleKeyPress = (e) => {
         post={postToReport}
         onSuccess={handleReportSuccess}
       >
-        
+
       </ReportModal>
     </div>
   );

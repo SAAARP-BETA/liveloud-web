@@ -5,6 +5,7 @@ import { Camera, MapPin, Users, Smile, Image, X, Edit, Plus } from 'lucide-react
 import { useRouter } from 'next/navigation';
 // import { useAuth } from '@context/AuthContext';
 import { useAuth } from '../../context/AuthContext';
+import { Toaster, toast } from 'react-hot-toast';
 
 const FilteredImage = ({ src, filterType, className }) => {
   const filterStyles = {
@@ -266,7 +267,7 @@ const fetchTrendingTags = useCallback(async () => {
   //   };
     
   //   console.log('Posting:', postData);
-  //   alert('Post created successfully!');
+  //   alert('Post created successfully!');2
     
   //   // Reset form
   //   setContent('');
@@ -322,10 +323,9 @@ const uploadMedia = useCallback(async () => {
         })
       );
       // const uploadEndpoint = `${API_ENDPOINTS.MEDIA}`;
-      const uploadEndpoint = `${process.env.NEXT_PUBLIC_MEDIA_API_URL}/upload/post`;
+      const uploadEndpoint = `${process.env.NEXT_PUBLIC_MEDIA_API_URL}/post`;
 
       console.log("Upload endpoint:", uploadEndpoint);
-      
       console.log('Uploading to:', uploadEndpoint);
       console.log('Images count:', base64Images.length);
       console.log('Metadata count:', mediaMetadata.length);
@@ -374,108 +374,109 @@ const uploadMedia = useCallback(async () => {
   console.log('Token being used:', token);
 
 const handleSubmit = useCallback(async () => {
-    if (!isAuthenticated) {
-      window.alert('Login Required: Please login to create posts');
-      return;
-    }
+  if (!isAuthenticated) {
+    toast.error('Login Required: Please login to create posts');
+    return;
+  }
 
-    if (!content.trim() && images.length === 0) {
-      window.alert('Empty Post: Please add some text or images to your post');
-      return;
-    }
+  if (!content.trim() && images.length === 0) {
+    toast.error('Empty Post: Please add some text or images to your post');
+    return;
+  }
 
-    if (content.length > MAX_CHAR_LIMIT) {
-      window.alert(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`);
-      return;
-    }
+  if (content.length > MAX_CHAR_LIMIT) {
+    toast.error(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`);
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
+ try {
+  const extractedTags = tags.filter(tag => tag.trim() !== '');
+  let mediaIds = [];
+  let mediaUrls = [];
+
+  if (images.length > 0) {
     try {
-      const extractedTags = tags.filter(tag => tag.trim() !== '');
+      const uploadResults = await uploadMedia();
 
-      let mediaUrls = [];
-      let mediaIds = [];
-
-      if (images.length > 0) {
-        try {
-         
-          const uploadResults = await uploadMedia();
-          mediaUrls = uploadResults.urls;
-          mediaIds = uploadResults.metadata.map(item => item.publicId);
-          setImageMetadata(uploadResults.metadata);
-        } catch (error) {
-          window.alert(`Upload Error: ${error.message}`);
-          setLoading(false);
-          return;
-        }
+      if (
+        !uploadResults ||
+        !uploadResults.metadata ||
+        !uploadResults.urls ||
+        uploadResults.urls.length === 0
+      ) {
+        throw new Error('Invalid upload response');
       }
 
-      const postData = {
-        content: content.trim(),
-        media: mediaUrls,
-        mediaIds: mediaIds,
-        tags: extractedTags,
-        metadata: imageMetadata,
-      };
-
-      if (location) {
-        postData.location = {
-          coordinates: [
-            location.coords.longitude,
-            location.coords.latitude,
-          ],
-          name: locationName,
-        };
-      }
-
-      if (taggedPeople.length > 0) {
-        postData.taggedUsers = taggedPeople.map(person => person.id);
-      }
-
-      if (selectedFeeling) {
-        postData.feeling = selectedFeeling.name;
-      }
-
-      const response = await fetch(`${API_ENDPOINTS.CREATE_POST}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-
-        body: JSON.stringify(postData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to create post');
-      }
-
-      window.alert('Post Created!\nYour post was published successfully.');
-      router.push('/home');
-
+      mediaIds = uploadResults.metadata.map(item => item.publicId);
+      mediaUrls = uploadResults.urls;
     } catch (error) {
-      console.error('Error creating post:', error);
-      window.alert(`Post Error: Failed to create your post: ${error.message}`);
-    } finally {
+      toast.error(`Upload Error: ${error.message}`);
       setLoading(false);
+      return;
     }
-  }, [
-    isAuthenticated,
-    content,
-    images,
-    tags,
-    location,
-    locationName,
-    taggedPeople,
-    selectedFeeling,
-    token,
-    uploadMedia,
-    setImageMetadata,
-    imageMetadata,
-    // navigate
-  ]);
+  }
+
+  const postData = {
+    content: content.trim(),
+    media: mediaUrls,         // ✅ required if posting image-only
+    mediaIds: mediaIds,       // ✅ keep if backend uses publicIds
+    tags: extractedTags,
+  };
+
+  if (location) {
+    postData.location = {
+      coordinates: [location.coords.longitude, location.coords.latitude],
+      name: locationName,
+    };
+  }
+
+  if (taggedPeople.length > 0) {
+    postData.taggedUsers = taggedPeople.map(person => person.id);
+  }
+
+  if (selectedFeeling) {
+    postData.feeling = selectedFeeling.name;
+  }
+
+  const response = await fetch(`${API_ENDPOINTS.CREATE_POST}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(postData),
+  });
+
+  if (!response.ok) {
+    console.log('Server response error:', await response.text());
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to create post');
+  }
+
+  toast.success('Post Created!\nYour post was published successfully.');
+  router.push('/home');
+} catch (error) {
+  console.error('Error creating post:', error);
+  toast.error(`Post Error: Failed to create your post: ${error.message}`);
+} finally {
+  setLoading(false);
+}
+
+}, [
+  isAuthenticated,
+  content,
+  images,
+  tags,
+  location,
+  locationName,
+  taggedPeople,
+  selectedFeeling,
+  token,
+  uploadMedia,
+]);
+
 
   if(loading){
      return (
@@ -491,6 +492,7 @@ const handleSubmit = useCallback(async () => {
   return (
 
     <div className="min-h-screen bg-gray-50 p-2">
+     <Toaster position="top-right" />
      
       {/* Header */}
 
