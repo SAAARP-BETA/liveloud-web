@@ -5,7 +5,7 @@ import { API_ENDPOINTS } from '../../app/utils/config';
 // const API_URL = "http://192.168.1.13:3002/api/";
 
 
-const CustomModal = ({ visible, onClose, post, token, onSuccess }) => {
+const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
@@ -134,7 +134,7 @@ const CustomModal = ({ visible, onClose, post, token, onSuccess }) => {
         setReplyTo(null);
       } else {
         // Regular comment
-        const response = await fetch(`${API_ENDPOINTS.SOCIAL}posts/${post.id}/comment`, {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -176,7 +176,7 @@ const CustomModal = ({ visible, onClose, post, token, onSuccess }) => {
     }
 
     try {
-      const response = await fetch(`${API_URL}posts/${post.id}/comment/${commentId}/like`, {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${commentId}/like`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -212,7 +212,7 @@ const CustomModal = ({ visible, onClose, post, token, onSuccess }) => {
     }
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}posts/${post.id}/comment/${commentId}/unlike`, {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${commentId}/unlike`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -484,4 +484,4 @@ const CustomModal = ({ visible, onClose, post, token, onSuccess }) => {
   );
 };
 
-export default CustomModal;
+export default CommentModal;

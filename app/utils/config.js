@@ -69,35 +69,35 @@ export const deleteFromApi = async (endpoint, path, headers = {}) => {
 // -------------------------------
 // ✅ Search Service
 // -------------------------------
-export const searchService = {
-  async globalSearch(query, type = 'all', page = 1, limit = 10) {
-    const params = new URLSearchParams({
-      query,
-      type,
-      page: page.toString(),
-      limit: limit.toString()
-    });
+// export const searchService = {
+//   async globalSearch(query, type = 'all', page = 1, limit = 10) {
+//     const params = new URLSearchParams({
+//       query,
+//       type,
+//       page: page.toString(),
+//       limit: limit.toString()
+//     });
 
-    const response = await fetch(`${API_ENDPOINTS.SEARCH}/?${params}`);
+//     const response = await fetch(`${API_ENDPOINTS.SEARCH}/?${params}`);
     
-    if (!response.ok) {
-      throw new Error(`Search failed: ${response.status}`);
-    }
+//     if (!response.ok) {
+//       throw new Error(`Search failed: ${response.status}`);
+//     }
     
-    return response.json();
-  },
+//     return response.json();
+//   },
 
-  async getSuggestions(query) {
-    const params = new URLSearchParams({ query });
-    const response = await fetch(`${API_ENDPOINTS.SEARCH}/suggestions?${params}`);
+//   async getSuggestions(query) {
+//     const params = new URLSearchParams({ query });
+//     const response = await fetch(`${API_ENDPOINTS.SEARCH}/suggestions?${params}`);
     
-    if (!response.ok) {
-      throw new Error(`Suggestions failed: ${response.status}`);
-    }
+//     if (!response.ok) {
+//       throw new Error(`Suggestions failed: ${response.status}`);
+//     }
     
-    return response.json();
-  }
-};
+//     return response.json();
+//   }
+// };
 // -------------------------------
 // ✅ API Configuration
 // -------------------------------

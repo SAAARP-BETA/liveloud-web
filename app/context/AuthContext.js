@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     user: null,
     token:null, //solved issue in creating post (setting the token)
     isAuthenticated: false,
-    token: null, // Store token if needed
+    
     loading: true,
   });
 

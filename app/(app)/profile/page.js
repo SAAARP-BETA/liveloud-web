@@ -13,7 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 import { fonts } from "../../utils/fonts";
-import CustomModal from "../../../Components/ui/CustomModal";
+import CustomModal from "../../../Components/ui/Modal";
 import AmplifyModal from "../../../Components/ui/AmplifyModal";
 import CommentModal from "../../../Components/ui/CommentModal";
 import {

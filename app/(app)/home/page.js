@@ -27,6 +27,7 @@ import {
   Image as PhotoIcon,
   X as XMarkIcon,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
@@ -700,7 +701,7 @@ const handleKeyPress = (e) => {
 
           // Update post with follow status in current tab
           const updatedPosts = getCurrentTabData().posts.map(post => {
-            if (post.id === selectedPost.id) {
+            if (post.id === selectedPost._id) {
               return { ...post, isFollowing };
             }
             return post;
@@ -743,7 +744,7 @@ const handleKeyPress = (e) => {
 
   const handleDeletePost = async (postId) => {
     if (!isAuthenticated) {
-      alert('Please login to delete posts');
+      toast.error('Please login to delete posts');
       return;
     }
     
@@ -762,10 +763,10 @@ const handleKeyPress = (e) => {
 
         const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== postId);
         updateTabData(activeTab, { posts: updatedPosts });
-        alert('Post deleted successfully');
+        toast.success('Post deleted successfully');
       } catch (error) {
         console.error('Error deleting post:', error);
-        alert(`Failed to delete post: ${error.message}`);
+        toast.error(`Failed to delete post: ${error.message}`);
       }
     }
   };
@@ -1166,9 +1167,9 @@ const handleKeyPress = (e) => {
         
 
         <div className="p-4">
-          <h3 className="text-lg font-bold text-gray-800 mb-2">
+          {/* <h3 className="text-lg font-bold text-gray-800 mb-2">
             Post options
-          </h3>
+          </h3> */}
 
           {selectedPost && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
@@ -1212,6 +1213,7 @@ const handleKeyPress = (e) => {
         title="Add Comment"
         post={postToComment}
         onSuccess={handleCommentSuccess}
+        token={token}
       >
 
       </CommentModal>
@@ -1221,13 +1223,14 @@ const handleKeyPress = (e) => {
         visible={isAmplifyModalVisible}
         onClose={() => setAmplifyModalVisible(false)}
         post={postToAmplify
-        
         }
+        token={token}
         
         title="Amplify Post"
         onSuccess={(postId) => {
           // Update amplify count in current posts
-          const updatedPosts = posts.map(post => {
+          const currentPosts = getCurrentTabData().posts;
+          const updatedPosts = currentPosts.map(post => {
             if (post.id === postId) {
               return { 
                 ...post, 
@@ -1237,7 +1240,7 @@ const handleKeyPress = (e) => {
             }
             return post;
           });
-          setPosts(updatedPosts);
+          updateTabData(activeTab, { posts: updatedPosts });
         }}
       >
        
@@ -1250,6 +1253,7 @@ const handleKeyPress = (e) => {
         title="Report Post"
         post={postToReport}
         onSuccess={handleReportSuccess}
+        token={token}
       >
         
       </ReportModal>
