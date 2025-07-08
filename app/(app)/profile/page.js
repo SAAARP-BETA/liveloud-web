@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
-import { fonts } from "../../utils/fonts";
+// import { fonts } from "../../utils/fonts";
 import CustomModal from "../../../Components/ui/Modal";
 import AmplifyModal from "../../../Components/ui/AmplifyModal";
 import CommentModal from "../../../Components/ui/CommentModal";
@@ -50,7 +50,7 @@ const PROFILE_IMAGE_MIN_SIZE = 40;
 const SCROLL_SENSITIVITY = 0.5;
 
 // Points Display Component (unchanged)
-const PointsDisplay = ({ points, loading, fonts }) => {
+const PointsDisplay = ({ points, loading }) => {
   const router = useRouter();
 
   if (loading || !points) {
@@ -1101,7 +1101,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   <PointsDisplay
                     points={userPoints}
                     loading={pointsLoading}
-                    fonts={fonts}
+                    
                   />
                   <StreakDisplay
                     consecutiveDays={userPoints.consecutiveLoginDays}

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "../../../context/AuthContext";
-import { fonts } from "../../../utils/fonts";
+// import { fonts } from "../../../utils/fonts";
 import { API_ENDPOINTS } from "../../../utils/config";
 import { motion } from 'framer-motion';
 
@@ -204,10 +204,10 @@ const EditPage = () => {
         updateData.dob = profileData.dob.toISOString();
       }
 
-      console.log("Sending PUT request to:", `${API_ENDPOINTS.USER}/profiles`);
+      console.log("Sending PUT request to:", `${API_ENDPOINTS.USER}/profiles/profile`);
       console.log("Request body:", JSON.stringify(updateData, null, 2));
 
-      const response = await fetch(`${API_ENDPOINTS.USER}/profiles`, {
+      const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -292,15 +292,14 @@ const EditPage = () => {
   const handleCustomBottomSheet = () => {
     if (!isBottomSheetVisible) return null;
     return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-10">
-        <div className="bg-white rounded-t-2xl p-4 w-full max-w-2xl max-h-[70vh] overflow-y-auto transform transition-transform duration-300 ease-in-out">
+      <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-4 w-full max-w-2xl max-h-[70vh] overflow-y-auto transform transition-transform duration-300 ease-in-out">
           <div className="flex flex-col items-center mb-4">
             <div className="w-10 h-1 bg-gray-300 rounded mb-3" />
             <div className="flex justify-between items-center w-full">
               <h2
                 className="text-xl font-bold text-gray-800 flex-1 text-center"
-                style={{ fontFamily: fonts.Bold }}
-              >
+               >
                 {imageActionType === "profile"
                   ? "Change Profile Picture"
                   : "Change Cover Picture"}
@@ -324,7 +323,7 @@ const EditPage = () => {
             <Camera className="text-blue-700 w-6 h-6" />
             <span
               className="ml-3 text-blue-700 font-medium text-base"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Choose from Gallery
             </span>
@@ -340,10 +339,10 @@ const EditPage = () => {
                 setIsBottomSheetVisible(false);
               }}
             >
-              <X className="text-red-500 w-6 h-6" />
+              <X className="text-red-500 w-6 h-6 cursor-pointer" />
               <span
                 className="ml-3 text-red-500 font-medium text-base"
-                style={{ fontFamily: fonts.Medium }}
+              
               >
                 Remove Photo
               </span>
@@ -355,8 +354,8 @@ const EditPage = () => {
             onClick={() => setIsBottomSheetVisible(false)}
           >
             <span
-              className="text-gray-700 font-medium text-base"
-              style={{ fontFamily: fonts.Medium }}
+              className="text-gray-700 font-medium text-base cursor-pointer"
+              
             >
               Cancel
             </span>
@@ -370,7 +369,7 @@ const EditPage = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <p className="mt-3 text-gray-600" style={{ fontFamily: fonts.Medium }}>
+        <p className="mt-3 text-gray-600">
           Loading profile...
         </p>
       </div>
@@ -380,7 +379,7 @@ const EditPage = () => {
   if (!profileData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-        <p className="mt-3 text-gray-600" style={{ fontFamily: fonts.Medium }}>
+        <p className="mt-3 text-gray-600" >
           No profile data found
         </p>
         <button
@@ -400,7 +399,7 @@ const EditPage = () => {
 
           <h1
             className="text-lg text-gray-900"
-            style={{ fontFamily: fonts.Bold }}
+           
           >
             Edit Profile
           </h1>
@@ -415,7 +414,7 @@ const EditPage = () => {
             ) : (
               <span
                 className="text-white text-sm"
-                style={{ fontFamily: fonts.Medium }}
+                
               >
                 Save
               </span>
@@ -486,7 +485,7 @@ const EditPage = () => {
               <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
                 <span
                   className="text-3xl text-gray-400"
-                  style={{ fontFamily: fonts.Bold }}
+                 
                 >
                   {profileData.fullname
                     ? profileData.fullname.substring(0, 2).toUpperCase()
@@ -495,7 +494,7 @@ const EditPage = () => {
               </div>
             )}
             <button
-              className="absolute right-0 bottom-0 bg-sky-500 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
+              className="absolute right-8 bottom-8 bg-sky-500 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
               onClick={() => openImagePicker("profile")}
             >
               <Camera className="text-white w-4 h-4" />
@@ -507,7 +506,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Username
             </label>
@@ -518,7 +517,7 @@ const EditPage = () => {
               <AtSign className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={profileData.username || ""}
                 onChange={(e) => handleInputChange("username", e.target.value)}
                 placeholder="Your username"
@@ -528,7 +527,7 @@ const EditPage = () => {
             {profileErrors.username && (
               <p
                 className="text-red-500 text-xs mt-1"
-                style={{ fontFamily: fonts.Regular }}
+               
               >
                 {profileErrors.username}
               </p>
@@ -538,7 +537,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Name
             </label>
@@ -549,7 +548,7 @@ const EditPage = () => {
               <User className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={profileData.fullname || ""}
                 onChange={(e) => handleInputChange("fullname", e.target.value)}
                 placeholder="Your full name"
@@ -558,7 +557,7 @@ const EditPage = () => {
             {profileErrors.fullname && (
               <p
                 className="text-red-500 text-xs mt-1"
-                style={{ fontFamily: fonts.Regular }}
+               
               >
                 {profileErrors.fullname}
               </p>
@@ -569,13 +568,13 @@ const EditPage = () => {
             <div className="flex flex-row justify-between items-center mb-1.5">
               <label
                 className="text-sm text-gray-500"
-                style={{ fontFamily: fonts.Medium }}
+                
               >
                 Bio
               </label>
               <span
                 className="text-xs text-gray-400"
-                style={{ fontFamily: fonts.Regular }}
+               
               >
                 {profileData.bio?.length || 0}/250
               </span>
@@ -583,7 +582,7 @@ const EditPage = () => {
             <textarea
               className={`bg-gray-50 border rounded-xl p-3 h-24 text-gray-800 w-full resize-none ${profileErrors.bio ? "border-red-500" : "border-gray-200"
                 }`}
-              style={{ fontFamily: fonts.Regular }}
+             
               value={profileData.bio || ""}
               onChange={(e) => handleInputChange("bio", e.target.value)}
               placeholder="Tell others about yourself"
@@ -592,7 +591,7 @@ const EditPage = () => {
             {profileErrors.bio && (
               <p
                 className="text-red-500 text-xs mt-1"
-                style={{ fontFamily: fonts.Regular }}
+               
               >
                 {profileErrors.bio}
               </p>
@@ -602,7 +601,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Location
             </label>
@@ -610,7 +609,7 @@ const EditPage = () => {
               <MapPin className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={profileData.location || ""}
                 onChange={(e) => handleInputChange("location", e.target.value)}
                 placeholder="Your location"
@@ -621,7 +620,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Website
             </label>
@@ -629,7 +628,7 @@ const EditPage = () => {
               <LinkIcon className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={profileData.website || ""}
                 onChange={(e) => handleInputChange("website", e.target.value)}
                 placeholder="Your website"
@@ -642,7 +641,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Date of Birth
             </label>
@@ -651,7 +650,7 @@ const EditPage = () => {
               <input
                 type="date"
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={
                   profileData.dob
                     ? profileData.dob.toISOString().split("T")[0]
@@ -668,7 +667,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Email
             </label>
@@ -676,7 +675,7 @@ const EditPage = () => {
               <Mail className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={profileData.email || ""}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 placeholder="Your email"
@@ -689,7 +688,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Phone
             </label>
@@ -697,7 +696,7 @@ const EditPage = () => {
               <Phone className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={profileData.phone || ""}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
                 placeholder="Your phone number"
@@ -709,7 +708,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Gender
             </label>
@@ -725,7 +724,7 @@ const EditPage = () => {
                       }`}
                     onClick={() => handleInputChange("gender", gender)}
                   >
-                    <span style={{ fontFamily: fonts.Medium }}>{gender}</span>
+                    <span >{gender}</span>
                   </button>
                 )
               )}
@@ -737,13 +736,13 @@ const EditPage = () => {
               <div className="flex-1 pr-4">
                 <p
                   className="text-gray-800 mb-1"
-                  style={{ fontFamily: fonts.Medium }}
+                  
                 >
                   Private Account
                 </p>
                 <p
                   className="text-gray-500 text-xs"
-                  style={{ fontFamily: fonts.Regular }}
+                 
                 >
                   When your account is private, only people you approve can see
                   your photos and videos
@@ -766,7 +765,7 @@ const EditPage = () => {
           <div className="mb-4">
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Occupation
             </label>
@@ -774,7 +773,7 @@ const EditPage = () => {
               <Briefcase className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={profileData.occupation || ""}
                 onChange={(e) =>
                   handleInputChange("occupation", e.target.value)
@@ -787,7 +786,7 @@ const EditPage = () => {
           <div className="mb-4">
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              style={{ fontFamily: fonts.Medium }}
+              
             >
               Education
             </label>
@@ -795,7 +794,7 @@ const EditPage = () => {
               <Book className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none"
-                style={{ fontFamily: fonts.Regular }}
+               
                 value={profileData.education || ""}
                 onChange={(e) => handleInputChange("education", e.target.value)}
                 placeholder="Your education"

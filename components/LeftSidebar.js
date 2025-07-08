@@ -9,6 +9,7 @@ import {
   PlusCircle,
   Wallet,
   User,
+  AlignEndHorizontal
 } from "lucide-react"
 
 const tabs = [
@@ -17,7 +18,10 @@ const tabs = [
   { name: "Create", href: "/create", icon: PlusCircle },
   { name: "Wallet", href: "/wallet", icon: Wallet },
   { name: "Profile", href: "/profile", icon: User },
-  { name: "leaderboard", href: "/leaderboard", icon: User },
+  {
+    name: "Leaderboard", href: "/leaderboard", icon: AlignEndHorizontal
+    
+   },
 ]
 
 export default function LeftSidebar() {
