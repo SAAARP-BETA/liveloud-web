@@ -132,6 +132,7 @@ const HomePage = () => {
   // Scroll handling
   const [scrollY, setScrollY] = useState(0);
 
+
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [images, setImages] = useState([]);
   const [imageFilters, setImageFilters] = useState([]);
@@ -912,7 +913,7 @@ const handleCreatePost = async () => {
         <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 relative z-10">
           <div className="flex items-center mb-2 space-x-3">
             <Image
-              src={userInfo?.profilePicture || '/api/placeholder/40/40'}
+              src={user?.profilePicture}
               alt="Profile"
               width={40}
               height={40}
