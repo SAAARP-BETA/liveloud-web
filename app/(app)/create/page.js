@@ -5,6 +5,7 @@ import { Camera, MapPin, Users, Smile, Image, X, Edit, Plus } from 'lucide-react
 import { useRouter } from 'next/navigation';
 // import { useAuth } from '@context/AuthContext';
 import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../utils/config';
 
 const FilteredImage = ({ src, filterType, className }) => {
   const filterStyles = {
@@ -97,22 +98,6 @@ const CreatePost = () => {
 // const UPLOAD_API_URL = `http://192.168.1.13:3003/api/upload`;
 
 
-const API_SOCIAL = process.env.NEXT_PUBLIC_SOCIAL_API_URL;
-const API_MEDIA = process.env.NEXT_PUBLIC_MEDIA_API_URL;
-
-const API_ENDPOINTS = {
-  CREATE_POST: `${API_SOCIAL}/posts`,
-  TRENDING_TAGS: `${API_SOCIAL}/posts/tags/trending`,
-  UPLOAD_MEDIA: `${API_MEDIA}/upload/post`,
-};
-
-// const API_ENDPOINTS = {
-//   SOCIAL: API_SOCIAL,
-//   UPLOAD: `${API_SOCIAL}/upload/post`, 
-//   MEDIA: `${API_MEDIA}/api/media`, 
-// };
-
-
   const samplePeople = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson'];
 
   const [trendyTags, setTrendyTags] = useState(['Systumm','Travel', 'Food', 'Photography', 'Nature', 'Fitness', 'Art']);
@@ -173,7 +158,7 @@ useEffect(() => {
 
 const fetchTrendingTags = useCallback(async () => {
     try {
-     const response = await fetch(API_ENDPOINTS.TRENDING_TAGS, {
+     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/tags/trending`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -322,7 +307,7 @@ const uploadMedia = useCallback(async () => {
         })
       );
       // const uploadEndpoint = `${API_ENDPOINTS.MEDIA}`;
-      const uploadEndpoint = `${process.env.NEXT_PUBLIC_MEDIA_API_URL}/upload/post`;
+      const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/post`;
 
       console.log("Upload endpoint:", uploadEndpoint);
       
@@ -437,7 +422,7 @@ const handleSubmit = useCallback(async () => {
         postData.feeling = selectedFeeling.name;
       }
 
-      const response = await fetch(`${API_ENDPOINTS.CREATE_POST}`, {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -37,7 +37,7 @@ import { useAuth } from "../../context/AuthContext";
 
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import PostCard from '@/Components/home/PostCard';
+import PostCard from '../../../Components/ui/PostCard';
 import EmptyFeed from '@/Components/home/EmptyFeed';
 import CommentModal from '@/Components/ui/CommentModal';
 import AmplifyModal from '@/Components/ui/AmplifyModal';
@@ -246,8 +246,6 @@ const HomePage = () => {
   const fetchFeed = useCallback(async (feedType, pageNum = 1, refresh = false) => {
     const currentTabData = tabData[feedType];
     const feedConfig = FEED_TYPES.find(feed => feed.key === feedType);
-    console.log('Feed config:', feedConfig);
-    console.log('API Base URL:', API_ENDPOINTS.SOCIAL); // Add this to see what endpoint is being used
     if (!feedConfig) return;
     
     // Validation checks
@@ -919,7 +917,7 @@ const handleKeyPress = (e) => {
              
             <div className="flex items-center mb-2 space-x-3">
               <Image
-                src={userInfo?.profilePicture || '/api/placeholder/40/40'}
+                src={user?.profilePicture}
                 alt="Profile"
                 width={40}
                 height={40}
@@ -1107,7 +1105,8 @@ const handleKeyPress = (e) => {
                       handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
                       setSelectedPost={setSelectedPost}
                       setModalVisible={setModalVisible}
-                      username={user.username}
+                      username={
+                        user}
                     />
             ))}
           </div>

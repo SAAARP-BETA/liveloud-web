@@ -1,5 +1,5 @@
 "use client";
-
+import defaultCover from '../../assets/Profilepic1.png';
 import React, {
   useState,
   useEffect,
@@ -152,7 +152,7 @@ const PointsDisplay = ({ points, loading, fonts }) => {
       <div className="flex justify-between">
         <div className="flex-1 text-center">
           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
-            <Edit2 size={20} className="text-blue-600" />
+            <Edit2 size={16} className="text-blue-600" />
           </div>
           <p className="text-base font-bold text-gray-900">
             {points.creatorPoints || 0}
@@ -678,7 +678,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           ...currentUser,
           name: currentUser.fullname || currentUser.username || "User",
           profilePicture: currentUser.profilePicture || "/Profilepic1.png",
-          coverPhoto: currentUser.coverPicture || "/Profilepic1.png",
+          coverPhoto: currentUser.coverPicture || defaultCover,
           bio: currentUser.bio || "",
           location: currentUser.location || "Not specified",
           website: currentUser.website || "Not specified",
@@ -956,92 +956,66 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-2xl flex flex-col items-center relative">
-        {/* Fixed Header */}
-        <div
-          ref={headerRef}
-          className="fixed top-0 z-10 w-full max-w-2xl mx-auto transition-all duration-300"
-          style={{ height: headerHeight }}
-        >
-          <Image
-            src={user.coverPhoto || "https://placehold.co/400"}
-            alt="Cover"
-            className="w-full h-full z-10 object-cover"
-            width={1200}
-            height={150}
-            priority
-          />
-          <div className="absolute top-3 left-0 p-3 right-0 px-4 flex bg-gray-100 items-center justify-between">
-            <Link
-              href="/"
-              className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center"
-            >
-              <ArrowLeft className="text-white text-2xl" />
-            </Link>
-            <div className="flex items-center">
-              <span className="text-white text-base font-semibold">
-                {user.username || "Profile"}
-              </span>
-              {user.isVerified && (
-                <Verified className="ml-1 text-blue-500 text-lg" />
-              )}
-            </div>
-            <button
-              onClick={() => setIsMoreModalVisible(true)}
-              className="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center"
-            >
-              <MoreHorizontal className="text-white text-2xl" />
-            </button>
-          </div>
-          <div
-            ref={resizeRef}
-            className="absolute bottom-0 left-[-10] right-0 h-2 bg-gray-300/50 cursor-ns-resize"
-            onMouseDown={startResizing}
-          ></div>
-        </div>
+       {/* Scrollable Content */}
+<div
+  className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
+  style={{ width: "100%" }}
+  onScroll={handleScroll}
+>
+  {/* Cover Image */}
+  <div className="w-full relative">
+    <Image
+      src={user?.coverPhoto || defaultCover}
+      alt="Cover"
+      className="w-full h-[150px] object-cover"
+      width={1200}
+      height={150}
+      priority
+    />
 
-        {/* Scrollable Content */}
-        <div
-          className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
-          style={{ paddingTop: headerHeight, width: "100%" }}
-          onScroll={handleScroll}
-        >
-          <motion.div
-            className="bg-white border-b border-gray-100 w-full"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+    {/* Profile Image */}
+    <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
+      <motion.div
+        className="border-4 border-white shadow-sm bg-white relative"
+        animate={{
+          height: profileImageSize,
+          width: profileImageSize,
+          borderRadius: profileImageSize / 2,
+        }}
+        transition={{ type: "spring", stiffness: 100 }}
+      >
+        <Image
+          src={user.profilePicture}
+          alt="Profile"
+          className="w-full h-full rounded-full object-cover"
+          width={PROFILE_IMAGE_MAX_SIZE}
+          height={PROFILE_IMAGE_MAX_SIZE}
+          priority
+        />
+        {isMyProfile && (
+          <Link
+            href="/profile/edit"
+            className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center"
           >
-            {/* Profile Image */}
-            <div className="flex justify-center mt-[-50px]">
-              {" "}
-              {/* Adjust negative margin to align with header */}
-              <motion.div
-                className="border-4 border-white shadow-sm bg-white relative"
-                animate={{
-                  height: profileImageSize,
-                  width: profileImageSize,
-                  borderRadius: profileImageSize / 2,
-                }}
-                transition={{ type: "spring", stiffness: 100 }}
-              >
-                <Image
-                  src={user.profilePicture}
-                  alt="Profile"
-                  className="w-full h-full rounded-full object-cover"
-                  width={PROFILE_IMAGE_MAX_SIZE}
-                  height={PROFILE_IMAGE_MAX_SIZE}
-                  priority
-                />
-                {isMyProfile && (
-                  <Link
-                    href="/edit"
-                    className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center"
-                  >
-                    <Edit2 className="text-blue-500 text-sm" />
-                  </Link>
-                )}
-              </motion.div>
-            </div>
+            <Edit2 className="text-blue-500 text-sm" />
+          </Link>
+        )}
+      </motion.div>
+    </div>
+  </div>
+
+  {/* Spacer to push content below profile image */}
+  <div className="h-12"></div>
+
+  {/* Profile Info */}
+  <motion.div
+    className="bg-white border-b border-gray-100 w-full"
+    initial={{ opacity: 0, y: 50 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    {/* Add remaining profile info here... */}
+
 
             {/* Profile Info */}
             <div className="mt-4 text-center px-4">
@@ -1192,7 +1166,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                       handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
                       setSelectedPost={setSelectedPost}
                       setModalVisible={setModalVisible}
-                      username={user.username}
                     />
                   ))
                 ) : (
