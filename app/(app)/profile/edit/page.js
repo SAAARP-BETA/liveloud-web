@@ -6,8 +6,9 @@ import Image from "next/image";
 import { useAuth } from "../../../context/AuthContext";
 import { fonts } from "../../../utils/fonts";
 import { API_ENDPOINTS } from "../../../utils/config";
+import { motion } from 'framer-motion';
+
 import {
-  ArrowLeft,
   Camera,
   AtSign,
   User,
@@ -20,7 +21,8 @@ import {
   Book,
   X,
 } from "lucide-react";
-
+import defaultCover from '../../../assets/Profilepic1.png';
+const PROFILE_IMAGE_MAX_SIZE = 120;
 // Utility to convert file to base64
 const fileToBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -329,7 +331,7 @@ const EditPage = () => {
           </label>
 
           {(imageActionType === "profile" && profileImage) ||
-          (imageActionType === "cover" && coverImage) ? (
+            (imageActionType === "cover" && coverImage) ? (
             <button
               className="flex flex-row items-center py-3 px-4 mb-3 bg-red-50 rounded-xl w-full text-left hover:bg-red-100 transition-colors"
               onClick={() => {
@@ -395,9 +397,7 @@ const EditPage = () => {
     <div className="min-h-screen bg-gray-50 flex justify-center">
       <div className="w-full max-w-2xl bg-white">
         <header className="flex flex-row items-center justify-between py-3 px-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-          <button onClick={() => router.back()} className="p-2">
-            <ArrowLeft className="text-gray-700 w-6 h-6" />
-          </button>
+
           <h1
             className="text-lg text-gray-900"
             style={{ fontFamily: fonts.Bold }}
@@ -405,9 +405,8 @@ const EditPage = () => {
             Edit Profile
           </h1>
           <button
-            className={`py-2 px-4 bg-sky-500 rounded-full hover:bg-sky-600 transition-colors ${
-              submitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={`py-2 px-4 bg-sky-500 rounded-full hover:bg-sky-600 transition-colors ${submitting ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             onClick={handleUpdateProfile}
             disabled={submitting}
           >
@@ -423,42 +422,45 @@ const EditPage = () => {
             )}
           </button>
         </header>
-
         <div className="relative w-full h-40">
-          {coverImage && typeof coverImage === "object" ? (
-            <Image
-              src={URL.createObjectURL(coverImage)}
-              alt="Cover"
-              className="w-full h-full object-cover"
-              width={800}
-              height={160}
-              onError={() => console.error("Failed to load cover image")}
-            />
-          ) : profileData.coverPicture ? (
-            <Image
-              src={profileData.coverPicture}
-              alt="Cover"
-              className="w-full h-full object-cover"
-              width={800}
-              height={160}
-              onError={() => console.error("Failed to load cover picture")}
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-blue-400 to-indigo-500" />
-          )}
-          <button
-            className="absolute right-4 bottom-4 bg-black bg-opacity-50 rounded-full flex flex-row items-center px-3 py-1.5 hover:bg-opacity-70 transition-colors"
-            onClick={() => openImagePicker("cover")}
-          >
-            <Camera className="text-white w-4 h-4" />
-            <span
-              className="text-white ml-1.5 text-xs"
-              style={{ fontFamily: fonts.Medium }}
-            >
-              Edit Cover
-            </span>
-          </button>
-        </div>
+  {coverImage && typeof coverImage === "object" ? (
+    <Image
+      src={URL.createObjectURL(coverImage)}
+      alt="Cover"
+      className="w-full h-full object-cover"
+      width={800}
+      height={160}
+      onError={() => console.error("Failed to load cover image")}
+    />
+  ) : profileData.coverPicture ? (
+    <Image
+      src={user?.coverPhoto || defaultCover}
+      alt="Cover"
+      className="w-full h-full object-cover"
+      width={800}
+      height={160}
+      onError={(e) => {
+        console.error("Failed to load cover picture");
+        e.currentTarget.src = defaultCover.src; // ✅ important fix here
+      }}
+      priority
+    />
+  ) : (
+    <Image
+      src={defaultCover}
+      alt="Default Cover"
+      className="w-full h-full object-cover"
+      width={800}
+      height={160}
+      priority
+    />
+  )}
+
+  
+</div>
+
+        
+
 
         <div className="flex justify-center -mt-12 mb-6">
           <div className="relative rounded-full border-4 border-white overflow-hidden">
@@ -510,9 +512,8 @@ const EditPage = () => {
               Username
             </label>
             <div
-              className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${
-                profileErrors.username ? "border-red-500" : "border-gray-200"
-              }`}
+              className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${profileErrors.username ? "border-red-500" : "border-gray-200"
+                }`}
             >
               <AtSign className="text-gray-400 w-5 h-5 ml-3" />
               <input
@@ -542,9 +543,8 @@ const EditPage = () => {
               Name
             </label>
             <div
-              className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${
-                profileErrors.fullname ? "border-red-500" : "border-gray-200"
-              }`}
+              className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${profileErrors.fullname ? "border-red-500" : "border-gray-200"
+                }`}
             >
               <User className="text-gray-400 w-5 h-5 ml-3" />
               <input
@@ -581,9 +581,8 @@ const EditPage = () => {
               </span>
             </div>
             <textarea
-              className={`bg-gray-50 border rounded-xl p-3 h-24 text-gray-800 w-full resize-none ${
-                profileErrors.bio ? "border-red-500" : "border-gray-200"
-              }`}
+              className={`bg-gray-50 border rounded-xl p-3 h-24 text-gray-800 w-full resize-none ${profileErrors.bio ? "border-red-500" : "border-gray-200"
+                }`}
               style={{ fontFamily: fonts.Regular }}
               value={profileData.bio || ""}
               onChange={(e) => handleInputChange("bio", e.target.value)}
@@ -720,11 +719,10 @@ const EditPage = () => {
                   <button
                     key={gender}
                     type="button"
-                    className={`px-4 py-2 rounded-full transition-colors ${
-                      profileData.gender === gender
+                    className={`px-4 py-2 rounded-full transition-colors ${profileData.gender === gender
                         ? "bg-sky-500 text-white"
                         : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
-                    }`}
+                      }`}
                     onClick={() => handleInputChange("gender", gender)}
                   >
                     <span style={{ fontFamily: fonts.Medium }}>{gender}</span>
