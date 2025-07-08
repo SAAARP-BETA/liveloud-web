@@ -916,7 +916,7 @@ const handleKeyPress = (e) => {
              
             <div className="flex items-center mb-2 space-x-3">
               <Image
-                src={userInfo?.profilePicture || '/api/placeholder/40/40'}
+                src={user?.profilePicture}
                 alt="Profile"
                 width={40}
                 height={40}
