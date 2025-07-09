@@ -59,7 +59,7 @@ const EditPage = () => {
   const loadUserProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_ENDPOINTS.USER}/user/profile/${user.username}`, {
+      const response = await fetch(`${API_ENDPOINTS.USER}/profile/${user.username}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -157,91 +157,107 @@ const EditPage = () => {
     }
   };
 
-  const handleUpdateProfile = async (event) => {
-    event.preventDefault();
+  const handleUpdateProfile = async () => {
+  try {
+    // Basic validation
+    const errors = {};
+    if (!profileData.username) errors.username = 'Username is required';
+    if (!profileData.fullname) errors.fullname = 'Name is required';
+    if (profileData.bio && profileData.bio.length > 250) errors.bio = 'Bio must be 250 characters or less';
 
-    try {
-      // Basic validation
-      const errors = {};
-      if (!profileData.username) errors.username = 'Username is required';
-      if (!profileData.fullname) errors.fullname = 'Name is required';
-      if (profileData.bio && profileData.bio.length > 250) errors.bio = 'Bio must be 250 characters or less';
-
-      if (Object.keys(errors).length > 0) {
-        setProfileErrors(errors);
-        return;
-      }
-
-      setSubmitting(true);
-
-      let updatedProfilePicture = profileData.profilePicture;
-      let updatedCoverPicture = profileData.coverPicture;
-
-      // Handle image uploads
-      if (profileImage && typeof profileImage === "object") {
-        updatedProfilePicture = await uploadImage(profileImage, "profile");
-        if (!updatedProfilePicture) return;
-      }
-      if (coverImage && typeof coverImage === "object") {
-        updatedCoverPicture = await uploadImage(coverImage, "cover");
-        if (!updatedCoverPicture) return;
-      }
-
-      const updateData = {
-  username: profileData.username || "",
-  email: profileData.email || "",
-  bio: profileData.bio || "",
-  location: profileData.location || "",
-  website: profileData.website || "",
-  fullname: profileData.fullname || "",
-  phone: profileData.phone || "",
-  gender: profileData.gender || "",
-  occupation: profileData.occupation || "",
-  education: profileData.education || "",
-  isPrivate: profileData.isPrivate || false,
-  interests: profileData.interests || [],
-  profilePicture: updatedProfilePicture,
-  coverPicture: updatedCoverPicture,
-};
-
-
-      if (profileData.dob) {
-        updateData.dob = profileData.dob.toISOString();
-      }
-
-      const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Server error" }));
-        throw new Error(errorData.message || `Failed to update profile: ${response.status}`);
-      }
-
-      const updatedUserData = await response.json();
-
-      setProfileData((prevData) => ({
-        ...prevData,
-        ...updatedUserData,
-        dob: updatedUserData.dob ? new Date(updatedUserData.dob) : prevData.dob,
-      }));
-      setProfileImage(updatedUserData.profilePicture || null);
-      setCoverImage(updatedUserData.coverPicture || null);
-
-      alert("Profile updated successfully");
-      router.back();
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Error: " + (error.message || "Failed to update profile"));
-    } finally {
-      setSubmitting(false);
+    if (Object.keys(errors).length > 0) {
+      setProfileErrors(errors);
+      return;
     }
-  };
+
+    setSubmitting(true);
+    // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Not available in web
+
+    // Prepare form data for image upload
+    const formData = new FormData();
+    Object.keys(profileData).forEach(key => {
+      if (key !== 'profilePicture' && key !== 'coverPhoto' && profileData[key] !== null) {
+        if (key === 'dob') {
+          formData.append(key, profileData[key].toISOString());
+        } else if (key === 'interests' && Array.isArray(profileData[key])) {
+          formData.append(key, JSON.stringify(profileData[key]));
+        } else {
+          formData.append(key, profileData[key]);
+        }
+      }
+    });
+
+    // Add profile image if changed
+    if (profileImage && profileImage !== profileData.profilePicture) {
+      try {
+        // For web, profileImage would be a File object or blob URL
+        if (profileImage instanceof File) {
+          console.log(`Adding profile picture: ${profileImage.name} (${profileImage.type})`);
+          formData.append('profilePicture', profileImage);
+        } else {
+          // Handle blob URL case
+          const response = await fetch(profileImage);
+          const blob = await response.blob();
+          const fileName = `profile.${blob.type.split('/')[1] || 'jpeg'}`;
+          console.log(`Adding profile picture: ${fileName} (${blob.type})`);
+          formData.append('profilePicture', blob, fileName);
+        }
+      } catch (error) {
+        console.error('Error preparing profile image:', error);
+        alert('Failed to prepare profile image for upload');
+      }
+    }
+    
+    // Add cover image if changed
+    if (coverImage && coverImage !== profileData.coverPhoto) {
+      try {
+        // For web, coverImage would be a File object or blob URL
+        if (coverImage instanceof File) {
+          console.log(`Adding cover photo: ${coverImage.name} (${coverImage.type})`);
+          formData.append('coverPhoto', coverImage);
+        } else {
+          // Handle blob URL case
+          const response = await fetch(coverImage);
+          const blob = await response.blob();
+          const fileName = `cover.${blob.type.split('/')[1] || 'jpeg'}`;
+          console.log(`Adding cover photo: ${fileName} (${blob.type})`);
+          formData.append('coverPhoto', blob, fileName);
+        }
+      } catch (error) {
+        console.error('Error preparing cover image:', error);
+        alert('Failed to prepare cover image for upload');
+      }
+    }
+    
+    // When sending the request, make sure you don't set any additional headers
+    // that would interfere with the content-type boundary
+    const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // Do NOT set 'Content-Type' here - Browser will set it 
+        // correctly with the boundary for multipart/form-data
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update profile');
+    }
+
+    const updatedUserData = await response.json();
+    // updateUserInfo(updatedUserData);
+
+    alert('Profile updated successfully');
+    router.back();
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    alert(error.message || 'Failed to update profile');
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const handleInputChange = (field, value) => {
     setProfileData((prev) => ({ ...prev, [field]: value }));
