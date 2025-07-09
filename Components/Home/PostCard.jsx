@@ -199,6 +199,45 @@ const PostCard = ({
             ))}
           </div>
         )}
+         {/* Image Carousel */}
+        {hasMedia && (
+          <div className="mb-3">
+            <div
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+              onScroll={handleImageScroll}
+            >
+              {post.media.map((item, index) => (
+                <button
+                  key={`media-${post.id}-${index}`}
+                  className="flex-shrink-0 w-full snap-start"
+                  onClick={handleImageClick}
+                ></button>
+              ))}
+            </div>
+            {post.media.length > 1 && (
+              <div className="flex justify-center mt-3">
+                {post.media.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      const container = containerRef.current?.querySelector(
+                        ".overflow-x-auto"
+                      );
+                      if (container) {
+                        container.scrollLeft = index * container.clientWidth;
+                        setCurrentImageIndex(index);
+                      }
+                    }}
+                    className={`w-2 h-2 rounded-full mx-1 transition-colors ${
+                      index === currentImageIndex ? "bg-sky-500" : "bg-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
 
         {/* Amplified Post */}
         {post.isAmplified && post.originalPost && (
@@ -238,45 +277,7 @@ const PostCard = ({
           </div>
         )}
 
-        {/* Image Carousel */}
-        {hasMedia && (
-          <div className="mb-3">
-            <div
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-              onScroll={handleImageScroll}
-            >
-              {post.media.map((item, index) => (
-                <button
-                  key={`media-${post.id}-${index}`}
-                  className="flex-shrink-0 w-full snap-start"
-                  onClick={handleImageClick}
-                ></button>
-              ))}
-            </div>
-            {post.media.length > 1 && (
-              <div className="flex justify-center mt-3">
-                {post.media.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      const container = containerRef.current?.querySelector(
-                        ".overflow-x-auto"
-                      );
-                      if (container) {
-                        container.scrollLeft = index * container.clientWidth;
-                        setCurrentImageIndex(index);
-                      }
-                    }}
-                    className={`w-2 h-2 rounded-full mx-1 transition-colors ${
-                      index === currentImageIndex ? "bg-sky-500" : "bg-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
+       
         {/* Stats */}
         <div className="flex items-center mb-2">
           <div className="flex items-center">

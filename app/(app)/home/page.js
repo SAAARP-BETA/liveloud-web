@@ -842,8 +842,12 @@ const handleKeyPress = (e) => {
 );
 
 
+
   const currentTabData = getCurrentTabData();
   const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
+  useEffect(() => {
+  console.log("Posts data:", currentTabData.posts);
+}, [currentTabData.posts]); // Dependency on posts data
 
   return (
     <div className=" max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
@@ -1089,42 +1093,41 @@ const handleKeyPress = (e) => {
             </p>
           </div>
         )}
+        
 
         {/* Posts list */}
-        {currentTabData.posts.length > 0 ? (
-          <div>
-            {currentTabData.posts.map((post, index) => (
-              <PostCard
-                      key={post.id || index}
-                      post={post}
-                      handleLikePost={postHandlers.handleLikePost}
-                      handleUnlikePost={postHandlers.handleUnlikePost}
-                      handleCommentPost={postHandlers.handleCommentPost}
-                      handleAmplifyPost={postHandlers.handleAmplifyPost}
-                      handleBookmarkPost={postHandlers.handleBookmarkPost}
-                      handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                      setSelectedPost={setSelectedPost}
-                      setModalVisible={setModalVisible}
-                      username={
-                        user}
-                    />
-            ))}
-          </div>
-        ) : !currentTabData.loading ? (
-          <EmptyFeed 
-            isAuthenticated={isAuthenticated} 
-            handleCreatePost={handleCreatePost}
-            error={currentTabData.error || error}
-            feedType={activeTab}
-            onLogin={() => {
-              // Make sure we're really logged out first
-              if (!isAuthenticated) {
-                  router.push('/login');
-              }           
-            }}
-          />
-        ) : null}
-
+       {currentTabData.posts.length > 0 ? (
+  <div>
+    {console.log("Posts data:", currentTabData.posts)}
+    {currentTabData.posts.map((post, index) => (
+      <PostCard
+        key={post.id || index}
+        post={post}
+        handleLikePost={postHandlers.handleLikePost}
+        handleUnlikePost={postHandlers.handleUnlikePost}
+        handleCommentPost={postHandlers.handleCommentPost}
+        handleAmplifyPost={postHandlers.handleAmplifyPost}
+        handleBookmarkPost={postHandlers.handleBookmarkPost}
+        handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+        setSelectedPost={setSelectedPost}
+        setModalVisible={setModalVisible}
+        username={user} // Fixed syntax
+      />
+    ))}
+  </div>
+) : !currentTabData.loading ? (
+  <EmptyFeed
+    isAuthenticated={isAuthenticated}
+    handleCreatePost={handleCreatePost}
+    error={currentTabData.error || error}
+    feedType={activeTab}
+    onLogin={() => {
+      if (!isAuthenticated) {
+        router.push("/login");
+      }
+    }}
+  />
+) : null}
         {/* Loading indicator */}
         {currentTabData.loading && !refreshing && (
           <div className="py-8 flex justify-center">

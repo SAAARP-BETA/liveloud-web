@@ -1,11 +1,18 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
+import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, MessageCircle, Repeat, Bookmark, Heart, CheckCircle } from 'lucide-react';
-import { useAuth } from '../../app/context/AuthContext';
-import FilteredImage from '../common/FilteredImage';
+import {
+  MoreHorizontal,
+  MessageCircle,
+  Repeat,
+  Bookmark,
+  Heart,
+  CheckCircle,
+} from "lucide-react";
+import { useAuth } from "../../app/context/AuthContext";
+import FilteredImage from "../common/FilteredImage";
 
 const PostCard = ({
   post,
@@ -17,7 +24,7 @@ const PostCard = ({
   handleUnbookmarkPost,
   setSelectedPost,
   setModalVisible,
-  username
+  username,
 }) => {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -27,7 +34,8 @@ const PostCard = ({
 
   useEffect(() => {
     setIsVisible(true);
-  }, []);
+    console.log("Post media metadata:", post.mediaMetadata); // Debug metadata
+  }, [post]);
 
   // Check if post is valid
   if (!post || !post.id) {
@@ -36,14 +44,28 @@ const PostCard = ({
   }
 
   // Check if the post has been liked by the user
-  const isLiked = isAuthenticated && user && Array.isArray(post.likes) && post.likes.includes(user._id);
-  const isDisliked = isAuthenticated && user && Array.isArray(post.dislikes) && post.dislikes.includes(user._id);
-  const isBookmarked = isAuthenticated && user && Array.isArray(post.bookmarks) && post.bookmarks.includes(user._id);
+  const isLiked =
+    isAuthenticated &&
+    user &&
+    Array.isArray(post.likes) &&
+    post.likes.includes(user._id);
+  const isDisliked =
+    isAuthenticated &&
+    user &&
+    Array.isArray(post.dislikes) &&
+    post.dislikes.includes(user._id);
+  const isBookmarked =
+    isAuthenticated &&
+    user &&
+    Array.isArray(post.bookmarks) &&
+    post.bookmarks.includes(user._id);
 
   // Handle image scroll
   const handleImageScroll = (event) => {
     const scrollContainer = event.target;
-    const imageIndex = Math.round(scrollContainer.scrollLeft / scrollContainer.clientWidth);
+    const imageIndex = Math.round(
+      scrollContainer.scrollLeft / scrollContainer.clientWidth
+    );
     setCurrentImageIndex(imageIndex);
   };
 
@@ -53,13 +75,13 @@ const PostCard = ({
 
     // Find and highlight hashtags and mentions
     const contentWithTags = post.content.split(/(\s+)/).map((word, i) => {
-      if (word.startsWith('#')) {
+      if (word.startsWith("#")) {
         return (
           <span key={i} className="font-medium text-sky-500">
             {word}
           </span>
         );
-      } else if (word.startsWith('@')) {
+      } else if (word.startsWith("@")) {
         return (
           <span key={i} className="font-medium text-sky-600">
             {word}
@@ -78,26 +100,27 @@ const PostCard = ({
 
   const getFilterBackgroundColor = (filterType) => {
     switch (filterType) {
-      case 'sepia':
-        return 'rgba(255,188,107,0.2)';
-      case 'vintage':
-        return 'rgba(255,235,205,0.2)';
-      case 'cool':
-        return 'rgba(173,216,230,0.1)';
-      case 'warm':
-        return 'rgba(255,160,122,0.1)';
+      case "sepia":
+        return "rgba(255,188,107,0.2)";
+      case "vintage":
+        return "rgba(255,235,205,0.2)";
+      case "cool":
+        return "rgba(173,216,230,0.1)";
+      case "warm":
+        return "rgba(255,160,122,0.1)";
       default:
-        return 'transparent';
+        return "transparent";
     }
   };
 
   // Determine if we should render media
   const hasMedia = post.media && post.media.length > 0;
-  const hasSingleImage = post.imageUrl || (hasMedia && post.media.length === 1);
+  const hasSingleImage =
+    post.imageUrl || (hasMedia && post.media.length === 1);
 
   const handleProfileClick = () => {
     if (post.user === user._id) {
-      router.push('/profile'); // own profile
+      router.push("/profile"); // own profile
     } else {
       router.push(`/user/${post.username}`); // someone else's profile
     }
@@ -105,23 +128,22 @@ const PostCard = ({
 
   const handleImageClick = () => {
     router.push({
-      pathname: '/media-viewer',
-      query: { postId: post.id, initialIndex: currentImageIndex }
+      pathname: "/media-viewer",
+      query: { postId: post.id, initialIndex: currentImageIndex },
     });
   };
 
   const handleCommentsClick = () => {
     router.push({
-      pathname: '/post-detail',
-      query: { postId: post.id }
+      pathname: "/post-detail",
+      query: { postId: post.id },
     });
   };
 
   return (
     <div
-      className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden -z-[15] shadow-sm border border-gray-100 transition-all duration-300 ${
-        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-      }`}
+      className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        }`}
       ref={containerRef}
     >
       {/* Post header */}
@@ -135,7 +157,7 @@ const PostCard = ({
               src={
                 isAuthenticated && post.profilePic?.trim()
                   ? post.profilePic
-                  : '/default-profile.png'
+                  : "/default-profile.png"
               }
               alt="Profile"
               fill
@@ -194,7 +216,9 @@ const PostCard = ({
             <div className="flex items-center mb-2">
               <span className="font-medium text-xs text-gray-500">
                 Amplified from
-                <span className="text-sky-500"> @{post.originalPost.user?.username || 'user'}</span>
+                <span className="text-sky-500">
+                  @{post.originalPost.user?.username || "user"}
+                </span>
               </span>
             </div>
 
@@ -218,6 +242,12 @@ const PostCard = ({
                     alt="Original post media"
                     fill
                     className="object-cover"
+                    onLoad={() =>
+                      console.log("Amplified image loaded:", post.originalPost.media[0])
+                    }
+                    onError={() =>
+                      console.error("Amplified image error:", post.originalPost.media[0])
+                    }
                   />
                 </div>
               )}
@@ -231,7 +261,7 @@ const PostCard = ({
             <div
               className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
               onScroll={handleImageScroll}
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {post.media.map((item, index) => (
                 <button
@@ -239,13 +269,15 @@ const PostCard = ({
                   className="flex-shrink-0 w-full snap-start"
                   onClick={handleImageClick}
                 >
-                  <div className="w-full h-80 rounded-lg overflow-hidden relative">
+                  <div
+                    className="w-full h-80 rounded-lg"
+                    style={{ position: "relative", minHeight: "320px" }}
+                  >
                     <FilteredImage
                       src={item}
                       alt={`Post media ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      filterType={post.mediaMetadata && post.mediaMetadata[index]?.filter}
+                      style={{ height: "320px" }}
+                      imageStyle="object-cover"
                     />
                   </div>
                 </button>
@@ -259,14 +291,14 @@ const PostCard = ({
                   <button
                     key={index}
                     onClick={() => {
-                      const container = containerRef.current?.querySelector('.overflow-x-auto');
+                      const container = containerRef.current?.querySelector(".overflow-x-auto");
                       if (container) {
                         container.scrollLeft = index * container.clientWidth;
                         setCurrentImageIndex(index);
                       }
                     }}
                     className={`w-2 h-2 rounded-full mx-1 transition-colors ${
-                      index === currentImageIndex ? 'bg-sky-500' : 'bg-gray-300'
+                      index === currentImageIndex ? "bg-sky-500" : "bg-gray-300"
                     }`}
                   />
                 ))}
@@ -306,14 +338,14 @@ const PostCard = ({
       <div className="flex items-center justify-around py-3 border-t border-gray-100">
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() => isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id)}
+          onClick={() => (isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id))}
         >
           <Heart
             size={18}
-            className={isLiked ? 'text-red-500 fill-current' : 'text-gray-600'}
+            className={isLiked ? "text-red-500 fill-current" : "text-gray-600"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${isLiked ? 'text-red-500' : 'text-gray-600'}`}
+            className={`ml-2 text-sm font-medium ${isLiked ? "text-red-500" : "text-gray-600"}`}
           >
             Like
           </span>
@@ -341,14 +373,22 @@ const PostCard = ({
 
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() => isBookmarked ? handleUnbookmarkPost(post.id) : handleBookmarkPost(post.id)}
+          onClick={() =>
+            isBookmarked
+              ? handleUnbookmarkPost(post.id)
+              : handleBookmarkPost(post.id)
+          }
         >
           <Bookmark
             size={18}
-            className={isBookmarked ? 'text-sky-500 fill-current' : 'text-gray-600'}
+            className={
+              isBookmarked ? "text-sky-500 fill-current" : "text-gray-600"
+            }
           />
           <span
-            className={`ml-2 text-sm font-medium ${isBookmarked ? 'text-sky-500' : 'text-gray-600'}`}
+            className={`ml-2 text-sm font-medium ${
+              isBookmarked ? "text-sky-500" : "text-gray-600"
+            }`}
           >
             Save
           </span>

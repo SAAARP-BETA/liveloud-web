@@ -507,7 +507,7 @@ const handleSubmit = useCallback(async () => {
         {/* User Info Header */}
 <div className="flex items-center px-4 pt-4">
   <img
-    src={user?.profilePic || './default-avatar.png'} // Replace with actual image path or user.profilePic
+    src={user?.profilePicture} 
     alt="User"
     className="w-10 h-10 bg-black rounded-full object-cover"
     />
