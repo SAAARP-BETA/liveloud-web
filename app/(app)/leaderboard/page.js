@@ -12,32 +12,35 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   return (
     <div className="bg-white border-b border-gray-100" style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12 }}>
       <div className="flex overflow-x-auto scrollbar-hide">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${
-              activeTab === tab.key ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-            }`}
-            onClick={() => onTabPress(tab.key)}
-            style={{
-              boxShadow: activeTab === tab.key ? '0 2px 4px rgba(14, 165, 233, 0.1)' : 'none',
-            }}
-          >
-            <div className="flex items-center">
-              <i className={`fas fa-${tab.icon} text-base mr-2`}></i>
-              <span
-              
-                className={activeTab === tab.key ? 'text-white' : 'text-gray-500'}
-              >
-                {tab.title}
-              </span>
-            </div>
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+
+          return (
+            <button
+              key={tab.key}
+              className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${
+                isActive ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              }`}
+              onClick={() => onTabPress(tab.key)}
+              style={{
+                boxShadow: isActive ? '0 2px 4px rgba(14, 165, 233, 0.1)' : 'none',
+              }}
+            >
+              <div className="flex items-center space-x-2">
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-black'}`} />
+                <span className={`${isActive ? 'text-white' : 'text-black'}`}>
+                  {tab.title}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 };
+
 
 // Fixed Leaderboard Item Component
 const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
