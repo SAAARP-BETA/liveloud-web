@@ -1,6 +1,6 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -9,7 +9,10 @@ import {
   PlusCircle,
   Wallet,
   User,
+  LogOut,
 } from "lucide-react"
+import { useAuth } from "../app/context/AuthContext" // Adjust path as needed
+import { API_ENDPOINTS } from "../app/utils/config" // Adjust path as needed
 
 const tabs = [
   { name: "Home", href: "/home", icon: Home },
@@ -22,6 +25,45 @@ const tabs = [
 
 export default function LeftSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { token, logout, isAuthenticated } = useAuth()
+
+  const handleLogout = async () => {
+    try {
+      // Show loading state or disable button here if needed
+      console.log("Logging out...")
+      
+      // Call logout API if user is authenticated and has a token
+      if (isAuthenticated && token) {
+        try {
+          await fetch(`${API_ENDPOINTS.AUTH}/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        } catch (apiError) {
+          console.error('Error during API logout:', apiError);
+          // Continue with local logout even if API fails
+        }
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      // Always log out locally regardless of API response
+      await logout();
+      
+      // Show success message (you can replace with your preferred notification method)
+      // For web, you might want to use a toast notification instead of alert
+      // if (typeof window !== 'undefined' && window.alert) {
+      //   window.alert('Logout Successful - You have been logged out.');
+      // }
+      
+      // Redirect to login page
+      router.replace('/(auth)/login');
+    }
+  }
 
   const TabButton = ({ tab }) => {
     const isActive = pathname === tab.href
@@ -130,6 +172,63 @@ export default function LeftSidebar() {
     )
   }
 
+  const LogoutButton = () => {
+    // Don't show logout button if user is not authenticated
+    if (!isAuthenticated) return null;
+    
+    return (
+      <>
+        {/* Mobile logout button */}
+        <div className="sm:hidden">
+          <button
+            onClick={handleLogout}
+            className="relative flex flex-col items-center justify-center py-2 px-3 min-w-0 flex-1"
+          >
+            <motion.div
+              className="relative z-10 flex items-center justify-center mb-1"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ rotate: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 20,
+              }}
+            >
+              <LogOut className="w-6 h-6 text-red-500 transition-colors duration-300" />
+            </motion.div>
+            <motion.span
+              className="text-xs font-medium relative z-10 text-red-500 transition-all duration-300"
+              animate={{ scale: 1, fontWeight: 500 }}
+              transition={{ duration: 0.2 }}
+            >
+              Logout
+            </motion.span>
+          </button>
+        </div>
+
+        {/* Desktop logout button */}
+        <div className="hidden sm:block">
+          <button
+            onClick={handleLogout}
+            className="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 text-red-600 hover:bg-red-50 w-full"
+          >
+            <motion.div
+              className="flex items-center justify-center"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <LogOut className="w-6 h-6 transition-colors duration-300 text-red-500 group-hover:text-red-600" />
+            </motion.div>
+            <span className="text-base transition-colors duration-200 group-hover:text-red-600">
+              Logout
+            </span>
+          </button>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       {/* Mobile Bottom Nav */}
@@ -158,6 +257,22 @@ export default function LeftSidebar() {
                 <TabButton tab={tab} />
               </motion.div>
             ))}
+            {/* Logout button for mobile - only show if authenticated */}
+            {isAuthenticated && (
+              <motion.div
+                className="flex-1"
+                initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  delay: tabs.length * 0.1,
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 25,
+                }}
+              >
+                <LogoutButton />
+              </motion.div>
+            )}
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white/30 to-transparent pointer-events-none" />
         </div>
@@ -170,7 +285,7 @@ export default function LeftSidebar() {
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <nav className="flex flex-col gap-4 mt-10">
+        <nav className="flex flex-col gap-4 mt-10 flex-1">
           {tabs.map((tab, index) => (
             <motion.div
               key={tab.name}
@@ -182,6 +297,18 @@ export default function LeftSidebar() {
             </motion.div>
           ))}
         </nav>
+        
+        {/* Logout button at the bottom of desktop sidebar - only show if authenticated */}
+        {isAuthenticated && (
+          <motion.div
+            className="mt-auto pt-4 border-t border-gray-200"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: (tabs.length + 1) * 0.1 }}
+          >
+            <LogoutButton />
+          </motion.div>
+        )}
       </motion.aside>
     </>
   )

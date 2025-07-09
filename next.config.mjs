@@ -2,17 +2,21 @@
 const nextConfig = {
   images: {
     domains: [
-      'res.cloudinary.com', 'via.placeholder.com',
+      'res.cloudinary.com',
+      'via.placeholder.com',
+      'placehold.co', // ✅ Added this
     ],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co', // ✅ Added this
+      },
     ],
   },
-}
-   
- 
+};
 
-export default nextConfig
+export default nextConfig;

@@ -103,6 +103,8 @@ const PostCard = ({
   // Determine if we should render media
   const hasMedia = post.media && post.media.length > 0;
   const hasSingleImage = post.imageUrl || (hasMedia && post.media.length === 1);
+  
+  
 
   const handleProfileClick = () => {
     if (post.user === user._id) {
@@ -140,6 +142,7 @@ const PostCard = ({
           onClick={handleProfileClick}
         >
           <div className="w-10 h-10 rounded-full mr-3 relative overflow-hidden">
+            {console.log("this is imaeg url", post.imageUrl)}
             <Image
               src={
                 isAuthenticated && post.profilePic?.trim()

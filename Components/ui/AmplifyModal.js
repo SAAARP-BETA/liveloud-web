@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import { X, Repeat, Edit, ArrowLeft } from 'lucide-react';
 
 // const API_URL = "http://192.168.1.13:3002/api/";
-import { API_ENDPOINTS } from '../../app/utils/config';
+import { API_ENDPOINTS } from '@/app/utils/config';
+import { useAuth } from '@/app/context/AuthContext';
 
 const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
   const [quoteContent, setQuoteContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState('options'); // 'options', 'quote'
+
 
   // Handle simple amplify (retweet)
   const handleAmplify = async () => {
@@ -17,7 +19,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
       onClose();
       return;
     }
-
+    
     try {
       setLoading(true);
       const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/amplify`, {

@@ -178,7 +178,7 @@ export default function LeaderboardPage() {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
       const response = await fetch(
-        `${API_ENDPOINTS.POINTS}/points/my-summary`,
+        `${API_ENDPOINTS.POINTS}/my-summary`,
         { headers }
       );
 
@@ -203,7 +203,7 @@ export default function LeaderboardPage() {
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       const response = await fetch(
-        `${API_ENDPOINTS.POINTS}/points/leaderboard?type=${activeTab}&page=${currentPage}&limit=20`,
+        `${API_ENDPOINTS.POINTS}/leaderboard?type=${activeTab}&page=${currentPage}&limit=20`,
         { headers }
       );
 

@@ -407,7 +407,7 @@ const HomePage = () => {
       formData.append('files', blob, `image-${index}.jpg`);
     });
 
-    const res = await fetch(`${API_ENDPOINTS.MEDIA}/upload/post`, {
+    const res = await fetch(`${API_ENDPOINTS.MEDIA}/post`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -917,8 +917,9 @@ const handleKeyPress = (e) => {
           <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 post-composer">
              
             <div className="flex items-center mb-2 space-x-3">
+              
               <Image
-                src={userInfo?.profilePicture || '/api/placeholder/40/40'}
+                src={user?.profilePicture || '/api/placeholder/40/40'}
                 alt="Profile"
                 width={40}
                 height={40}
@@ -1092,7 +1093,9 @@ const handleKeyPress = (e) => {
         )}
 
         {/* Posts list */}
+        {console.log("name", user.username)}
         {currentTabData.posts.length > 0 ? (
+          
           <div>
             {currentTabData.posts.map((post, index) => (
               <PostCard
@@ -1108,6 +1111,8 @@ const handleKeyPress = (e) => {
                       setModalVisible={setModalVisible}
                       username={user.username}
                     />
+                    
+                    
             ))}
           </div>
         ) : !currentTabData.loading ? (

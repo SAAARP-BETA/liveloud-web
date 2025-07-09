@@ -1,10 +1,7 @@
-"use client";
-
 import React, { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
-import { useRouter } from "next/navigation";
-import { MoreHorizontal, MessageCircle, Repeat, Bookmark, Heart, CheckCircle } from 'lucide-react';
-import { useAuth } from '../../app/context/AuthContext';
+import { useRouter } from 'next/router';
+import { MoreHorizontal, MessageCircle, Repeat, Bookmark, ThumbsUp, ThumbsDown, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import FilteredImage from '../common/FilteredImage';
 
 const PostCard = ({
@@ -17,16 +14,24 @@ const PostCard = ({
   handleUnbookmarkPost,
   setSelectedPost,
   setModalVisible,
-  username
+  username,
+  handleDislikePost,
+  handleUndislikePost
 }) => {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
-  const [isVisible, setIsVisible] = useState(false);
+  const [opacity, setOpacity] = useState(0);
+  const [scale, setScale] = useState(0.95);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    setIsVisible(true);
+    // Animate in
+    const timer = setTimeout(() => {
+      setOpacity(1);
+      setScale(1);
+    }, 50);
+    return () => clearTimeout(timer);
   }, []);
 
   // Check if post is valid
@@ -42,8 +47,10 @@ const PostCard = ({
 
   // Handle image scroll
   const handleImageScroll = (event) => {
-    const scrollContainer = event.target;
-    const imageIndex = Math.round(scrollContainer.scrollLeft / scrollContainer.clientWidth);
+    const container = event.target;
+    const scrollLeft = container.scrollLeft;
+    const imageWidth = container.offsetWidth;
+    const imageIndex = Math.round(scrollLeft / imageWidth);
     setCurrentImageIndex(imageIndex);
   };
 
@@ -55,13 +62,13 @@ const PostCard = ({
     const contentWithTags = post.content.split(/(\s+)/).map((word, i) => {
       if (word.startsWith('#')) {
         return (
-          <span key={i} className="font-medium text-sky-500">
+          <span key={i} className="text-sky-500 font-medium">
             {word}
           </span>
         );
       } else if (word.startsWith('@')) {
         return (
-          <span key={i} className="font-medium text-sky-600">
+          <span key={i} className="text-sky-600 font-medium">
             {word}
           </span>
         );
@@ -70,7 +77,7 @@ const PostCard = ({
     });
 
     return (
-      <p className="text-base text-gray-800 leading-6 mb-3 font-normal">
+      <p className="text-base text-gray-800 leading-6 mb-3">
         {contentWithTags}
       </p>
     );
@@ -95,76 +102,62 @@ const PostCard = ({
   const hasMedia = post.media && post.media.length > 0;
   const hasSingleImage = post.imageUrl || (hasMedia && post.media.length === 1);
 
-  const handleProfileClick = () => {
-    if (post.user === user._id) {
-      router.push('/profile'); // own profile
-    } else {
-      router.push(`/user/${post.username}`); // someone else's profile
-    }
-  };
-
-  const handleImageClick = () => {
-    router.push({
-      pathname: '/media-viewer',
-      query: { postId: post.id, initialIndex: currentImageIndex }
-    });
-  };
-
-  const handleCommentsClick = () => {
-    router.push({
-      pathname: '/post-detail',
-      query: { postId: post.id }
-    });
-  };
-
   return (
     <div
-      className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden -z-[15] shadow-sm border border-gray-100 transition-all duration-300 ${
-        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-      }`}
       ref={containerRef}
+      className="mb-4 bg-white rounded-xl mx-4 overflow-hidden shadow-sm border border-gray-100 transition-all duration-300"
+      style={{
+        opacity: opacity,
+        transform: `scale(${scale})`
+      }}
     >
       {/* Post header */}
       <div className="p-4 flex items-center justify-between">
         <button
           className="flex items-center flex-1 text-left"
-          onClick={handleProfileClick}
+          onClick={() => {
+            if (post.user === user._id) {
+              router.push('/profile/profile'); // own profile
+            } else {
+              router.push(`/UserProfile/${post.username}`); // someone else's profile
+            }
+          }}
         >
-          <div className="w-10 h-10 rounded-full mr-3 relative overflow-hidden">
-            <Image
-              src={
-                isAuthenticated && post.profilePic?.trim()
-                  ? post.profilePic
-                  : '/default-profile.png'
-              }
-              alt="Profile"
-              fill
-              className="object-cover"
-            />
-          </div>
+          <img
+            src={
+              isAuthenticated && post.profilePic?.trim()
+                ? post.profilePic
+                : '/assets/Profilepic1.png'
+            }
+            alt="Profile"
+            className="w-10 h-10 rounded-full mr-3 object-cover"
+          />
+
           <div className="ml-3 flex-1">
             <div className="flex items-center">
-              <span className="font-medium text-base text-gray-800">
+              <span className="text-base text-gray-800 font-medium">
                 {post.username}
               </span>
               {post.isVerified && (
                 <CheckCircle size={16} className="text-blue-500 ml-1" />
               )}
             </div>
-            <span className="font-normal text-xs text-gray-500">
+            <span className="text-xs text-gray-500">
               {post.timestamp}
             </span>
           </div>
         </button>
 
         <button
-          className="p-2 hover:bg-gray-50 rounded-full transition-colors"
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           onClick={() => {
+            console.log('Three-dot menu pressed for post:', post.id);
             setSelectedPost(post);
             setModalVisible(true);
+            console.log('Modal should be visible now');
           }}
         >
-          <MoreHorizontal size={20} className="text-gray-600" />
+          <MoreHorizontal size={20} className="text-gray-500" />
         </button>
       </div>
 
@@ -180,7 +173,7 @@ const PostCard = ({
                 key={index}
                 className="bg-gray-100 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 transition-colors"
               >
-                <span className="font-medium text-xs text-gray-700">
+                <span className="text-xs text-gray-700 font-medium">
                   #{tag}
                 </span>
               </button>
@@ -192,34 +185,31 @@ const PostCard = ({
         {post.isAmplified && post.originalPost && (
           <div className="border border-gray-200 rounded-xl p-3 mb-3">
             <div className="flex items-center mb-2">
-              <span className="font-medium text-xs text-gray-500">
+              <span className="text-xs text-gray-500 font-medium">
                 Amplified from
                 <span className="text-sky-500"> @{post.originalPost.user?.username || 'user'}</span>
               </span>
             </div>
 
             {post.quoteContent && (
-              <p className="font-normal text-sm text-gray-700 mb-2">
+              <p className="text-sm text-gray-700 mb-2">
                 {post.quoteContent}
               </p>
             )}
 
             <div className="bg-gray-50 p-3 rounded-lg">
               {post.originalPost.content && (
-                <p className="font-normal text-sm text-gray-700">
+                <p className="text-sm text-gray-700">
                   {post.originalPost.content}
                 </p>
               )}
 
               {post.originalPost.media && post.originalPost.media.length > 0 && (
-                <div className="w-full h-48 relative rounded-lg mt-2 overflow-hidden">
-                  <Image
-                    src={post.originalPost.media[0]}
-                    alt="Original post media"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                <img
+                  src={post.originalPost.media[0]}
+                  alt="Original post media"
+                  className="w-full h-45 object-cover rounded-lg mt-2"
+                />
               )}
             </div>
           </div>
@@ -229,26 +219,32 @@ const PostCard = ({
         {hasMedia && (
           <div className="mb-3">
             <div
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+              className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory"
               onScroll={handleImageScroll}
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {post.media.map((item, index) => (
-                <button
+                <div
                   key={`media-${post.id}-${index}`}
                   className="flex-shrink-0 w-full snap-start"
-                  onClick={handleImageClick}
                 >
-                  <div className="w-full h-80 rounded-lg overflow-hidden relative">
+                  <button
+                    className="w-full h-75 rounded-lg overflow-hidden"
+                    onClick={() => {
+                      router.push({
+                        pathname: '/home/media-viewer',
+                        query: { postId: post.id, initialIndex: currentImageIndex }
+                      });
+                    }}
+                  >
                     <FilteredImage
                       src={item}
                       alt={`Post media ${index + 1}`}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full object-cover"
                       filterType={post.mediaMetadata && post.mediaMetadata[index]?.filter}
                     />
-                  </div>
-                </button>
+                  </button>
+                </div>
               ))}
             </div>
 
@@ -261,7 +257,7 @@ const PostCard = ({
                     onClick={() => {
                       const container = containerRef.current?.querySelector('.overflow-x-auto');
                       if (container) {
-                        container.scrollLeft = index * container.clientWidth;
+                        container.scrollLeft = index * container.offsetWidth;
                         setCurrentImageIndex(index);
                       }
                     }}
@@ -278,23 +274,26 @@ const PostCard = ({
         {/* Post stats */}
         <div className="flex items-center mb-2">
           <div className="flex items-center">
-            <span className="font-medium text-xs text-gray-500">
+            <span className="text-xs text-gray-500 font-medium">
               {post.likeCount} likes
             </span>
           </div>
           <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
           <button
-            onClick={handleCommentsClick}
-            className="hover:text-gray-700 transition-colors"
+            onClick={() => router.push({
+              pathname: '/home/post-detail',
+              query: { postId: post.id }
+            })}
+            className="hover:underline"
           >
-            <span className="font-medium text-xs text-gray-500">
+            <span className="text-xs text-gray-500 font-medium">
               {post.commentCount} comments
             </span>
           </button>
           {post.bookmarkCount > 0 && (
             <>
               <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
-              <span className="font-medium text-xs text-gray-500">
+              <span className="text-xs text-gray-500 font-medium">
                 {post.bookmarkCount} saves
               </span>
             </>
@@ -304,48 +303,71 @@ const PostCard = ({
 
       {/* Post actions */}
       <div className="flex items-center justify-around py-3 border-t border-gray-100">
+        {/* Like Button - Thumbs Up */}
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id)}
         >
-          <Heart
+          <ThumbsUp
             size={18}
-            className={isLiked ? 'text-red-500 fill-current' : 'text-gray-600'}
+            className={isLiked ? "text-blue-500" : "text-gray-500"}
+            fill={isLiked ? "currentColor" : "none"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${isLiked ? 'text-red-500' : 'text-gray-600'}`}
+            className={`ml-2 text-sm font-medium ${isLiked ? 'text-blue-500' : 'text-gray-600'}`}
           >
             Like
           </span>
         </button>
 
+        {/* Dislike Button - Thumbs Down */}
+        <button
+          className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+          onClick={() => isDisliked ? handleUndislikePost(post.id) : handleDislikePost(post.id)}
+        >
+          <ThumbsDown
+            size={18}
+            className={isDisliked ? "text-orange-500" : "text-gray-500"}
+            fill={isDisliked ? "currentColor" : "none"}
+          />
+          <span
+            className={`ml-2 text-sm font-medium ${isDisliked ? 'text-orange-500' : 'text-gray-600'}`}
+          >
+            Dislike
+          </span>
+        </button>
+
+        {/* Comment Button */}
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleCommentPost(post)}
         >
-          <MessageCircle size={18} className="text-gray-600" />
+          <MessageCircle size={18} className="text-gray-500" />
           <span className="ml-2 text-sm text-gray-600 font-medium">
             Comment
           </span>
         </button>
 
+        {/* Amplify Button */}
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleAmplifyPost(post)}
         >
-          <Repeat size={18} className="text-gray-600" />
+          <Repeat size={18} className="text-gray-500" />
           <span className="ml-2 text-sm text-gray-600 font-medium">
             Amplify
           </span>
         </button>
 
+        {/* Bookmark Button */}
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => isBookmarked ? handleUnbookmarkPost(post.id) : handleBookmarkPost(post.id)}
         >
           <Bookmark
             size={18}
-            className={isBookmarked ? 'text-sky-500 fill-current' : 'text-gray-600'}
+            className={isBookmarked ? "text-sky-500" : "text-gray-500"}
+            fill={isBookmarked ? "currentColor" : "none"}
           />
           <span
             className={`ml-2 text-sm font-medium ${isBookmarked ? 'text-sky-500' : 'text-gray-600'}`}
