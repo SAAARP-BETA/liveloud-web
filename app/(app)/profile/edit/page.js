@@ -59,7 +59,7 @@ const EditPage = () => {
   const loadUserProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_ENDPOINTS.USER}/profile`, {
+      const response = await fetch(`${API_ENDPOINTS.USER}/user/profile/${user.username}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -91,7 +91,7 @@ const EditPage = () => {
             occupation: "",
             education: "",
             profilePicture: user?.profilePicture || null,
-            coverPicture: null,
+            coverPicture: user?.coverPicture||null,
           });
           setProfileImage(user?.profilePicture || null);
           setCoverImage(null);
@@ -159,23 +159,25 @@ const EditPage = () => {
 
   const handleUpdateProfile = async (event) => {
     event.preventDefault();
-    const errors = {};
-    if (!profileData.username) errors.username = "Username is required";
-    if (!profileData.fullname) errors.fullname = "Name is required";
-    if (profileData.bio && profileData.bio.length > 250)
-      errors.bio = "Bio must be 250 characters or less";
-
-    if (Object.keys(errors).length > 0) {
-      setProfileErrors(errors);
-      return;
-    }
-
-    setSubmitting(true);
 
     try {
+      // Basic validation
+      const errors = {};
+      if (!profileData.username) errors.username = 'Username is required';
+      if (!profileData.fullname) errors.fullname = 'Name is required';
+      if (profileData.bio && profileData.bio.length > 250) errors.bio = 'Bio must be 250 characters or less';
+
+      if (Object.keys(errors).length > 0) {
+        setProfileErrors(errors);
+        return;
+      }
+
+      setSubmitting(true);
+
       let updatedProfilePicture = profileData.profilePicture;
       let updatedCoverPicture = profileData.coverPicture;
 
+      // Handle image uploads
       if (profileImage && typeof profileImage === "object") {
         updatedProfilePicture = await uploadImage(profileImage, "profile");
         if (!updatedProfilePicture) return;
@@ -186,26 +188,26 @@ const EditPage = () => {
       }
 
       const updateData = {
-        bio: profileData.bio || "",
-        location: profileData.location || "",
-        website: profileData.website || "",
-        fullname: profileData.fullname || "",
-        phone: profileData.phone || "",
-        gender: profileData.gender || "",
-        occupation: profileData.occupation || "",
-        education: profileData.education || "",
-        isPrivate: profileData.isPrivate || false,
-        interests: profileData.interests || [],
-        profilePicture: updatedProfilePicture,
-        coverPicture: updatedCoverPicture,
-      };
+  username: profileData.username || "",
+  email: profileData.email || "",
+  bio: profileData.bio || "",
+  location: profileData.location || "",
+  website: profileData.website || "",
+  fullname: profileData.fullname || "",
+  phone: profileData.phone || "",
+  gender: profileData.gender || "",
+  occupation: profileData.occupation || "",
+  education: profileData.education || "",
+  isPrivate: profileData.isPrivate || false,
+  interests: profileData.interests || [],
+  profilePicture: updatedProfilePicture,
+  coverPicture: updatedCoverPicture,
+};
+
 
       if (profileData.dob) {
         updateData.dob = profileData.dob.toISOString();
       }
-
-      console.log("Sending PUT request to:", `${API_ENDPOINTS.USER}/profiles/profile`);
-      console.log("Request body:", JSON.stringify(updateData, null, 2));
 
       const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
         method: "PUT",
@@ -218,17 +220,10 @@ const EditPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: "Server error" }));
-        console.error("PUT response error:", errorData);
-        if (errorData.code === "INVALID_ID") {
-          alert("Invalid user ID. Please login again.");
-          router.push("/login");
-          return;
-        }
         throw new Error(errorData.message || `Failed to update profile: ${response.status}`);
       }
 
       const updatedUserData = await response.json();
-      console.log("Profile update response:", updatedUserData);
 
       setProfileData((prevData) => ({
         ...prevData,
@@ -238,7 +233,7 @@ const EditPage = () => {
       setProfileImage(updatedUserData.profilePicture || null);
       setCoverImage(updatedUserData.coverPicture || null);
 
-      alert("Success: Profile updated successfully");
+      alert("Profile updated successfully");
       router.back();
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -299,7 +294,7 @@ const EditPage = () => {
             <div className="flex justify-between items-center w-full">
               <h2
                 className="text-xl font-bold text-gray-800 flex-1 text-center"
-               >
+              >
                 {imageActionType === "profile"
                   ? "Change Profile Picture"
                   : "Change Cover Picture"}
@@ -323,7 +318,7 @@ const EditPage = () => {
             <Camera className="text-blue-700 w-6 h-6" />
             <span
               className="ml-3 text-blue-700 font-medium text-base"
-              
+
             >
               Choose from Gallery
             </span>
@@ -342,7 +337,7 @@ const EditPage = () => {
               <X className="text-red-500 w-6 h-6 cursor-pointer" />
               <span
                 className="ml-3 text-red-500 font-medium text-base"
-              
+
               >
                 Remove Photo
               </span>
@@ -355,7 +350,7 @@ const EditPage = () => {
           >
             <span
               className="text-gray-700 font-medium text-base cursor-pointer"
-              
+
             >
               Cancel
             </span>
@@ -399,7 +394,7 @@ const EditPage = () => {
 
           <h1
             className="text-lg text-gray-900"
-           
+
           >
             Edit Profile
           </h1>
@@ -414,7 +409,7 @@ const EditPage = () => {
             ) : (
               <span
                 className="text-white text-sm"
-                
+
               >
                 Save
               </span>
@@ -433,14 +428,14 @@ const EditPage = () => {
     />
   ) : profileData.coverPicture ? (
     <Image
-      src={user?.coverPhoto || defaultCover}
+      src={profileData.coverPicture}
       alt="Cover"
       className="w-full h-full object-cover"
       width={800}
       height={160}
       onError={(e) => {
         console.error("Failed to load cover picture");
-        e.currentTarget.src = defaultCover.src; // ✅ important fix here
+        e.currentTarget.src = defaultCover.src;
       }}
       priority
     />
@@ -454,11 +449,17 @@ const EditPage = () => {
       priority
     />
   )}
-
   
+  {/* Add cover edit button */}
+  <button
+    className="absolute top-4 right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+    onClick={() => openImagePicker("cover")}
+  >
+    <Camera className="text-white w-5 h-5" />
+  </button>
 </div>
 
-        
+
 
 
         <div className="flex justify-center -mt-12 mb-6">
@@ -485,7 +486,7 @@ const EditPage = () => {
               <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
                 <span
                   className="text-3xl text-gray-400"
-                 
+
                 >
                   {profileData.fullname
                     ? profileData.fullname.substring(0, 2).toUpperCase()
@@ -506,7 +507,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Username
             </label>
@@ -517,7 +518,7 @@ const EditPage = () => {
               <AtSign className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-               
+
                 value={profileData.username || ""}
                 onChange={(e) => handleInputChange("username", e.target.value)}
                 placeholder="Your username"
@@ -527,7 +528,7 @@ const EditPage = () => {
             {profileErrors.username && (
               <p
                 className="text-red-500 text-xs mt-1"
-               
+
               >
                 {profileErrors.username}
               </p>
@@ -537,7 +538,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Name
             </label>
@@ -548,7 +549,7 @@ const EditPage = () => {
               <User className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-               
+
                 value={profileData.fullname || ""}
                 onChange={(e) => handleInputChange("fullname", e.target.value)}
                 placeholder="Your full name"
@@ -557,7 +558,7 @@ const EditPage = () => {
             {profileErrors.fullname && (
               <p
                 className="text-red-500 text-xs mt-1"
-               
+
               >
                 {profileErrors.fullname}
               </p>
@@ -568,13 +569,13 @@ const EditPage = () => {
             <div className="flex flex-row justify-between items-center mb-1.5">
               <label
                 className="text-sm text-gray-500"
-                
+
               >
                 Bio
               </label>
               <span
                 className="text-xs text-gray-400"
-               
+
               >
                 {profileData.bio?.length || 0}/250
               </span>
@@ -582,7 +583,7 @@ const EditPage = () => {
             <textarea
               className={`bg-gray-50 border rounded-xl p-3 h-24 text-gray-800 w-full resize-none ${profileErrors.bio ? "border-red-500" : "border-gray-200"
                 }`}
-             
+
               value={profileData.bio || ""}
               onChange={(e) => handleInputChange("bio", e.target.value)}
               placeholder="Tell others about yourself"
@@ -591,7 +592,7 @@ const EditPage = () => {
             {profileErrors.bio && (
               <p
                 className="text-red-500 text-xs mt-1"
-               
+
               >
                 {profileErrors.bio}
               </p>
@@ -601,7 +602,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Location
             </label>
@@ -609,7 +610,7 @@ const EditPage = () => {
               <MapPin className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-               
+
                 value={profileData.location || ""}
                 onChange={(e) => handleInputChange("location", e.target.value)}
                 placeholder="Your location"
@@ -620,7 +621,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Website
             </label>
@@ -628,7 +629,7 @@ const EditPage = () => {
               <LinkIcon className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-               
+
                 value={profileData.website || ""}
                 onChange={(e) => handleInputChange("website", e.target.value)}
                 placeholder="Your website"
@@ -641,7 +642,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Date of Birth
             </label>
@@ -650,7 +651,7 @@ const EditPage = () => {
               <input
                 type="date"
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-               
+
                 value={
                   profileData.dob
                     ? profileData.dob.toISOString().split("T")[0]
@@ -667,7 +668,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Email
             </label>
@@ -675,7 +676,7 @@ const EditPage = () => {
               <Mail className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-               
+
                 value={profileData.email || ""}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 placeholder="Your email"
@@ -688,7 +689,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Phone
             </label>
@@ -696,7 +697,7 @@ const EditPage = () => {
               <Phone className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-               
+
                 value={profileData.phone || ""}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
                 placeholder="Your phone number"
@@ -708,7 +709,7 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Gender
             </label>
@@ -719,8 +720,8 @@ const EditPage = () => {
                     key={gender}
                     type="button"
                     className={`px-4 py-2 rounded-full transition-colors ${profileData.gender === gender
-                        ? "bg-sky-500 text-white"
-                        : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
+                      ? "bg-sky-500 text-white"
+                      : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
                       }`}
                     onClick={() => handleInputChange("gender", gender)}
                   >
@@ -736,13 +737,13 @@ const EditPage = () => {
               <div className="flex-1 pr-4">
                 <p
                   className="text-gray-800 mb-1"
-                  
+
                 >
                   Private Account
                 </p>
                 <p
                   className="text-gray-500 text-xs"
-                 
+
                 >
                   When your account is private, only people you approve can see
                   your photos and videos
@@ -765,7 +766,7 @@ const EditPage = () => {
           <div className="mb-4">
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Occupation
             </label>
@@ -773,7 +774,7 @@ const EditPage = () => {
               <Briefcase className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none"
-               
+
                 value={profileData.occupation || ""}
                 onChange={(e) =>
                   handleInputChange("occupation", e.target.value)
@@ -786,7 +787,7 @@ const EditPage = () => {
           <div className="mb-4">
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-              
+
             >
               Education
             </label>
@@ -794,7 +795,7 @@ const EditPage = () => {
               <Book className="text-gray-400 w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none"
-               
+
                 value={profileData.education || ""}
                 onChange={(e) => handleInputChange("education", e.target.value)}
                 placeholder="Your education"
