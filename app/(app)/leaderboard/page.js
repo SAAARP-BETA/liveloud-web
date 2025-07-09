@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 // import { fonts } from '../../utils/fonts';
 // import Navbar from "../../components/Navbar";
 import { API_ENDPOINTS } from '../../utils/config';
+import {User, Heart, Pencil, Star, Trophy, Medal} from "lucide-react"
 
 // Fixed Tab Component
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
@@ -48,19 +49,19 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       case 1:
         return (
           <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-            <i className="fas fa-crown text-white text-sm"></i>
+            <i className="fas fa-crown text-white text-sm"><Trophy/></i>
           </div>
         );
       case 2:
         return (
           <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-            <i className="fas fa-medal text-white text-sm"></i>
+            <i className="fas fa-medal text-white text-sm"><Medal/></i>
           </div>
         );
       case 3:
         return (
           <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-            <i className="fas fa-medal text-white text-sm"></i>
+            <i className="fas fa-medal text-white text-sm"><Medal/></i>
           </div>
         );
       default:
@@ -107,7 +108,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
 
       {/* Profile Picture */}
       <div className="w-12 h-12 rounded-full ml-2 bg-gradient-to-br from-sky-100 to-blue-200 flex items-center justify-center border-2 border-white">
-        <i className="fas fa-user text-sky-500 text-lg"></i>
+        <i className="fas fa-user text-sky-500 text-lg"><User/></i>
       </div>
 
       {/* User Info */}
@@ -165,10 +166,10 @@ export default function LeaderboardPage() {
   const [myPoints, setMyPoints] = useState(null);
 
   const tabs = [
-    { key: 'total', title: 'Overall', icon: 'trophy' },
-    { key: 'creators', title: 'Creators', icon: 'edit' },
-    { key: 'fans', title: 'Fans', icon: 'heart' },
-    { key: 'followers', title: 'Followers', icon: 'users' },
+    { key: 'total', title: 'Overall', icon: Trophy },
+    { key: 'creators', title: 'Creators', icon: Pencil },
+    { key: 'fans', title: 'Fans', icon: Heart },
+    { key: 'followers', title: 'Followers', icon: User },
   ];
 
   // Fetch user's points
@@ -356,7 +357,7 @@ export default function LeaderboardPage() {
               <div className="flex justify-between pt-4 border-t border-white/20">
                 <div className="items-center flex-1 text-center">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <i className="fas fa-edit text-white text-lg"></i>
+                    <i className="fas fa-edit text-white text-lg"><Pencil/></i>
                   </div>
                   <p  className="text-white text-lg">
                     {myPoints.creatorPoints || 0}
@@ -367,7 +368,7 @@ export default function LeaderboardPage() {
                 </div>
                 <div className="items-center flex-1 text-center">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <i className="fas fa-heart text-white text-lg"></i>
+                    <i className="fas fa-heart text-white text-lg"><Heart/></i>
                   </div>
                   <p className="text-white text-lg">
                     {myPoints.fanPoints || 0}
@@ -378,7 +379,7 @@ export default function LeaderboardPage() {
                 </div>
                 <div className="items-center flex-1 text-center">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <i className="fas fa-star text-white text-lg"></i>
+                    <i className="fas fa-star text-white text-lg"><Star/></i>
                   </div>
                   <p  className="text-white text-lg">
                     {myPoints.bonusPoints || 0}

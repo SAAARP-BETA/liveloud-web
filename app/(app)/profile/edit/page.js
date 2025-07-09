@@ -59,7 +59,7 @@ const EditPage = () => {
   const loadUserProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_ENDPOINTS.USER}/profile/${user.username}`, {
+      const response = await fetch(`${API_ENDPOINTS.USER}/profiles/${user.username}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
