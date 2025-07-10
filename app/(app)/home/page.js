@@ -27,6 +27,7 @@ import {
   Image as PhotoIcon,
   X as XMarkIcon,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
@@ -36,7 +37,7 @@ import { useAuth } from "../../context/AuthContext";
 
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import PostCard from '@/Components/home/PostCard';
+import PostCard from '../../../Components/ui/PostCard';
 import EmptyFeed from '@/Components/home/EmptyFeed';
 import CommentModal from '@/Components/ui/CommentModal';
 import AmplifyModal from '@/Components/ui/AmplifyModal';
@@ -245,8 +246,6 @@ const HomePage = () => {
   const fetchFeed = useCallback(async (feedType, pageNum = 1, refresh = false) => {
     const currentTabData = tabData[feedType];
     const feedConfig = FEED_TYPES.find(feed => feed.key === feedType);
-    console.log('Feed config:', feedConfig);
-    console.log('API Base URL:', API_ENDPOINTS.SOCIAL); // Add this to see what endpoint is being used
     if (!feedConfig) return;
     
     // Validation checks
@@ -700,7 +699,7 @@ const handleKeyPress = (e) => {
 
           // Update post with follow status in current tab
           const updatedPosts = getCurrentTabData().posts.map(post => {
-            if (post.id === selectedPost.id) {
+            if (post.id === selectedPost._id) {
               return { ...post, isFollowing };
             }
             return post;
@@ -743,7 +742,7 @@ const handleKeyPress = (e) => {
 
   const handleDeletePost = async (postId) => {
     if (!isAuthenticated) {
-      alert('Please login to delete posts');
+      toast.error('Please login to delete posts');
       return;
     }
     
@@ -762,10 +761,10 @@ const handleKeyPress = (e) => {
 
         const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== postId);
         updateTabData(activeTab, { posts: updatedPosts });
-        alert('Post deleted successfully');
+        toast.success('Post deleted successfully');
       } catch (error) {
         console.error('Error deleting post:', error);
-        alert(`Failed to delete post: ${error.message}`);
+        toast.error(`Failed to delete post: ${error.message}`);
       }
     }
   };
@@ -843,8 +842,12 @@ const handleKeyPress = (e) => {
 );
 
 
+
   const currentTabData = getCurrentTabData();
   const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
+  useEffect(() => {
+  console.log("Posts data:", currentTabData.posts);
+}, [currentTabData.posts]); // Dependency on posts data
 
   return (
     <div className=" max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
@@ -919,7 +922,7 @@ const handleKeyPress = (e) => {
             <div className="flex items-center mb-2 space-x-3">
               
               <Image
-                src={user?.profilePicture || '/api/placeholder/40/40'}
+                src={user?.profilePicture}
                 alt="Profile"
                 width={40}
                 height={40}
@@ -1091,45 +1094,41 @@ const handleKeyPress = (e) => {
             </p>
           </div>
         )}
+        
 
         {/* Posts list */}
-        {console.log("name", user.username)}
-        {currentTabData.posts.length > 0 ? (
-          
-          <div>
-            {currentTabData.posts.map((post, index) => (
-              <PostCard
-                      key={post.id || index}
-                      post={post}
-                      handleLikePost={postHandlers.handleLikePost}
-                      handleUnlikePost={postHandlers.handleUnlikePost}
-                      handleCommentPost={postHandlers.handleCommentPost}
-                      handleAmplifyPost={postHandlers.handleAmplifyPost}
-                      handleBookmarkPost={postHandlers.handleBookmarkPost}
-                      handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                      setSelectedPost={setSelectedPost}
-                      setModalVisible={setModalVisible}
-                      username={user.username}
-                    />
-                    
-                    
-            ))}
-          </div>
-        ) : !currentTabData.loading ? (
-          <EmptyFeed 
-            isAuthenticated={isAuthenticated} 
-            handleCreatePost={handleCreatePost}
-            error={currentTabData.error || error}
-            feedType={activeTab}
-            onLogin={() => {
-              // Make sure we're really logged out first
-              if (!isAuthenticated) {
-                  router.push('/login');
-              }           
-            }}
-          />
-        ) : null}
-
+       {currentTabData.posts.length > 0 ? (
+  <div>
+    {console.log("Posts data:", currentTabData.posts)}
+    {currentTabData.posts.map((post, index) => (
+      <PostCard
+        key={post.id || index}
+        post={post}
+        handleLikePost={postHandlers.handleLikePost}
+        handleUnlikePost={postHandlers.handleUnlikePost}
+        handleCommentPost={postHandlers.handleCommentPost}
+        handleAmplifyPost={postHandlers.handleAmplifyPost}
+        handleBookmarkPost={postHandlers.handleBookmarkPost}
+        handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+        setSelectedPost={setSelectedPost}
+        setModalVisible={setModalVisible}
+        username={user} // Fixed syntax
+      />
+    ))}
+  </div>
+) : !currentTabData.loading ? (
+  <EmptyFeed
+    isAuthenticated={isAuthenticated}
+    handleCreatePost={handleCreatePost}
+    error={currentTabData.error || error}
+    feedType={activeTab}
+    onLogin={() => {
+      if (!isAuthenticated) {
+        router.push("/login");
+      }
+    }}
+  />
+) : null}
         {/* Loading indicator */}
         {currentTabData.loading && !refreshing && (
           <div className="py-8 flex justify-center">
@@ -1171,9 +1170,9 @@ const handleKeyPress = (e) => {
         
 
         <div className="p-4">
-          <h3 className="text-lg font-bold text-gray-800 mb-2">
+          {/* <h3 className="text-lg font-bold text-gray-800 mb-2">
             Post options
-          </h3>
+          </h3> */}
 
           {selectedPost && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
@@ -1217,6 +1216,7 @@ const handleKeyPress = (e) => {
         title="Add Comment"
         post={postToComment}
         onSuccess={handleCommentSuccess}
+        token={token}
       >
 
       </CommentModal>
@@ -1226,13 +1226,14 @@ const handleKeyPress = (e) => {
         visible={isAmplifyModalVisible}
         onClose={() => setAmplifyModalVisible(false)}
         post={postToAmplify
-        
         }
+        token={token}
         
         title="Amplify Post"
         onSuccess={(postId) => {
           // Update amplify count in current posts
-          const updatedPosts = posts.map(post => {
+          const currentPosts = getCurrentTabData().posts;
+          const updatedPosts = currentPosts.map(post => {
             if (post.id === postId) {
               return { 
                 ...post, 
@@ -1242,7 +1243,7 @@ const handleKeyPress = (e) => {
             }
             return post;
           });
-          setPosts(updatedPosts);
+          updateTabData(activeTab, { posts: updatedPosts });
         }}
       >
        
@@ -1255,6 +1256,7 @@ const handleKeyPress = (e) => {
         title="Report Post"
         post={postToReport}
         onSuccess={handleReportSuccess}
+        token={token}
       >
         
       </ReportModal>

@@ -98,9 +98,8 @@ export default function WalletPage() {
           <div>
             <div className="text-sm text-gray-500">Your handle</div>
             <div className="text-lg font-semibold text-gray-800">
-              @{isLoading ? user?.username : username}
+              @{user.username}
             </div>
-            {error && <div className="text-xs text-red-500 mt-1">Error: {error}</div>}
           </div>
           <button className="bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-700 font-medium">
             Link

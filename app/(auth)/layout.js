@@ -5,12 +5,23 @@ import Image from "next/image";
 import LoginImage from "../assets/login-image.jpg";
 import Login2 from "../assets/login-2.jpg"
 import Login3 from "../assets/login-3.jpg"
+import { useEffect, useState } from "react";
 
 export default function AuthLayout({ children }) {
+  const [isLoaded, setIsLoaded] = useState(false);
   const cardWidth = 250;
   const cardHeight = 300;
   const cardContainerWidth = cardWidth * 2.4;
   const cardContainerHeight = cardHeight * 1.2;
+
+  useEffect(() => {
+    // Trigger animation after component mounts
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <AuthRoute>
@@ -21,15 +32,20 @@ export default function AuthLayout({ children }) {
             className="relative"
             style={{ width: `${cardContainerWidth}px`, height: `${cardContainerHeight}px` }}
           >
-            {/* Card 1 */}
+            {/* Card 1 - Left */}
             <div
-              className="absolute z-10"
+              className={`absolute z-10 transition-all duration-700 ease-out ${
+                isLoaded 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-8'
+              }`}
               style={{
                 width: `${cardWidth}px`,
                 height: `${cardHeight}px`,
                 left: `calc(50% - ${cardWidth * 1.05}px)`,
                 top: '50%',
-                transform: `translateY(-50%) rotate(-15deg)`,
+                transform: `translateY(-50%) rotate(-15deg) ${isLoaded ? 'translateY(0)' : 'translateY(32px)'}`,
+                transitionDelay: '200ms'
               }}
             >
               <Image
@@ -42,15 +58,20 @@ export default function AuthLayout({ children }) {
               />
             </div>
 
-            {/* Card 2 */}
+            {/* Card 2 - Middle (appears first) */}
             <div
-              className="absolute z-20"
+              className={`absolute z-20 transition-all duration-700 ease-out ${
+                isLoaded 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-8'
+              }`}
               style={{
                 width: `${cardWidth}px`,
                 height: `${cardHeight}px`,
                 left: '50%',
                 top: '50%',
-                transform: `translate(-50%, -50%) rotate(0deg)`,
+                transform: `translate(-50%, -50%) rotate(0deg) ${isLoaded ? 'translateY(0)' : 'translateY(32px)'}`,
+                transitionDelay: '0ms'
               }}
             >
               <Image
@@ -62,15 +83,20 @@ export default function AuthLayout({ children }) {
               />
             </div>
 
-            {/* Card 3 */}
+            {/* Card 3 - Right */}
             <div
-              className="absolute z-10"
+              className={`absolute z-10 transition-all duration-700 ease-out ${
+                isLoaded 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-8'
+              }`}
               style={{
                 width: `${cardWidth}px`,
                 height: `${cardHeight}px`,
                 left: `calc(50% + ${cardWidth * 0.05}px)`,
                 top: '50%',
-                transform: `translateY(-50%) rotate(15deg)`,
+                transform: `translateY(-50%) rotate(15deg) ${isLoaded ? 'translateY(0)' : 'translateY(32px)'}`,
+                transitionDelay: '400ms'
               }}
             >
               <Image
@@ -85,8 +111,13 @@ export default function AuthLayout({ children }) {
         </div>
 
         {/* Right Side - Auth Form */}
-        <div className="w-full lg:w-[50%] xl:w-[55%] flex items-center justify-center bg-gray-50">
-          <div className="w-full max-w-md bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200">
+        <div className="w-full lg:w-[50%] xl:w-[55%] flex items-center justify-center" style={{ backgroundColor: '#F3F4F6' }}>
+          <div className={`w-full max-w-md bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200 transition-all duration-700 ease-out ${
+            isLoaded 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
+          }`}
+          style={{ transitionDelay: '300ms' }}>
             {children}
           </div>
         </div>
