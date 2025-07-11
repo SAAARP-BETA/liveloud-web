@@ -103,6 +103,9 @@ const HomePage = () => {
   
   const [refreshing, setRefreshing] = useState(false);
   const [showComposeButton, setShowComposeButton] = useState(false);
+   const [progress, setProgress] = useState(0);
+
+
   
   // Post composer
   const [text, setText] = useState('');
@@ -392,56 +395,101 @@ const HomePage = () => {
     ? ['#FFD166', '#FF9F1C']
     : ['#06D6A0', '#1B9AAA'];
 
-    const uploadMedia = async () => {
-      const formData = new FormData();
-      images.forEach((image, index) => {
-        const byteString = atob(image.split(',')[1]);
-        const mimeString = image.split(',')[0].split(':')[1].split(';')[0];
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
-      const blob = new Blob([ab], { type: mimeString });
-      formData.append('files', blob, `image-${index}.jpg`);
-    });
+      // media upload
+const uploadMedia = async () => {
+  if (images.length === 0) return { urls: [], metadata: [] };
 
-    const res = await fetch(`${API_ENDPOINTS.MEDIA}/upload/post`, {
+  try {
+    setProgress(10); // Start
+
+    const base64Images = await Promise.all(
+      images.map(async (image, i) => {
+        if (image.startsWith('data:image')) return image;
+
+        const response = await fetch(image);
+        const blob = await response.blob();
+
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            setProgress(20 + i * (50 / images.length)); // Simulate mid-progress
+            resolve(reader.result);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      })
+    );
+
+    const metadata = images.map((_, index) => ({
+      filter: imageFilters[index] || null,
+      originalUri: images[index],
+    }));
+
+    setProgress(75); // Before upload
+
+    const res = await fetch(`${API_ENDPOINTS.MEDIA}/post`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: formData,
+      body: JSON.stringify({ images: base64Images, metadata }),
     });
-    
-    if (!res.ok) throw new Error('Failed to upload media');
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to upload media');
+    }
+
     const data = await res.json();
-    return data.urls; // Expecting { urls: [ ... ] }
-  };
+    setProgress(100); // Done
+    return {
+      urls: data.imageUrls || [],
+      metadata: data.metadata || [],
+    };
+  } catch (error) {
+    setProgress(0);
+    throw new Error(error.message || 'Upload failed');
+  }
+};
+
+
   
 // create post handlers
 const handleCreatePost = async () => {
   if (!isAuthenticated) {
-    alert('Please login to create posts');
+    toast.error('Please login to create posts');
     return;
   }
-  
+
   if (!text.trim() && images.length === 0) {
-    alert('Please add some text or images to your post');
+    toast.error('Please add some text or images to your post');
     return;
   }
-  
+
   if (isOverLimit) {
-    alert(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`);
+    toast.error(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`);
     return;
   }
-  
+
   try {
+    setProgress(5);
+
     let mediaUrls = [];
+    let mediaIds = [];
+
     if (images.length > 0) {
-      mediaUrls = await uploadMedia();
+      const uploadResults = await uploadMedia();
+      if (!uploadResults || !uploadResults.urls || !uploadResults.metadata) {
+        throw new Error('Invalid upload response');
+      }
+      mediaUrls = uploadResults.urls;
+      mediaIds = uploadResults.metadata.map(item => item.publicId);
     }
-    
+
+    setProgress(90); // Almost done
+
     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts`, {
       method: 'POST',
       headers: {
@@ -449,25 +497,34 @@ const handleCreatePost = async () => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        content: text,
+        content: text.trim() || '[media-only-post]',
         media: mediaUrls,
+        mediaIds: mediaIds,
       }),
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to create post');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to create post');
     }
-    
-    alert('Post created successfully!');
+
+    setProgress(100);
+    toast.success('Post created successfully!');
     setText('');
     setImages([]);
     setImageFilters([]);
     setIsInputFocused(false);
+    setProgress(0);
   } catch (error) {
     console.error('Error creating post:', error);
-    alert(`Failed to create post: ${error.message}`);
+    toast.error(`Failed to create post: ${error.message}`);
+    setProgress(0);
   }
 };
+
+
+
+
 
 const handleMediaButtonClick = () => {
   if (fileInputRef.current) {
@@ -476,21 +533,22 @@ const handleMediaButtonClick = () => {
 };
 
 const handleImageUpload = (event) => {
-  const files = Array.from(event.target.files);
-  files.forEach(file => {
-    if (images.length < MEDIA_LIMIT) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImages(prev => [...prev, e.target.result]);
-        setImageFilters(prev => [...prev, 'none']);
-      };
-      reader.readAsDataURL(file);
+    const files = Array.from(event.target.files);
+    files.forEach(file => {
+      if (images.length < MEDIA_LIMIT) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImages(prev => [...prev, e.target.result]);
+          setImageFilters(prev => [...prev, 'none']);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
-  });
-  if (fileInputRef.current) {
-    fileInputRef.current.value = '';
-  }
-};
+  };
+
 
 const handleKeyPress = (e) => {
   if (e.key === 'Enter' && e.ctrlKey) {
@@ -856,193 +914,162 @@ const handleKeyPress = (e) => {
 
       {/* Tab Bar */}
       {renderTabBar()}
-      <style jsx>{`
-        .blur-content {
-          filter: ${isInputFocused || images.length > 0 ? 'blur(4px)' : 'none'};
-          pointer-events: ${isInputFocused || images.length > 0 ? 'none' : 'auto'};
-          transition: filter 0.3s ease;
-          }
-          .post-composer {
-            position: relative;
-            z-index: 10;
-            }
-            .char-counter-bottom {
-              width: 40px;
-              height: 40px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              }
-              .char-counter-inner {
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                background: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                }
-                .char-counter-text {
-                  font-size: 12px;
-                  font-weight: 500;
-                  }
-                  .char-counter-text.over-limit {
-                    color: #FF0000;
-        }
-        .char-counter-text.approaching-limit {
-          color: #FF9F1C;
-          }
-          .char-counter-text.normal {
-            color: #1B9AAA;
-            }
-            .image-preview-container {
-              overflow-x: auto;
-              scrollbar-width: thin;
-              scrollbar-color: #d1d5db transparent;
-              }
-              `}</style>
+      
 
-{!isAuthenticated ? (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
-            <button
-              onClick={() => router.push('/login')}
-              className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-            >
-              Log In
-            </button>
-          </div>
+         {!isAuthenticated ? (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
+          <button
+            onClick={() => router.push('/login')}
+            className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+          >
+            Log In
+          </button>
         </div>
-      ) : (
-        <div className="max-w-2xl mx-auto">
-          <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 post-composer">
-             
-            <div className="flex items-center mb-2 space-x-3">
-              <Image
-                src={user?.profilePicture}
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full "
-              />
-               <span className=" text-gray-700">@{user.username}</span>
-              {/* <span className="font-semibold text-gray-700">@{userInfo?.username || 'Loading...'}</span> */}
-            </div>
+      </div>
+    ) : (
+      <div className="max-w-2xl mx-auto">
+        <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 relative z-10">
+          <div className="flex items-center mb-2 space-x-3">
+            <Image
+              src={user?.profilePicture }
+              alt="Profile"
+              width={40}
+              height={40}
+              className="rounded-full w-[40] h-[40]"
+            />
+            <span className="text-gray-700">@{user.username}</span>
+          </div>
 
-            <div className="flex items-start space-x-3">
-              <textarea
-                className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="What's on your mind?"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onFocus={() => setIsInputFocused(true)}
-                onBlur={() => setIsInputFocused(text.trim().length > 0)}
-                onKeyDown={handleKeyPress}
-                rows={isInputFocused ? 5 : 2}
-                style={{ transition: 'all 0.3s ease' }}
-              />
-              <div>
-                <button
-                  onClick={handleMediaButtonClick}
-                  disabled={images.length >= MEDIA_LIMIT}
-                  className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
-                    images.length >= MEDIA_LIMIT ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  <PhotoIcon className="w-5 h-5 text-gray-600" />
-                </button>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  ref={fileInputRef}
-                  className="hidden"
-                />
-              </div>
-            </div>
+          <div className="flex items-start space-x-3">
+      
 
-            {images.length > 0 && (
-              <div className="mt-2 flex overflow-x-auto space-x-3 image-preview-container">
-                {images.map((img, index) => (
-                  <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden">
-                    <Image
-                      src={img}
-                      alt="Uploaded"
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 object-cover"
-                    />
-                    <button
-                      onClick={() => {
-                        setImages(prev => prev.filter((_, i) => i !== index));
-                        setImageFilters(prev => prev.filter((_, i) => i !== index));
-                      }}
-                      className="absolute top-1 right-1 bg-black/50 rounded-full p-1"
-                    >
-                      <XMarkIcon className="w-4 h-4 text-white" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between mt-2">
-              <div
-                className="char-counter-bottom"
-                style={{
-                  background: `linear-gradient(135deg, ${gradientColors.join(', ')})`
-                }}
-              >
-                <div className="char-counter-inner">
-                  <span
-                    className={`char-counter-text ${
-                      isOverLimit ? 'over-limit' :
-                      isApproachingLimit ? 'approaching-limit' :
-                      'normal'
-                    }`}
-                  >
-                    {MAX_CHAR_LIMIT - charCount}
-                  </span>
-                </div>
-              </div>
+            <textarea
+              className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              placeholder="What's on your mind?"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(text.trim().length > 0)}
+              onKeyDown={handleKeyPress}
+              rows={isInputFocused ? 5 : 2}
+            />
+            <div>
               <button
-                onClick={handleCreatePost}
-                disabled={!text.trim() && images.length === 0 || isOverLimit}
-                className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                onClick={handleMediaButtonClick}
+                disabled={images.length >= MEDIA_LIMIT}
+                className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
+                  images.length >= MEDIA_LIMIT ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14" />
-                  <path d="M12 5l7 7-7 7" />
-                </svg>
+                <PhotoIcon className="w-5 h-5 text-gray-600" />
               </button>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                ref={fileInputRef}
+                className="hidden"
+              />
             </div>
           </div>
 
-          {/* <div className="blur-content">
-            <div className="m-4 p-4 text-center text-gray-600">
-              No posts to display. Start sharing your thoughts!
+          {images.length > 0 && (
+            <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-thin scrollbar-thumb-gray-300">
+              {images.map((img, index) => (
+                <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden">
+                  <Image
+                    src={img}
+                    alt="Uploaded"
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 object-cover"
+                  />
+                  <button
+                    onClick={() => {
+                      setImages((prev) => prev.filter((_, i) => i !== index));
+                      setImageFilters((prev) => prev.filter((_, i) => i !== index));
+                    }}
+                    className="absolute top-1 right-1 bg-black/50 rounded-full p-1"
+                  >
+                    <XMarkIcon className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              ))}
             </div>
-          </div> */}
-        </div>
-      )}
+          )}
+<div className="flex justify-between mt-2">
+  
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{
+              background: `linear-gradient(135deg, ${gradientColors.join(', ')})`
+            }}
+          >
+            <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
+              <span
+                className={`text-xs font-medium ${
+                  isOverLimit
+                    ? 'text-red-600'
+                    : isApproachingLimit
+                    ? 'text-yellow-500'
+                    : 'text-cyan-600'
+                }`}
+              >
+                {MAX_CHAR_LIMIT - charCount}
+              </span>
+            </div>
+          </div>
 
+          <button
+            onClick={handleCreatePost}
+            disabled={
+              (!text.trim() && images.length === 0) || isOverLimit
+            }
+            className="p-2 cursor-pointer flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          >
+            {/* <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg> */}
+            Post
+          </button>
+           </div>
+            {progress > 0 && progress < 100 && (
+  <div className="w-full mt-2">
+    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+      <div
+        className="h-2 bg-blue-500 transition-all duration-300"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+    <p className="text-sm text-gray-600 mt-1">{Math.floor(progress)}% uploading...</p>
+  </div>
+)}
+       
+      </div>
+      </div>
+    )}
 
-      <div 
-        className=" overflow-y-auto blur-content"
-        onScroll={handleScroll}
-      >
+    <div
+      className={`overflow-y-auto transition-all duration-300 ${
+        isInputFocused || images.length > 0
+          ? 'blur-sm pointer-events-none'
+          : 'pointer-events-auto'
+      }`}
+      onScroll={handleScroll}
+    >
         {/* Post composer - only show on home tab */}
         {/* {activeTab === 'home' && (
           // <div className="m-4 p-3 bg-white rounded-xl shadow-sm border border-gray-100">
