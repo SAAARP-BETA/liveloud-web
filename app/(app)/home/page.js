@@ -919,18 +919,19 @@ const handleKeyPress = (e) => {
         <div className="max-w-2xl mx-auto">
           <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 post-composer">
              
-            <div className="flex items-center mb-2 space-x-3">
-              
-              <Image
-                src={user?.profilePicture}
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full "
-              />
-               <span className=" text-gray-700">@{user.username}</span>
-              {/* <span className="font-semibold text-gray-700">@{userInfo?.username || 'Loading...'}</span> */}
-            </div>
+           <div className="flex items-center mb-2 space-x-3">
+  <div className="w-10 h-10 rounded-full overflow-hidden">
+    <Image
+      src={user?.profilePicture}
+      alt="Profile"
+      width={40}
+      height={40}
+      className="object-cover w-full h-full"
+    />
+  </div>
+  <span className="text-gray-700">@{user?.username}</span>
+</div>
+
 
             <div className="flex items-start space-x-3">
               <textarea
