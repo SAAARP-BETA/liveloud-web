@@ -27,3 +27,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 } */
+
+/* src/app/globals.css or equivalent */
+
+/* For Webkit browsers (Chrome, Safari, Edge) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0px; /* Hide vertical scrollbar */
+  height: 0px; /* Hide horizontal scrollbar */
+  background: transparent; /* Make scrollbar track transparent */
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  -ms-overflow-style: none;  /* Hide scrollbar in IE and Edge */
+  scrollbar-width: none;  /* Hide scrollbar in Firefox */
+}

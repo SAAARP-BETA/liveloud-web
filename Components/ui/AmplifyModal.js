@@ -15,7 +15,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
       onClose();
       return;
     }
-
+    
     try {
       setLoading(true);
       const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/amplify`, {
