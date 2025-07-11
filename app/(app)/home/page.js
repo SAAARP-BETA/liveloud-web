@@ -429,7 +429,7 @@ const HomePage = () => {
       setProgress(75); // Before upload
 
       const res = await fetch(`${API_ENDPOINTS.MEDIA}/post`, {
-        const res = await fetch(`${API_ENDPOINTS.MEDIA}/post`, {
+        // const res = await fetch(`${API_ENDPOINTS.MEDIA}/post`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

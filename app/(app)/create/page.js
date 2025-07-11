@@ -747,118 +747,136 @@ const handleSubmit = useCallback(async () => {
       </div>
 
       {/* Media Options Modal */}
-      {showMediaOptions && (
-        <div className="fixed inset-0  bg-black/50  flex items-end z-50">
-        {/* //  <div className=" inset-0   bg-gray/50  flex items-end z-50"> */}
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg p-4 m-8"> 
-            {/* max-w-md mx-auto */}
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Add Media</h3>
-              <button onClick={() => setShowMediaOptions(false)}>
-                <X size={24} />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <label className="flex items-center p-3 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
-                <Camera className="text-blue-500 mr-3" size={24} />
-                <span>Upload Photos</span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
+{showMediaOptions && (
+  <>
+    <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowMediaOptions(false)}></div>
+    <div className="relative z-60">
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg"
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Add Media</h3>
+          <button onClick={() => setShowMediaOptions(false)} className="text-gray-600 hover:text-gray-900">
+            <X size={24} />
+          </button>
         </div>
-      )}
+        <div className="space-y-3">
+          <label className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+            <Camera className="text-blue-500 mr-3" size={24} />
+            <span>Upload Photos</span>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  </>
+)}
 
       {/* Location Modal */}
-      {showLocationModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg p-4 m-8">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Add Location</h3>
-              <button onClick={() => setShowLocationModal(false)}>
-                <X size={24} />
-              </button>
-            </div>
-            <div className="space-y-2">
-              {['New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX'].map((loc, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleLocationSelect(loc)}
-                  className="w-full text-left p-3 hover:bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center">
-                    <MapPin className="text-gray-400 mr-3" size={20} />
-                    <span>{loc}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+{showLocationModal && (
+  <>
+    <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowLocationModal(false)}></div>
+    <div className="relative z-60">
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg"
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Add Location</h3>
+          <button onClick={() => setShowLocationModal(false)} className="text-gray-600 hover:text-gray-900">
+            <X size={24} />
+          </button>
         </div>
-      )}
+        <div className="space-y-2">
+          {['New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX'].map((loc, index) => (
+            <button
+              key={index}
+              onClick={() => handleLocationSelect(loc)}
+              className="w-full text-left p-3 hover:bg-gray-50 rounded-lg"
+            >
+              <div className="flex items-center">
+                <MapPin className="text-gray-400 mr-3" size={20} />
+                <span>{loc}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  </>
+)}
 
       {/* People Tag Modal */}
-      {showPeopleTagModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg m-8 p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Tag People</h3>
-              <button onClick={() => setShowPeopleTagModal(false)}>
-                <X size={24} />
-              </button>
-            </div>
-            <div className="space-y-2">
-              {samplePeople.map((person, index) => (
-                <button
-                  key={index}
-                  onClick={() => handlePeopleTag(person)}
-                  className="w-full text-left cursor-pointer p-3 hover:bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full mr-3"></div>
-                    <span>{person}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+ {showPeopleTagModal && (
+  <>
+    <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowPeopleTagModal(false)}></div>
+    <div className="relative z-60">
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg"
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Tag People</h3>
+          <button onClick={() => setShowPeopleTagModal(false)} className="text-gray-600 hover:text-gray-900">
+            <X size={24} />
+          </button>
         </div>
-      )}
+        <div className="space-y-2">
+          {samplePeople.map((person, index) => (
+            <button
+              key={index}
+              onClick={() => handlePeopleTag(person)}
+              className="w-full text-left cursor-pointer p-3 hover:bg-gray-50 rounded-lg"
+            >
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-300 rounded-full mr-3"></div>
+                <span>{person}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  </>
+)}
 
       {/* Feeling Modal */}
-      {showFeelingModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg m-8 p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">How are you feeling?</h3>
-              <button onClick={() => setShowFeelingModal(false)}>
-                <X size={24} />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {feelings.map((feeling, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setSelectedFeeling(feeling);
-                    setShowFeelingModal(false);
-                  }}
-                  className="flex items-center p-3 hover:bg-gray-50 rounded-lg"
-                >
-                  <span className="text-2xl mr-3">{feeling.icon}</span>
-                  <span>{feeling.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+{showFeelingModal && (
+  <>
+    <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowFeelingModal(false)}></div>
+    <div className="relative z-60">
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg"
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">How are you feeling?</h3>
+          <button onClick={() => setShowFeelingModal(false)} className="text-gray-600 hover:text-gray-900">
+            <X size={24} />
+          </button>
         </div>
-      )}
+        <div className="grid grid-cols-2 gap-3">
+          {feelings.map((feeling, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setSelectedFeeling(feeling);
+                setShowFeelingModal(false);
+              }}
+              className="flex items-center p-3 hover:bg-gray-50 rounded-lg"
+            >
+              <span className="text-2xl mr-3">{feeling.icon}</span>
+              <span>{feeling.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  </>
+)}
 
       {/* Image Editor Modal */}
       {showImageEditor && editingImageIndex !== null && (
