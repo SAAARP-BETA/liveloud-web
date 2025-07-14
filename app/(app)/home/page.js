@@ -1136,6 +1136,8 @@ return (
               setSelectedPost={setSelectedPost}
               setModalVisible={setModalVisible}
               username={user} // Fixed syntax
+              handleDislikePost={postHandlers.handleDislikePost}
+                handleUndislikePost={postHandlers.handleUndislikePost}
             />
           ))}
         </div>

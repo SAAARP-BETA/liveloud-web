@@ -25,6 +25,8 @@ const PostCard = ({
   setSelectedPost,
   setModalVisible,
   username,
+  handleDislikePost,
+  handleUndislikePost
 }) => {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -336,6 +338,7 @@ const PostCard = ({
 
       {/* Post actions */}
       <div className="flex items-center justify-around py-3 border-t border-gray-100">
+                {/* Like Button - Thumbs Up */}
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => (isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id))}
@@ -351,6 +354,23 @@ const PostCard = ({
           </span>
         </button>
 
+        {/* Dislike Button - Thumbs Down */}
+        <button
+          className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+          onClick={() => (isDisliked ? handleUndislikePost(post.id) : handleDislikePost(post.id))}
+        >
+          <Heart
+            size={18}
+            className={isDisliked ? "text-orange-500 fill-current" : "text-gray-600"}
+          />
+          <span
+            className={`ml-2 text-sm font-medium ${isDisliked ? "text-orange-500" : "text-gray-600"}`}
+          >
+            Dislike
+          </span>
+        </button>
+
+        {/* Comment Button */}
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleCommentPost(post)}
@@ -361,6 +381,7 @@ const PostCard = ({
           </span>
         </button>
 
+        {/* Amplify Button */}
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleAmplifyPost(post)}
@@ -371,6 +392,7 @@ const PostCard = ({
           </span>
         </button>
 
+        {/* Bookmark Button */}
         <button
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() =>
