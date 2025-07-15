@@ -46,25 +46,25 @@ import CustomModal from '@/Components/ui/Modal';
 import ReportModal from '@/Components/ui/ReportModal';
 import Image from 'next/image';
 // import {
-//   Plus as PlusIcon,
-//   Image as PhotoIcon,
-//   MessageCircle as ChatBubbleOvalLeftIcon,
-//   RefreshCcw as ArrowPathIcon,
-//   Bookmark as BookmarkIcon,
-//   MoreHorizontal as EllipsisHorizontalIcon,
-//   UserPlus as UserPlusIcon,
-//   UserMinus as UserMinusIcon,
-//   Info as InformationCircleIcon,
-//   Flag as FlagIcon,
-//   EyeOff as EyeSlashIcon,
-//   X as XMarkIcon,
-//   Trash2 as TrashIcon,
-//   Link as LinkIcon
+//   Plus as PlusIcon,
+//   Image as PhotoIcon,
+//   MessageCircle as ChatBubbleOvalLeftIcon,
+//   RefreshCcw as ArrowPathIcon,
+//   Bookmark as BookmarkIcon,
+//   MoreHorizontal as EllipsisHorizontalIcon,
+//   UserPlus as UserPlusIcon,
+//   UserMinus as UserMinusIcon,
+//   Info as InformationCircleIcon,
+//   Flag as FlagIcon,
+//   EyeOff as EyeSlashIcon,
+//   X as XMarkIcon,
+//   Trash2 as TrashIcon,
+//   Link as LinkIcon
 // } from 'lucide-react';
 
 // import {
-//   Heart as HeartIconSolid,
-//   Bookmark as BookmarkIconSolid
+//   Heart as HeartIconSolid,
+//   Bookmark as BookmarkIconSolid
 // } from 'lucide-react';
 import {
   createPostHandlers,
@@ -73,6 +73,9 @@ import {
 
 const MAX_CHAR_LIMIT = 1000;
 const MEDIA_LIMIT = 4;
+// --- FIX: Define the page limit as a constant ---
+const POST_LIMIT = 10;
+
 
 // Constants
 const REFRESH_INTERVAL = 60000; // 1 minute
@@ -141,22 +144,22 @@ const HomePage = () => {
   const fileInputRef = useRef(null);
 
   // useEffect(() => {
-  //   const fetchUserInfo = async () => {
-  //     if (user?.username) {
-  //       try {
-  //         const res = await fetch(`${API_ENDPOINTS.USERS}/profiles/${user.username}`);
-  //         console.log("res", res);
+  //   const fetchUserInfo = async () => {
+  //     if (user?.username) {
+  //       try {
+  //         const res = await fetch(`${API_ENDPOINTS.USERS}/profiles/${user.username}`);
+  //         console.log("res", res);
 
-  //         if (!res.ok) throw new Error('Failed to fetch user info');
-  //         const data = await res.json();
-  //         setUserInfo(data);
-  //         console.log('User Info:', data);
-  //       } catch (err) {
-  //         console.error(err);
-  //       }
-  //     }
-  //   };
-  //   fetchUserInfo();
+  //         if (!res.ok) throw new Error('Failed to fetch user info');
+  //         const data = await res.json();
+  //         setUserInfo(data);
+  //         console.log('User Info:', data);
+  //       } catch (err) {
+  //         console.error(err);
+  //       }
+  //     }
+  //   };
+  //   fetchUserInfo();
   // }, [user]);
 
   // Helper function to update tab data
@@ -287,7 +290,7 @@ const HomePage = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=10`;
+      const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
 
       const response = await fetch(url, {
         headers,
@@ -327,13 +330,13 @@ const HomePage = () => {
         throw new Error('Invalid server response format');
       }
 
-      // Update pagination info
-      const hasMore = data.currentPage < data.totalPages;
-
       // Process posts
       const formattedPosts = data.posts
         .map((post, index) => post ? formatPostFromApi(post, index) : null)
         .filter(Boolean);
+
+      // --- FIX: More robust way to determine if there are more posts ---
+      const hasMore = formattedPosts.length === POST_LIMIT;
 
       // Update state
       if (refresh) {
@@ -694,17 +697,17 @@ const HomePage = () => {
 
 
   // const handleCreatePost = () => {
-  //   if (!isAuthenticated) {
-  //     alert('Please login to create posts');
-  //     return;
-  //   }
+  //   if (!isAuthenticated) {
+  //     alert('Please login to create posts');
+  //     return;
+  //   }
 
-  //   if (text.trim()) {
-  //     router.push(`/create/createpost?initialText=${encodeURIComponent(text)}`);
-  //     setText('');
-  //   } else {
-  //     router.push('/create/createpost');
-  //   }
+  //   if (text.trim()) {
+  //     router.push(`/create/createpost?initialText=${encodeURIComponent(text)}`);
+  //     setText('');
+  //   } else {
+  //     router.push('/create/createpost');
+  //   }
   // };
 
   // Check follow status for menu options
@@ -908,48 +911,28 @@ const HomePage = () => {
 
   const currentTabData = getCurrentTabData();
   const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
-  useEffect(() => {
-    console.log("Posts data:", currentTabData.posts);
-  }, [currentTabData.posts]); // Dependency on posts data
-  // Infinite scroll handler
-  useEffect(() => {
-    let timeoutId;
 
-    const handleScrollBottom = () => {
-      // Clear previous timeout to debounce scroll events
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+  // --- Intersection Observer for Infinite Scroll ---
+  const observer = useRef();
+  const lastPostElementRef = useCallback(node => {
+    // If we are currently loading, do nothing.
+    if (currentTabData.loading) return;
+    // Disconnect the old observer.
+    if (observer.current) observer.current.disconnect();
+
+    // Create a new observer.
+    observer.current = new IntersectionObserver(entries => {
+      // If the last post is visible and there are more posts to fetch, load them.
+      if (entries[0].isIntersecting && currentTabData.hasMore) {
+        fetchFeed(activeTab, currentTabData.page + 1);
       }
+    });
 
-      timeoutId = setTimeout(() => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollHeight = document.documentElement.scrollHeight;
-        const clientHeight = window.innerHeight;
+    // Observe the new last post element.
+    if (node) observer.current.observe(node);
+  }, [currentTabData.loading, currentTabData.hasMore, activeTab, fetchFeed]);
 
-        // Check if we're near the bottom (100px threshold)
-        if (scrollTop + clientHeight >= scrollHeight - 100) {
-          // Get fresh state data instead of relying on closure
-          setTabData(currentTabData => {
-            const activeTabData = currentTabData[activeTab];
-            if (!activeTabData.loading && activeTabData.hasMore) {
-              const nextPage = activeTabData.page + 1;
-              fetchFeed(activeTab, nextPage);
-            }
-            return currentTabData;
-          });
-        }
-      }, 100); // Debounce scroll events
-    };
 
-    window.addEventListener('scroll', handleScrollBottom, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScrollBottom);
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [activeTab, fetchFeed]);
   return (
     <div className=" max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
       {/* Tab Bar */}
@@ -1068,19 +1051,6 @@ const HomePage = () => {
                 }
                 className="p-2 cursor-pointer flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
-                {/* <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h14" />
-              <path d="M12 5l7 7-7 7" />
-            </svg> */}
                 Post
               </button>
             </div>
@@ -1106,40 +1076,6 @@ const HomePage = () => {
           : 'pointer-events-auto'
           }`}
       >
-        {/* Post composer - only show on home tab */}
-        {/* {activeTab === 'home' && (
-          // <div className="m-4 p-3 bg-white rounded-xl shadow-sm border border-gray-100">
-          //   <div className="flex items-center">
-          //     <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 relative overflow-hidden">
-          //       {isAuthenticated && user?.profilePicture ? (
-          //         <Image
-          //           src={user.profilePicture}
-          //           alt="Profile"
-          //           fill
-          //           className="object-cover"
-          //         />
-          //       ) : (
-          //         <div className="w-full h-full bg-gray-300" />
-          //       )}
-          //     </div>
-
-          //     <button
-          //       onClick={handleCreatePost}
-          //       className="flex-1 bg-gray-100 py-3 px-4 rounded-full text-left text-gray-500 hover:bg-gray-200 transition-colors"
-          //     >
-          //       What's on your mind?
-          //     </button>
-
-          //     <button
-          //       className="ml-3 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
-          //       onClick={handleCreatePost}
-          //     >
-          //       <ImageIcon size={20} className="text-gray-600" />
-          //     </button>
-          //   </div>
-          // </div>
-        )} */}
-
         {/* Error states */}
         {error && activeTab === 'home' && (
           <div className="p-4 mx-4 mt-4 bg-red-50 rounded-xl border border-red-100">
@@ -1157,30 +1093,57 @@ const HomePage = () => {
           </div>
         )}
 
-
-        {/* Posts list */}
-        {currentTabData.posts.length > 0 ? (
-          <div>
-            {console.log("Posts data:", currentTabData.posts)}
-            {currentTabData.posts.map((post, index) => (
-              <PostCard
-                key={post.id || index}
-                post={post}
-                handleLikePost={postHandlers.handleLikePost}
-                handleUnlikePost={postHandlers.handleUnlikePost}
-                handleCommentPost={postHandlers.handleCommentPost}
-                handleAmplifyPost={postHandlers.handleAmplifyPost}
-                handleBookmarkPost={postHandlers.handleBookmarkPost}
-                handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                setSelectedPost={setSelectedPost}
-                setModalVisible={setModalVisible}
-                username={user} // Fixed syntax
-                handleDislikePost={postHandlers.handleDislikePost}
-                handleUndislikePost={postHandlers.handleUndislikePost}
-              />
-            ))}
+        {/* Initial loading indicator */}
+        {currentTabData.loading && currentTabData.posts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-16">
+            <Loader2 className="w-10 h-10 text-sky-500 animate-spin mb-4" />
+            <p className="text-lg text-gray-600">Loading fresh posts for you...</p>
           </div>
-        ) : !currentTabData.loading ? (
+        ) : currentTabData.posts.length > 0 ? (
+          <div>
+            {currentTabData.posts.map((post, index) => {
+              // Attach ref to the last post element
+              if (currentTabData.posts.length === index + 1) {
+                return (
+                  <div ref={lastPostElementRef} key={post.id}>
+                    <PostCard
+                      post={post}
+                      handleLikePost={postHandlers.handleLikePost}
+                      handleUnlikePost={postHandlers.handleUnlikePost}
+                      handleCommentPost={postHandlers.handleCommentPost}
+                      handleAmplifyPost={postHandlers.handleAmplifyPost}
+                      handleBookmarkPost={postHandlers.handleBookmarkPost}
+                      handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                      setSelectedPost={setSelectedPost}
+                      setModalVisible={setModalVisible}
+                      username={user}
+                      handleDislikePost={postHandlers.handleDislikePost}
+                      handleUndislikePost={postHandlers.handleUndislikePost}
+                    />
+                  </div>
+                );
+              } else {
+                return (
+                  <PostCard
+                    key={post.id || index}
+                    post={post}
+                    handleLikePost={postHandlers.handleLikePost}
+                    handleUnlikePost={postHandlers.handleUnlikePost}
+                    handleCommentPost={postHandlers.handleCommentPost}
+                    handleAmplifyPost={postHandlers.handleAmplifyPost}
+                    handleBookmarkPost={postHandlers.handleBookmarkPost}
+                    handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                    setSelectedPost={setSelectedPost}
+                    setModalVisible={setModalVisible}
+                    username={user}
+                    handleDislikePost={postHandlers.handleDislikePost}
+                    handleUndislikePost={postHandlers.handleUndislikePost}
+                  />
+                );
+              }
+            })}
+          </div>
+        ) : (
           <EmptyFeed
             isAuthenticated={isAuthenticated}
             handleCreatePost={handleCreatePost}
@@ -1192,16 +1155,8 @@ const HomePage = () => {
               }
             }}
           />
-        ) : null}
-        {/* Load more trigger area - makes it more obvious when loading */}
-        {currentTabData.posts.length > 0 && currentTabData.hasMore && !currentTabData.loading && (
-          <div className="py-6 text-center">
-            <div className="inline-flex items-center space-x-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-full">
-              <div className="animate-pulse w-2 h-2 bg-gray-400 rounded-full"></div>
-              <span className="text-sm">Scroll down for more posts</span>
-            </div>
-          </div>
         )}
+
 
         {/* Loading state for more posts */}
         {currentTabData.loading && currentTabData.posts.length > 0 && (
@@ -1248,8 +1203,8 @@ const HomePage = () => {
 
         <div className="p-4">
           {/* <h3 className="text-lg font-bold text-gray-800 mb-2">
-            Post options
-          </h3> */}
+            Post options
+          </h3> */}
 
           {selectedPost && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">

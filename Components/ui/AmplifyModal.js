@@ -89,7 +89,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 rounded-2xl">
-      <div className="absolute inset-0" onClick={onClose} />
+      <div className="absolute cursor-pointer inset-0" onClick={onClose} />
       <div className="bg-white rounded-2xl w-full max-w-lg mx-4 relative transform transition-all duration-300">
         <div className="w-full flex items-center justify-center pt-4 pb-2">
           <div className="w-10 h-1 bg-gray-300 rounded" />
@@ -97,10 +97,10 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
 
         {mode === 'options' ? (
           <>
-            <div className="p-4">
+            <div className="p-4 ">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-bold text-gray-800">Amplify this post</h2>
-                <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+                <button onClick={onClose} className="p-2 cursor-pointer hover:bg-gray-100 rounded-full">
                   <X size={20} className="text-gray-600" />
                 </button>
               </div>
@@ -124,8 +124,8 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
               <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
                 <Repeat size={20} className="text-gray-600" />
               </div>
-              <div className="flex-1 text-left">
-                <p className="font-medium text-gray-800">Amplify</p>
+              <div className="flex-1 cursor-pointer text-left">
+                <p className="font-medium  text-gray-800">Amplify</p>
                 <p className="text-sm text-gray-600">Share this post with your followers</p>
               </div>
               {loading && <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />}
@@ -138,7 +138,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
               <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
                 <Edit size={20} className="text-gray-600" />
               </div>
-              <div className="flex-1 text-left">
+              <div className="flex-1 cursor-pointer text-left">
                 <p className="font-medium text-gray-800">Quote</p>
                 <p className="text-sm text-gray-600">Add your own thoughts to this post</p>
               </div>
