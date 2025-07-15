@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 // import { fonts } from '../../utils/fonts';
 // import Navbar from "../../components/Navbar";
 import { API_ENDPOINTS } from '../../utils/config';
-import {User, Heart, Pencil, Star, Trophy, Medal} from "lucide-react"
+import { User, Heart, Pencil, Star, Trophy, Medal } from "lucide-react"
 
 // Fixed Tab Component
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
@@ -19,9 +19,8 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
           return (
             <button
               key={tab.key}
-              className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${
-                isActive ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-              }`}
+              className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
               onClick={() => onTabPress(tab.key)}
               style={{
                 boxShadow: isActive ? '0 2px 4px rgba(14, 165, 233, 0.1)' : 'none',
@@ -52,25 +51,25 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       case 1:
         return (
           <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-            <i className="fas fa-crown text-white text-sm"><Trophy/></i>
+            <i className="fas fa-crown text-white text-sm"><Trophy /></i>
           </div>
         );
       case 2:
         return (
           <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-            <i className="fas fa-medal text-white text-sm"><Medal/></i>
+            <i className="fas fa-medal text-white text-sm"><Medal /></i>
           </div>
         );
       case 3:
         return (
           <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-            <i className="fas fa-medal text-white text-sm"><Medal/></i>
+            <i className="fas fa-medal text-white text-sm"><Medal /></i>
           </div>
         );
       default:
         return (
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-            <span  className="text-gray-600 text-sm">
+            <span className="text-gray-600 text-sm">
               {rank}
             </span>
           </div>
@@ -99,9 +98,8 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
 
   return (
     <div
-      className={`flex items-center p-4 mx-4 mb-3 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${
-        isCurrentUser ? 'bg-sky-50 border-2 border-sky-300' : 'bg-white shadow-sm hover:shadow-md'
-      }`}
+      className={`flex items-center p-4 mx-4 mb-3 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${isCurrentUser ? 'bg-sky-50 border-2 border-sky-300' : 'bg-white shadow-sm hover:shadow-md'
+        }`}
       onClick={() => onPress(item.user)}
     >
       {/* Rank */}
@@ -111,18 +109,18 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
 
       {/* Profile Picture */}
       <div className="w-12 h-12 rounded-full ml-2 bg-gradient-to-br from-sky-100 to-blue-200 flex items-center justify-center border-2 border-white">
-        <i className="fas fa-user text-sky-500 text-lg"><User/></i>
+        <i className="fas fa-user text-sky-500 text-lg"><User /></i>
       </div>
 
       {/* User Info */}
       <div className="flex-1 ml-3">
         <div className="flex items-center">
-          <span  className="text-gray-900 text-base">
+          <span className="text-gray-900 text-base">
             User #{item?.user?.slice(-6)}
           </span>
           {isCurrentUser && (
             <div className="ml-2 px-2 py-1 bg-sky-500 rounded-full">
-              <span  className="text-xs text-white">
+              <span className="text-xs text-white">
                 You
               </span>
             </div>
@@ -145,7 +143,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
         <div className="text-lg text-gray-900">
           {item.totalPoints.toLocaleString()}
         </div>
-        <div  className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500">
           points
         </div>
       </div>
@@ -205,7 +203,7 @@ export default function LeaderboardPage() {
 
       const currentPage = resetData ? 1 : page;
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-      
+
       const response = await fetch(
         `${API_ENDPOINTS.POINTS}/leaderboard?type=${activeTab}&page=${currentPage}&limit=20`,
         { headers }
@@ -216,7 +214,7 @@ export default function LeaderboardPage() {
       }
 
       const data = await response.json();
-      
+
       if (resetData) {
         setLeaderboardData(data.leaderboard || []);
       } else {
@@ -230,7 +228,7 @@ export default function LeaderboardPage() {
         const userIndex = data.leaderboard?.findIndex(
           item => item.user === currentUser._id
         );
-        
+
         if (userIndex !== -1) {
           setUserPosition({
             rank: (currentPage - 1) * 20 + userIndex + 1,
@@ -306,7 +304,7 @@ export default function LeaderboardPage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto"></div>
-            <p  className="mt-4 text-gray-600">
+            <p className="mt-4 text-gray-600">
               Loading leaderboard...
             </p>
           </div>
@@ -331,7 +329,7 @@ export default function LeaderboardPage() {
         {/* My Points Summary */}
         {isAuthenticated && myPoints && (
           <div className="mx-4 my-4 rounded-xl overflow-hidden">
-            <div 
+            <div
               className="p-5 bg-gradient-to-r from-sky-500 to-blue-600"
               style={{
                 background: 'linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%)'
@@ -339,10 +337,10 @@ export default function LeaderboardPage() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p  className="text-white/80 text-sm">
+                  <p className="text-white/80 text-sm">
                     Your Total Points
                   </p>
-                  <p  className="text-white text-2xl mt-1">
+                  <p className="text-white text-2xl mt-1">
                     {myPoints.totalPoints?.toLocaleString() || '0'}
                   </p>
                 </div>
@@ -355,36 +353,36 @@ export default function LeaderboardPage() {
                   </span>
                 </button>
               </div>
-              
+
               {/* Points Breakdown */}
               <div className="flex justify-between pt-4 border-t border-white/20">
                 <div className="items-center flex-1 text-center">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <i className="fas fa-edit text-white text-lg"><Pencil/></i>
+                    <i className="fas fa-edit text-white text-lg"><Pencil /></i>
                   </div>
-                  <p  className="text-white text-lg">
+                  <p className="text-white text-lg">
                     {myPoints.creatorPoints || 0}
                   </p>
-                  <p  className="text-white/80 text-xs">
+                  <p className="text-white/80 text-xs">
                     Creator
                   </p>
                 </div>
                 <div className="items-center flex-1 text-center">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <i className="fas fa-heart text-white text-lg"><Heart/></i>
+                    <i className="fas fa-heart text-white text-lg"><Heart /></i>
                   </div>
                   <p className="text-white text-lg">
                     {myPoints.fanPoints || 0}
                   </p>
-                  <p  className="text-white/80 text-xs">
+                  <p className="text-white/80 text-xs">
                     Fan
                   </p>
                 </div>
                 <div className="items-center flex-1 text-center">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <i className="fas fa-star text-white text-lg"><Star/></i>
+                    <i className="fas fa-star text-white text-lg"><Star /></i>
                   </div>
-                  <p  className="text-white text-lg">
+                  <p className="text-white text-lg">
                     {myPoints.bonusPoints || 0}
                   </p>
                   <p className="text-white/80 text-xs">
@@ -398,7 +396,7 @@ export default function LeaderboardPage() {
 
         {/* Leaderboard title */}
         <div className="px-4 py-2">
-          <h2  className="text-gray-800 text-lg">
+          <h2 className="text-gray-800 text-lg">
             🏆 Top Users
           </h2>
         </div>
@@ -415,7 +413,7 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Leaderboard Items */}
-        <div 
+        <div
           className="max-h-96 overflow-y-auto"
           onScroll={handleScroll}
         >
