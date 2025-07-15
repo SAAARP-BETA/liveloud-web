@@ -1,5 +1,5 @@
 "use client";
-
+import defaultPic from "../../assets/default-avatar.jpg";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,8 @@ import {
   MessageCircle,
   Repeat,
   Bookmark,
-  Heart,
+  ThumbsUp,
+  ThumbsDown,
   CheckCircle,
 } from "lucide-react";
 import { useAuth } from "../../app/context/AuthContext";
@@ -124,7 +125,7 @@ const PostCard = ({
     if (post.user === user._id) {
       router.push("/profile"); // own profile
     } else {
-      router.push(`/user/${post.username}`); // someone else's profile
+      router.push(`/UserProfile/${post.username}`); // someone else's profile
     }
   };
 
@@ -159,7 +160,7 @@ const PostCard = ({
               src={
                 isAuthenticated && post.profilePic?.trim()
                   ? post.profilePic
-                  : "/default-profile.png"
+                  : defaultPic.src
               }
               alt="Profile"
               fill
@@ -343,12 +344,12 @@ const PostCard = ({
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => (isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id))}
         >
-          <Heart
+          <ThumbsUp
             size={18}
-            className={isLiked ? "text-red-500 fill-current" : "text-gray-600"}
+            className={isLiked ? "text-blue-500 fill-current" : "text-gray-600"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${isLiked ? "text-red-500" : "text-gray-600"}`}
+            className={`ml-2 text-sm font-medium ${isLiked ? "text-blue-500" : "text-gray-600"}`}
           >
             Like
           </span>
@@ -359,7 +360,7 @@ const PostCard = ({
           className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => (isDisliked ? handleUndislikePost(post.id) : handleDislikePost(post.id))}
         >
-          <Heart
+          <ThumbsDown
             size={18}
             className={isDisliked ? "text-orange-500 fill-current" : "text-gray-600"}
           />
