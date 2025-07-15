@@ -684,12 +684,13 @@ const onRefresh = useCallback(() => {
 }, [fetchFeed, activeTab]);
 
 const handleLoadMore = useCallback(() => {
-  const currentTabData = getCurrentTabData();
+  const currentTabData = tabData[activeTab];
   if (!currentTabData.loading && currentTabData.hasMore) {
     const nextPage = currentTabData.page + 1;
     fetchFeed(activeTab, nextPage);
   }
-}, [getCurrentTabData, fetchFeed, activeTab]);
+}, [activeTab, fetchFeed]); // Remove tabData from dependencies to prevent stale closure
+
 
 // const handleCreatePost = () => {
 //   if (!isAuthenticated) {
@@ -884,7 +885,7 @@ const renderTabBar = () => (
           <button
             key={feedType.key}
             onClick={() => canAccess && handleTabChange(feedType.key)}
-            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${isActive
+            className={`px-4 py-2 rounded-full cursor-pointer whitespace-nowrap text-sm font-medium transition-colors ${isActive
                 ? 'bg-sky-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               } ${!canAccess ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -906,12 +907,47 @@ const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
 useEffect(() => {
   console.log("Posts data:", currentTabData.posts);
 }, [currentTabData.posts]); // Dependency on posts data
+// Infinite scroll handler
+useEffect(() => {
+  let timeoutId;
+  
+  const handleScrollBottom = () => {
+    // Clear previous timeout to debounce scroll events
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    
+    timeoutId = setTimeout(() => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+      
+      // Check if we're near the bottom (100px threshold)
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        // Get fresh state data instead of relying on closure
+        setTabData(currentTabData => {
+          const activeTabData = currentTabData[activeTab];
+          if (!activeTabData.loading && activeTabData.hasMore) {
+            const nextPage = activeTabData.page + 1;
+            fetchFeed(activeTab, nextPage);
+          }
+          return currentTabData;
+        });
+      }
+    }, 100); // Debounce scroll events
+  };
 
+  window.addEventListener('scroll', handleScrollBottom, { passive: true });
+  
+  return () => {
+    window.removeEventListener('scroll', handleScrollBottom);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  };
+}, [activeTab, fetchFeed]);
 return (
   <div className=" max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
-    {/* Custom Header */}
-    {/* <Navbar /> */}
-
     {/* Tab Bar */}
     {renderTabBar()}
 
@@ -922,7 +958,7 @@ return (
           <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
           <button
             onClick={() => router.push('/login')}
-            className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+            className="px-4 py-2 bg-blue-500 cursor-pointer text-white rounded-full hover:bg-blue-600"
           >
             Log In
           </button>
@@ -930,7 +966,7 @@ return (
       </div>
     ) : (
       <div className="max-w-2xl mx-auto">
-        <div className="m-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 relative z-10">
+        <div className="m-4 p-4 bg-white cursor-pointer rounded-xl shadow-sm border border-gray-200 relative z-10">
           <div className="flex items-center mb-2 space-x-3">
             <Image
               src={user?.profilePicture}
@@ -939,7 +975,7 @@ return (
               height={40}
               className="rounded-full w-[40] h-[40]"
             />
-            <span className="text-gray-700">@{user.username}</span>
+            <span className="text-gray-700 cursor-pointer">@{user.username}</span>
           </div>
 
           <div className="flex items-start space-x-3">
@@ -962,7 +998,7 @@ return (
                 className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${images.length >= MEDIA_LIMIT ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
               >
-                <PhotoIcon className="w-5 h-5 text-gray-600" />
+                <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600" />
               </button>
               <input
                 type="file"
@@ -1065,7 +1101,6 @@ return (
           ? 'blur-sm pointer-events-none'
           : 'pointer-events-auto'
         }`}
-      onScroll={handleScroll}
     >
       {/* Post composer - only show on home tab */}
       {/* {activeTab === 'home' && (
@@ -1152,21 +1187,34 @@ return (
           }}
         />
       ) : null}
-      {/* Loading indicator */}
-      {currentTabData.loading && !refreshing && (
-        <div className="py-8 flex justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
-        </div>
-      )}
+{/* Load more trigger area - makes it more obvious when loading */}
+{currentTabData.posts.length > 0 && currentTabData.hasMore && !currentTabData.loading && (
+  <div className="py-6 text-center">
+    <div className="inline-flex items-center space-x-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-full">
+      <div className="animate-pulse w-2 h-2 bg-gray-400 rounded-full"></div>
+      <span className="text-sm">Scroll down for more posts</span>
+    </div>
+  </div>
+)}
 
-      {/* End of feed message */}
-      {!currentTabData.loading && currentTabData.posts.length > 5 && !currentTabData.hasMore && (
-        <div className="py-8 text-center">
-          <p className="text-gray-500 font-medium">
-            You're all caught up!
-          </p>
-        </div>
-      )}
+{/* Loading state for more posts */}
+{currentTabData.loading && currentTabData.posts.length > 0 && (
+  <div className="py-6 text-center">
+    <div className="inline-flex items-center space-x-3 bg-blue-50 px-6 py-3 rounded-full">
+      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+      <span className="text-blue-600 font-medium">Loading more posts...</span>
+    </div>
+  </div>
+)}
+
+{/* End of feed indicator */}
+{!currentTabData.loading && currentTabData.posts.length > 5 && !currentTabData.hasMore && (
+  <div className="py-8 text-center">
+    <div className="inline-flex items-center space-x-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-full">
+      <span className="text-sm font-medium">You're all caught up!</span>
+    </div>
+  </div>
+)}
 
       {/* Bottom padding for scrolling behind floating button */}
       <div className="h-20" />
