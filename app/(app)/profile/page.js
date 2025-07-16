@@ -32,7 +32,7 @@ import {
   Flag,
   Flame,
   MapPin,
-  Link as LinkIcon,
+ LinkIcon,
   Calendar,
   Grid,
   Trophy,
@@ -309,9 +309,9 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
-    <div className="min-h-screen flex justify-center bg-gray-50">
-      <div className="w-full max-w-2xl">
-        <div className="fixed top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
+    <div className="flex justify-center bg-gray-50">
+      <div className="w-full ">
+        <div className=" top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
         <div className="pt-40">
           <div className="flex justify-center -mt-12">
             <div className="w-24 h-24 rounded-full bg-gray-300 border-4 border-white animate-pulse" />
@@ -955,7 +955,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-2xl flex flex-col items-center relative">
+      <div className="w-xl max-sm:w-100 flex flex-col items-center relative">
        {/* Scrollable Content */}
 <div
   className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
@@ -1118,12 +1118,20 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                       </span>
                     </div>
                   )}
-                  {user.website && (
+                 {user?.website && (
                     <div className="flex items-center mb-2">
-                      <LinkIcon className="text-gray-600 text-base" />
-                      <span className="ml-2 text-gray-500">{user.website}</span>
-                    </div>
-                  )}
+                      <LinkIcon className='text-gray-600 text-lg'/>
+    <Link  
+    
+      href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="ml-2 text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+    >
+      {user.website}
+  </Link>
+  </div>
+)}
                   <div className="flex items-center mb-2">
                     <Calendar className="text-gray-600 text-base" />
                     <span className="ml-2 text-gray-500">

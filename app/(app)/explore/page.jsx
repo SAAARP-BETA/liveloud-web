@@ -14,7 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { debounce } from "lodash";
-import { API_ENDPOINTS} from "../../utils/config";
+import { API_ENDPOINTS } from "../../utils/config";
 
 // Mock data and utilities (since we don't have the actual context)
 const mockUser = {
@@ -337,7 +337,9 @@ export default function SearchPage() {
   // API calls
   const fetchTrendingTags = async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.SEARCH}/posts/tags/trending`);
+      const response = await fetch(
+        `${API_ENDPOINTS.SEARCH}/posts/tags/trending`
+      );
       if (response.ok) {
         const data = await response.json();
         setTrendingTags(data.tags || []);
@@ -375,7 +377,9 @@ export default function SearchPage() {
 
     try {
       const response = await fetch(
-        `${API_ENDPOINTS.SEARCH}/search/suggestions?query=${encodeURIComponent(query)}`
+        `${API_ENDPOINTS.SEARCH}/search/suggestions?query=${encodeURIComponent(
+          query
+        )}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -550,7 +554,7 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto">
+      <div className="md:w-xl w-90 mx-auto">
         {/* Header */}
         <div className="px-4 pt-6 pb-4">
           <div className="flex items-center">
@@ -620,7 +624,7 @@ export default function SearchPage() {
         <div className="flex-1 overflow-auto">
           {searchMode === "initial" ? (
             // Initial state
-            <div className="p-4 space-y-6 max-w-3xl mx-auto">
+            <div className="p-4 space-y-6 mx-auto">
               {/* Recent Searches */}
               {recentSearches.length > 0 && (
                 <div>
@@ -712,7 +716,7 @@ export default function SearchPage() {
             <div className="p-4">
               {isLoading && !isRefreshing ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
+                  <div className="animate-spin rounded-full h-12 border-b-2 border-sky-500"></div>
                 </div>
               ) : (
                 <div className="space-y-4">

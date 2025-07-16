@@ -227,7 +227,7 @@ export default function LeftSidebar() {
             {tabs.map((tab, index) => (
               <motion.div
                 key={tab.name}
-                className="flex-1"
+                className="flex-1 truncate"
                 initial={{ opacity: 0, y: 30, scale: 0.8 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{
@@ -242,7 +242,7 @@ export default function LeftSidebar() {
             ))}
             {isAuthenticated && (
               <motion.div
-                className="flex-1"
+                className="flex-1 truncate"
                 initial={{ opacity: 0, y: 30, scale: 0.8 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{
@@ -261,8 +261,7 @@ export default function LeftSidebar() {
 
       {/* Desktop Sidebar */}
       <motion.aside
-        className="hidden sm:flex fixed top-0 left-0 h-screen w-64 px-6 py-8 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl z-50 flex-col"
-        initial={{ x: -100, opacity: 0 }}
+className="hidden sm:flex h-screen md:w-80 max-w-80 px-6 py-8 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl flex-col"        initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
@@ -281,7 +280,7 @@ export default function LeftSidebar() {
 
         {isAuthenticated && (
           <motion.div
-            className="mt-auto pt-4 border-t border-gray-200"
+            className="mt-auto pt-4 border-t border-gray-200 truncate"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: (tabs.length + 1) * 0.1 }}

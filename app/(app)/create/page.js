@@ -475,7 +475,7 @@ const handleSubmit = useCallback(async () => {
 
   return (
 
-    <div className="min-h-screen bg-gray-50 p-2">
+    <div className="min-h-screen md:w-xl sm:w-120 w-90 bg-gray-50 p-2">
      
       {/* Header */}
 

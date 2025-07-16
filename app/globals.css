@@ -1,7 +1,19 @@
 @import "tailwindcss";
 
 body {
-  font-family: 'Geist', sans-serif;
+  font-family: "Geist", sans-serif;
+  overflow: hidden; /* Make main content scroll from anywhere on the page */
+}
+
+/* Capture scroll events on the entire page and redirect to main */
+.scroll-container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.scroll-target {
+  height: 100vh;
+  overflow-y: auto;
 }
 /* :root {
   --background: #ffffff;
@@ -39,6 +51,10 @@ body {
 
 /* For Firefox */
 .custom-scrollbar {
-  -ms-overflow-style: none;  /* Hide scrollbar in IE and Edge */
-  scrollbar-width: none;  /* Hide scrollbar in Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+}
+
+.main-scroll-target::-webkit-scrollbar {
+  display: none; /* WebKit */
 }
