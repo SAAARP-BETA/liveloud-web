@@ -32,7 +32,7 @@ import {
   Flag,
   Flame,
   MapPin,
-  Link as LinkIcon,
+ LinkIcon,
   Calendar,
   Grid,
   Trophy,
@@ -310,9 +310,9 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
-    <div className="min-h-screen flex justify-center bg-gray-50">
-      <div className="w-full max-w-2xl">
-        <div className="fixed top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
+    <div className="flex justify-center bg-gray-50">
+      <div className="w-full ">
+        <div className=" top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
         <div className="pt-40">
           <div className="flex justify-center -mt-12">
             <div className="w-24 h-24 rounded-full bg-gray-300 border-4 border-white animate-pulse" />
@@ -789,7 +789,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-2xl flex flex-col items-center relative">
+      <div className="w-xl max-sm:w-100 flex flex-col items-center relative">
         <div
           className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
           style={{ width: "100%" }}
@@ -942,17 +942,20 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     </div>
                   )}
                   {/* --- FIX: Made website a clickable link --- */}
-                  {user.website && (
-                    <a
-                      href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center mb-2 text-gray-500 hover:text-sky-500 cursor-pointer"
-                    >
-                      <LinkIcon className="text-gray-600 text-base" />
-                      <span className="ml-2">{user.website}</span>
-                    </a>
-                  )}
+                  {user?.website && (
+                    <div className="flex items-center mb-2">
+                      <LinkIcon className='text-gray-600 text-lg'/>
+    <Link  
+    
+      href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="ml-2 text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+    >
+      {user.website}
+  </Link>
+  </div>
+)}
                   <div className="flex items-center mb-2">
                     <Calendar className="text-gray-600 cursor-pointer text-base" />
                     <span className="ml-2 text-gray-500">
@@ -1063,10 +1066,137 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           </motion.div>
           <div className="h-20"></div>
         </div>
-        {/* Modals remain unchanged */}
+       <CustomModal
+          visible={isMoreModalVisible}
+          onClose={() => setIsMoreModalVisible(false)}
+          title="More Options"
+        >
+          <div className="bg-white p-4">
+            {moreOptions.map((option, index) => (
+              <button
+                key={index}
+                className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+                onClick={() => {
+                  setIsMoreModalVisible(false);
+                  setTimeout(() => option.onPress(), 300);
+                }}
+              >
+                <div className="w-8">{option.icon}</div>
+                <span
+                  className={`text-base ${
+                    option.danger ? "text-red-500" : "text-gray-800"
+                  } font-medium`}
+                >
+                  {option.label}
+                </span>
+              </button>
+            ))}
+            <button
+              onClick={() => setIsMoreModalVisible(false)}
+              className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+        </CustomModal>
+        <CustomModal
+          visible={isModalVisible}
+          onClose={() => setModalVisible(false)}
+          title="Post Options"
+        >
+          <div className="bg-white p-4">
+            {selectedPost && (
+              <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+                <Image
+                  src={selectedPost.profilePic || "/Profilepic1.png"}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full"
+                  width={40}
+                  height={40}
+                />
+                <div className="ml-3">
+                  <h3 className="text-base font-medium text-gray-800">
+                    {selectedPost.username}
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    {selectedPost.timestamp}
+                  </p>
+                </div>
+              </div>
+            )}
+            <button
+              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+              onClick={() => {
+                setModalVisible(false);
+                if (selectedPost) {
+                  postHandlers.handleBookmarkPost(selectedPost.id);
+                }
+              }}
+            >
+              <div className="w-8">
+                <Bookmark className="text-gray-600 text-xl" />
+              </div>
+              <span className="text-base text-gray-800 font-medium">
+                Save Post
+              </span>
+            </button>
+            <Link
+              href={`/home/post-detail?postId=${selectedPost?.id}`}
+              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+              onClick={() => setModalVisible(false)}
+            >
+              <div className="w-8">
+                <MessageCircle className="text-gray-600 text-xl" />
+              </div>
+              <span className="text-base text-gray-800 font-medium">
+                View Comments
+              </span>
+            </Link>
+            <button
+              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+              onClick={() => {
+                setModalVisible(false);
+                if (confirm("Are you sure you want to report this post?")) {
+                  alert("Thank you for your report.");
+                }
+              }}
+            >
+              <div className="w-8">
+                <Flag className="text-gray-600 text-xl" />
+              </div>
+              <span className="text-base text-red-500 font-medium">
+                Report Post
+              </span>
+            </button>
+            <button
+              onClick={() => setModalVisible(false)}
+              className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+        </CustomModal>
+        <AmplifyModal
+          isVisible={isAmplifyModalVisible}
+          onClose={() => setAmplifyModalVisible(false)}
+          post={postToAmplify}
+          token={token}
+          onSuccess={() => {
+            setAmplifyModalVisible(false);
+            fetchUserProfile();
+          }}
+        />
+        <CommentModal
+          isVisible={isCommentModalVisible}
+          onClose={() => setCommentModalVisible(false)}
+          post={postToComment}
+          token={token}
+          onSuccess={handleCommentSuccess}
+        />
       </div>
     </div>
   );
 };
+
 
 export default ProfilePage;

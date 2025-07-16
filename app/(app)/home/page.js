@@ -879,8 +879,8 @@ const HomePage = () => {
 
   // Render tab bar
   const renderTabBar = () => (
-    <div className="bg-white border-b border-gray-200">
-      <div className="flex justify-center overflow-x-auto px-4 py-2 space-x-2 min-w-max">
+    <div className="bg-white border-b border-gray-200 truncate">
+      <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max">
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
           const canAccess = !feedType.requiresAuth || isAuthenticated;
@@ -934,7 +934,7 @@ const HomePage = () => {
 
 
   return (
-    <div className=" max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
+    <div className="md:w-xl max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
       {/* Tab Bar */}
       {renderTabBar()}
 
@@ -952,7 +952,7 @@ const HomePage = () => {
           </div>
         </div>
       ) : (
-        <div className="max-w-2xl mx-auto">
+        <div className="mx-auto">
           <div className="m-4 p-4 bg-white cursor-pointer rounded-xl shadow-sm border border-gray-200 relative z-10">
             <div className="flex items-center mb-2 space-x-3">
               <Image

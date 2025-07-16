@@ -166,8 +166,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   if (!isAuthenticated || !isVisible) return null;
 
   return (
-    <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl border-l border-gray-200 z-40 overflow-y-auto hidden lg:block">
-      {/* Header */}
+<div className="w-80 bg-white shadow-xl border-l border-gray-200 hidden lg:block h-screen flex flex-col">    {/* Header */}
       <div className="sticky top-0 bg-white border-b border-gray-100 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
