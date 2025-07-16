@@ -188,64 +188,64 @@ const EditPage = () => {
         }
       });
 
-      // Add profile image if changed
-      if (profileImage && profileImage !== profileData.profilePicture) {
-        try {
-          // For web, profileImage would be a File object or blob URL
-          if (profileImage instanceof File) {
-            console.log(`Adding profile picture: ${profileImage.name} (${profileImage.type})`);
-            formData.append('profilePicture', profileImage);
-          } else {
-            // Handle blob URL case
-            const response = await fetch(profileImage);
-            const blob = await response.blob();
-            const fileName = `profile.${blob.type.split('/')[1] || 'jpeg'}`;
-            console.log(`Adding profile picture: ${fileName} (${blob.type})`);
-            formData.append('profilePicture', blob, fileName);
-          }
-        } catch (error) {
-          console.error('Error preparing profile image:', error);
-          toast.error('Failed to prepare profile image for upload');
+    // Add profile image if changed
+    if (profileImage && profileImage !== profileData.profilePicture) {
+      try {
+        // For web, profileImage would be a File object or blob URL
+        if (profileImage instanceof File) {
+          console.log(`Adding profile picture: ${profileImage.name} (${profileImage.type})`);
+          formData.append('profilePicture', profileImage);
+        } else {
+          // Handle blob URL case
+          const response = await fetch(profileImage);
+          const blob = await response.blob();
+          const fileName = `profile.${blob.type.split('/')[1] || 'jpeg'}`;
+          console.log(`Adding profile picture: ${fileName} (${blob.type})`);
+          formData.append('profilePicture', blob, fileName);
         }
+      } catch (error) {
+        console.error('Error preparing profile image:', error);
+        alert('Failed to prepare profile image for upload');
       }
-
-      // Add cover image if changed
-      if (coverImage && coverImage !== profileData.coverPhoto) {
-        try {
-          // For web, coverImage would be a File object or blob URL
-          if (coverImage instanceof File) {
-            console.log(`Adding cover photo: ${coverImage.name} (${coverImage.type})`);
-            formData.append('coverPhoto', coverImage);
-          } else {
-            // Handle blob URL case
-            const response = await fetch(coverImage);
-            const blob = await response.blob();
-            const fileName = `cover.${blob.type.split('/')[1] || 'jpeg'}`;
-            console.log(`Adding cover photo: ${fileName} (${blob.type})`);
-            formData.append('coverPhoto', blob, fileName);
-          }
-        } catch (error) {
-          console.error('Error preparing cover image:', error);
-          toast.error('Failed to prepare cover image for upload');
+    }
+    
+    // Add cover image if changed
+    if (coverImage && coverImage !== profileData.coverPhoto) {
+      try {
+        // For web, coverImage would be a File object or blob URL
+        if (coverImage instanceof File) {
+          console.log(`Adding cover photo: ${coverImage.name} (${coverImage.type})`);
+          formData.append('coverPhoto', coverImage);
+        } else {
+          // Handle blob URL case
+          const response = await fetch(coverImage);
+          const blob = await response.blob();
+          const fileName = `cover.${blob.type.split('/')[1] || 'jpeg'}`;
+          console.log(`Adding cover photo: ${fileName} (${blob.type})`);
+          formData.append('coverPhoto', blob, fileName);
         }
+      } catch (error) {
+        console.error('Error preparing cover image:', error);
+        alert('Failed to prepare cover image for upload');
       }
-
-      // When sending the request, make sure you don't set any additional headers
-      // that would interfere with the content-type boundary
-      const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          // Do NOT set 'Content-Type' here - Browser will set it 
-          // correctly with the boundary for multipart/form-data
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update profile');
-      }
+    }
+    
+    // When sending the request, make sure you don't set any additional headers
+    // that would interfere with the content-type boundary
+    const response = await fetch(`${API_ENDPOINTS.USER}/profiles`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // Do NOT set 'Content-Type' here - Browser will set it 
+        // correctly with the boundary for multipart/form-data
+      },
+      body: formData,
+    });
+ console.log(response)
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update profile');
+    }
 
       const updatedUserData = await response.json();
       // updateUserInfo(updatedUserData);
