@@ -15,11 +15,25 @@ import {
 } from "lucide-react";
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
+import defaultPic from "../../assets/Profilepic1.png";
+
+const getProfilePicture = (profilePic) => {
+  if (!profilePic) {
+    return defaultPic.src || defaultPic; // Use .src property if it exists
+  }
+
+  // If profilePic is an object (imported image), use its src property
+  if (typeof profilePic === "object" && profilePic.src) {
+    return profilePic.src;
+  }
+
+  return profilePic;
+};
 
 // Mock data and utilities (since we don't have the actual context)
 const mockUser = {
   username: "currentuser",
-  profilePicture: "https://randomuser.me/api/portraits/men/1.jpg",
+  profilePicture: defaultPic,
 };
 
 const mockToken = "mock-token";
@@ -78,7 +92,7 @@ const SuggestionItem = ({ item, onPress, showType = true }) => {
       {item.type === "user" ? (
         <>
           <img
-            src={item.profilePicture || null}
+            src={getProfilePicture(item.profilePicture)}
             alt={item.username}
             className="w-10 h-10 rounded-full object-cover"
           />
@@ -129,10 +143,18 @@ const RecentSearchItem = ({ item, onPress, onRemove }) => {
   return (
     <div className="flex items-center justify-between py-3 px-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
       <button
-        className="flex items-center flex-1 text-left  rounded -m-2 p-2 cursor-pointer"
+        className="flex items-center flex-1 text-left rounded -m-2 p-2 cursor-pointer"
         onClick={() => onPress(item)}
       >
-        <Clock size={16} className="text-gray-500" />
+        {item.type === "user" && item.profilePicture ? (
+          <img
+            src={getProfilePicture(item.profilePicture)}
+            alt={item.username}
+            className="w-4 h-4 rounded-full object-cover mr-3"
+          />
+        ) : (
+          <Clock size={16} className="text-gray-500" />
+        )}
         <span className="ml-3 text-gray-700 truncate">
           {item.type === "user"
             ? `@${item.username}`
@@ -158,7 +180,7 @@ const PostSearchResult = ({ post, onPress }) => {
     >
       <div className="flex items-center mb-3">
         <img
-          src={post.user.profilePicture || null}
+          src={getProfilePicture(post.user.profilePicture)}
           alt={post.user.username}
           className="w-8 h-8 rounded-full object-cover"
         />
@@ -198,7 +220,7 @@ const UserSearchResult = ({ user, onPress }) => {
       onClick={() => onPress(user)}
     >
       <img
-        src={user.profilePicture || null}
+        src={getProfilePicture(user.profilePicture)}
         alt={user.username}
         className="w-14 h-14 rounded-full object-cover"
       />
