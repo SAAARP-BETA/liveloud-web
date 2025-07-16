@@ -7,6 +7,7 @@ import { useAuth } from "../../../context/AuthContext";
 // import { fonts } from "../../../utils/fonts";
 import { API_ENDPOINTS } from "../../../utils/config";
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 import {
   Camera,
@@ -49,7 +50,7 @@ const EditPage = () => {
 
     if (!isAuthenticated || !user || !token) {
       console.log("Not authenticated or missing user/token, redirecting to login");
-      alert("Not Authorized, please login to edit your profile");
+      toast.error("Not Authorized, please login to edit your profile");
       router.push("/login");
       return;
     }
@@ -70,7 +71,7 @@ const EditPage = () => {
       if (!response.ok) {
         if (response.status === 401) {
           console.log("Session expired, redirecting to login");
-          alert("Session expired. Please login again.");
+          toast.error("Session expired. Please login again.");
           router.push("/login");
           return;
         }
@@ -91,7 +92,7 @@ const EditPage = () => {
             occupation: "",
             education: "",
             profilePicture: user?.profilePicture || null,
-            coverPicture: user?.coverPicture||null,
+            coverPicture: user?.coverPicture || null,
           });
           setProfileImage(user?.profilePicture || null);
           setCoverImage(null);
@@ -124,7 +125,7 @@ const EditPage = () => {
       setCoverImage(data.coverPicture || null);
     } catch (error) {
       console.error("Error loading profile:", error);
-      alert("Error: Failed to load profile information. " + error.message);
+      toast.error("Error: Failed to load profile information. " + error.message);
       router.push("/login");
     } finally {
       setLoading(false);
@@ -152,112 +153,112 @@ const EditPage = () => {
       return data.imageUrl;
     } catch (error) {
       console.error(`Error uploading ${type} image:`, error);
-      alert(`Error uploading ${type} image: ${error.message}`);
+      toast.error(`Error uploading ${type} image: ${error.message}`);
       return null;
     }
   };
 
   const handleUpdateProfile = async () => {
-  try {
-    // Basic validation
-    const errors = {};
-    if (!profileData.username) errors.username = 'Username is required';
-    if (!profileData.fullname) errors.fullname = 'Name is required';
-    if (profileData.bio && profileData.bio.length > 250) errors.bio = 'Bio must be 250 characters or less';
+    try {
+      // Basic validation
+      const errors = {};
+      if (!profileData.username) errors.username = 'Username is required';
+      if (!profileData.fullname) errors.fullname = 'Name is required';
+      if (profileData.bio && profileData.bio.length > 250) errors.bio = 'Bio must be 250 characters or less';
 
-    if (Object.keys(errors).length > 0) {
-      setProfileErrors(errors);
-      return;
-    }
+      if (Object.keys(errors).length > 0) {
+        setProfileErrors(errors);
+        return;
+      }
 
-    setSubmitting(true);
-    // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Not available in web
+      setSubmitting(true);
+      // Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Not available in web
 
-    // Prepare form data for image upload
-    const formData = new FormData();
-    Object.keys(profileData).forEach(key => {
-      if (key !== 'profilePicture' && key !== 'coverPhoto' && profileData[key] !== null) {
-        if (key === 'dob') {
-          formData.append(key, profileData[key].toISOString());
-        } else if (key === 'interests' && Array.isArray(profileData[key])) {
-          formData.append(key, JSON.stringify(profileData[key]));
-        } else {
-          formData.append(key, profileData[key]);
+      // Prepare form data for image upload
+      const formData = new FormData();
+      Object.keys(profileData).forEach(key => {
+        if (key !== 'profilePicture' && key !== 'coverPhoto' && profileData[key] !== null) {
+          if (key === 'dob') {
+            formData.append(key, profileData[key].toISOString());
+          } else if (key === 'interests' && Array.isArray(profileData[key])) {
+            formData.append(key, JSON.stringify(profileData[key]));
+          } else {
+            formData.append(key, profileData[key]);
+          }
+        }
+      });
+
+      // Add profile image if changed
+      if (profileImage && profileImage !== profileData.profilePicture) {
+        try {
+          // For web, profileImage would be a File object or blob URL
+          if (profileImage instanceof File) {
+            console.log(`Adding profile picture: ${profileImage.name} (${profileImage.type})`);
+            formData.append('profilePicture', profileImage);
+          } else {
+            // Handle blob URL case
+            const response = await fetch(profileImage);
+            const blob = await response.blob();
+            const fileName = `profile.${blob.type.split('/')[1] || 'jpeg'}`;
+            console.log(`Adding profile picture: ${fileName} (${blob.type})`);
+            formData.append('profilePicture', blob, fileName);
+          }
+        } catch (error) {
+          console.error('Error preparing profile image:', error);
+          toast.error('Failed to prepare profile image for upload');
         }
       }
-    });
 
-    // Add profile image if changed
-    if (profileImage && profileImage !== profileData.profilePicture) {
-      try {
-        // For web, profileImage would be a File object or blob URL
-        if (profileImage instanceof File) {
-          console.log(`Adding profile picture: ${profileImage.name} (${profileImage.type})`);
-          formData.append('profilePicture', profileImage);
-        } else {
-          // Handle blob URL case
-          const response = await fetch(profileImage);
-          const blob = await response.blob();
-          const fileName = `profile.${blob.type.split('/')[1] || 'jpeg'}`;
-          console.log(`Adding profile picture: ${fileName} (${blob.type})`);
-          formData.append('profilePicture', blob, fileName);
+      // Add cover image if changed
+      if (coverImage && coverImage !== profileData.coverPhoto) {
+        try {
+          // For web, coverImage would be a File object or blob URL
+          if (coverImage instanceof File) {
+            console.log(`Adding cover photo: ${coverImage.name} (${coverImage.type})`);
+            formData.append('coverPhoto', coverImage);
+          } else {
+            // Handle blob URL case
+            const response = await fetch(coverImage);
+            const blob = await response.blob();
+            const fileName = `cover.${blob.type.split('/')[1] || 'jpeg'}`;
+            console.log(`Adding cover photo: ${fileName} (${blob.type})`);
+            formData.append('coverPhoto', blob, fileName);
+          }
+        } catch (error) {
+          console.error('Error preparing cover image:', error);
+          toast.error('Failed to prepare cover image for upload');
         }
-      } catch (error) {
-        console.error('Error preparing profile image:', error);
-        alert('Failed to prepare profile image for upload');
       }
-    }
-    
-    // Add cover image if changed
-    if (coverImage && coverImage !== profileData.coverPhoto) {
-      try {
-        // For web, coverImage would be a File object or blob URL
-        if (coverImage instanceof File) {
-          console.log(`Adding cover photo: ${coverImage.name} (${coverImage.type})`);
-          formData.append('coverPhoto', coverImage);
-        } else {
-          // Handle blob URL case
-          const response = await fetch(coverImage);
-          const blob = await response.blob();
-          const fileName = `cover.${blob.type.split('/')[1] || 'jpeg'}`;
-          console.log(`Adding cover photo: ${fileName} (${blob.type})`);
-          formData.append('coverPhoto', blob, fileName);
-        }
-      } catch (error) {
-        console.error('Error preparing cover image:', error);
-        alert('Failed to prepare cover image for upload');
+
+      // When sending the request, make sure you don't set any additional headers
+      // that would interfere with the content-type boundary
+      const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Do NOT set 'Content-Type' here - Browser will set it 
+          // correctly with the boundary for multipart/form-data
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
       }
+
+      const updatedUserData = await response.json();
+      // updateUserInfo(updatedUserData);
+
+      toast.success('Profile updated successfully');
+      router.back();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error(error.message || 'Failed to update profile');
+    } finally {
+      setSubmitting(false);
     }
-    
-    // When sending the request, make sure you don't set any additional headers
-    // that would interfere with the content-type boundary
-    const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        // Do NOT set 'Content-Type' here - Browser will set it 
-        // correctly with the boundary for multipart/form-data
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update profile');
-    }
-
-    const updatedUserData = await response.json();
-    // updateUserInfo(updatedUserData);
-
-    alert('Profile updated successfully');
-    router.back();
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    alert(error.message || 'Failed to update profile');
-  } finally {
-    setSubmitting(false);
-  }
-};
+  };
 
   const handleInputChange = (field, value) => {
     setProfileData((prev) => ({ ...prev, [field]: value }));
@@ -279,19 +280,19 @@ const EditPage = () => {
     const file = event.target.files[0];
     if (!file) {
       console.error("No file selected for upload");
-      alert("Please select an image file");
+      toast.error("Please select an image file");
       return;
     }
     const validTypes = ["image/jpeg", "image/png", "image/gif"];
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (!validTypes.includes(file.type)) {
       console.error("Invalid file type:", file.type);
-      alert("Please select a valid image file (JPEG, PNG, or GIF)");
+      toast.error("Please select a valid image file (JPEG, PNG, or GIF)");
       return;
     }
     if (file.size > maxSize) {
       console.error("File too large:", file.size);
-      alert("Image file must be smaller than 5MB");
+      toast.error("Image file must be smaller than 5MB");
       return;
     }
     console.log("Selected file:", file.name, file.type, file.size);
@@ -433,47 +434,47 @@ const EditPage = () => {
           </button>
         </header>
         <div className="relative w-full h-40">
-  {coverImage && typeof coverImage === "object" ? (
-    <Image
-      src={URL.createObjectURL(coverImage)}
-      alt="Cover"
-      className="w-full h-full object-cover"
-      width={800}
-      height={160}
-      onError={() => console.error("Failed to load cover image")}
-    />
-  ) : profileData.coverPicture ? (
-    <Image
-      src={profileData.coverPicture}
-      alt="Cover"
-      className="w-full h-full object-cover cursor-pointer"
-      width={800}
-      height={160}
-      onError={(e) => {
-        console.error("Failed to load cover picture");
-        e.currentTarget.src = defaultCover.src;
-      }}
-      priority
-    />
-  ) : (
-    <Image
-      src={defaultCover}
-      alt="Default Cover"
-      className="w-full h-full cursor-pointer object-cover"
-      width={800}
-      height={160}
-      priority
-    />
-  )}
-  
-  {/* Add cover edit button */}
-  <button
-    className="absolute top-4 cursor-pointer right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
-    onClick={() => openImagePicker("cover")}
-  >
-    <Camera className="text-white w-5 h-5" />
-  </button>
-</div>
+          {coverImage && typeof coverImage === "object" ? (
+            <Image
+              src={URL.createObjectURL(coverImage)}
+              alt="Cover"
+              className="w-full h-full object-cover"
+              width={800}
+              height={160}
+              onError={() => console.error("Failed to load cover image")}
+            />
+          ) : profileData.coverPicture ? (
+            <Image
+              src={profileData.coverPicture}
+              alt="Cover"
+              className="w-full h-full object-cover cursor-pointer"
+              width={800}
+              height={160}
+              onError={(e) => {
+                console.error("Failed to load cover picture");
+                e.currentTarget.src = defaultCover.src;
+              }}
+              priority
+            />
+          ) : (
+            <Image
+              src={defaultCover}
+              alt="Default Cover"
+              className="w-full h-full cursor-pointer object-cover"
+              width={800}
+              height={160}
+              priority
+            />
+          )}
+
+          {/* Add cover edit button */}
+          <button
+            className="absolute top-4 cursor-pointer right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+            onClick={() => openImagePicker("cover")}
+          >
+            <Camera className="text-white w-5 h-5" />
+          </button>
+        </div>
 
 
 

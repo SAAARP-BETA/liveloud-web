@@ -62,7 +62,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
-      alert('Error - Failed to load comments');
+      toast.error('Error - Failed to load comments');
     } finally {
       setLoadingComments(false);
     }
@@ -95,7 +95,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
     }
 
     if (!token) {
-      alert('Login Required - Please login to comment');
+      toast.error('Login Required - Please login to comment');
       return;
     }
 
@@ -162,7 +162,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Error posting comment/reply:', error);
-      alert('Error - Failed to post comment');
+      toast.error('Error - Failed to post comment');
     } finally {
       setLoading(false);
     }
@@ -171,7 +171,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
   // Like a comment
   const handleLikeComment = async (commentId) => {
     if (!token) {
-      alert('Login Required - Please login to like comments');
+      toast.error('Login Required - Please login to like comments');
       return;
     }
 
@@ -262,7 +262,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
   // Render a comment item
   const CommentItem = ({ item }) => {
     const isLiked = item.likes && item.likes.some(like => like._id === post.user?._id);
-  
+
     return (
       <div className="p-4 border-b border-gray-100">
         <div className="flex">
@@ -286,7 +286,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
             <p className="text-sm text-gray-800 mt-1">
               {item.content}
             </p>
-  
+
             {/* Comment actions */}
             <div className="flex items-center mt-2">
               <button
@@ -301,7 +301,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                   {item.likes?.length || 0}
                 </span>
               </button>
-  
+
               <button
                 className="flex items-center hover:bg-gray-100 p-1 rounded cursor-pointer"
                 onClick={() => handleReplyToComment(item)}
@@ -312,7 +312,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                 </span>
               </button>
             </div>
-  
+
             {/* Render replies if any */}
             {item.replies && item.replies.length > 0 && (
               <div className="mt-3 pl-4 border-l-2 border-gray-200">
@@ -361,29 +361,29 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
-      <div 
+      <div
         className="absolute inset-0"
         onClick={onClose}
       />
-  
+
       <div className="bg-white rounded-2xl w-full max-w-lg mx-4 relative animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col">
         <div className="w-full flex items-center justify-center pt-4 pb-2">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
         </div>
-  
+
         <div className="p-4 border-b border-gray-100">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-xl font-bold text-gray-800">
               Comments
             </h2>
-            <button 
+            <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
             >
               <X size={20} className="text-gray-600" />
             </button>
           </div>
-  
+
           {/* Original post preview */}
           {post && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
@@ -408,9 +408,9 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
             </div>
           )}
         </div>
-  
+
         {/* Comments list */}
-        <div 
+        <div
           className="flex-1 overflow-y-auto"
           onScroll={handleScroll}
           style={{ maxHeight: '400px' }}
@@ -422,14 +422,14 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
               <CommentItem key={comment._id} item={comment} />
             ))
           )}
-          
+
           {loadingComments && (
             <div className="py-4 text-center">
               <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           )}
         </div>
-  
+
         {/* Reply indicator */}
         {replyTo && (
           <div className="flex items-center justify-between bg-gray-100 px-4 py-2">
@@ -438,7 +438,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                 @{replyTo.user?.username || 'user'}
               </span>
             </p>
-            <button 
+            <button
               onClick={cancelReply}
               className="p-1 hover:bg-gray-200 rounded cursor-pointer"
             >
@@ -446,7 +446,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
             </button>
           </div>
         )}
-  
+
         {/* Comment input */}
         <div className="p-4 border-t border-gray-100 bg-white rounded-2xl">
           <div className="flex items-center ">
@@ -465,9 +465,8 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
               }}
             />
             <button
-              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${
-                commentText.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300'
-              }`}
+              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${commentText.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300'
+                }`}
               onClick={handleSubmitComment}
               disabled={!commentText.trim() || loading}
             >

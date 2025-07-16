@@ -22,7 +22,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      alert('Please enter your email and password');
+      toast.error('Please enter your email and password');
       return;
     }
 
@@ -35,7 +35,7 @@ export default function Login() {
         console.log('Login failed:', error);
       }
     } catch (err) {
-      alert('An unexpected error occurred');
+      toast.error('An unexpected error occurred');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -43,11 +43,11 @@ export default function Login() {
   };
 
   const handleGoogleLogin = () => {
-    alert('Google login will be available soon!');
+    toast.error('Google login will be available soon!');
   };
 
   const handleWalletConnect = () => {
-    alert('Wallet connection will be available soon!');
+    toast.error('Wallet connection will be available soon!');
   };
 
   return (
@@ -94,9 +94,8 @@ export default function Login() {
       <div className="flex items-center mt-2">
         <button
           onClick={() => setIsChecked(!isChecked)}
-          className={`w-4 h-4 border-2 rounded mr-2 flex items-center justify-center ${
-            isChecked ? 'border-sky-500 bg-sky-500' : 'border-gray-400'
-          }`}
+          className={`w-4 h-4 border-2 rounded mr-2 flex items-center justify-center ${isChecked ? 'border-sky-500 bg-sky-500' : 'border-gray-400'
+            }`}
           disabled={isLoading}
         >
           {isChecked && <span className="text-xs text-white font-bold">✓</span>}
@@ -112,9 +111,8 @@ export default function Login() {
       </div>
 
       <button
-        className={`mt-6 w-full bg-sky-500 py-3 rounded-full text-white text-lg font-bold ${
-          isLoading ? 'opacity-70 cursor-not-allowed' : ''
-        }`}
+        className={`mt-6 w-full bg-sky-500 py-3 rounded-full text-white text-lg font-bold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
+          }`}
         onClick={handleLogin}
         disabled={isLoading}
       >

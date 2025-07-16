@@ -97,7 +97,7 @@ const PointsDisplay = ({ points, loading }) => {
         try {
             router.push("/leaderboard");
         } catch (error) {
-            alert("Unable to navigate to leaderboard. Please try again.");
+            toast.error("Unable to navigate to leaderboard. Please try again.");
         }
     };
 
@@ -417,7 +417,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                 label: "Share Profile",
                 icon: <Share2 className="text-gray-600 text-xl" />,
                 onPress: () =>
-                    alert(
+                    toast.error(
                         `Coming soon! Sharing profile for ${user?.username || "this user"}.`
                     ),
             },
@@ -432,7 +432,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                     ? () => router.push("/profile/edit")
                     : () => {
                         if (confirm("Are you sure you want to report this user?")) {
-                            alert("Thank you for your report.");
+                            toast.success("Thank you for your report.");
                         }
                     },
                 danger: !isMyProfile,
@@ -798,7 +798,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
 
     const handleFollowToggle = async () => {
         if (!isAuthenticated) {
-            alert("Please login to follow users");
+            toast.error("Please login to follow users");
             return;
         }
 
@@ -827,13 +827,13 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
             setIsFollowing(wasFollowing);
             setFollowersCount((prev) => (wasFollowing ? prev + 1 : prev - 1));
             console.error("Error updating follow status:", error);
-            alert("Failed to update follow status. Please try again.");
+            toast.error("Failed to update follow status. Please try again.");
         }
     };
 
     const handleShareProfile = async () => {
         try {
-            alert(
+            toast.error(
                 `Coming soon! Sharing profile for ${user?.username || "this user"}.`
             );
         } catch (error) {
@@ -965,7 +965,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                                 transition={{ type: "spring", stiffness: 100 }}
                             >
                                 <Image
-                                    src={user.profilePicture||defaultCover}
+                                    src={user.profilePicture || defaultCover}
                                     alt="Profile"
                                     className="w-full h-full rounded-full object-cover"
                                     width={PROFILE_IMAGE_MAX_SIZE}
@@ -1286,7 +1286,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                             onClick={() => {
                                 setModalVisible(false);
                                 if (confirm("Are you sure you want to report this post?")) {
-                                    alert("Thank you for your report.");
+                                    toast.success("Thank you for your report.");
                                 }
                             }}
                         >

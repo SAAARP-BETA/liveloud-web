@@ -1,11 +1,11 @@
 "use client"
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Camera, MapPin, Users, Smile, Image, X, Edit, Plus } from 'lucide-react';
-// import image from '../../assets/default-avatar.png';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Camera, MapPin, Users, Smile, Image, X, Edit, Plus, RefreshCw, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-// import { useAuth } from '@context/AuthContext';
 import { useAuth } from '../../context/AuthContext';
 import { API_ENDPOINTS } from '../../utils/config';
+// import toast from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const FilteredImage = ({ src, filterType, className }) => {
   const filterStyles = {
@@ -31,8 +31,7 @@ const CreatePost = () => {
   // Constants
   const MAX_CHAR_LIMIT = 1000;
   const MEDIA_LIMIT = 4;
-  
-  
+
   // State
   const [content, setContent] = useState('');
   const [images, setImages] = useState([]);
@@ -45,10 +44,14 @@ const CreatePost = () => {
   const [tags, setTags] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  // const [loading, setLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  
+  const [tagInput, setTagInput] = useState('');
+  const [locationSearch, setLocationSearch] = useState('');
+  const [peopleSearch, setPeopleSearch] = useState('');
+  const [peopleSuggestions, setPeopleSuggestions] = useState([]);
+  const [filteredPeople, setFilteredPeople] = useState([]);
+  const [locationResults, setLocationResults] = useState([]);
+
   // UI State
   const [showMediaOptions, setShowMediaOptions] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -56,19 +59,27 @@ const CreatePost = () => {
   const [showFeelingModal, setShowFeelingModal] = useState(false);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageIndex, setEditingImageIndex] = useState(null);
-  
+
   // useAuth
   const { user, token, isAuthenticated } = useAuth();
-  console.log("token", token);
-  
-  
+
   const router = useRouter();
-  
-  // Sample data
-  // const trendyTags = ['Travel', 'Food', 'Photography', 'Nature', 'Fitness', 'Art'];
-  
-  const charCount = content.length;
-// memoised value
+  const autocompleteService = useRef(null);
+  const placesService = useRef(null);
+
+  // Calculate word count excluding hashtags
+  const charCount = useMemo(() => {
+    const words = content.trim().split(/\s+/);
+    const nonHashtagWords = words.filter(word => !word.startsWith('#'));
+    return nonHashtagWords.join(' ').length;
+  }, [content]);
+
+  const locations = ['New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX'];
+  const filteredLocations = locations.filter(loc =>
+    loc.toLowerCase().includes(locationSearch.toLowerCase())
+  );
+
+  // Memoized values
   const isApproachingLimit = useMemo(
     () => charCount > MAX_CHAR_LIMIT * 0.8,
     [charCount]
@@ -80,8 +91,8 @@ const CreatePost = () => {
   );
 
   const isSubmitDisabled = useMemo(
-    () => loading || isOverLimit || !content.trim(),
-    [loading, isOverLimit, content]
+    () => loading || isOverLimit || (!content.trim() && images.length === 0 && tags.length === 0),
+    [loading, isOverLimit, content, images, tags]
   );
 
   const feelings = [
@@ -93,72 +104,114 @@ const CreatePost = () => {
     { name: 'Creative', icon: '🎨' }
   ];
 
-// API endpoints
-// const SOCIAL_API_URL = `http://192.168.1.13:3002/api/social`;
-// const UPLOAD_API_URL = `http://192.168.1.13:3003/api/upload`;
+  const [trendyTags, setTrendyTags] = useState([]);
 
-
-  const samplePeople = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson'];
-
-  const [trendyTags, setTrendyTags] = useState(['Systumm','Travel', 'Food', 'Photography', 'Nature', 'Fitness', 'Art']);
-
-  
-
-  
-// check auth and fetch trending tags 
-
-useEffect(() => {
-    if(loading) return;
-
-    if (!isAuthenticated) {
-      const shouldLogin = window.confirm(
-        'You need to be logged in to create a post. Do you want to login now?'
-      );
-
-      if (shouldLogin) {
-        router.push('/login'); // Adjust the route as needed
-      }
-
-      return;
-    }
-
-    fetchTrendingTags();
-    console.log("ENV MEDIA:", process.env.NEXT_PUBLIC_MEDIA_API_URL);
-
-  }, [isAuthenticated, loading,  router]);
-
-  // Computed values
-
-  // const isOverLimit = charCount > MAX_CHAR_LIMIT;
-  // const isApproachingLimit = charCount > MAX_CHAR_LIMIT * 0.9;
-
-  // const gradientColors = isOverLimit 
-  //   ? ['#ef4444', '#dc2626'] 
-  //   : isApproachingLimit 
-  //   ? ['#f59e0b', '#d97706'] 
-  //   : ['#10b981', '#059669'];
-
-    const gradientColors = useMemo(() => {
+  const gradientColors = useMemo(() => {
     if (isOverLimit) return ['#FF6B6B', '#FF0000'];
     if (isApproachingLimit) return ['#FFD166', '#FF9F1C'];
     return ['#06D6A0', '#1B9AAA'];
   }, [isOverLimit, isApproachingLimit]);
 
-  // Extract hashtags from content
+  // Initialize Google Places API
   useEffect(() => {
-    const hashtagRegex = /#(\w+)/g;
-    const matches = content.match(hashtagRegex);
-    if (matches) {
-      const extractedTags = matches.map(tag => tag.substring(1));
-      setTags([...new Set(extractedTags)]);
-    } else {
-      setTags([]);
+    if (typeof window !== 'undefined' && window.google && !autocompleteService.current) {
+      autocompleteService.current = new window.google.maps.places.AutocompleteService();
+      placesService.current = new window.google.maps.places.PlacesService(document.createElement('div'));
     }
-  }, [content]);
+  }, []);
 
-const fetchTrendingTags = useCallback(async () => {
+  // Handle content change and extract hashtags on space or enter
+  const handleContentChange = (e) => {
+    const newContent = e.target.value;
+    setContent(newContent);
+
+    // Check if the last character is a space or new line
+    if (newContent.endsWith(' ') || newContent.endsWith('\n')) {
+      const words = newContent.trim().split(/[\s\n]+/);
+      const lastWord = words[words.length - 1];
+      if (lastWord.startsWith('#') && lastWord.length > 1) {
+        const newTag = lastWord.substring(1);
+        setContent(newContent.replace(lastWord, '').trim() + ' ');
+        if (!tags.includes(newTag)) {
+          setTags(prev => [...prev, newTag]);
+        }
+      }
+    }
+  };
+
+  // Remove tag without adding back to content
+  const removeTag = (tagToRemove) => {
+    setTags(prev => prev.filter(tag => tag !== tagToRemove));
+  };
+
+  // Fetch people suggestions when modal opens
+  useEffect(() => {
+    if (showPeopleTagModal) {
+      const fetchPeopleSuggestions = async () => {
+        try {
+          const response = await fetch(`${API_ENDPOINTS.USER}/suggestions`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setPeopleSuggestions(data);
+            setFilteredPeople(data);
+          }
+        } catch (error) {
+          console.error('Error fetching people suggestions:', error);
+          toast.error('Failed to load people suggestions');
+        }
+      };
+      fetchPeopleSuggestions();
+    }
+  }, [showPeopleTagModal, token]);
+
+  // Search people when typing
+  useEffect(() => {
+    const searchPeople = () => {
+      if (peopleSearch.trim() === '') {
+        setFilteredPeople(peopleSuggestions);
+        return;
+      }
+
+      // Filter locally based on the search term
+      const filtered = peopleSuggestions.filter(person =>
+        (person.username && person.username.toLowerCase().includes(peopleSearch.toLowerCase())) ||
+        (person.name && person.name.toLowerCase().includes(peopleSearch.toLowerCase()))
+      );
+      setFilteredPeople(filtered);
+    };
+
+    searchPeople();
+  }, [peopleSearch, peopleSuggestions]);
+
+  // Search locations when typing
+  useEffect(() => {
+    if (!autocompleteService.current || !locationSearch.trim()) {
+      setLocationResults([]);
+      return;
+    }
+
+    const searchLocations = () => {
+      autocompleteService.current.getPlacePredictions(
+        { input: locationSearch },
+        (predictions, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            setLocationResults(predictions);
+          } else {
+            setLocationResults([]);
+          }
+        }
+      );
+    };
+
+    const debounceSearch = setTimeout(searchLocations, 300);
+    return () => clearTimeout(debounceSearch);
+  }, [locationSearch]);
+
+  const fetchTrendingTags = useCallback(async () => {
     try {
-     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/tags/trending`, {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/tags/trending`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -172,6 +225,24 @@ const fetchTrendingTags = useCallback(async () => {
       console.error('Error fetching trending tags:', error);
     }
   }, [token]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (!isAuthenticated) {
+      const shouldLogin = window.confirm(
+        'You need to be logged in to create a post. Do you want to login now?'
+      );
+
+      if (shouldLogin) {
+        router.push('/login');
+      }
+
+      return;
+    }
+
+    fetchTrendingTags();
+  }, [isAuthenticated, loading, router, fetchTrendingTags]);
 
   // Handlers
   const handleImageUpload = (event) => {
@@ -212,8 +283,8 @@ const fetchTrendingTags = useCallback(async () => {
   };
 
   const addTag = (tag) => {
-    if (!content.includes(`#${tag}`)) {
-      setContent(prev => prev + ` #${tag}`);
+    if (!tags.includes(tag)) {
+      setTags(prev => [...prev, tag]);
     }
   };
 
@@ -226,49 +297,29 @@ const fetchTrendingTags = useCallback(async () => {
     setLocation(loc);
     setLocationName(loc);
     setShowLocationModal(false);
+    setLocationSearch('');
+  };
+
+  const closeLocationModal = () => {
+    setShowLocationModal(false);
+    setLocationSearch('');
+    setLocationResults([]);
   };
 
   const handlePeopleTag = (person) => {
-    if (!taggedPeople.find(p => p.name === person)) {
-      setTaggedPeople(prev => [...prev, { name: person }]);
+    if (!person || !person._id) {
+      toast.error('Invalid person selected');
+      return;
+    }
+    if (!taggedPeople.find(p => p.id === person._id)) {
+      setTaggedPeople(prev => [...prev, { id: person._id, name: person.name || person.username }]);
     }
     setShowPeopleTagModal(false);
+    setPeopleSearch('');
+    setFilteredPeople(peopleSuggestions); // Reset filtered people
   };
 
-  // handle post function
-
-  // const handlePost = () => {
-  //   if (isOverLimit) return;
-    
-  //   const postData = {
-  //     content,
-  //     images,
-  //     location,
-  //     taggedPeople,
-  //     feeling: selectedFeeling,
-  //     tags,
-  //     timestamp: new Date().toISOString()
-  //   };
-    
-  //   console.log('Posting:', postData);
-  //   alert('Post created successfully!');
-    
-  //   // Reset form
-  //   setContent('');
-  //   setImages([]);
-  //   setImageFilters([]);
-  //   setLocation(null);
-  //   setLocationName('');
-  //   setTaggedPeople([]);
-  //   setSelectedFeeling(null);
-  //   setTags([]);
-  // };
-
-
-
-
-
-const uploadMedia = useCallback(async () => {
+  const uploadMedia = useCallback(async () => {
     if (images.length === 0) return { urls: [], metadata: [] };
 
     try {
@@ -306,15 +357,8 @@ const uploadMedia = useCallback(async () => {
           });
         })
       );
-      // const uploadEndpoint = `${API_ENDPOINTS.MEDIA}`;
-      const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/post`;
 
-      console.log("Upload endpoint:", uploadEndpoint);
-      
-      console.log('Uploading to:', uploadEndpoint);
-      console.log('Images count:', base64Images.length);
-      console.log('Metadata count:', mediaMetadata.length);
-      console.log('Token present:', !!token);
+      const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/post`;
 
       const response = await fetch(uploadEndpoint, {
         method: 'POST',
@@ -329,20 +373,15 @@ const uploadMedia = useCallback(async () => {
       });
 
       clearInterval(progressInterval);
-      console.log("Upload endpoint:", uploadEndpoint);
-      console.log('Upload response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Upload failed:', errorData);
         throw new Error(errorData.message || `Upload failed with status ${response.status}`);
       }
 
       setUploadProgress(100);
 
       const data = await response.json();
-      console.log('Upload successful:', data);
-
       return {
         urls: data.imageUrls || [],
         metadata: data.metadata || [],
@@ -354,23 +393,20 @@ const uploadMedia = useCallback(async () => {
       setUploading(false);
     }
   }, [images, imageFilters, token]);
-  console.log("ENV MEDIA:", process.env.NEXT_PUBLIC_MEDIA_API_URL);
 
-  console.log('Token being used:', token);
-
-const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async () => {
     if (!isAuthenticated) {
-      window.alert('Login Required: Please login to create posts');
+      toast.error('Login Required: Please login to create posts');
       return;
     }
 
-    if (!content.trim() && images.length === 0) {
-      window.alert('Empty Post: Please add some text or images to your post');
+    if (!content.trim() && images.length === 0 && tags.length === 0) {
+      toast.error('Empty Post: Please add some text, images, or tags to your post');
       return;
     }
 
-    if (content.length > MAX_CHAR_LIMIT) {
-      window.alert(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`);
+    if (charCount > MAX_CHAR_LIMIT) {
+      toast.error(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit (excluding hashtags).`);
       return;
     }
 
@@ -384,13 +420,12 @@ const handleSubmit = useCallback(async () => {
 
       if (images.length > 0) {
         try {
-         
           const uploadResults = await uploadMedia();
           mediaUrls = uploadResults.urls;
           mediaIds = uploadResults.metadata.map(item => item.publicId);
           setImageMetadata(uploadResults.metadata);
         } catch (error) {
-          window.alert(`Upload Error: ${error.message}`);
+          toast.error(`Upload Error: ${error.message}`);
           setLoading(false);
           return;
         }
@@ -407,8 +442,8 @@ const handleSubmit = useCallback(async () => {
       if (location) {
         postData.location = {
           coordinates: [
-            location.coords.longitude,
-            location.coords.latitude,
+            location.coords?.longitude || 0,
+            location.coords?.latitude || 0,
           ],
           name: locationName,
         };
@@ -428,7 +463,6 @@ const handleSubmit = useCallback(async () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-
         body: JSON.stringify(postData),
       });
 
@@ -437,12 +471,12 @@ const handleSubmit = useCallback(async () => {
         throw new Error(errorData.message || 'Failed to create post');
       }
 
-      window.alert('Post Created!\nYour post was published successfully.');
+      toast.success('Post Created!\nYour post was published successfully.');
       router.push('/home');
 
     } catch (error) {
       console.error('Error creating post:', error);
-      window.alert(`Post Error: Failed to create your post: ${error.message}`);
+      toast.error(`Failed to create your post: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -457,13 +491,12 @@ const handleSubmit = useCallback(async () => {
     selectedFeeling,
     token,
     uploadMedia,
-    setImageMetadata,
     imageMetadata,
-    // navigate
+    charCount
   ]);
 
-  if(loading){
-     return (
+  if (loading) {
+    return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
@@ -474,51 +507,56 @@ const handleSubmit = useCallback(async () => {
   }
 
   return (
-
     <div className="min-h-screen md:w-xl sm:w-120 w-90 bg-gray-50 p-2">
-     
       {/* Header */}
-
-       {/* Centered Header */}
-    <div className="bg-white border-b border-gray-200 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
-    <div className="flex items-center justify-between px-4 py-3 mt-5">
-      <button className="text-gray-600 transition-transform duration-200 cursor-pointer ease-in-out hover:rotate-90">
-     <X size={24} />
-    </button>
-
-      <h1 className="text-lg font-semibold text-gray-900">Create New Post</h1>
-      <button
-  onClick={handleSubmit}
-  disabled={isOverLimit || (content.trim().length === 0 && images.length === 0)}
-  className={`px-4 py-2  rounded-full font-medium transition-all duration-200 ease-in-out
-    ${
-      isOverLimit || (content.trim().length === 0 && images.length === 0)
-        ? 'bg-gray-200 text-gray-400 cursor-not-allowed scale-100'
-        : 'bg-blue-500 text-white cursor-pointer hover:bg-blue-600 hover:scale-105 active:scale-95'
-    }`}
->
-  Post
-    </button>
-  </div>
-</div>
+      <div className="bg-white border-b border-gray-200 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
+        <div className="flex items-center justify-between px-4 py-3 mt-5">
+          <button
+            className="text-gray-600 transition-transform duration-200 cursor-pointer ease-in-out hover:rotate-180"
+            onClick={() => (
+              setContent(''),
+              setImages([]),
+              setImageFilters([]),
+              setLocation(null),
+              setLocationName(''),
+              setTaggedPeople([]),
+              setSelectedFeeling(null),
+              setTags([]),
+              setTagInput('')
+            )}
+          >
+            <RefreshCw size={24} />
+          </button>
+          <h1 className="text-lg font-semibold text-gray-900">Create New Post</h1>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitDisabled}
+            className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ease-in-out
+              ${isSubmitDisabled
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed scale-100'
+                : 'bg-blue-500 text-white cursor-pointer hover:bg-blue-600 hover:scale-105 active:scale-95'
+              }`}
+          >
+            Post
+          </button>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="bg-white mt-4 rounded-lg max-w-2xl w-full mx-auto shadow-sm">
         {/* User Info Header */}
-<div className="flex items-center px-4 pt-4">
-  <img
-    src={user?.profilePicture} 
-    alt="User"
-    className="w-10 h-10 bg-black rounded-full object-cover"
-    />
-  <div className="ml-3">
-    <p className="text-sm text-gray-900">{user?.name || user?.username || 'User'}</p>
-    {/* Optional: small caption like “Public” or timestamp */}
-    {/* <p className="text-xs text-gray-500">Posting publicly</p> */}
-  </div>
-</div>
+        <div className="flex items-center px-4 pt-4">
+          <img
+            src={user?.profilePicture}
+            alt="User profile"
+            className="w-10 h-10 bg-black rounded-full object-cover"
+          />
+          <div className="ml-3">
+            <p className="text-sm text-gray-900">{user?.name || user?.username || 'User'}</p>
+          </div>
+        </div>
 
-    {/* Character Counter */}
+        {/* Character Counter */}
         {content.length > 0 && (
           <div className="flex items-center justify-center pt-4">
             <div
@@ -531,11 +569,10 @@ const handleSubmit = useCallback(async () => {
             >
               <div className="bg-white rounded-full w-9 h-9 flex items-center justify-center">
                 <span
-                  className={`text-xs font-medium ${
-                    isOverLimit ? 'text-red-600' :
+                  className={`text-xs font-medium ${isOverLimit ? 'text-red-600' :
                     isApproachingLimit ? 'text-amber-600' :
-                    'text-emerald-600'
-                  }`}
+                      'text-emerald-600'
+                    }`}
                 >
                   {MAX_CHAR_LIMIT - charCount}
                 </span>
@@ -550,7 +587,7 @@ const handleSubmit = useCallback(async () => {
             className="w-full text-base text-gray-800 placeholder-gray-400 outline-none resize-none"
             placeholder="What's on your mind?"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={handleContentChange}
             rows={6}
             maxLength={MAX_CHAR_LIMIT * 1.1}
           />
@@ -576,8 +613,8 @@ const handleSubmit = useCallback(async () => {
               <Users className="text-indigo-500" size={20} />
               <span className="text-indigo-600 ml-2 mr-1 font-medium">With</span>
               {taggedPeople.map((person, index) => (
-                <span key={index} className="text-indigo-600">
-                  {person.name}{index < taggedPeople.length - 1 && ', '}
+                <span key={person.id} className="text-indigo-600">
+                  {person.name}{index < taggedPeople.length - 1 ? ', ' : ''}
                 </span>
               ))}
               <button onClick={() => setTaggedPeople([])} className="ml-2">
@@ -646,8 +683,14 @@ const handleSubmit = useCallback(async () => {
             <div className="text-sm text-gray-600 mb-2 font-medium">Tags in your post:</div>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag, index) => (
-                <div key={index} className="bg-blue-50 rounded-full px-3 py-1.5">
+                <div key={index} className="bg-blue-50 rounded-full px-3 py-1.5 flex items-center">
                   <span className="text-blue-600 text-sm">#{tag}</span>
+                  <button
+                    onClick={() => removeTag(tag)}
+                    className="ml-2 text-blue-500 hover:text-blue-700"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -655,47 +698,27 @@ const handleSubmit = useCallback(async () => {
         )}
 
         {/* Trending Tags */}
-        {/* <div className="px-4 py-3">
-          <div className="text-sm text-gray-600 mb-2 font-medium">Popular hashtags:</div>
-          <div className="flex flex-wrap gap-2">
-            {trendyTags.map((tag, index) => (
-              <button
-                key={index}
-                onClick={() => addTag(tag)}
-                className="bg-gray-100 cursor-pointer hover:bg-gray-200 rounded-full px-3 py-1.5 transition-colors"
-              >
-                <span className="text-gray-800 text-sm">#{tag}</span>
-              </button>
-            ))}
-          </div>
-        </div> */}
-
-        {/* Trending Tags */}
-
         <div className="px-4 py-3">
-        <div className="text-sm text-gray-600 mb-2 font-medium">Popular hashtags:</div>
-
-  {trendyTags.length > 0 ? (
-    <div className="flex flex-wrap gap-2">
-      {trendyTags.map((tag, index) => (
-        <button
-          key={index} 
-          onClick={() => addTag(tag)}
-          className="bg-gray-100 cursor-pointer hover:bg-gray-200 rounded-full px-3 py-1.5 transition-colors"
-        >
-          <span className="text-gray-800 text-sm">#{tag}</span>
-        </button>
-      ))}
-    </div>
-  ) : (
-    <div className="text-sm text-gray-500 italic">No trending tags found.</div>
-  )}
-</div>
-
-
+          <div className="text-sm text-gray-600 mb-2 font-medium">Popular hashtags:</div>
+          {trendyTags.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {trendyTags.map((tag, index) => (
+                <button
+                  key={index}
+                  onClick={() => addTag(tag)}
+                  className="bg-gray-100 cursor-pointer hover:bg-gray-200 rounded-full px-3 py-1.5 transition-colors"
+                >
+                  <span className="text-gray-800 text-sm">#{tag}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-gray-500 italic">No trending tags found.</div>
+          )}
+        </div>
 
         {/* Add to Post Options */}
-        <div className="bg-white px-4 py-3 border-t border-gray-100">
+        <div className="bg-white px-4 py-3 border-t border-gray-200">
           <div className="text-sm text-gray-600 mb-3 font-medium">Add to your post:</div>
           <div className="flex justify-around">
             <button
@@ -703,9 +726,8 @@ const handleSubmit = useCallback(async () => {
               disabled={images.length >= MEDIA_LIMIT}
               className="flex flex-col items-center cursor-pointer"
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                images.length >= MEDIA_LIMIT ? 'bg-gray-100' : 'bg-red-50 hover:bg-red-100'
-              }`}>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${images.length >= MEDIA_LIMIT ? 'bg-gray-100' : 'bg-red-50 hover:bg-red-100'
+                }`}>
                 <Image className={images.length >= MEDIA_LIMIT ? 'text-gray-400' : 'text-red-500'} size={20} />
               </div>
               <span className={`text-xs mt-1 ${images.length >= MEDIA_LIMIT ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -740,148 +762,177 @@ const handleSubmit = useCallback(async () => {
         {isOverLimit && (
           <div className="mx-4 my-3 p-3 bg-red-50 rounded-lg border border-red-200">
             <span className="text-red-600 text-sm font-medium">
-              Your post exceeds the {MAX_CHAR_LIMIT} character limit. Please shorten your text to post.
+              Your post exceeds the {MAX_CHAR_LIMIT} character limit (excluding hashtags). Please shorten your text to post.
             </span>
           </div>
         )}
       </div>
 
       {/* Media Options Modal */}
-{showMediaOptions && (
-  <>
-    <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowMediaOptions(false)}></div>
-    <div className="relative z-60">
-      <div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg"
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Add Media</h3>
-          <button onClick={() => setShowMediaOptions(false)} className="text-gray-600 hover:text-gray-900">
-            <X size={24} />
-          </button>
-        </div>
-        <div className="space-y-3">
-          <label className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-            <Camera className="text-blue-500 mr-3" size={24} />
-            <span>Upload Photos</span>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </label>
-        </div>
-      </div>
-    </div>
-  </>
-)}
+      {showMediaOptions && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowMediaOptions(false)}></div>
+          <div className="relative z-60">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Add Media</h3>
+                <button onClick={() => setShowMediaOptions(false)} className="text-gray-600 hover:text-gray-900">
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="space-y-3">
+                <label className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                  <Camera className="text-blue-500 mr-3" size={24} />
+                  <span>Upload Photos</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Location Modal */}
-{showLocationModal && (
-  <>
-    <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowLocationModal(false)}></div>
-    <div className="relative z-60">
-      <div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg"
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Add Location</h3>
-          <button onClick={() => setShowLocationModal(false)} className="text-gray-600 hover:text-gray-900">
-            <X size={24} />
-          </button>
-        </div>
-        <div className="space-y-2">
-          {['New York, NY', 'Los Angeles, CA', 'Chicago, IL', 'Houston, TX'].map((loc, index) => (
-            <button
-              key={index}
-              onClick={() => handleLocationSelect(loc)}
-              className="w-full text-left p-3 hover:bg-gray-50 rounded-lg"
-            >
-              <div className="flex items-center">
-                <MapPin className="text-gray-400 mr-3" size={20} />
-                <span>{loc}</span>
+      {showLocationModal && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={closeLocationModal}></div>
+          <div className="relative z-60">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Add Location</h3>
+                <button onClick={closeLocationModal} className="text-gray-600 cursor-pointer hover:text-gray-900">
+                  <X size={24} />
+                </button>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  </>
-)}
+              <div className="mb-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    className="w-full text-base text-gray-800 placeholder-gray-400 outline-none border-b border-gray-200 py-1 pl-10"
+                    placeholder="Search locations"
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                  />
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                {filteredLocations.length > 0 ? (
+                  filteredLocations.map((loc, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleLocationSelect(loc)}
+                      className="w-full text-left p-3 hover:bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex items-center">
+                        <MapPin className="text-gray-400 mr-3" size={20} />
+                        <span>{loc}</span>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-sm text-gray-500 italic">No locations found</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* People Tag Modal */}
- {showPeopleTagModal && (
-  <>
-    <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowPeopleTagModal(false)}></div>
-    <div className="relative z-60">
-      <div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg"
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Tag People</h3>
-          <button onClick={() => setShowPeopleTagModal(false)} className="text-gray-600 hover:text-gray-900">
-            <X size={24} />
-          </button>
-        </div>
-        <div className="space-y-2">
-          {samplePeople.map((person, index) => (
-            <button
-              key={index}
-              onClick={() => handlePeopleTag(person)}
-              className="w-full text-left cursor-pointer p-3 hover:bg-gray-50 rounded-lg"
-            >
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-gray-300 rounded-full mr-3"></div>
-                <span>{person}</span>
+      {showPeopleTagModal && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowPeopleTagModal(false)}></div>
+          <div className="relative z-60">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Tag People</h3>
+                <button onClick={() => setShowPeopleTagModal(false)} className="text-gray-600 cursor-pointer hover:text-gray-900">
+                  <X size={24} />
+                </button>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  </>
-)}
+              <div className="mb-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    className="w-full text-base text-gray-800 placeholder-gray-400 outline-none border-b border-gray-200 py-1 pl-10"
+                    placeholder="Search people"
+                    value={peopleSearch}
+                    onChange={(e) => setPeopleSearch(e.target.value)}
+                  />
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                {filteredPeople.length > 0 ? (
+                  filteredPeople.map((person) => (
+                    <button
+                      key={person._id}
+                      onClick={() => handlePeopleTag(person)}
+                      className="flex items-center space-x-3 w-full text-left p-3 hover:bg-gray-50 rounded-lg"
+                    >
+                      <img
+                        src={person.profilePicture || "/default-avatar.png"}
+                        alt={person.username}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="font-medium">{person.name || person.username}</p>
+                        <p className="text-sm text-gray-500">{person.bio || 'No bio'}</p>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-sm text-gray-500 italic">No people found</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Feeling Modal */}
-{showFeelingModal && (
-  <>
-    <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowFeelingModal(false)}></div>
-    <div className="relative z-60">
-      <div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg"
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">How are you feeling?</h3>
-          <button onClick={() => setShowFeelingModal(false)} className="text-gray-600 hover:text-gray-900">
-            <X size={24} />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {feelings.map((feeling, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                setSelectedFeeling(feeling);
-                setShowFeelingModal(false);
-              }}
-              className="flex items-center p-3 hover:bg-gray-50 rounded-lg"
-            >
-              <span className="text-2xl mr-3">{feeling.icon}</span>
-              <span>{feeling.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  </>
-)}
+      {showFeelingModal && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowFeelingModal(false)}></div>
+          <div className="relative z-60">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">How are you feeling?</h3>
+                <button onClick={() => setShowFeelingModal(false)} className="text-gray-600 cursor-pointer hover:text-gray-900">
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {feelings.map((feeling, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setSelectedFeeling(feeling);
+                      setShowFeelingModal(false);
+                    }}
+                    className="flex items-center p-3 hover:bg-gray-50 rounded-lg"
+                  >
+                    <span className="text-2xl mr-3">{feeling.icon}</span>
+                    <span>{feeling.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Image Editor Modal */}
       {showImageEditor && editingImageIndex !== null && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg p-4 m-8 ">
+          <div className="bg-white w-full max-w-2xl mx-auto rounded-lg p-4 m-8">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Edit Image</h3>
               <button onClick={() => setShowImageEditor(false)}>

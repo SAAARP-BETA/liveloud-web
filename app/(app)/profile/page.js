@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import toast from 'react-hot-toast';
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -32,7 +33,7 @@ import {
   Flag,
   Flame,
   MapPin,
- LinkIcon,
+  LinkIcon,
   Calendar,
   Grid,
   Trophy,
@@ -100,7 +101,7 @@ const PointsDisplay = ({ points, loading }) => {
     try {
       router.push("/leaderboard");
     } catch (error) {
-      alert("Unable to navigate to leaderboard. Please try again.");
+      toast.error("Unable to navigate to leaderboard. Please try again.");
     }
   };
 
@@ -423,7 +424,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         label: "Share Profile",
         icon: <Share2 className="text-gray-600 text-xl" />,
         onPress: () =>
-          alert(
+          toast.error(
             `Coming soon! Sharing profile for ${user?.username || "this user"}.`
           ),
       },
@@ -438,7 +439,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           ? () => router.push("/profile/edit")
           : () => {
             if (confirm("Are you sure you want to report this user?")) {
-              alert("Thank you for your report.");
+              toast.success("Thank you for your report.");
             }
           },
         danger: !isMyProfile,
@@ -689,7 +690,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
 
   const handleFollowToggle = async () => {
     if (!isAuthenticated) {
-      alert("Please login to follow users");
+      toast.error("Please login to follow users");
       return;
     }
 
@@ -718,13 +719,13 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
       setIsFollowing(wasFollowing);
       setFollowersCount((prev) => (wasFollowing ? prev + 1 : prev - 1));
       console.error("Error updating follow status:", error);
-      alert("Failed to update follow status. Please try again.");
+      toast.error("Failed to update follow status. Please try again.");
     }
   };
 
   const handleShareProfile = async () => {
     try {
-      alert(
+      toast.error(
         `Coming soon! Sharing profile for ${user?.username || "this user"}.`
       );
     } catch (error) {
@@ -897,8 +898,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     <button
                       onClick={handleFollowToggle}
                       className={` cursor-pointer flex-1 py-2.5 rounded-full text-center font-medium ${isFollowing
-                          ? "bg-gray-100 text-gray-900"
-                          : "bg-sky-500 text-white"
+                        ? "bg-gray-100 text-gray-900"
+                        : "bg-sky-500 text-white"
                         }`}
                     >
                       {isFollowing ? "Following" : "Follow"}
@@ -944,18 +945,18 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   {/* --- FIX: Made website a clickable link --- */}
                   {user?.website && (
                     <div className="flex items-center mb-2">
-                      <LinkIcon className='text-gray-600 text-lg'/>
-    <Link  
-    
-      href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="ml-2 text-blue-500 hover:text-blue-700 hover:underline transition-colors"
-    >
-      {user.website}
-  </Link>
-  </div>
-)}
+                      <LinkIcon className='text-gray-600 text-lg' />
+                      <Link
+
+                        href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+                      >
+                        {user.website}
+                      </Link>
+                    </div>
+                  )}
                   <div className="flex items-center mb-2">
                     <Calendar className="text-gray-600 cursor-pointer text-base" />
                     <span className="ml-2 text-gray-500">
@@ -1066,7 +1067,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           </motion.div>
           <div className="h-20"></div>
         </div>
-       <CustomModal
+        <CustomModal
           visible={isMoreModalVisible}
           onClose={() => setIsMoreModalVisible(false)}
           title="More Options"
@@ -1083,9 +1084,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               >
                 <div className="w-8">{option.icon}</div>
                 <span
-                  className={`text-base ${
-                    option.danger ? "text-red-500" : "text-gray-800"
-                  } font-medium`}
+                  className={`text-base ${option.danger ? "text-red-500" : "text-gray-800"
+                    } font-medium`}
                 >
                   {option.label}
                 </span>
@@ -1157,7 +1157,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               onClick={() => {
                 setModalVisible(false);
                 if (confirm("Are you sure you want to report this post?")) {
-                  alert("Thank you for your report.");
+                  toast.success("Thank you for your report.");
                 }
               }}
             >
