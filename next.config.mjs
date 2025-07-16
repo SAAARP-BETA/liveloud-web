@@ -1,12 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      'res.cloudinary.com',
-      'via.placeholder.com',
-      'placehold.co',
-      'ai4science.seas.upenn.edu',
-    ],
     remotePatterns: [
       {
         protocol: 'https',
@@ -14,10 +8,9 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3001',
-        pathname: '/uploads/**',
+        protocol: 'https',
+        hostname: 'via.placeholder.com', // Moved from domains
+        pathname: '/**',
       },
       {
         protocol: 'https',
@@ -26,8 +19,19 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'ai4science.seas.upenn.edu', // Moved from domains
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 't3.ftcdn.net',
         pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+        pathname: '/uploads/**',
       },
     ],
   },

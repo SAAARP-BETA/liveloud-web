@@ -78,7 +78,7 @@ const SuggestionItem = ({ item, onPress, showType = true }) => {
       {item.type === "user" ? (
         <>
           <img
-            src={item.profilePicture || "https://via.placeholder.com/50"}
+            src={item.profilePicture || null}
             alt={item.username}
             className="w-10 h-10 rounded-full object-cover"
           />
@@ -158,7 +158,7 @@ const PostSearchResult = ({ post, onPress }) => {
     >
       <div className="flex items-center mb-3">
         <img
-          src={post.user.profilePicture || "https://via.placeholder.com/50"}
+          src={post.user.profilePicture || null}
           alt={post.user.username}
           className="w-8 h-8 rounded-full object-cover"
         />
@@ -198,7 +198,7 @@ const UserSearchResult = ({ user, onPress }) => {
       onClick={() => onPress(user)}
     >
       <img
-        src={user.profilePicture || "https://via.placeholder.com/50"}
+        src={user.profilePicture || null}
         alt={user.username}
         className="w-14 h-14 rounded-full object-cover"
       />

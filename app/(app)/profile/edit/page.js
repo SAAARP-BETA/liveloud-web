@@ -319,7 +319,7 @@ const EditPage = () => {
                 onClick={() => setIsBottomSheetVisible(false)}
                 className="p-1 ml-4"
               >
-                <X className="text-gray-600 w-6 h-6" />
+                <X className="text-gray-600 cursor-pointer w-6 h-6" />
               </button>
             </div>
           </div>
@@ -343,7 +343,7 @@ const EditPage = () => {
           {(imageActionType === "profile" && profileImage) ||
             (imageActionType === "cover" && coverImage) ? (
             <button
-              className="flex flex-row items-center py-3 px-4 mb-3 bg-red-50 rounded-xl w-full text-left hover:bg-red-100 transition-colors"
+              className="flex flex-row items-center py-3  cursor-pointer px-4 mb-3 bg-red-50 rounded-xl w-full text-left hover:bg-red-100 transition-colors"
               onClick={() => {
                 if (imageActionType === "profile") setProfileImage(null);
                 else setCoverImage(null);
@@ -361,7 +361,7 @@ const EditPage = () => {
           ) : null}
 
           <button
-            className="flex items-center justify-center py-3 px-4 mt-4 bg-gray-100 rounded-xl w-full hover:bg-gray-200 transition-colors"
+            className="flex items-center cursor-pointer justify-center py-3 px-4 mt-4 bg-gray-100 rounded-xl w-full hover:bg-gray-200 transition-colors"
             onClick={() => setIsBottomSheetVisible(false)}
           >
             <span
@@ -394,7 +394,7 @@ const EditPage = () => {
           No profile data found
         </p>
         <button
-          className="mt-4 py-2 px-4 bg-sky-500 rounded-lg text-white hover:bg-sky-600 transition-colors"
+          className="mt-4 py-2 px-4 bg-sky-500 cursor-pointer rounded-lg text-white hover:bg-sky-600 transition-colors"
           onClick={() => router.back()}
         >
           Go Back
@@ -409,13 +409,13 @@ const EditPage = () => {
         <header className="flex flex-row items-center justify-between py-3 px-4 bg-white border-b border-gray-100 sticky top-0 z-10">
 
           <h1
-            className="text-lg text-gray-900"
+            className="text-lg cursor-pointer text-gray-900"
 
           >
             Edit Profile
           </h1>
           <button
-            className={`py-2 px-4 bg-sky-500 rounded-full hover:bg-sky-600 transition-colors ${submitting ? "opacity-70 cursor-not-allowed" : ""
+            className={`py-2 px-4 cursor-pointer bg-sky-500 rounded-full hover:bg-sky-600 transition-colors ${submitting ? "opacity-70 cursor-not-allowed" : ""
               }`}
             onClick={handleUpdateProfile}
             disabled={submitting}
@@ -446,7 +446,7 @@ const EditPage = () => {
     <Image
       src={profileData.coverPicture}
       alt="Cover"
-      className="w-full h-full object-cover"
+      className="w-full h-full object-cover cursor-pointer"
       width={800}
       height={160}
       onError={(e) => {
@@ -459,7 +459,7 @@ const EditPage = () => {
     <Image
       src={defaultCover}
       alt="Default Cover"
-      className="w-full h-full object-cover"
+      className="w-full h-full cursor-pointer object-cover"
       width={800}
       height={160}
       priority
@@ -468,7 +468,7 @@ const EditPage = () => {
   
   {/* Add cover edit button */}
   <button
-    className="absolute top-4 right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+    className="absolute top-4 cursor-pointer right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
     onClick={() => openImagePicker("cover")}
   >
     <Camera className="text-white w-5 h-5" />
@@ -511,7 +511,7 @@ const EditPage = () => {
               </div>
             )}
             <button
-              className="absolute right-8 bottom-8 bg-sky-500 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
+              className="absolute right-8 cursor-pointer bottom-8 bg-sky-500 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
               onClick={() => openImagePicker("profile")}
             >
               <Camera className="text-white w-4 h-4" />
@@ -531,7 +531,7 @@ const EditPage = () => {
               className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${profileErrors.username ? "border-red-500" : "border-gray-200"
                 }`}
             >
-              <AtSign className="text-gray-400 w-5 h-5 ml-3" />
+              <AtSign className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
 
@@ -562,7 +562,7 @@ const EditPage = () => {
               className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${profileErrors.fullname ? "border-red-500" : "border-gray-200"
                 }`}
             >
-              <User className="text-gray-400 w-5 h-5 ml-3" />
+              <User className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
 
@@ -623,7 +623,7 @@ const EditPage = () => {
               Location
             </label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <MapPin className="text-gray-400 w-5 h-5 ml-3" />
+              <MapPin className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
 
@@ -642,7 +642,7 @@ const EditPage = () => {
               Website
             </label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <LinkIcon className="text-gray-400 w-5 h-5 ml-3" />
+              <LinkIcon className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
 
@@ -658,15 +658,14 @@ const EditPage = () => {
           <div>
             <label
               className="text-sm text-gray-500 mb-1.5 block"
-
             >
               Date of Birth
             </label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Calendar className="text-gray-400 w-5 h-5 ml-3" />
+              <Calendar className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 type="date"
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                className="flex-1 py-3 px-2 text-gray-800 cursor-pointer outline-none bg-transparent"
 
                 value={
                   profileData.dob
@@ -689,7 +688,7 @@ const EditPage = () => {
               Email
             </label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Mail className="text-gray-400 w-5 h-5 ml-3" />
+              <Mail className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
 
@@ -710,7 +709,7 @@ const EditPage = () => {
               Phone
             </label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Phone className="text-gray-400 w-5 h-5 ml-3" />
+              <Phone className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
 
@@ -735,7 +734,7 @@ const EditPage = () => {
                   <button
                     key={gender}
                     type="button"
-                    className={`px-4 py-2 rounded-full transition-colors ${profileData.gender === gender
+                    className={`px-4 py-2 cursor-pointer rounded-full transition-colors ${profileData.gender === gender
                       ? "bg-sky-500 text-white"
                       : "bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100"
                       }`}
@@ -787,7 +786,7 @@ const EditPage = () => {
               Occupation
             </label>
             <div className="flex flex-row items-center bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <Briefcase className="text-gray-400 w-5 h-5 ml-3" />
+              <Briefcase className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none"
 
@@ -808,7 +807,7 @@ const EditPage = () => {
               Education
             </label>
             <div className="flex flex-row items-center bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <Book className="text-gray-400 w-5 h-5 ml-3" />
+              <Book className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none"
 

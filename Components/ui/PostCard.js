@@ -1,5 +1,5 @@
 "use client";
-import defaultPic from "../../assets/default-avatar.jpg";
+import defaultPic from "../../assets/Profilepic1.png";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -160,7 +160,7 @@ const PostCard = ({
               src={
                 isAuthenticated && post.profilePic?.trim()
                   ? post.profilePic
-                  : defaultPic.src
+                  : defaultPic
               }
               alt="Profile"
               fill

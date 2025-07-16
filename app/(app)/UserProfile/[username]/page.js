@@ -965,7 +965,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                                 transition={{ type: "spring", stiffness: 100 }}
                             >
                                 <Image
-                                    src={user.profilePicture}
+                                    src={user.profilePicture||defaultCover}
                                     alt="Profile"
                                     className="w-full h-full rounded-full object-cover"
                                     width={PROFILE_IMAGE_MAX_SIZE}
