@@ -102,7 +102,7 @@ const PointsDisplay = ({ points, loading }) => {
     };
 
     return (
-        <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl border border-sky-100">
+        <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl border border-sky-100 w-xl">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center">
                     <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -207,7 +207,7 @@ const StreakDisplay = ({ consecutiveDays }) => {
 // Tab Bar Component (unchanged)
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
     return (
-        <div className="flex  w-full bg-white border justify-center gap-25 border-gray-100 pt-2">
+        <div className="flex  w-full  border justify-center gap-25 border-gray-100 pt-2">
             {tabs.map((tab) => (
                 <button
                     key={tab.key}
@@ -215,7 +215,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
                         }`}
                     onClick={() => onTabPress(tab.key)}
                 >
-                    <div className="flex items-center">
+                    <div className="flex items-center cursor-pointer">
                         {tab.key === "posts" && (
                             <Grid
                                 size={18}
@@ -307,9 +307,9 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
     return (
-        <div className="min-h-screen flex justify-center bg-gray-50">
-            <div className="w-full max-w-2xl">
-                <div className="fixed top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
+        <div className="flex justify-center bg-gray-50">
+            <div className="w-full">
+                <div className="top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
                 <div className="pt-40">
                     <div className="flex justify-center -mt-12">
                         <div className="w-24 h-24 rounded-full bg-gray-300 border-4 border-white animate-pulse" />
@@ -902,7 +902,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     if (!user && !isLoading) {
         return (
             <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
-                <div className="w-full max-w-md px-6">
+                <div className="w-full max-sm:w-100 px-6">
                     <div className="text-center">
                         <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="text-gray-400 text-3xl">😔</span>

@@ -16,19 +16,7 @@ import {
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
 import defaultPic from "../../assets/Profilepic1.png";
-
-const getProfilePicture = (profilePic) => {
-  if (!profilePic) {
-    return defaultPic.src || defaultPic; // Use .src property if it exists
-  }
-
-  // If profilePic is an object (imported image), use its src property
-  if (typeof profilePic === "object" && profilePic.src) {
-    return profilePic.src;
-  }
-
-  return profilePic;
-};
+import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 // Mock data and utilities (since we don't have the actual context)
 const mockUser = {

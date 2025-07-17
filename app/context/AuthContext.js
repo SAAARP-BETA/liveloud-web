@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import authService from '@/backend/api/routes/authService.mjs';
-import { getAuthData, clearAuthData } from '@/backend/utils/authUtils';
+import { getAuthData, clearAuthData, storeAuthData } from '@/backend/utils/authUtils';
 
 export const AuthContext = createContext({
   user: null,
@@ -11,7 +11,8 @@ export const AuthContext = createContext({
   error: null,
   login: () => {},
   signup: () => {},
-  logout: () => {},
+  logout: () => { },
+  updateUserInfo : ()=>{},
   getProfile: () => {},
   clearError: () => {},
 });
@@ -154,6 +155,34 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+   // Update user info function
+  const updateUserInfo = async (newUserData) => {
+    try {
+      console.log('Updating user info in context:', newUserData);
+      
+      setAuthState(prev => ({
+        ...prev,
+        user: {
+          ...prev.user,
+          ...newUserData
+        }
+      }));
+      
+      // Also update AsyncStorage with new user data
+      if (authState.token && newUserData) {
+        await storeAuthData(authState.token, {
+          ...authState.user,
+          ...newUserData
+        });
+      }
+      
+      return true;
+    } catch (err) {
+      console.error('Update user info error:', err);
+      return false;
+    }
+  };
+
   // ------------------ GET PROFILE ------------------
   const getProfile = async () => {
     try {
@@ -187,6 +216,7 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
+        updateUserInfo,
         getProfile,
         clearError,
       }}

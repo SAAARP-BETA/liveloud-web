@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { reportReasons, handleReportPost } from '../../app/utils/postFunctions';
 import toast from 'react-hot-toast';
+import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 // Flag icon component to replace Feather icons
 const FlagIcon = ({ size = 20, color = '#64748B' }) => (
@@ -86,7 +87,12 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
 
           {post && (
             <div className="flex flex-row items-center p-3 mb-4 bg-gray-50 rounded-xl">
-              <img src={post.profilePic} alt="Profile" className="w-10 h-10 rounded-full" />
+             <img
+  src={getProfilePicture(post.profilePic)}
+  alt="Profile"
+  className="w-10 h-10 rounded-full"
+/>
+
               <div className="ml-3 flex-1">
                 <p className="text-base text-gray-800 mb-0.5">{post.username}</p>
                 <p className="text-sm text-gray-500">
