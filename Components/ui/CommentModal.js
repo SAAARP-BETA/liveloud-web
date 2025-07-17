@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, MessageCircle, Send, CheckCircle } from 'lucide-react';
 import { API_ENDPOINTS } from '../../app/utils/config';
+import { getProfilePicture } from "@/app/utils/fallbackImage";
+
 // const API_URL = "http://192.168.1.13:3002/api/";
 
 
@@ -267,10 +269,11 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
       <div className="p-4 border-b border-gray-100">
         <div className="flex">
           <img
-            src={item.user?.profilePicture || 'https://via.placeholder.com/150'}
-            alt="Profile"
-            className="w-8 h-8 rounded-full"
-          />
+  src={getProfilePicture(item.user?.profilePicture)}
+  alt="Profile"
+  className="w-8 h-8 rounded-full"
+/>
+
           <div className="ml-3 flex-1">
             <div className="flex items-center">
               <span className="font-medium text-sm text-gray-800">
@@ -319,11 +322,13 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                 {item.replies.map((reply, index) => (
                   <div key={index} className={index < item.replies.length - 1 ? "mb-2" : ""}>
                     <div className="flex">
-                      <img
-                        src={reply.user?.profilePicture || 'https://via.placeholder.com/150'}
-                        alt="Profile"
-                        className="w-6 h-6 rounded-full"
-                      />
+                <img
+  src={getProfilePicture(reply.user?.profilePicture)}
+  alt="Profile"
+  className="w-6 h-6 rounded-full"
+/>
+
+
                       <div className="ml-2 flex-1">
                         <div className="flex items-center">
                           <span className="font-medium text-xs text-gray-800">
@@ -387,11 +392,13 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
           {/* Original post preview */}
           {post && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <img
-                src={post.profilePic}
-                alt="Profile"
-                className="w-8 h-8 rounded-full"
-              />
+             <img
+  src={getProfilePicture(post.profilePic)}
+  alt="Profile"
+  className="w-8 h-8 rounded-full"
+/>
+
+
               <div className="ml-3 flex-1">
                 <div className="flex items-center">
                   <span className="font-medium text-sm text-gray-800">

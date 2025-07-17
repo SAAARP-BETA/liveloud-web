@@ -211,7 +211,7 @@ const StreakDisplay = ({ consecutiveDays }) => {
 // Tab Bar Component (unchanged)
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   return (
-    <div className="flex  w-full bg-white border justify-center gap-25 border-gray-100 pt-2">
+    <div className="flex w-full border justify-center gap-25 border-gray-100 pt-2">
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -219,7 +219,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
             }`}
           onClick={() => onTabPress(tab.key)}
         >
-          <div className="flex items-center">
+          <div className="flex items-center cursor-pointer">
             {tab.key === "posts" && (
               <Grid
                 size={18}

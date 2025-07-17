@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { X, Repeat, Edit, ArrowLeft } from 'lucide-react';
 import { API_ENDPOINTS } from '../../app/utils/config';
 import toast from 'react-hot-toast';
+import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
   const [quoteContent, setQuoteContent] = useState('');
@@ -107,7 +108,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
 
               {post && (
                 <div className="flex items-center m-4 p-3 bg-gray-50 rounded-xl">
-                  <img src={post.profilePic} alt="Profile" className="w-10 h-10 rounded-full" />
+<img src={getProfilePicture(post.profilePic)} alt="Profile" className="w-10 h-10 rounded-full" />
                   <div className="ml-3 flex-1">
                     <p className="font-medium text-gray-800">{post.username}</p>
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2">{post.content}</p>
@@ -164,7 +165,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
             {post && (
               <div className="border border-gray-200 rounded-xl p-3 mb-3">
                 <div className="flex items-center mb-2">
-                  <img src={post.profilePic} alt="Profile" className="w-8 h-8 rounded-full mr-2" />
+<img src={getProfilePicture(post.profilePic)} alt="Profile" className="w-8 h-8 rounded-full mr-2" />
                   <span className="font-medium text-sm text-gray-800">{post.username}</span>
                   <span className="text-xs text-gray-500 ml-2">{post.timestamp}</span>
                 </div>

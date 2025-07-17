@@ -205,7 +205,7 @@ const EditPage = () => {
         }
       } catch (error) {
         console.error('Error preparing profile image:', error);
-        alert('Failed to prepare profile image for upload');
+        toast.error('Failed to prepare profile image for upload');
       }
     }
     
@@ -226,7 +226,7 @@ const EditPage = () => {
         }
       } catch (error) {
         console.error('Error preparing cover image:', error);
-        alert('Failed to prepare cover image for upload');
+        toast.error('Failed to prepare cover image for upload');
       }
     }
     

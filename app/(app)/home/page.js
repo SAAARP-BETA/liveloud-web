@@ -28,13 +28,12 @@ import {
   Image as PhotoIcon,
   X as XMarkIcon,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
-
+import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -45,6 +44,7 @@ import AmplifyModal from '@/Components/ui/AmplifyModal';
 import CustomModal from '@/Components/ui/Modal';
 import ReportModal from '@/Components/ui/ReportModal';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 // import {
 //   Plus as PlusIcon,
 //   Image as PhotoIcon,
@@ -565,7 +565,7 @@ const HomePage = () => {
   // User interaction handlers
   const handleFollowUser = async (userId) => {
     if (!isAuthenticated) {
-      alert('Please login to follow users');
+      toast.error('Please login to follow users');
       return;
     }
 
@@ -582,7 +582,7 @@ const HomePage = () => {
         throw new Error('Failed to follow user');
       }
 
-      alert('You are now following this user');
+      toast.error('You are now following this user');
 
       // Update posts in current tab to reflect new following status
       const updatedPosts = getCurrentTabData().posts.map(post =>
@@ -591,13 +591,13 @@ const HomePage = () => {
       updateTabData(activeTab, { posts: updatedPosts });
     } catch (error) {
       console.error('Error following user:', error);
-      alert(`Failed to follow user: ${error.message}`);
+      toast.error(`Failed to follow user: ${error.message}`);
     }
   };
 
   const handleUnfollowUser = async (userId) => {
     if (!isAuthenticated) {
-      alert('Please login to unfollow users');
+      toast.error('Please login to unfollow users');
       return;
     }
 
@@ -614,7 +614,7 @@ const HomePage = () => {
         throw new Error('Failed to unfollow user');
       }
 
-      alert('You have unfollowed this user');
+      toast.success('You have unfollowed this user');
 
       // Update posts in current tab to reflect new following status
       const updatedPosts = getCurrentTabData().posts.map(post => {
@@ -626,7 +626,7 @@ const HomePage = () => {
       updateTabData(activeTab, { posts: updatedPosts });
     } catch (error) {
       console.error('Error unfollowing user:', error);
-      alert(`Failed to unfollow user: ${error.message}`);
+      toast.error(`Failed to unfollow user: ${error.message}`);
     }
   };
 
@@ -637,12 +637,12 @@ const HomePage = () => {
   const handleHidePost = (postId) => {
     const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== postId);
     updateTabData(activeTab, { posts: updatedPosts });
-    alert('This post will no longer appear in your feed');
+    toast.success('This post will no longer appear in your feed');
   };
 
   const handleBlockUser = async (userId) => {
     if (!isAuthenticated) {
-      alert('Please login to block users');
+      toast.error('Please login to block users');
       return;
     }
 
@@ -662,10 +662,10 @@ const HomePage = () => {
       // Remove all posts from this user in current tab
       const updatedPosts = getCurrentTabData().posts.filter(post => post.userId !== userId);
       updateTabData(activeTab, { posts: updatedPosts });
-      alert('You will no longer see content from this user');
+      toast.success('You will no longer see content from this user');
     } catch (error) {
       console.error('Error blocking user:', error);
-      alert(`Failed to block user: ${error.message}`);
+      toast.error(`Failed to block user: ${error.message}`);
     }
   };
 
@@ -698,7 +698,7 @@ const HomePage = () => {
 
   // const handleCreatePost = () => {
   //   if (!isAuthenticated) {
-  //     alert('Please login to create posts');
+  //     toast.error('Please login to create posts');
   //     return;
   //   }
 
@@ -849,7 +849,7 @@ const HomePage = () => {
         if (isAuthenticated) {
           handleFollowUser(userId);
         } else {
-          alert('Please login to follow users');
+          toast.error('Please login to follow users');
         }
         break;
       case 'Unfollow':
@@ -1208,13 +1208,14 @@ const HomePage = () => {
 
           {selectedPost && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <Image
-                src={selectedPost.profilePic || '/api/placeholder/40/40'}
-                alt={selectedPost.username}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
+              <img
+  src={getProfilePicture(selectedPost?.profilePic)}
+  alt={selectedPost?.username || "Profile"}
+  width={40}
+  height={40}
+  className="rounded-full"
+/>
+
               <div className="ml-3">
                 <p className="font-semibold text-gray-800">{selectedPost.username}</p>
                 <p className="text-sm text-gray-500 truncate">{selectedPost.content}</p>
