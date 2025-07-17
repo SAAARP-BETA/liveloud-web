@@ -35,7 +35,7 @@ const fileToBase64 = (file) =>
 
 const EditPage = () => {
   const router = useRouter();
-  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
+  const { user, token, isAuthenticated, loading: authLoading, updateUserInfo } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profileData, setProfileData] = useState(null);
@@ -60,7 +60,7 @@ const EditPage = () => {
   const loadUserProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_ENDPOINTS.USER}/profiles/${user.username}`, {
+      const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -251,6 +251,11 @@ const EditPage = () => {
       // updateUserInfo(updatedUserData);
 
       toast.success('Profile updated successfully');
+       // Update the auth context with new user data if this is the current user's profile
+      if (updatedUserData.user && user && updatedUserData.user._id === user._id) {
+        console.log('Updating auth context with new user data');
+        await updateUserInfo(updatedUserData.user);
+      }
       router.back();
     } catch (error) {
       console.error('Error updating profile:', error);
