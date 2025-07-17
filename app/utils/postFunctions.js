@@ -108,6 +108,35 @@ export const handleDislikePost = async (postId, user, token, setPosts) => {
   }
 
   try {
+    // Optimistically update UI first
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        const updatedLikes = [...post.likes];
+        const updatedDislikes = [...(post.dislikes || [])];
+        const userId = user?._id || 'current-user';
+        
+        // Remove from likes if present
+        const likeIndex = updatedLikes.indexOf(userId);
+        if (likeIndex > -1) {
+          updatedLikes.splice(likeIndex, 1);
+        }
+        
+        // Add to dislikes if not present
+        if (!updatedDislikes.includes(userId)) {
+          updatedDislikes.push(userId);
+        }
+        
+        return {
+          ...post,
+          likes: updatedLikes,
+          dislikes: updatedDislikes,
+          likeCount: updatedLikes.length,
+          dislikeCount: updatedDislikes.length
+        };
+      }
+      return post;
+    }));
+
     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}/dislike`, {
       method: 'POST',
       headers: {
@@ -116,29 +145,25 @@ export const handleDislikePost = async (postId, user, token, setPosts) => {
       }
     });
 
-    const responseBody = await response.text();
-
     if (!response.ok) {
-      if (responseBody.includes('Post already disliked')) {
-        // If the post is already disliked, undislike it instead
-        await handleUndislikePost(postId, user, token, setPosts);
-      } else {
-        throw new Error(`Failed to dislike post: ${responseBody}`);
-      }
-    } else {
-      // Optimistically update UI
-      setPosts(prev => prev.map(post => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            dislikes: [...(post.dislikes || []), user?._id || 'current-user']
-          };
-        }
-        return post;
-      }));
+      const responseBody = await response.text();
+      throw new Error(`Failed to dislike post: ${responseBody}`);
     }
   } catch (error) {
     console.error('Error disliking post:', error);
+    // Revert optimistic update on error
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        const userId = user?._id || 'current-user';
+        const updatedDislikes = post.dislikes?.filter(id => id !== userId) || [];
+        return {
+          ...post,
+          dislikes: updatedDislikes,
+          dislikeCount: updatedDislikes.length
+        };
+      }
+      return post;
+    }));
   }
 };
 
@@ -156,6 +181,21 @@ export const handleUndislikePost = async (postId, user, token, setPosts) => {
   }
 
   try {
+    // Optimistically update UI first
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        const userId = user?._id || 'current-user';
+        const updatedDislikes = (post.dislikes || []).filter(id => id !== userId);
+        
+        return {
+          ...post,
+          dislikes: updatedDislikes,
+          dislikeCount: updatedDislikes.length
+        };
+      }
+      return post;
+    }));
+
     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}/removeDislike`, {
       method: 'POST',
       headers: {
@@ -168,19 +208,24 @@ export const handleUndislikePost = async (postId, user, token, setPosts) => {
       const responseBody = await response.text();
       throw new Error(`Failed to undislike post: ${responseBody}`);
     }
-
-    // Optimistically update UI
+  } catch (error) {
+    console.error('Error undisliking post:', error);
+    // Revert optimistic update on error
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
+        const userId = user?._id || 'current-user';
+        const updatedDislikes = [...(post.dislikes || [])];
+        if (!updatedDislikes.includes(userId)) {
+          updatedDislikes.push(userId);
+        }
         return {
           ...post,
-          dislikes: (post.dislikes || []).filter(id => id !== (user?._id || 'current-user'))
+          dislikes: updatedDislikes,
+          dislikeCount: updatedDislikes.length
         };
       }
       return post;
     }));
-  } catch (error) {
-    console.error('Error undisliking post:', error);
   }
 };
 
@@ -301,7 +346,6 @@ export const formatTimestamp = (timestamp) => {
  * @returns {object} - Formatted post object
  */
 export const formatPostFromApi = (post, index) => {
-  const defaultProfilePic = 'https://via.placeholder.com/150';
 
   if (!post || typeof post !== 'object') {
     console.warn(`Post at index ${index} is invalid:`, post);
@@ -320,7 +364,7 @@ export const formatPostFromApi = (post, index) => {
     imageUrl: post.media && post.media.length > 0 ? post.media[0] : null,
     username: post.user?.username || 'Anonymous',
     timestamp: formatTimestamp(post.createdAt),
-    profilePic: post.user?.profilePicture || defaultProfilePic,
+    profilePic: post.user?.profilePicture || null,
     isVerified: post.user?.isVerified || false,
     likes: Array.isArray(post.likes) ? post.likes : [],
     dislikes: Array.isArray(post.dislikes) ? post.dislikes : [],

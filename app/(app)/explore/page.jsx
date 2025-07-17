@@ -14,12 +14,26 @@ import {
   XCircle,
 } from "lucide-react";
 import { debounce } from "lodash";
-import { API_ENDPOINTS} from "../../utils/config";
+import { API_ENDPOINTS } from "../../utils/config";
+import defaultPic from "../../assets/Profilepic1.png";
+
+const getProfilePicture = (profilePic) => {
+  if (!profilePic) {
+    return defaultPic.src || defaultPic; // Use .src property if it exists
+  }
+
+  // If profilePic is an object (imported image), use its src property
+  if (typeof profilePic === "object" && profilePic.src) {
+    return profilePic.src;
+  }
+
+  return profilePic;
+};
 
 // Mock data and utilities (since we don't have the actual context)
 const mockUser = {
   username: "currentuser",
-  profilePicture: "https://randomuser.me/api/portraits/men/1.jpg",
+  profilePicture: defaultPic,
 };
 
 const mockToken = "mock-token";
@@ -78,7 +92,7 @@ const SuggestionItem = ({ item, onPress, showType = true }) => {
       {item.type === "user" ? (
         <>
           <img
-            src={item.profilePicture || "https://via.placeholder.com/50"}
+            src={getProfilePicture(item.profilePicture)}
             alt={item.username}
             className="w-10 h-10 rounded-full object-cover"
           />
@@ -129,10 +143,18 @@ const RecentSearchItem = ({ item, onPress, onRemove }) => {
   return (
     <div className="flex items-center justify-between py-3 px-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
       <button
-        className="flex items-center flex-1 text-left  rounded -m-2 p-2 cursor-pointer"
+        className="flex items-center flex-1 text-left rounded -m-2 p-2 cursor-pointer"
         onClick={() => onPress(item)}
       >
-        <Clock size={16} className="text-gray-500" />
+        {item.type === "user" && item.profilePicture ? (
+          <img
+            src={getProfilePicture(item.profilePicture)}
+            alt={item.username}
+            className="w-4 h-4 rounded-full object-cover mr-3"
+          />
+        ) : (
+          <Clock size={16} className="text-gray-500" />
+        )}
         <span className="ml-3 text-gray-700 truncate">
           {item.type === "user"
             ? `@${item.username}`
@@ -158,7 +180,7 @@ const PostSearchResult = ({ post, onPress }) => {
     >
       <div className="flex items-center mb-3">
         <img
-          src={post.user.profilePicture || "https://via.placeholder.com/50"}
+          src={getProfilePicture(post.user.profilePicture)}
           alt={post.user.username}
           className="w-8 h-8 rounded-full object-cover"
         />
@@ -198,7 +220,7 @@ const UserSearchResult = ({ user, onPress }) => {
       onClick={() => onPress(user)}
     >
       <img
-        src={user.profilePicture || "https://via.placeholder.com/50"}
+        src={getProfilePicture(user.profilePicture)}
         alt={user.username}
         className="w-14 h-14 rounded-full object-cover"
       />
@@ -337,7 +359,9 @@ export default function SearchPage() {
   // API calls
   const fetchTrendingTags = async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.SEARCH}/posts/tags/trending`);
+      const response = await fetch(
+        `${API_ENDPOINTS.SEARCH}/posts/tags/trending`
+      );
       if (response.ok) {
         const data = await response.json();
         setTrendingTags(data.tags || []);
@@ -375,7 +399,9 @@ export default function SearchPage() {
 
     try {
       const response = await fetch(
-        `${API_ENDPOINTS.SEARCH}/search/suggestions?query=${encodeURIComponent(query)}`
+        `${API_ENDPOINTS.SEARCH}/search/suggestions?query=${encodeURIComponent(
+          query
+        )}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -550,7 +576,7 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto">
+      <div className="md:w-xl w-90 mx-auto">
         {/* Header */}
         <div className="px-4 pt-6 pb-4">
           <div className="flex items-center">
@@ -620,7 +646,7 @@ export default function SearchPage() {
         <div className="flex-1 overflow-auto">
           {searchMode === "initial" ? (
             // Initial state
-            <div className="p-4 space-y-6 max-w-3xl mx-auto">
+            <div className="p-4 space-y-6 mx-auto">
               {/* Recent Searches */}
               {recentSearches.length > 0 && (
                 <div>
@@ -712,7 +738,7 @@ export default function SearchPage() {
             <div className="p-4">
               {isLoading && !isRefreshing ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
+                  <div className="animate-spin rounded-full h-12 border-b-2 border-sky-500"></div>
                 </div>
               ) : (
                 <div className="space-y-4">

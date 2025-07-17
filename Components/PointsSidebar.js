@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '@/app/utils/config'; // Update with your config p
 const PointsSidebar = ({ isVisible = true, onClose }) => {
   const { user: currentUser, token, isAuthenticated } = useAuth();
   const router = useRouter();
-  
+
   // State for points data
   const [myPoints, setMyPoints] = useState({
     totalPoints: 0,
@@ -43,13 +43,13 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   const getProgressToNextLevel = (currentPoints) => {
     const levels = [0, 100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000];
     const currentLevelIndex = levels.findIndex(level => currentPoints < level);
-    
+
     if (currentLevelIndex === -1) return { progress: 100, nextLevel: null };
-    
+
     const currentLevelMin = levels[currentLevelIndex - 1] || 0;
     const nextLevelMin = levels[currentLevelIndex];
     const progress = ((currentPoints - currentLevelMin) / (nextLevelMin - currentLevelMin)) * 100;
-    
+
     return { progress: Math.min(progress, 100), nextLevel: nextLevelMin };
   };
 
@@ -59,18 +59,18 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
 
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const headers = { 
+      const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       };
-      
+
       const response = await fetch(
         `${API_ENDPOINTS.POINTS}/my-summary`,
-        { 
+        {
           method: 'GET',
-          headers 
+          headers
         }
       );
 
@@ -79,7 +79,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
       }
 
       const data = await response.json();
-      
+
       // Update points with the actual data structure from your backend
       setMyPoints({
         totalPoints: data.totalPoints || 0,
@@ -88,7 +88,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
         bonusPoints: data.bonusPoints || 0,
         followersPoints: data.followersPoints || 0
       });
-      
+
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching my points:', error);
@@ -128,37 +128,37 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   const progressInfo = getProgressToNextLevel(myPoints.totalPoints);
 
   const pointsData = [
-    { 
-      key: 'creator', 
-      title: 'Creator', 
-      points: myPoints.creatorPoints, 
-      icon: Pencil, 
-      color: 'text-blue-500', 
-      bgColor: 'bg-blue-50' 
+    {
+      key: 'creator',
+      title: 'Creator',
+      points: myPoints.creatorPoints,
+      icon: Pencil,
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-50'
     },
-    { 
-      key: 'fan', 
-      title: 'Fan', 
-      points: myPoints.fanPoints, 
-      icon: Heart, 
-      color: 'text-red-500', 
-      bgColor: 'bg-red-50' 
+    {
+      key: 'fan',
+      title: 'Fan',
+      points: myPoints.fanPoints,
+      icon: Heart,
+      color: 'text-red-500',
+      bgColor: 'bg-red-50'
     },
-    { 
-      key: 'bonus', 
-      title: 'Bonus', 
-      points: myPoints.bonusPoints, 
-      icon: Star, 
-      color: 'text-yellow-500', 
-      bgColor: 'bg-yellow-50' 
+    {
+      key: 'bonus',
+      title: 'Bonus',
+      points: myPoints.bonusPoints,
+      icon: Star,
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-50'
     },
-    { 
-      key: 'followers', 
-      title: 'Followers', 
-      points: myPoints.followersPoints || 0, 
-      icon: User, 
-      color: 'text-green-500', 
-      bgColor: 'bg-green-50' 
+    {
+      key: 'followers',
+      title: 'Followers',
+      points: myPoints.followersPoints || 0,
+      icon: User,
+      color: 'text-green-500',
+      bgColor: 'bg-green-50'
     },
   ];
 
@@ -166,8 +166,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   if (!isAuthenticated || !isVisible) return null;
 
   return (
-    <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl border-l border-gray-200 z-40 overflow-y-auto hidden lg:block">
-      {/* Header */}
+<div className="w-80 bg-white shadow-xl border-l border-gray-200 hidden lg:block h-screen flex flex-col">    {/* Header */}
       <div className="sticky top-0 bg-white border-b border-gray-100 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -175,9 +174,9 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
             <h2 className="text-lg font-semibold text-gray-800">My Points</h2>
           </div>
           {onClose && (
-            <button 
+            <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 transition-colors text-xl"
+              className="text-gray-500 hover:text-gray-700 transition-colors text-xl cursor-pointer"
             >
               ×
             </button>
@@ -215,19 +214,19 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
               <Award className="w-8 h-8 text-white/80" />
             </div>
           </div>
-          
+
           {/* Level Info */}
           <div className="bg-white/20 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Level {levelInfo.level}</span>
               <span className="text-xs text-white/80">{levelInfo.title}</span>
             </div>
-            
+
             {/* Progress Bar */}
             {progressInfo.nextLevel && (
               <div>
                 <div className="bg-white/20 rounded-full h-2 mb-1">
-                  <div 
+                  <div
                     className="bg-white rounded-full h-2 transition-all duration-500"
                     style={{ width: `${progressInfo.progress}%` }}
                   ></div>
@@ -246,13 +245,13 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
             <TrendingUp className="w-4 h-4 mr-2" />
             Points Breakdown
           </h3>
-          
+
           {pointsData.map((item) => {
             const Icon = item.icon;
             const percentage = myPoints.totalPoints > 0 ? ((item.points / myPoints.totalPoints) * 100) : 0;
-            
+
             return (
-              <div key={item.key} className="bg-white rounded-lg border border-gray-100 p-3 hover:shadow-md transition-shadow">
+              <div key={item.key} className="bg-white rounded-lg border border-gray-100 p-3 hover:shadow-md transition-shadow cursor-pointer">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className={`w-10 h-10 rounded-full ${item.bgColor} flex items-center justify-center`}>
@@ -283,11 +282,11 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
             <Zap className="w-4 h-4 mr-2" />
             Quick Actions
           </h3>
-          
+
           <div className="w-full">
-            <button 
+            <button
               onClick={handleLeaderboardClick}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
             >
               <Trophy className="w-5 h-5" />
               <span>View Leaderboard</span>

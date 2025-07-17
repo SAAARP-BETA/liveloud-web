@@ -81,8 +81,8 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
         </div>
 
         <div className="p-4">
-          <h2 className="text-lg text-gray-800 mb-2">Report Post</h2>
-          <p className="text-base text-gray-500 mb-4">Why are you reporting this post?</p>
+          <h2 className="text-lg text-gray-800 mb-2 cursor-pointer">Report Post</h2>
+          <p className="text-base text-gray-500 mb-4 cursor-pointer">Why are you reporting this post?</p>
 
           {post && (
             <div className="flex flex-row items-center p-3 mb-4 bg-gray-50 rounded-xl">
@@ -122,13 +122,13 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
                   setSelectedReason(null);
                 }}
               >
-                <span className="text-gray-600 text-base">Back</span>
+                <span className="text-gray-600 text-base cursor-pointer">Back</span>
               </button>
               <button
                 className="bg-sky-500 rounded-xl py-3 px-5"
                 onClick={() => submitReport('Other')}
               >
-                <span className="text-white text-base">Submit Report</span>
+                <span className="text-white text-base cursor-pointer">Submit Report</span>
               </button>
             </div>
           </div>
@@ -137,7 +137,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
             {reportReasons.map((reason) => (
               <button
                 key={reason.id}
-                className="flex flex-row items-center py-4 px-6 border-t border-gray-200 hover:bg-gray-100 w-full text-left"
+                className="flex flex-row cursor-pointer items-center py-4 px-6 border-t border-gray-200 hover:bg-gray-100 w-full text-left"
                 onClick={() => handleReasonSelect(reason)}
               >
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
@@ -150,7 +150,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
         )}
 
         <button
-          className="bg-gray-100 hover:bg-gray-200 p-4 flex items-center justify-center mt-2"
+          className="bg-gray-100 cursor-pointer hover:bg-gray-200 p-4 flex items-center justify-center mt-2"
           onClick={onClose}
         >
           <span className="text-base text-gray-600">Cancel</span>

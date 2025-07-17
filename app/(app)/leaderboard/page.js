@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { API_ENDPOINTS } from '../../utils/config';
-import {User, Heart, Pencil, Star, Trophy, Medal} from "lucide-react"
+import { User, Heart, Pencil, Star, Trophy, Medal } from "lucide-react"
 
 // Fixed Tab Component
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
@@ -17,9 +17,8 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
           return (
             <button
               key={tab.key}
-              className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${
-                isActive ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-              }`}
+              className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
               onClick={() => onTabPress(tab.key)}
               style={{
                 boxShadow: isActive ? '0 2px 4px rgba(14, 165, 233, 0.1)' : 'none',
@@ -49,19 +48,19 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       case 1:
         return (
           <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-            <Trophy className="w-4 h-4 text-white" />
+            <i className="fas fa-crown text-white text-sm"><Trophy /></i>
           </div>
         );
       case 2:
         return (
           <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-            <Medal className="w-4 h-4 text-white" />
+            <i className="fas fa-medal text-white text-sm"><Medal /></i>
           </div>
         );
       case 3:
         return (
           <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-            <Medal className="w-4 h-4 text-white" />
+            <i className="fas fa-medal text-white text-sm"><Medal /></i>
           </div>
         );
       default:
@@ -202,7 +201,7 @@ export default function LeaderboardPage() {
 
       const currentPage = resetData ? 1 : page;
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-      
+
       const response = await fetch(
         `${API_ENDPOINTS.POINTS}/leaderboard?type=${activeTab}&page=${currentPage}&limit=20`,
         { headers }
@@ -213,7 +212,7 @@ export default function LeaderboardPage() {
       }
 
       const data = await response.json();
-      
+
       if (resetData) {
         setLeaderboardData(data.leaderboard || []);
       } else {
@@ -227,7 +226,7 @@ export default function LeaderboardPage() {
         const userIndex = data.leaderboard?.findIndex(
           item => item.user === currentUser._id
         );
-        
+
         if (userIndex !== -1) {
           setUserPosition({
             rank: (currentPage - 1) * 20 + userIndex + 1,
@@ -350,7 +349,7 @@ export default function LeaderboardPage() {
                   </span>
                 </button>
               </div>
-              
+
               {/* Points Breakdown */}
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
                 <div className="text-center">

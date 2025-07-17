@@ -60,7 +60,7 @@ export default function WalletPage() {
 
     return (
       <div className="flex p-4 bg-white rounded-xl mb-2 shadow-sm">
-        <div className="w-10 h-10 rounded-full bg-gray-100 flex justify-center items-center mr-3">
+        <div className="w-10 h-10 rounded-full bg-gray-100 flex justify-center items-center">
           {isReceived ? (
             <ArrowDownLeft size={20} color="#4CAF50" />
           ) : isSent ? (
@@ -86,7 +86,7 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen px-4 py-6 sm:px-10 sm:py-10  max-w-4xl mx-auto w-full">
+    <div className="bg-gray-50 min-h-screen py-6  sm:py-10  max-w-4xl mx-auto w-full">
       <div className="w-full max-w-md sm:max-w-full mx-auto">
         {/* Wallet Header */}
         <div className="mb-6">

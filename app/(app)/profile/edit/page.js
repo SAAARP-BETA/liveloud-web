@@ -7,6 +7,7 @@ import { useAuth } from "../../../context/AuthContext";
 // import { fonts } from "../../../utils/fonts";
 import { API_ENDPOINTS } from "../../../utils/config";
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 import {
   Camera,
@@ -228,7 +229,7 @@ const EditPage = () => {
 
     if (!isAuthenticated || !user || !token) {
       console.log("Not authenticated or missing user/token, redirecting to login");
-      alert("Not Authorized, please login to edit your profile");
+      toast.error("Not Authorized, please login to edit your profile");
       router.push("/login");
       return;
     }
@@ -249,7 +250,7 @@ const EditPage = () => {
       if (!response.ok) {
         if (response.status === 401) {
           console.log("Session expired, redirecting to login");
-          alert("Session expired. Please login again.");
+          toast.error("Session expired. Please login again.");
           router.push("/login");
           return;
         }
@@ -270,7 +271,7 @@ const EditPage = () => {
             occupation: "",
             education: "",
             profilePicture: user?.profilePicture || null,
-            coverPicture: user?.coverPicture||null,
+            coverPicture: user?.coverPicture || null,
           });
           setProfileImage(user?.profilePicture || null);
           setCoverImage(null);
@@ -303,7 +304,7 @@ const EditPage = () => {
       setCoverImage(data.coverPicture || null);
     } catch (error) {
       console.error("Error loading profile:", error);
-      alert("Error: Failed to load profile information. " + error.message);
+      toast.error("Error: Failed to load profile information. " + error.message);
       router.push("/login");
     } finally {
       setLoading(false);
@@ -331,7 +332,7 @@ const EditPage = () => {
       return data.imageUrl;
     } catch (error) {
       console.error(`Error uploading ${type} image:`, error);
-      alert(`Error uploading ${type} image: ${error.message}`);
+      toast.error(`Error uploading ${type} image: ${error.message}`);
       return null;
     }
   };
@@ -458,19 +459,19 @@ const EditPage = () => {
     const file = event.target.files[0];
     if (!file) {
       console.error("No file selected for upload");
-      alert("Please select an image file");
+      toast.error("Please select an image file");
       return;
     }
     const validTypes = ["image/jpeg", "image/png", "image/gif"];
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (!validTypes.includes(file.type)) {
       console.error("Invalid file type:", file.type);
-      alert("Please select a valid image file (JPEG, PNG, or GIF)");
+      toast.error("Please select a valid image file (JPEG, PNG, or GIF)");
       return;
     }
     if (file.size > maxSize) {
       console.error("File too large:", file.size);
-      alert("Image file must be smaller than 5MB");
+      toast.error("Image file must be smaller than 5MB");
       return;
     }
     console.log("Selected file:", file.name, file.type, file.size);
@@ -496,7 +497,7 @@ const EditPage = () => {
                 onClick={() => setIsBottomSheetVisible(false)}
                 className="p-1 ml-4"
               >
-                <X className="text-gray-600 w-6 h-6" />
+                <X className="text-gray-600 cursor-pointer w-6 h-6" />
               </button>
             </div>
           </div>
@@ -517,7 +518,7 @@ const EditPage = () => {
           {(imageActionType === "profile" && profileImage) ||
             (imageActionType === "cover" && coverImage) ? (
             <button
-              className="flex flex-row items-center py-3 px-4 mb-3 bg-red-50 rounded-xl w-full text-left hover:bg-red-100 transition-colors"
+              className="flex flex-row items-center py-3  cursor-pointer px-4 mb-3 bg-red-50 rounded-xl w-full text-left hover:bg-red-100 transition-colors"
               onClick={() => {
                 if (imageActionType === "profile") setProfileImage(null);
                 else setCoverImage(null);
@@ -532,7 +533,7 @@ const EditPage = () => {
           ) : null}
 
           <button
-            className="flex items-center justify-center py-3 px-4 mt-4 bg-gray-100 rounded-xl w-full hover:bg-gray-200 transition-colors"
+            className="flex items-center cursor-pointer justify-center py-3 px-4 mt-4 bg-gray-100 rounded-xl w-full hover:bg-gray-200 transition-colors"
             onClick={() => setIsBottomSheetVisible(false)}
           >
             <span className="text-gray-700 font-medium text-base cursor-pointer">
@@ -564,7 +565,7 @@ const EditPage = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <p className="mt-3 text-gray-600">No profile data found</p>
         <button
-          className="mt-4 py-2 px-4 bg-sky-500 rounded-lg text-white hover:bg-sky-600 transition-colors"
+          className="mt-4 py-2 px-4 bg-sky-500 cursor-pointer rounded-lg text-white hover:bg-sky-600 transition-colors"
           onClick={() => router.back()}
         >
           Go Back
@@ -574,7 +575,7 @@ const EditPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center">
+    <div className="min-h-screen bg-gray-50 flex justify-center md:w-xl ">
       <div className="w-full max-w-2xl bg-white">
         <header className="flex flex-row items-center justify-between py-3 px-4 bg-white border-b border-gray-100 sticky top-0 z-10">
           <h1 className="text-lg text-gray-900">Edit Profile</h1>
@@ -607,7 +608,7 @@ const EditPage = () => {
             <Image
               src={profileData.coverPicture}
               alt="Cover"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer"
               width={800}
               height={160}
               onError={(e) => {
@@ -620,20 +621,24 @@ const EditPage = () => {
             <Image
               src={defaultCover}
               alt="Default Cover"
-              className="w-full h-full object-cover"
+              className="w-full h-full cursor-pointer object-cover"
               width={800}
               height={160}
               priority
             />
           )}
-          
+
+          {/* Add cover edit button */}
           <button
-            className="absolute top-4 right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+            className="absolute top-4 cursor-pointer right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
             onClick={() => openImagePicker("cover")}
           >
             <Camera className="text-white w-5 h-5" />
           </button>
         </div>
+
+
+
 
         <div className="flex justify-center -mt-12 mb-6">
           <div className="relative rounded-full border-4 border-white overflow-hidden">
@@ -665,7 +670,7 @@ const EditPage = () => {
               </div>
             )}
             <button
-              className="absolute right-8 bottom-8 bg-sky-500 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
+              className="absolute right-8 cursor-pointer bottom-8 bg-sky-500 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
               onClick={() => openImagePicker("profile")}
             >
               <Camera className="text-white w-4 h-4" />
@@ -694,11 +699,17 @@ const EditPage = () => {
           </div>
 
           <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Name</label>
-            <div className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${
-              profileErrors.fullname ? "border-red-500" : "border-gray-200"
-            }`}>
-              <User className="text-gray-400 w-5 h-5 ml-3" />
+            <label
+              className="text-sm text-gray-500 mb-1.5 block"
+
+            >
+              Name
+            </label>
+            <div
+              className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${profileErrors.fullname ? "border-red-500" : "border-gray-200"
+                }`}
+            >
+              <User className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
                 value={profileData.fullname || ""}
@@ -735,7 +746,7 @@ const EditPage = () => {
           <div>
             <label className="text-sm text-gray-500 mb-1.5 block">Location</label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <MapPin className="text-gray-400 w-5 h-5 ml-3" />
+              <MapPin className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
                 value={profileData.location || ""}
@@ -748,7 +759,7 @@ const EditPage = () => {
           <div>
             <label className="text-sm text-gray-500 mb-1.5 block">Website</label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <LinkIcon className="text-gray-400 w-5 h-5 ml-3" />
+              <LinkIcon className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
                 value={profileData.website || ""}
@@ -776,7 +787,7 @@ const EditPage = () => {
           <div>
             <label className="text-sm text-gray-500 mb-1.5 block">Email</label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Mail className="text-gray-400 w-5 h-5 ml-3" />
+              <Mail className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
                 value={profileData.email || ""}
@@ -791,7 +802,7 @@ const EditPage = () => {
           <div>
             <label className="text-sm text-gray-500 mb-1.5 block">Phone</label>
             <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Phone className="text-gray-400 w-5 h-5 ml-3" />
+              <Phone className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
               <input
                 className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
                 value={profileData.phone || ""}

@@ -22,17 +22,17 @@ export default function Signup() {
 
   const handleSignup = async () => {
     if (!fullName.trim() || !email.trim() || !password.trim()) {
-      alert('Please fill in all fields');
+      toast.error('Please fill in all fields');
       return;
     }
 
     if (password.length < 6) {
-      alert('Password must be at least 6 characters long');
+      toast.error('Password must be at least 6 characters long');
       return;
     }
 
     if (!isChecked) {
-      alert('Please agree to the Terms and Privacy Policy');
+      toast.error('Please agree to the Terms and Privacy Policy');
       return;
     }
 
@@ -43,22 +43,22 @@ export default function Signup() {
       if (success) {
         router.push('/home');
       } else {
-        alert(error || 'Signup failed. Please try again.');
+        toast.error(error || 'Signup failed. Please try again.');
       }
     } catch (err) {
       console.error('Signup error:', err);
-      alert('An unexpected error occurred');
+      toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignup = () => {
-    alert('Google signup will be available soon!');
+    toast.error('Google signup will be available soon!');
   };
 
   const handleWalletConnect = () => {
-    alert('Wallet connection will be available soon!');
+    toast.error('Wallet connection will be available soon!');
   };
 
   return (
@@ -107,9 +107,8 @@ export default function Signup() {
 
       <div className="flex items-center mt-4">
         <button
-          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${
-            isChecked ? 'border-sky-500 bg-sky-500' : 'border-gray-300'
-          }`}
+          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${isChecked ? 'border-sky-500 bg-sky-500' : 'border-gray-300'
+            }`}
           onClick={() => setIsChecked(!isChecked)}
           disabled={isLoading}
         >
@@ -121,9 +120,8 @@ export default function Signup() {
       </div>
 
       <button
-        className={`bg-sky-500 rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${
-          isLoading ? 'opacity-70 cursor-not-allowed' : ''
-        }`}
+        className={`bg-sky-500 rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
+          }`}
         onClick={handleSignup}
         disabled={isLoading}
       >

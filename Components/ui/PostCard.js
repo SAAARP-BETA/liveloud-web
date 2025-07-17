@@ -1,5 +1,5 @@
 "use client";
-
+import defaultPic from "../../assets/Profilepic1.png";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,8 @@ import {
   MessageCircle,
   Repeat,
   Bookmark,
-  Heart,
+  ThumbsUp,
+  ThumbsDown,
   CheckCircle,
 } from "lucide-react";
 import { useAuth } from "../../app/context/AuthContext";
@@ -25,6 +26,8 @@ const PostCard = ({
   setSelectedPost,
   setModalVisible,
   username,
+  handleDislikePost,
+  handleUndislikePost
 }) => {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -122,7 +125,7 @@ const PostCard = ({
     if (post.user === user._id) {
       router.push("/profile"); // own profile
     } else {
-      router.push(`/user/${post.username}`); // someone else's profile
+      router.push(`/UserProfile/${post.username}`); // someone else's profile
     }
   };
 
@@ -157,16 +160,16 @@ const PostCard = ({
               src={
                 isAuthenticated && post.profilePic?.trim()
                   ? post.profilePic
-                  : "/default-profile.png"
+                  : defaultPic
               }
               alt="Profile"
               fill
-              className="object-cover"
+              className="object-cover cursor-pointer"
             />
           </div>
           <div className="ml-3 flex-1">
             <div className="flex items-center">
-              <span className="font-medium text-base text-gray-800">
+              <span className="font-medium cursor-pointer text-base text-gray-800">
                 {post.username}
               </span>
               {post.isVerified && (
@@ -180,13 +183,13 @@ const PostCard = ({
         </button>
 
         <button
-          className="p-2 hover:bg-gray-50 rounded-full transition-colors"
+          className="p-2 cursor-pointer hover:bg-gray-50 rounded-full transition-colors"
           onClick={() => {
             setSelectedPost(post);
             setModalVisible(true);
           }}
         >
-          <MoreHorizontal size={20} className="text-gray-600" />
+          <MoreHorizontal size={20} className="text-gray-600 cursor-pointer" />
         </button>
       </div>
 
@@ -260,7 +263,7 @@ const PostCard = ({
         {hasMedia && (
           <div className="mb-3">
             <div
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+              className="flex cursor-pointer overflow-x-auto snap-x snap-mandatory scrollbar-hide"
               onScroll={handleImageScroll}
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
@@ -287,7 +290,7 @@ const PostCard = ({
 
             {/* Image counter dots */}
             {post.media.length > 1 && (
-              <div className="flex justify-center mt-3">
+              <div className="flex cursor-pointer justify-center mt-3">
                 {post.media.map((_, index) => (
                   <button
                     key={index}
@@ -311,7 +314,7 @@ const PostCard = ({
         {/* Post stats */}
         <div className="flex items-center mb-2">
           <div className="flex items-center">
-            <span className="font-medium text-xs text-gray-500">
+            <span className="font-medium cursor-pointer text-xs text-gray-500">
               {post.likeCount} likes
             </span>
           </div>
@@ -320,14 +323,14 @@ const PostCard = ({
             onClick={handleCommentsClick}
             className="hover:text-gray-700 transition-colors"
           >
-            <span className="font-medium text-xs text-gray-500">
+            <span className="font-medium  cursor-pointer text-xs text-gray-500">
               {post.commentCount} comments
             </span>
           </button>
           {post.bookmarkCount > 0 && (
             <>
               <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
-              <span className="font-medium text-xs text-gray-500">
+              <span className="font-medium cursor-pointer text-xs text-gray-500">
                 {post.bookmarkCount} saves
               </span>
             </>
@@ -337,23 +340,41 @@ const PostCard = ({
 
       {/* Post actions */}
       <div className="flex items-center justify-around py-3 border-t border-gray-100">
+                {/* Like Button - Thumbs Up */}
         <button
-          className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => (isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id))}
         >
-          <Heart
+          <ThumbsUp
             size={18}
-            className={isLiked ? "text-red-500 fill-current" : "text-gray-600"}
+            className={isLiked ? "text-blue-500 fill-current" : " text-gray-600"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${isLiked ? "text-red-500" : "text-gray-600"}`}
+            className={`ml-2 text-sm font-medium ${isLiked ? " text-blue-500" : " text-gray-600"}`}
           >
             Like
           </span>
         </button>
 
+        {/* Dislike Button - Thumbs Down */}
         <button
-          className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+          onClick={() => (isDisliked ? handleUndislikePost(post.id) : handleDislikePost(post.id))}
+        >
+          <ThumbsDown
+            size={18}
+            className={isDisliked ? "text-orange-500 fill-current" : "text-gray-600"}
+          />
+          <span
+            className={`ml-2 text-sm font-medium ${isDisliked ? "text-orange-500" : "text-gray-600"}`}
+          >
+            Dislike
+          </span>
+        </button>
+
+        {/* Comment Button */}
+        <button
+          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleCommentPost(post)}
         >
           <MessageCircle size={18} className="text-gray-600" />
@@ -362,8 +383,9 @@ const PostCard = ({
           </span>
         </button>
 
+        {/* Amplify Button */}
         <button
-          className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleAmplifyPost(post)}
         >
           <Repeat size={18} className="text-gray-600" />
@@ -372,8 +394,9 @@ const PostCard = ({
           </span>
         </button>
 
+        {/* Bookmark Button */}
         <button
-          className="flex items-center hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() =>
             isBookmarked
               ? handleUnbookmarkPost(post.id)
