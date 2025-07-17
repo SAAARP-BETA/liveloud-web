@@ -104,13 +104,13 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   };
 
   // Auto-refresh points every 15 seconds (more frequent for better UX)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchMyPoints();
-    }, 15000); // 15 seconds
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     fetchMyPoints();
+  //   }, 15000); // 15 seconds
 
-    return () => clearInterval(interval);
-  }, [fetchMyPoints]);
+  //   return () => clearInterval(interval);
+  // }, [fetchMyPoints]);
 
   // Initial load
   useEffect(() => {

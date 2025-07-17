@@ -168,7 +168,57 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
                   <span className="font-medium text-sm text-gray-800">{post.username}</span>
                   <span className="text-xs text-gray-500 ml-2">{post.timestamp}</span>
                 </div>
-                <p className="text-sm text-gray-600">{post.content}</p>
+                <p className="text-sm text-gray-600 mb-2">{post.content}</p>
+                
+                {/* Display post image if it exists */}
+                {post.image && (
+                  <div className="mt-3">
+                    <img 
+                      src={post.image} 
+                      alt="Post content" 
+                      className="w-full rounded-lg max-h-64 object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Display multiple images if they exist */}
+                {post.images && post.images.length > 0 && (
+                  <div className="mt-3">
+                    {post.images.length === 1 ? (
+                      <img 
+                        src={post.images[0]} 
+                        alt="Post content" 
+                        className="w-full rounded-lg max-h-64 object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className={`grid gap-2 ${post.images.length === 2 ? 'grid-cols-2' : 'grid-cols-2'}`}>
+                        {post.images.slice(0, 4).map((image, index) => (
+                          <div key={index} className="relative">
+                            <img 
+                              src={image} 
+                              alt={`Post content ${index + 1}`} 
+                              className="w-full h-32 rounded-lg object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                            {index === 3 && post.images.length > 4 && (
+                              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                <span className="text-white font-bold">+{post.images.length - 4}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -195,4 +245,4 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
   );
 };
 
-export default AmplifyModal;
+export default AmplifyModal;    

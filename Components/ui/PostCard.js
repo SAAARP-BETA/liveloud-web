@@ -236,12 +236,13 @@ const PostCard = ({
               )}
 
               {post.originalPost.media && post.originalPost.media.length > 0 && (
-                <div className="w-full h-48 relative rounded-lg mt-2 overflow-hidden">
+                <div className="w-full relative rounded-lg mt-2 overflow-hidden">
                   <Image
                     src={post.originalPost.media[0]}
                     alt="Original post media"
-                    fill
-                    className="object-cover"
+                    width={400}
+                    height={300}
+                    className="w-full h-auto rounded-lg"
                     onLoad={() =>
                       console.log("Amplified image loaded:", post.originalPost.media[0])
                     }
