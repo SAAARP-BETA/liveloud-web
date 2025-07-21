@@ -23,6 +23,7 @@ import {
 } from "../../utils/postFunctions";
 import PostCard from "../../../Components/ui/PostCard";
 import { API_ENDPOINTS } from "../../utils/config";
+
 import {
   ArrowLeft,
   MoreHorizontal,
@@ -43,6 +44,7 @@ import {
   CheckCircle as Verified,
   Loader2,
 } from "lucide-react";
+import ReportModal from '@/Components/ui/ReportModal';
 
 const POST_LIMIT = 10;
 
@@ -311,7 +313,7 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
-    <div className="flex justify-center bg-gray-50">
+    <div className="flex w-xl justify-center bg-gray-50">
       <div className="w-full ">
         <div className=" top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
         <div className="pt-40">
@@ -390,6 +392,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [isCommentModalVisible, setCommentModalVisible] = useState(false);
   const [postToComment, setPostToComment] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  // Report modal
+    const [isReportModalVisible, setReportModalVisible] = useState(false);
+    const [postToReport, setPostToReport] = useState(null);
 
   const [postPage, setPostPage] = useState(1);
   const [hasMorePosts, setHasMorePosts] = useState(true);
@@ -412,7 +417,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         setPostToComment,
         setCommentModalVisible,
         setPostToAmplify,
-        setAmplifyModalVisible
+        setAmplifyModalVisible,
+    
       ),
     [currentUser, token]
   );
@@ -788,6 +794,12 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     );
   }
 
+  const handleReportSuccess = (reportedPostId) => {
+    const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== reportedPostId);
+    updateTabData(activeTab, { posts: updatedPosts });
+  };
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-xl max-sm:w-100 flex flex-col items-center relative">
@@ -1006,6 +1018,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
                         setSelectedPost={setSelectedPost}
                         setModalVisible={setModalVisible}
+                        handleDislikePost={postHandlers.handleDislikePost}
+                      handleUndislikePost={postHandlers.handleUndislikePost}
                       />
                     </div>
                   ))
@@ -1140,10 +1154,13 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 Save Post
               </span>
             </button>
-            <Link
-              href={`/home/post-detail?postId=${selectedPost?.id}`}
+            <button
+              // href={`/home/post-detail?postId=${selectedPost?.id}`}
               className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-              onClick={() => setModalVisible(false)}
+              onClick={() => {
+                setModalVisible(false);
+                postHandlers.handleCommentPost(selectedPost.id)
+              }}
             >
               <div className="w-8">
                 <MessageCircle className="text-gray-600 text-xl" />
@@ -1151,8 +1168,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               <span className="text-base text-gray-800 font-medium">
                 View Comments
               </span>
-            </Link>
-            <button
+            </button>
+            {/* <button
               className="flex items-center py-4 border-b border-gray-100 w-full text-left"
               onClick={() => {
                 setModalVisible(false);
@@ -1167,7 +1184,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               <span className="text-base text-red-500 font-medium">
                 Report Post
               </span>
-            </button>
+            </button> */}
             <button
               onClick={() => setModalVisible(false)}
               className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
@@ -1186,13 +1203,59 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             fetchUserProfile();
           }}
         />
-        <CommentModal
-          isVisible={isCommentModalVisible}
-          onClose={() => setCommentModalVisible(false)}
-          post={postToComment}
-          token={token}
-          onSuccess={handleCommentSuccess}
-        />
+        
+        
+              {/* Comment Modal */}
+              <CommentModal
+                visible={isCommentModalVisible}
+                onClose={() => setCommentModalVisible(false)}
+                title="Add Comment"
+                post={postToComment}
+                onSuccess={handleCommentSuccess}
+                token={token}
+              >
+        
+              </CommentModal>
+        
+              {/* Amplify Modal */}
+              <AmplifyModal
+                visible={isAmplifyModalVisible}
+                onClose={() => setAmplifyModalVisible(false)}
+                post={postToAmplify
+                }
+                token={token}
+        
+                title="Amplify Post"
+                onSuccess={(postId) => {
+                  // Update amplify count in current posts
+                  const currentPosts = getCurrentTabData().posts;
+                  const updatedPosts = currentPosts.map(post => {
+                    if (post.id === postId) {
+                      return {
+                        ...post,
+                        amplifyCount: post.amplifyCount + 1,
+                        hasAmplified: true
+                      };
+                    }
+                    return post;
+                  });
+                  updateTabData(activeTab, { posts: updatedPosts });
+                }}
+              >
+        
+              </AmplifyModal>
+        
+              {/* Report Modal */}
+              <ReportModal
+                visible={isReportModalVisible}
+                onClose={() => setReportModalVisible(false)}
+                title="Report Post"
+                post={postToReport}
+                onSuccess={handleReportSuccess}
+                token={token}
+              >
+        
+              </ReportModal>
       </div>
     </div>
   );

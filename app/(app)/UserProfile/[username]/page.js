@@ -307,7 +307,7 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
     return (
-        <div className="flex justify-center bg-gray-50">
+        <div className="flex w-xl justify-center bg-gray-50">
             <div className="w-full">
                 <div className="top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
                 <div className="pt-40">
@@ -1114,18 +1114,18 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                         </div>
                     </motion.div>
 
-                    <TabBarAnimated
+                    <TabBarAnimated 
                         tabs={[
                             { key: "posts", title: "Posts", icon: "grid" },
                             { key: "media", title: "Media", icon: "image" },
                         ]}
                         activeTab={activeTab}
                         onTabPress={setActiveTab}
-                        className="border-2 w-full flex  justify-between"
+                        className="border-2 w-full flex justify-between"
                     />
 
                     <motion.div
-                        className="px-4 pt-2 w-full "
+                        className="pt-2 w-full "
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
@@ -1148,7 +1148,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                                         />
                                     ))
                                 ) : (
-                                    <div className="flex flex-col border-2 items-center justify-center py-12">
+                                    <div className="flex flex-col border-2 w-xl items-center justify-center py-12">
                                         <ImageIcon className="text-gray-300 text-5xl" />
                                         <h3 className="mt-4 text-lg font-medium text-gray-700">
                                             No posts yet
