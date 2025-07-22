@@ -148,13 +148,13 @@ const PostPage = () => {
     };
 
     // --- Render Logic ---
-    if (loading) return <div className="text-center py-20">Loading post...</div>;
+    if (loading) return <div className="text-center w-xl py-20">Loading post...</div>;
     if (error) return <div className="text-center py-20 text-red-500">Error: {error}</div>;
     if (!post) return <div className="text-center py-20">Post not found.</div>;
 
     return (
         <>
-            <div className="container mx-auto max-w-2xl py-4">
+            <div className="container mx-auto w-xl py-4">
                 <PostCard
                     post={post}
                     handleLikePost={postHandlers.handleLikePost}
