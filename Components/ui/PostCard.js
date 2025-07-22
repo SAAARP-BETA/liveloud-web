@@ -128,7 +128,9 @@ const PostCard = ({
       router.push(`/UserProfile/${post.username}`); // someone else's profile
     }
   };
-
+const handleNavigateToPost = () => {
+  router.push(`/post/${post.id}`);
+};
   const handleImageClick = () => {
     router.push({
       pathname: "/media-viewer",
@@ -194,7 +196,10 @@ const PostCard = ({
       </div>
 
       {/* Post content */}
-      <div className="px-4 pb-3">
+      <div 
+            className="px-4 pb-3 cursor-pointer"
+            onClick={() => router.push(`/post/${post.id}`)}
+        >
         {renderContent()}
 
         {/* Tags */}
