@@ -863,19 +863,6 @@ const handleLoadMore = useCallback(() => {
   }
 }, [activeTab, tabData, fetchFeed]);
 
-  // const handleCreatePost = () => {
-  //   if (!isAuthenticated) {
-  //     toast.error('Please login to create posts');
-  //     return;
-  //   }
-
-  //   if (text.trim()) {
-  //     router.push(`/create/createpost?initialText=${encodeURIComponent(text)}`);
-  //     setText('');
-  //   } else {
-  //     router.push('/create/createpost');
-  //   }
-  // };
 
   // Check follow status for menu options
   const checkFollowStatus = async (userId) => {
@@ -1107,291 +1094,202 @@ const handleLoadMore = useCallback(() => {
   if (node) observer.current.observe(node);
 }, [currentTabData.loading, currentTabData.hasMore, activeTab, fetchFeed]);
 
-  return (
-    <div className="md:w-xl max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
-      {/* Tab Bar */}
-      {renderTabBar()}
+ return (
+    <>
+      {/* --- Block 1: Create Post & Tabs --- */}
+      <div className="md:w-xl max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
+        {renderTabBar()}
 
-
-      {!isAuthenticated ? (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
-            <button
-              onClick={() => router.push('/login')}
-              className="px-4 py-2 bg-primary cursor-pointer text-white rounded-full hover:bg-sky-600"
-            >
-              Log In
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="mx-auto">
-          <div className="m-4 p-4 bg-white cursor-pointer rounded-xl shadow-sm border border-gray-200 relative z-10">
-            <div className="flex items-center mb-2 space-x-3">
-              <Image
-                src={user?.profilePicture}
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full w-[40] h-[40]"
-              />
-              <span className="text-gray-700 cursor-pointer">@{user.username}</span>
-            </div>
-
-            <div className="flex items-start space-x-3">
-
-
-              <textarea
-                className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
-                placeholder="What's on your mind?"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onFocus={() => setIsInputFocused(true)}
-                onBlur={() => setIsInputFocused(text.trim().length > 0)}
-                onKeyDown={handleKeyPress}
-                rows={isInputFocused ? 5 : 2}
-              />
-              <div>
-                <button
-                  onClick={handleMediaButtonClick}
-                  disabled={images.length >= MEDIA_LIMIT}
-                  className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${images.length >= MEDIA_LIMIT ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                >
-                  <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600" />
-                </button>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  ref={fileInputRef}
-                  className="hidden"
-                />
-              </div>
-            </div>
-
-            {images.length > 0 && (
-              <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-thin scrollbar-thumb-gray-300">
-                {images.map((img, index) => (
-                  <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden">
-                    <Image
-                      src={img}
-                      alt="Uploaded"
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 object-cover"
-                    />
-                    <button
-                      onClick={() => {
-                        setImages((prev) => prev.filter((_, i) => i !== index));
-                        setImageFilters((prev) => prev.filter((_, i) => i !== index));
-                      }}
-                      className="absolute top-1 right-1 bg-black/50 rounded-full p-1"
-                    >
-                      <XMarkIcon className="w-4 h-4 text-white" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="flex justify-between mt-2">
-
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(135deg, ${gradientColors.join(', ')})`
-                }}
-              >
-                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
-                  <span
-                    className={`text-xs font-medium ${isOverLimit
-                      ? 'text-red-600'
-                      : isApproachingLimit
-                        ? 'text-yellow-500'
-                        : 'text-cyan-600'
-                      }`}
-                  >
-                    {MAX_CHAR_LIMIT - charCount}
-                  </span>
-                </div>
-              </div>
-
+        {!isAuthenticated ? (
+          <div className="min-h-[200px] bg-gray-50 flex items-center justify-center rounded-lg">
+            <div className="text-center">
+              <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
               <button
-                onClick={handleCreatePost}
-                disabled={
-                  (!text.trim() && images.length === 0) || isOverLimit
-                }
-                className="p-2 cursor-pointer flex items-center justify-center bg-primary text-white rounded-full hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                onClick={() => router.push('/login')}
+                className="px-4 py-2 bg-primary cursor-pointer text-white rounded-full hover:bg-sky-600"
               >
-                Post
+                Log In
               </button>
             </div>
-            {progress > 0 && progress < 100 && (
-              <div className="w-full mt-2">
-                <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="h-2 bg-primary transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <p className="text-sm text-gray-600 mt-1">{Math.floor(progress)}% uploading...</p>
+          </div>
+        ) : (
+          <div className="mx-auto">
+            <div className="p-4 bg-white cursor-pointer rounded-xl relative z-10">
+              <div className="flex items-center mb-2 space-x-3">
+                <Image
+                  src={user?.profilePicture}
+                  alt="Profile"
+                  width={40}
+                  height={40}
+                  className="rounded-full w-[40] h-[40]"
+                />
+                <span className="text-gray-700 cursor-pointer">@{user.username}</span>
               </div>
-            )}
-
-          </div>
-        </div>
-      )}
-
-      <div
-        className={`overflow-y-auto transition-all duration-300 ${isInputFocused || images.length > 0
-          ? 'blur-sm pointer-events-none'
-          : 'pointer-events-auto'
-          }`}
-      >
-        {/* Error states */}
-        {error && activeTab === 'home' && (
-          <div className="p-4 mx-4 mt-4 bg-red-50 rounded-xl border border-red-100">
-            <p className="text-red-600 font-medium">
-              Authentication Error: {error}
-            </p>
-          </div>
-        )}
-
-        {currentTabData.error && (
-          <div className="p-4 mx-4 mt-4 bg-yellow-50 rounded-xl border border-yellow-100">
-            <p className="text-yellow-700 font-medium">
-              {currentTabData.error}
-            </p>
-          </div>
-        )}
-
-        {/* Initial loading indicator */}
-        {currentTabData.loading && currentTabData.posts.length === 0 ? (
-  <div className="flex flex-col items-center justify-center p-16">
-    <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-    <p className="text-lg text-gray-600">Loading posts for you...</p>
-  </div>
-) : currentTabData.posts.length > 0 ? (
-  <div>
-    {/* Posts rendering */}
-    {currentTabData.posts.map((post, index) => {
-      const isLastPost = currentTabData.posts.length === index + 1;
-      
-      return (
-        <div 
-          key={`${post.id}-${activeTab}-${index}`} // More unique key
-          ref={isLastPost ? lastPostElementRef : null}
-        >
-          <PostCard
-                      post={post}
-                      handleLikePost={postHandlers.handleLikePost}
-                      handleUnlikePost={postHandlers.handleUnlikePost}
-                      handleCommentPost={postHandlers.handleCommentPost}
-                      handleAmplifyPost={postHandlers.handleAmplifyPost}
-                      handleBookmarkPost={postHandlers.handleBookmarkPost}
-                      handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                      setSelectedPost={setSelectedPost}
-                      setModalVisible={setModalVisible}
-                      username={user}
-                      handleDislikePost={postHandlers.handleDislikePost}
-                      handleUndislikePost={postHandlers.handleUndislikePost}
-                    />
-        </div>
-      );
-    })}
-    
-    {/* Loading more posts indicator - improved visibility */}
-    {currentTabData.loading && (
-      <div className="py-8 text-center mx-4 ">
-        <div className="inline-flex items-center space-x-3 px-6 py-4">
-          <Loader2 className="w-6 h-6 text-primary animate-spin" />
-          <div>
-            <span className="text-primary font-medium block">Loading more posts...</span>
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
-) : (
-  <EmptyFeed
-    isAuthenticated={isAuthenticated}
-    handleCreatePost={handleCreatePost}
-    error={currentTabData.error || error}
-    feedType={activeTab}
-    onLogin={() => {
-      if (!isAuthenticated) {
-        router.push("/login");
-      }
-    }}
-  />
-)}
-
-
-        {/* End of feed indicator */}
-        {!currentTabData.loading && currentTabData.posts.length > 5 && !currentTabData.hasMore && (
-          <div className="py-8 text-center">
-            <div className="inline-flex items-center space-x-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-full">
-              <span className="text-sm font-medium">You're all caught up!</span>
+              <div className="flex items-start space-x-3">
+                <textarea
+                  className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                  placeholder="What's on your mind?"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(text.trim().length > 0)}
+                  onKeyDown={handleKeyPress}
+                  rows={isInputFocused ? 5 : 2}
+                />
+                <div>
+                  <button
+                    onClick={handleMediaButtonClick}
+                    disabled={images.length >= MEDIA_LIMIT}
+                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${images.length >= MEDIA_LIMIT ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600" />
+                  </button>
+                  <input type="file" multiple accept="image/*" onChange={handleImageUpload} ref={fileInputRef} className="hidden" />
+                </div>
+              </div>
+              {images.length > 0 && (
+                <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-thin scrollbar-thumb-gray-300">
+                  {images.map((img, index) => (
+                    <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden">
+                      <Image src={img} alt="Uploaded" width={80} height={80} className="w-20 h-20 object-cover" />
+                      <button onClick={() => {
+                        setImages((prev) => prev.filter((_, i) => i !== index));
+                        setImageFilters((prev) => prev.filter((_, i) => i !== index));
+                      }} className="absolute top-1 right-1 bg-black/50 rounded-full p-1">
+                        <XMarkIcon className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-between mt-2">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${gradientColors.join(', ')})` }}>
+                  <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
+                    <span className={`text-xs font-medium ${isOverLimit ? 'text-red-600' : isApproachingLimit ? 'text-yellow-500' : 'text-cyan-600'}`}>
+                      {MAX_CHAR_LIMIT - charCount}
+                    </span>
+                  </div>
+                </div>
+                <button onClick={handleCreatePost} disabled={(!text.trim() && images.length === 0) || isOverLimit} className="p-2 cursor-pointer flex items-center justify-center bg-primary text-white rounded-full hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                  Post
+                </button>
+              </div>
+              {progress > 0 && progress < 100 && (
+                <div className="w-full mt-2">
+                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                    <div className="h-2 bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{Math.floor(progress)}% uploading...</p>
+                </div>
+              )}
             </div>
           </div>
         )}
-
-        {/* Bottom padding for scrolling behind floating button */}
-        <div className="h-20" />
       </div>
 
-      {/* Floating compose button - only show on home tab */}
+      {/* --- Block 2: Feed Content (Loading, Posts, or Empty) --- */}
+      <div className="md:w-xl max-w-2xl w-full mx-auto">
+        {/* Initial loading indicator */}
+        {currentTabData.loading && currentTabData.posts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-16">
+            <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+            <p className="text-lg text-gray-600">Loading posts...</p>
+          </div>
+        ) : (
+          <div className={`transition-all duration-300 ${isInputFocused || images.length > 0 ? 'blur-sm pointer-events-none' : 'pointer-events-auto'}`}>
+            {/* Error states */}
+            {error && activeTab === 'home' && (
+              <div className="p-4 mx-4 mt-4 bg-red-50 rounded-xl border border-red-100">
+                <p className="text-red-600 font-medium">Authentication Error: {error}</p>
+              </div>
+            )}
+            {currentTabData.error && (
+              <div className="p-4 mx-4 mt-4 bg-yellow-50 rounded-xl border border-yellow-100">
+                <p className="text-yellow-700 font-medium">{currentTabData.error}</p>
+              </div>
+            )}
+
+            {/* Posts or Empty Feed */}
+            {currentTabData.posts.length > 0 ? (
+              <div>
+                {currentTabData.posts.map((post, index) => {
+                  const isLastPost = currentTabData.posts.length === index + 1;
+                  return (
+                    <div key={`${post.id}-${activeTab}-${index}`} ref={isLastPost ? lastPostElementRef : null}>
+                      <PostCard
+                        post={post}
+                        handleLikePost={postHandlers.handleLikePost}
+                        handleUnlikePost={postHandlers.handleUnlikePost}
+                        handleCommentPost={postHandlers.handleCommentPost}
+                        handleAmplifyPost={postHandlers.handleAmplifyPost}
+                        handleBookmarkPost={postHandlers.handleBookmarkPost}
+                        handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                        setSelectedPost={setSelectedPost}
+                        setModalVisible={setModalVisible}
+                        username={user}
+                        handleDislikePost={postHandlers.handleDislikePost}
+                        handleUndislikePost={postHandlers.handleUndislikePost}
+                      />
+                    </div>
+                  );
+                })}
+                {currentTabData.loading && (
+                  <div className="py-8 text-center mx-4">
+                    <div className="inline-flex items-center space-x-3 px-6 py-4">
+                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                      <div><span className="text-primary font-medium block">Loading more posts...</span></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <EmptyFeed
+                isAuthenticated={isAuthenticated}
+                handleCreatePost={handleCreatePost}
+                error={currentTabData.error || error}
+                feedType={activeTab}
+                onLogin={() => {
+                  if (!isAuthenticated) router.push("/login");
+                }}
+              />
+            )}
+
+            {/* End of feed indicator */}
+            {!currentTabData.loading && currentTabData.posts.length > 5 && !currentTabData.hasMore && (
+              <div className="py-8 text-center">
+                <div className="inline-flex items-center space-x-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-full">
+                  <span className="text-sm font-medium">You're all caught up!</span>
+                </div>
+              </div>
+            )}
+            <div className="h-20" />
+          </div>
+        )}
+      </div>
+
+      {/* --- Block 3: Modals & Floating Button --- */}
       {showComposeButton && activeTab === 'home' && (
         <div className="fixed bottom-36 right-4 z-50">
-          <button
-            onClick={handleCreatePost}
-            className="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-sky-600 transition-colors"
-          >
+          <button onClick={handleCreatePost} className="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-sky-600 transition-colors">
             <Plus size={24} className="text-white" />
           </button>
         </div>
       )}
 
-      {/* Custom Modal for post options */}
-      <CustomModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Post Options"
-      >
-
-
+      <CustomModal visible={isModalVisible} onClose={() => setModalVisible(false)} title="Post Options">
         <div className="p-4">
-        
-
           {selectedPost && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <img
-  src={getProfilePicture(selectedPost?.profilePic)}
-  alt={selectedPost?.username || "Profile"}
-  width={40}
-  height={40}
-  className="rounded-full"
-/>
-
+              <img src={getProfilePicture(selectedPost?.profilePic)} alt={selectedPost?.username || "Profile"} width={40} height={40} className="rounded-full" />
               <div className="ml-3">
                 <p className="font-semibold text-gray-800">{selectedPost.username}</p>
                 <p className="text-sm text-gray-500 truncate">{selectedPost.content}</p>
               </div>
             </div>
           )}
-
           <div className="space-y-2">
             {filteredOptions.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleMenuOptionPress(option)}
-                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report'
-                  ? 'hover:bg-red-50 text-red-600'
-                  : 'hover:bg-gray-50 text-gray-700'
-                  }`}
-              >
+              <button key={index} onClick={() => handleMenuOptionPress(option)} className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report' ? 'hover:bg-red-50 text-red-600' : 'hover:bg-gray-50 text-gray-700'}`}>
                 <option.icon className="w-5 h-5 mr-3" />
                 <span className="font-medium">{option.text}</span>
               </button>
@@ -1400,59 +1298,28 @@ const handleLoadMore = useCallback(() => {
         </div>
       </CustomModal>
 
-      {/* Comment Modal */}
-      <CommentModal
-        visible={isCommentModalVisible}
-        onClose={() => setCommentModalVisible(false)}
-        title="Add Comment"
-        post={postToComment}
-        onSuccess={handleCommentSuccess}
-        token={token}
-      >
+      <CommentModal visible={isCommentModalVisible} onClose={() => setCommentModalVisible(false)} title="Add Comment" post={postToComment} onSuccess={handleCommentSuccess} token={token} />
 
-      </CommentModal>
-
-      {/* Amplify Modal */}
       <AmplifyModal
         visible={isAmplifyModalVisible}
         onClose={() => setAmplifyModalVisible(false)}
-        post={postToAmplify
-        }
+        post={postToAmplify}
         token={token}
-
         title="Amplify Post"
         onSuccess={(postId) => {
-          // Update amplify count in current posts
           const currentPosts = getCurrentTabData().posts;
           const updatedPosts = currentPosts.map(post => {
             if (post.id === postId) {
-              return {
-                ...post,
-                amplifyCount: post.amplifyCount + 1,
-                hasAmplified: true
-              };
+              return { ...post, amplifyCount: post.amplifyCount + 1, hasAmplified: true };
             }
             return post;
           });
           updateTabData(activeTab, { posts: updatedPosts });
         }}
-      >
+      />
 
-      </AmplifyModal>
-
-      {/* Report Modal */}
-      <ReportModal
-        visible={isReportModalVisible}
-        onClose={() => setReportModalVisible(false)}
-        title="Report Post"
-        post={postToReport}
-        onSuccess={handleReportSuccess}
-        token={token}
-      >
-
-      </ReportModal>
-    </div>
-    
+      <ReportModal visible={isReportModalVisible} onClose={() => setReportModalVisible(false)} title="Report Post" post={postToReport} onSuccess={handleReportSuccess} token={token} />
+    </>
   );
 };
 
