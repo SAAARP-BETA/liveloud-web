@@ -114,7 +114,7 @@ const PointsDisplay = ({ points, loading }) => {
           <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
             <Trophy size={20} className="text-white" />
           </div>
-          <div className="ml-3">
+          <div className="ml-3 cursor-pointer">
             <h3 className="text-2xl font-bold text-gray-900">
               {points.totalPoints.toLocaleString() || 0}
             </h3>
@@ -157,7 +157,7 @@ const PointsDisplay = ({ points, loading }) => {
       </div>
       <div className="flex justify-between">
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="w-12 cursor-pointer h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-1">
             <Edit2 size={16} className="text-primary" />
           </div>
           <p className="text-base font-bold text-gray-900">
@@ -166,7 +166,7 @@ const PointsDisplay = ({ points, loading }) => {
           <p className="text-xs text-gray-600">Creator</p>
         </div>
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="w-12 cursor-pointer h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
             <Heart size={20} className="text-green-600" />
           </div>
           <p className="text-base font-bold text-gray-900">
@@ -175,7 +175,7 @@ const PointsDisplay = ({ points, loading }) => {
           <p className="text-xs text-gray-600">Fan</p>
         </div>
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="cursor-pointer w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1">
             <Star size={20} className="text-yellow-600" />
           </div>
           <p className="text-base font-bold text-gray-900">
@@ -185,7 +185,7 @@ const PointsDisplay = ({ points, loading }) => {
         </div>
       </div>
       <button
-        className="mt-3 w-full py-2 bg-primary hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
+        className="mt-3 w-full py-2 bg-primary cursor-pointer hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
         onClick={handleLeaderboardPress}
       >
         Leaderboard

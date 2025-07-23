@@ -11,7 +11,9 @@ import {
   User,
   LogOut,
   AlignEndHorizontal,
-  MoreHorizontal
+  MoreHorizontal,
+  Crown,
+  Users
 } from "lucide-react"
 import { useAuth } from "../app/context/AuthContext"
 import { API_ENDPOINTS } from "../app/utils/config"
@@ -24,6 +26,8 @@ const tabs = [
   { name: "Wallet", href: "/wallet", icon: Wallet },
   { name: "Profile", href: "/profile", icon: User },
   { name: "Leaderboard", href: "/leaderboard", icon: AlignEndHorizontal },
+  { name: "Premium", href: "/premium", icon: Crown },
+  { name: "Referral", href: "/referral", icon: Users },
 ]
 
 export default function LeftSidebar() {
@@ -54,6 +58,8 @@ export default function LeftSidebar() {
   const TabButton = ({ tab }) => {
     const isActive = pathname === tab.href
     const Icon = tab.icon
+    const isPremium = tab.name === "Premium"
+    const isReferral = tab.name === "Referral"
 
     const iconAnimation = {
       rotate: isActive ? 360 : 0,
@@ -64,6 +70,27 @@ export default function LeftSidebar() {
       type: "spring",
       stiffness: 300,
       damping: 20,
+    }
+
+    // Special styling for premium tab
+    const getPremiumStyles = () => {
+      if (!isPremium) return {}
+      return {
+        background: isActive 
+          ? "linear-gradient(135deg, #FFD700, #FFA500)" 
+          : "linear-gradient(135deg, #FFD700, #FFA500)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+      }
+    }
+
+    // Special styling for referral tab
+    const getReferralStyles = () => {
+      if (!isReferral) return {}
+      return {
+        color: isActive ? "#10B981" : "#6B7280"
+      }
     }
 
     return (
@@ -78,7 +105,13 @@ export default function LeftSidebar() {
               {isActive && (
                 <motion.div
                   layoutId="mobile-active-pill"
-                  className="absolute inset-0 bg-[rgba(14,165,233,0.15)] rounded-2xl shadow-sm"
+                  className={`absolute inset-0 rounded-2xl shadow-sm ${
+                    isPremium 
+                      ? "bg-gradient-to-r from-yellow-400/20 to-orange-500/20" 
+                      : isReferral
+                      ? "bg-emerald-500/15"
+                      : "bg-[rgba(14,165,233,0.15)]"
+                  }`}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.8, opacity: 0 }}
@@ -91,7 +124,15 @@ export default function LeftSidebar() {
               animate={iconAnimation}
               transition={iconTransition}
             >
-              <Icon className={`w-6 h-6 ${isActive ? "text-[#0EA5E9]" : "text-gray-400"}`} />
+              <Icon 
+                className={`w-6 h-6 ${
+                  isPremium 
+                    ? (isActive ? "text-yellow-500" : "text-yellow-600") 
+                    : isReferral
+                    ? (isActive ? "text-emerald-500" : "text-emerald-600")
+                    : (isActive ? "text-[#0EA5E9]" : "text-gray-400")
+                }`} 
+              />
             </motion.div>
             <motion.span
               className={`text-[11px] font-medium relative z-10 text-center`}
@@ -101,7 +142,11 @@ export default function LeftSidebar() {
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 display: "inline-block",
-                color: isActive ? "#0EA5E9" : "#6b7280",
+                color: isPremium 
+                  ? (isActive ? "#EAB308" : "#CA8A04")
+                  : isReferral
+                  ? (isActive ? "#10B981" : "#059669")
+                  : (isActive ? "#0EA5E9" : "#6b7280"),
               }}
               animate={{ scale: isActive ? 1.05 : 1 }}
               transition={{ duration: 0.2 }}
@@ -117,7 +162,16 @@ export default function LeftSidebar() {
           <Link
             href={tab.href}
             className={`group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
-              isActive ? "bg-[rgba(14,165,233,0.1)] text-[#0EA5E9] font-semibold shadow-sm" : "text-gray-600 hover:bg-gray-100"
+              isActive 
+                ? (isPremium 
+                    ? "bg-gradient-to-r from-yellow-400/10 to-orange-500/10 shadow-sm" 
+                    : isReferral
+                    ? "bg-emerald-500/10 shadow-sm"
+                    : "bg-[rgba(14,165,233,0.1)] shadow-sm"
+                  )
+                : "hover:bg-gray-100"
+            } ${
+              isPremium ? "font-semibold" : isReferral ? "font-semibold" : (isActive ? "font-semibold" : "")
             }`}
           >
             <motion.div
@@ -127,7 +181,15 @@ export default function LeftSidebar() {
               animate={iconAnimation}
               transition={iconTransition}
             >
-              <Icon className={`w-6 h-6 ${isActive ? "text-[#0EA5E9]" : "text-gray-500 group-hover:text-[#0EA5E9]"}`} />
+              <Icon 
+                className={`w-6 h-6 ${
+                  isPremium 
+                    ? (isActive ? "text-yellow-500" : "text-yellow-600 group-hover:text-yellow-500") 
+                    : isReferral
+                    ? (isActive ? "text-emerald-500" : "text-emerald-600 group-hover:text-emerald-500")
+                    : (isActive ? "text-[#0EA5E9]" : "text-gray-500 group-hover:text-[#0EA5E9]")
+                }`} 
+              />
             </motion.div>
             <motion.span
               className="text-base"
@@ -137,7 +199,11 @@ export default function LeftSidebar() {
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 display: "inline-block",
-                color: isActive ? "#0EA5E9" : "#6b7280"
+                color: isPremium 
+                  ? (isActive ? "#EAB308" : "#CA8A04")
+                  : isReferral
+                  ? (isActive ? "#10B981" : "#059669")
+                  : (isActive ? "#0EA5E9" : "#6b7280")
               }}
               transition={{ duration: 0.2 }}
               title={tab.name}
@@ -231,7 +297,7 @@ export default function LeftSidebar() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <MoreHorizontal className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
+              <MoreHorizontal className="w-5 h-5 cursor-pointer text-gray-400 group-hover:text-gray-600" />
             </motion.div>
           </button>
 
@@ -243,11 +309,11 @@ export default function LeftSidebar() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.2 }}
-                className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
+                className="absolute cursor-pointer bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
               >
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  className="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="text-sm font-medium">Logout</span>
