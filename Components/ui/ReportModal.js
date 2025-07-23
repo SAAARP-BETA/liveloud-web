@@ -69,7 +69,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
   return (
     <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
       <div
-        className="absolute inset-0 opacity-100"
+        className="absolute cursor-pointer inset-0 opacity-100"
         onClick={onClose}
         role="button"
         tabIndex={0}

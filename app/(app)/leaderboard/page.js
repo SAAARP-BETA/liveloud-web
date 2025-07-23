@@ -17,7 +17,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
           return (
             <button
               key={tab.key}
-              className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              className={` cursor-pointer mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                 }`}
               onClick={() => onTabPress(tab.key)}
               style={{
@@ -48,19 +48,19 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       case 1:
         return (
           <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-            <Trophy className="w-4 h-4 text-white" />
+            <Trophy className="w-4 h-4 cursor-pointer text-white" />
           </div>
         );
       case 2:
         return (
           <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-            <Medal className="w-4 h-4 text-white" />
+            <Medal className="w-4 h-4 cursor-pointer text-white" />
           </div>
         );
       case 3:
         return (
           <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-            <Medal className="w-4 h-4 text-white" />
+            <Medal className="cursor-pointer w-4 h-4 text-white" />
           </div>
         );
       default:
@@ -350,7 +350,7 @@ export default function LeaderboardPage() {
                   <p className="text-white/80 text-sm">
                     Your Total Points
                   </p>
-                  <p className="text-white text-center text-2xl font-bold mt-1">
+                  <p className="text-white cursor-pointer  text-center text-2xl font-bold mt-1">
                     {myPoints.totalPoints?.toLocaleString() || '0'}
                   </p>
                 </div>
@@ -367,7 +367,7 @@ export default function LeaderboardPage() {
               {/* Points Breakdown */}
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                  <div className="cursor-pointer  w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
                     <Pencil className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-white text-lg font-semibold">
@@ -378,7 +378,7 @@ export default function LeaderboardPage() {
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                  <div className="w-12 cursor-pointer h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
                     <Heart className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-white text-lg font-semibold">
@@ -389,7 +389,7 @@ export default function LeaderboardPage() {
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                  <div className="w-12 h-12 cursor-pointer  bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
                     <Star className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-white text-lg font-semibold">
@@ -406,13 +406,13 @@ export default function LeaderboardPage() {
 
         {/* Header Section */}
         <div className="px-4 py-4 flex items-center justify-between">
-          <h2 className="text-gray-800 text-lg font-semibold">
+          <h2 className="text-gray-800 cursor-pointer  text-lg font-semibold">
             🏆 Top Users
           </h2>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-sky-600 disabled:opacity-50 transition-colors text-sm font-medium"
+            className="bg-primary cursor-pointer  text-white px-4 py-2 rounded-lg hover:bg-sky-600 disabled:opacity-50 transition-colors text-sm font-medium"
           >
             {isRefreshing ? 'Refreshing...' : 'Refresh'}
           </button>
