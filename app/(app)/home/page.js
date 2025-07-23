@@ -143,25 +143,6 @@ const HomePage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const fileInputRef = useRef(null);
 
-  // useEffect(() => {
-  //   const fetchUserInfo = async () => {
-  //     if (user?.username) {
-  //       try {
-  //         const res = await fetch(`${API_ENDPOINTS.USERS}/profiles/${user.username}`);
-  //         console.log("res", res);
-
-  //         if (!res.ok) throw new Error('Failed to fetch user info');
-  //         const data = await res.json();
-  //         setUserInfo(data);
-  //         console.log('User Info:', data);
-  //       } catch (err) {
-  //         console.error(err);
-  //       }
-  //     }
-  //   };
-  //   fetchUserInfo();
-  // }, [user]);
-
   // Helper function to update tab data
   const updateTabData = (tabKey, updates) => {
     setTabData(prev => ({
@@ -251,143 +232,324 @@ const HomePage = () => {
 
   // Fetch feed for specific tab
   const fetchFeed = useCallback(async (feedType, pageNum = 1, refresh = false) => {
-    const currentTabData = tabData[feedType];
-    const feedConfig = FEED_TYPES.find(feed => feed.key === feedType);
-    if (!feedConfig) return;
+  const feedConfig = FEED_TYPES.find(feed => feed.key === feedType);
+  if (!feedConfig) return;
 
-    // Validation checks
-    if (currentTabData.loading) return;
-    if (!currentTabData.hasMore && !refresh && pageNum > 1) return;
+  // Get current state synchronously
+  const currentTabData = tabData[feedType];
+  
+  // Validation checks
+  if (currentTabData.loading) return;
+  if (!currentTabData.hasMore && !refresh && pageNum > 1) return;
 
-    // Check authentication requirement
-    if (feedConfig.requiresAuth && !isAuthenticated) {
-      updateTabData(feedType, {
+  // Check authentication requirement
+  if (feedConfig.requiresAuth && !isAuthenticated) {
+    setTabData(prev => ({
+      ...prev,
+      [feedType]: {
+        ...prev[feedType],
         error: 'Please log in to view this feed',
         posts: [],
-        hasMore: false
-      });
-      return;
-    }
+        hasMore: false,
+        loading: false // Ensure loading is false
+      }
+    }));
+    return;
+  }
 
+  // Set loading state BEFORE async operations
+  setTabData(prev => ({
+    ...prev,
+    [feedType]: {
+      ...prev[feedType],
+      loading: true,
+      error: refresh ? null : prev[feedType].error
+    }
+  }));
+
+  // Move the actual fetch logic here instead of separate function
+  try {
     // API call throttling
     const now = Date.now();
     const lastFetch = lastFetchTime[feedType] || 0;
-    if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) return;
+    if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
+      setTabData(prev => ({
+        ...prev,
+        [feedType]: { ...prev[feedType], loading: false }
+      }));
+      return;
+    }
 
     setLastFetchTime(prev => ({ ...prev, [feedType]: now }));
 
-    try {
-      updateTabData(feedType, { loading: true });
-      if (refresh) {
-        updateTabData(feedType, { error: null });
-      }
+    // Set request headers
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (token && feedConfig.requiresAuth) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
-      // Set request headers
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-      if (token && feedConfig.requiresAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+    const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
 
-      const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
+    const response = await fetch(url, {
+      headers,
+      signal: AbortSignal.timeout(15000)
+    });
 
-      const response = await fetch(url, {
-        headers,
-        signal: AbortSignal.timeout(15000) // 15 seconds timeout
-      });
-
-      // Check for authentication errors specifically
-      if (response.status === 401 || response.status === 403) {
-        if (feedConfig.requiresAuth) {
-          console.log('Authentication failure in feed fetch, token may be expired');
-          updateTabData(feedType, {
+    // Handle auth errors
+    if (response.status === 401 || response.status === 403) {
+      if (feedConfig.requiresAuth) {
+        setTabData(prev => ({
+          ...prev,
+          [feedType]: {
+            ...prev[feedType],
             error: 'Your session has expired. Please log in again.',
             posts: [],
-            hasMore: false
-          });
-          await logout();
-          return;
-        }
-      }
-
-      // Handle response status
-      if (response.status === 429) {
-        updateTabData(feedType, {
-          error: 'Rate limited. Please wait a moment before refreshing.'
-        });
+            hasMore: false,
+            loading: false
+          }
+        }));
+        await logout();
         return;
       }
+    }
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
-      }
+    // Handle rate limiting
+    if (response.status === 429) {
+      setTabData(prev => ({
+        ...prev,
+        [feedType]: {
+          ...prev[feedType],
+          error: 'Rate limited. Please wait a moment before refreshing.',
+          loading: false
+        }
+      }));
+      return;
+    }
 
-      const responseText = await response.text();
-      const data = JSON.parse(responseText);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
+    }
 
-      if (!data.posts || !Array.isArray(data.posts)) {
-        throw new Error('Invalid server response format');
-      }
+    const responseText = await response.text();
+    const data = JSON.parse(responseText);
 
-      // Process posts
-      const formattedPosts = data.posts
-        .map((post, index) => post ? formatPostFromApi(post, index) : null)
-        .filter(Boolean);
+    if (!data.posts || !Array.isArray(data.posts)) {
+      throw new Error('Invalid server response format');
+    }
 
-      // --- FIX: More robust way to determine if there are more posts ---
-      const hasMore = formattedPosts.length === POST_LIMIT;
+    // Process posts
+    const formattedPosts = data.posts
+      .map((post, index) => post ? formatPostFromApi(post, index) : null)
+      .filter(Boolean);
 
-      // Update state
+    const hasMore = formattedPosts.length === POST_LIMIT;
+
+    // Update state
+    setTabData(prev => {
+      const prevTabData = prev[feedType];
+      
       if (refresh) {
-        updateTabData(feedType, {
-          posts: formattedPosts,
-          page: 1,
-          hasMore,
-          error: null
-        });
+        return {
+          ...prev,
+          [feedType]: {
+            posts: formattedPosts,
+            page: 1,
+            hasMore,
+            error: null,
+            loading: false // Always set loading to false
+          }
+        };
       } else {
-        const existingIds = new Set(currentTabData.posts.map(p => p.id));
+        const existingIds = new Set(prevTabData.posts.map(p => p.id));
         const uniqueNewPosts = formattedPosts.filter(p => !existingIds.has(p.id));
 
-        updateTabData(feedType, {
-          posts: [...currentTabData.posts, ...uniqueNewPosts],
-          page: pageNum,
-          hasMore
-        });
+        return {
+          ...prev,
+          [feedType]: {
+            ...prevTabData,
+            posts: [...prevTabData.posts, ...uniqueNewPosts],
+            page: pageNum,
+            hasMore,
+            loading: false // Always set loading to false
+          }
+        };
       }
-    } catch (error) {
-      console.error(`Error fetching ${feedType} feed:`, error);
+    });
 
-      // Check if this might be an auth error
-      if (error.message && (
-        error.message.includes('unauthorized') ||
-        error.message.includes('forbidden') ||
-        error.message.includes('authentication')
-      ) && feedConfig.requiresAuth) {
-        console.log('Likely authentication error, logging out');
-        updateTabData(feedType, {
-          error: 'Your session has expired. Please log in again.',
-          posts: refresh ? [] : currentTabData.posts,
-          hasMore: false
-        });
-        await logout();
-      } else {
-        updateTabData(feedType, {
-          error: `Failed to load posts: ${error.message}`,
-          posts: refresh ? [] : currentTabData.posts
-        });
+  } catch (error) {
+    console.error(`Error fetching ${feedType} feed:`, error);
+    
+    setTabData(prev => ({
+      ...prev,
+      [feedType]: {
+        ...prev[feedType],
+        error: `Failed to load posts: ${error.message}`,
+        posts: refresh ? [] : prev[feedType].posts,
+        loading: false // Always set loading to false on error
       }
-    } finally {
-      updateTabData(feedType, { loading: false });
-      setRefreshing(false);
+    }));
+
+    if (error.message && (
+      error.message.includes('unauthorized') ||
+      error.message.includes('forbidden') ||
+      error.message.includes('authentication')
+    ) && feedConfig.requiresAuth) {
+      await logout();
     }
-  }, [tabData, token, isAuthenticated, lastFetchTime, logout]);
-
+  } finally {
+    // Ensure loading is always set to false
+    setRefreshing(false);
+    setTabData(prev => ({
+      ...prev,
+      [feedType]: {
+        ...prev[feedType],
+        loading: false
+      }
+    }));
+  }
+}, [isAuthenticated, token, logout, tabData, lastFetchTime]);
   // Handle tab change
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
   };
+  const performFetch = async (feedType, pageNum, refresh, feedConfig, currentTabData) => {
+  // API call throttling
+  const now = Date.now();
+  const lastFetch = lastFetchTime[feedType] || 0;
+  if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
+    setTabData(prev => ({
+      ...prev,
+      [feedType]: { ...prev[feedType], loading: false }
+    }));
+    return;
+  }
+
+  setLastFetchTime(prev => ({ ...prev, [feedType]: now }));
+
+  try {
+    // Set request headers
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (token && feedConfig.requiresAuth) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
+
+    const response = await fetch(url, {
+      headers,
+      signal: AbortSignal.timeout(15000)
+    });
+
+    // Handle auth errors
+    if (response.status === 401 || response.status === 403) {
+      if (feedConfig.requiresAuth) {
+        setTabData(prev => ({
+          ...prev,
+          [feedType]: {
+            ...prev[feedType],
+            error: 'Your session has expired. Please log in again.',
+            posts: [],
+            hasMore: false,
+            loading: false
+          }
+        }));
+        await logout();
+        return;
+      }
+    }
+
+    // Handle rate limiting
+    if (response.status === 429) {
+      setTabData(prev => ({
+        ...prev,
+        [feedType]: {
+          ...prev[feedType],
+          error: 'Rate limited. Please wait a moment before refreshing.',
+          loading: false
+        }
+      }));
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
+    }
+
+    const responseText = await response.text();
+    const data = JSON.parse(responseText);
+
+    if (!data.posts || !Array.isArray(data.posts)) {
+      throw new Error('Invalid server response format');
+    }
+
+    // Process posts
+    const formattedPosts = data.posts
+      .map((post, index) => post ? formatPostFromApi(post, index) : null)
+      .filter(Boolean);
+
+    const hasMore = formattedPosts.length === POST_LIMIT;
+
+    // Update state with functional update
+    setTabData(prev => {
+      const prevTabData = prev[feedType];
+      
+      if (refresh) {
+        return {
+          ...prev,
+          [feedType]: {
+            ...prevTabData,
+            posts: formattedPosts,
+            page: 1,
+            hasMore,
+            error: null,
+            loading: false
+          }
+        };
+      } else {
+        const existingIds = new Set(prevTabData.posts.map(p => p.id));
+        const uniqueNewPosts = formattedPosts.filter(p => !existingIds.has(p.id));
+
+        return {
+          ...prev,
+          [feedType]: {
+            ...prevTabData,
+            posts: [...prevTabData.posts, ...uniqueNewPosts],
+            page: pageNum,
+            hasMore,
+            loading: false
+          }
+        };
+      }
+    });
+
+  } catch (error) {
+    console.error(`Error fetching ${feedType} feed:`, error);
+    
+    setTabData(prev => ({
+      ...prev,
+      [feedType]: {
+        ...prev[feedType],
+        error: `Failed to load posts: ${error.message}`,
+        posts: refresh ? [] : prev[feedType].posts,
+        loading: false
+      }
+    }));
+
+    if (error.message && (
+      error.message.includes('unauthorized') ||
+      error.message.includes('forbidden') ||
+      error.message.includes('authentication')
+    ) && feedConfig.requiresAuth) {
+      await logout();
+    }
+  } finally {
+    setRefreshing(false);
+  }
+};
 
   // character count and media upload: create post
   const charCount = text.length;
@@ -686,15 +848,20 @@ const HomePage = () => {
     setRefreshing(true);
     fetchFeed(activeTab, 1, true);
   }, [fetchFeed, activeTab]);
-
-  const handleLoadMore = useCallback(() => {
-    const currentTabData = tabData[activeTab];
-    if (!currentTabData.loading && currentTabData.hasMore) {
-      const nextPage = currentTabData.page + 1;
-      fetchFeed(activeTab, nextPage);
-    }
-  }, [activeTab, fetchFeed]); // Remove tabData from dependencies to prevent stale closure
-
+const handleLoadMore = useCallback(() => {
+  const currentTabData = tabData[activeTab];
+  console.log('Load more triggered:', {
+    loading: currentTabData.loading,
+    hasMore: currentTabData.hasMore,
+    page: currentTabData.page
+  });
+  
+  if (!currentTabData.loading && currentTabData.hasMore) {
+    const nextPage = currentTabData.page + 1;
+    console.log('Fetching page:', nextPage);
+    fetchFeed(activeTab, nextPage);
+  }
+}, [activeTab, tabData, fetchFeed]);
 
   // const handleCreatePost = () => {
   //   if (!isAuthenticated) {
@@ -914,24 +1081,31 @@ const HomePage = () => {
 
   // --- Intersection Observer for Infinite Scroll ---
   const observer = useRef();
-  const lastPostElementRef = useCallback(node => {
-    // If we are currently loading, do nothing.
-    if (currentTabData.loading) return;
-    // Disconnect the old observer.
-    if (observer.current) observer.current.disconnect();
+ const lastPostElementRef = useCallback(node => {
+  if (currentTabData.loading) return;
+  if (observer.current) observer.current.disconnect();
 
-    // Create a new observer.
-    observer.current = new IntersectionObserver(entries => {
-      // If the last post is visible and there are more posts to fetch, load them.
-      if (entries[0].isIntersecting && currentTabData.hasMore) {
-        fetchFeed(activeTab, currentTabData.page + 1);
-      }
-    });
+  observer.current = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && currentTabData.hasMore && !currentTabData.loading) {
+      console.log('Intersection observer triggered - loading more posts');
+      // Use setTimeout to prevent multiple rapid triggers
+      setTimeout(() => {
+        setTabData(prevTabData => {
+          const currentTab = prevTabData[activeTab];
+          if (!currentTab.loading && currentTab.hasMore) {
+            fetchFeed(activeTab, currentTab.page + 1);
+          }
+          return prevTabData;
+        });
+      }, 100);
+    }
+  }, {
+    threshold: 0.1,
+    rootMargin: '100px'
+  });
 
-    // Observe the new last post element.
-    if (node) observer.current.observe(node);
-  }, [currentTabData.loading, currentTabData.hasMore, activeTab, fetchFeed]);
-
+  if (node) observer.current.observe(node);
+}, [currentTabData.loading, currentTabData.hasMore, activeTab, fetchFeed]);
 
   return (
     <div className="md:w-xl max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
@@ -1095,18 +1269,22 @@ const HomePage = () => {
 
         {/* Initial loading indicator */}
         {currentTabData.loading && currentTabData.posts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-16">
-            <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-            <p className="text-lg text-gray-600">Loading fresh posts for you...</p>
-          </div>
-        ) : currentTabData.posts.length > 0 ? (
-          <div>
-            {currentTabData.posts.map((post, index) => {
-              // Attach ref to the last post element
-              if (currentTabData.posts.length === index + 1) {
-                return (
-                  <div ref={lastPostElementRef} key={post.id}>
-                    <PostCard
+  <div className="flex flex-col items-center justify-center p-16">
+    <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+    <p className="text-lg text-gray-600">Loading posts for you...</p>
+  </div>
+) : currentTabData.posts.length > 0 ? (
+  <div>
+    {/* Posts rendering */}
+    {currentTabData.posts.map((post, index) => {
+      const isLastPost = currentTabData.posts.length === index + 1;
+      
+      return (
+        <div 
+          key={`${post.id}-${activeTab}-${index}`} // More unique key
+          ref={isLastPost ? lastPostElementRef : null}
+        >
+          <PostCard
                       post={post}
                       handleLikePost={postHandlers.handleLikePost}
                       handleUnlikePost={postHandlers.handleUnlikePost}
@@ -1120,53 +1298,36 @@ const HomePage = () => {
                       handleDislikePost={postHandlers.handleDislikePost}
                       handleUndislikePost={postHandlers.handleUndislikePost}
                     />
-                  </div>
-                );
-              } else {
-                return (
-                  <PostCard
-                    key={post.id || index}
-                    post={post}
-                    handleLikePost={postHandlers.handleLikePost}
-                    handleUnlikePost={postHandlers.handleUnlikePost}
-                    handleCommentPost={postHandlers.handleCommentPost}
-                    handleAmplifyPost={postHandlers.handleAmplifyPost}
-                    handleBookmarkPost={postHandlers.handleBookmarkPost}
-                    handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                    setSelectedPost={setSelectedPost}
-                    setModalVisible={setModalVisible}
-                    username={user}
-                    handleDislikePost={postHandlers.handleDislikePost}
-                    handleUndislikePost={postHandlers.handleUndislikePost}
-                  />
-                );
-              }
-            })}
+        </div>
+      );
+    })}
+    
+    {/* Loading more posts indicator - improved visibility */}
+    {currentTabData.loading && (
+      <div className="py-8 text-center mx-4 ">
+        <div className="inline-flex items-center space-x-3 px-6 py-4">
+          <Loader2 className="w-6 h-6 text-primary animate-spin" />
+          <div>
+            <span className="text-primary font-medium block">Loading more posts...</span>
           </div>
-        ) : (
-          <EmptyFeed
-            isAuthenticated={isAuthenticated}
-            handleCreatePost={handleCreatePost}
-            error={currentTabData.error || error}
-            feedType={activeTab}
-            onLogin={() => {
-              if (!isAuthenticated) {
-                router.push("/login");
-              }
-            }}
-          />
-        )}
+        </div>
+      </div>
+    )}
+  </div>
+) : (
+  <EmptyFeed
+    isAuthenticated={isAuthenticated}
+    handleCreatePost={handleCreatePost}
+    error={currentTabData.error || error}
+    feedType={activeTab}
+    onLogin={() => {
+      if (!isAuthenticated) {
+        router.push("/login");
+      }
+    }}
+  />
+)}
 
-
-        {/* Loading state for more posts */}
-        {currentTabData.loading && currentTabData.posts.length > 0 && (
-          <div className="py-6 text-center">
-            <div className="inline-flex items-center space-x-3 bg-blue-50 px-6 py-3 rounded-full">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-              <span className="text-primary font-medium">Loading more posts...</span>
-            </div>
-          </div>
-        )}
 
         {/* End of feed indicator */}
         {!currentTabData.loading && currentTabData.posts.length > 5 && !currentTabData.hasMore && (
@@ -1202,9 +1363,7 @@ const HomePage = () => {
 
 
         <div className="p-4">
-          {/* <h3 className="text-lg font-bold text-gray-800 mb-2">
-            Post options
-          </h3> */}
+        
 
           {selectedPost && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
@@ -1293,6 +1452,7 @@ const HomePage = () => {
 
       </ReportModal>
     </div>
+    
   );
 };
 
