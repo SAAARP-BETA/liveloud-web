@@ -80,13 +80,13 @@ const PostCard = ({
     const contentWithTags = post.content.split(/(\s+)/).map((word, i) => {
       if (word.startsWith("#")) {
         return (
-          <span key={i} className="font-medium text-sky-500">
+          <span key={i} className="font-medium text-primary">
             {word}
           </span>
         );
       } else if (word.startsWith("@")) {
         return (
-          <span key={i} className="font-medium text-sky-600">
+          <span key={i} className="font-medium text-primary">
             {word}
           </span>
         );
@@ -175,7 +175,7 @@ const handleNavigateToPost = () => {
                 {post.username}
               </span>
               {post.isVerified && (
-                <CheckCircle size={16} className="text-blue-500 ml-1" />
+                <CheckCircle size={16} className="text-primary ml-1" />
               )}
             </div>
             <span className="font-normal text-xs text-gray-500">
@@ -224,7 +224,7 @@ const handleNavigateToPost = () => {
             <div className="flex items-center mb-2">
               <span className="font-medium text-xs text-gray-500">
                 Amplified from
-                <span className="text-sky-500">
+                <span className="text-primary">
                   @{post.originalPost.user?.username || "user"}
                 </span>
               </span>
@@ -307,7 +307,7 @@ const handleNavigateToPost = () => {
                       }
                     }}
                     className={`w-2 h-2 rounded-full mx-1 transition-colors ${
-                      index === currentImageIndex ? "bg-sky-500" : "bg-gray-300"
+                      index === currentImageIndex ? "bg-primary" : "bg-gray-300"
                     }`}
                   />
                 ))}
@@ -352,10 +352,10 @@ const handleNavigateToPost = () => {
         >
           <ThumbsUp
             size={18}
-            className={isLiked ? "text-blue-500 fill-current" : " text-gray-600"}
+            className={isLiked ? "text-primary fill-current" : " text-gray-600"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${isLiked ? " text-blue-500" : " text-gray-600"}`}
+            className={`ml-2 text-sm font-medium ${isLiked ? " text-primary" : " text-gray-600"}`}
           >
             Like
           </span>
@@ -411,12 +411,12 @@ const handleNavigateToPost = () => {
           <Bookmark
             size={18}
             className={
-              isBookmarked ? "text-sky-500 fill-current" : "text-gray-600"
+              isBookmarked ? "text-primary fill-current" : "text-gray-600"
             }
           />
           <span
             className={`ml-2 text-sm font-medium ${
-              isBookmarked ? "text-sky-500" : "text-gray-600"
+              isBookmarked ? "text-primary" : "text-gray-600"
             }`}
           >
             Save

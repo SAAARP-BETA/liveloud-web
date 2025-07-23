@@ -17,7 +17,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
           return (
             <button
               key={tab.key}
-              className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              className={`mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                 }`}
               onClick={() => onTabPress(tab.key)}
               style={{
@@ -40,7 +40,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
 
 // Fixed Leaderboard Item Component
 const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
-  const isCurrentUser = item.user === currentUserId;
+  const isCurrentUser = item.userId === currentUserId;
   const rank = index + 1;
 
   const getRankIcon = () => {
@@ -48,19 +48,19 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       case 1:
         return (
           <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-            <i className="fas fa-crown text-white text-sm"><Trophy /></i>
+            <Trophy className="w-4 h-4 text-white" />
           </div>
         );
       case 2:
         return (
           <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-            <i className="fas fa-medal text-white text-sm"><Medal /></i>
+            <Medal className="w-4 h-4 text-white" />
           </div>
         );
       case 3:
         return (
           <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-            <i className="fas fa-medal text-white text-sm"><Medal /></i>
+            <Medal className="w-4 h-4 text-white" />
           </div>
         );
       default:
@@ -96,9 +96,9 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
   return (
     <div
       className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${
-        isCurrentUser ? 'bg-sky-50 border-2 border-sky-300' : 'bg-white shadow-sm hover:shadow-md'
+        isCurrentUser ? 'bg-sky-50 border-2 border-primary' : 'bg-white shadow-sm hover:shadow-md'
       }`}
-      onClick={() => onPress(item.user)}
+      onClick={() => onPress(item)}
     >
       {/* Rank */}
       <div className="mr-4 flex-shrink-0">
@@ -106,18 +106,26 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       </div>
 
       {/* Profile Picture */}
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-blue-200 flex items-center justify-center border-2 border-white flex-shrink-0">
-        <User className="w-6 h-6 text-sky-500" />
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0">
+        {item.profilePicture ? (
+          <img 
+            src={item.profilePicture} 
+            alt="Profile" 
+            className="w-full h-full rounded-full object-cover"
+          />
+        ) : (
+          <User className="w-6 h-6 text-primary" />
+        )}
       </div>
 
       {/* User Info */}
       <div className="flex-1 ml-4 min-w-0">
         <div className="flex items-center mb-1">
           <span className="text-gray-900 text-base font-medium truncate">
-            User #{item?.user?.slice(-6)}
+            {item.username || item.fullname || `User #${item?.userId?.slice(-6)}`}
           </span>
           {isCurrentUser && (
-            <div className="ml-2 px-2 py-1 bg-sky-500 rounded-full flex-shrink-0">
+            <div className="ml-2 px-2 py-1 bg-primary rounded-full flex-shrink-0">
               <span className="text-xs text-white font-medium">
                 You
               </span>
@@ -125,8 +133,8 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <div className="px-3 py-1 bg-blue-100 rounded-full">
-            <span className="text-xs text-blue-700 font-medium">
+          <div className="px-3 py-1 bg-sky-100 rounded-full">
+            <span className="text-xs text-primary font-medium">
               Level {levelInfo.level}
             </span>
           </div>
@@ -224,7 +232,7 @@ export default function LeaderboardPage() {
       // Find current user's position
       if (isAuthenticated && currentUser) {
         const userIndex = data.leaderboard?.findIndex(
-          item => item.user === currentUser._id
+          item => item.userId === currentUser._id
         );
 
         if (userIndex !== -1) {
@@ -256,14 +264,20 @@ export default function LeaderboardPage() {
     fetchMyPoints();
   };
 
-  // Navigate to user profile
-  const navigateToProfile = (userId) => {
-    if (!currentUser || !userId) return;
+  // Navigate to user profile - FIXED VERSION
+  const navigateToProfile = (userItem) => {
+    if (!userItem) return;
 
-    if (userId === currentUser._id) {
-      router.push('/profile/profile');
+    // Check if it's the current user
+    if (currentUser && userItem.userId === currentUser._id) {
+      // Navigate to current user's profile using their username
+      const username = currentUser.username || currentUser._id;
+      router.push(`/UserProfile/${username}`);
     } else {
-      router.push(`/UserProfile/${userId}`);
+      // Navigate to other user's profile
+      // Use username if available, otherwise use userId
+      const identifier = userItem.username || userItem.userId;
+      router.push(`/UserProfile/${identifier}`);
     }
   };
 
@@ -301,7 +315,7 @@ export default function LeaderboardPage() {
       <div className="min-h-screen w-xl bg-gray-50">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
             <p className="mt-4 text-gray-600">
               Loading leaderboard...
             </p>
@@ -326,28 +340,28 @@ export default function LeaderboardPage() {
         {isAuthenticated && myPoints && (
           <div className="mx-4 my-6 rounded-xl overflow-hidden shadow-lg">
             <div 
-              className="p-6 bg-gradient-to-r from-sky-500 to-blue-600"
+              className="p-6 bg-gradient-to-r from-sky-400 to-primary"
               style={{
                 background: 'linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%)'
               }}
             >
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-center mb-4">
                 <div>
                   <p className="text-white/80 text-sm">
                     Your Total Points
                   </p>
-                  <p className="text-white text-2xl font-bold mt-1">
+                  <p className="text-white text-center text-2xl font-bold mt-1">
                     {myPoints.totalPoints?.toLocaleString() || '0'}
                   </p>
                 </div>
-                <button
+                {/* <button
                   className="bg-white/20 px-4 py-2 rounded-full hover:bg-white/30 transition-colors"
                   onClick={() => router.push('/dashboard')}
                 >
                   <span className="text-white text-sm font-medium">
                     View Details
                   </span>
-                </button>
+                </button> */}
               </div>
 
               {/* Points Breakdown */}
@@ -398,17 +412,17 @@ export default function LeaderboardPage() {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 disabled:opacity-50 transition-colors text-sm font-medium"
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-sky-600 disabled:opacity-50 transition-colors text-sm font-medium"
           >
             {isRefreshing ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
 
-        {/* Leaderboard Items - Removed fixed height constraint */}
+        {/* Leaderboard Items */}
         <div className="pb-8">
           {leaderboardData.map((item, index) => (
             <LeaderboardItem
-              key={item.user || index}
+              key={item.userId || index}
               item={item}
               index={index}
               currentUserId={currentUser?._id}
@@ -419,7 +433,7 @@ export default function LeaderboardPage() {
           {/* Loading Footer */}
           {isLoading && page > 1 && (
             <div className="py-6 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             </div>
           )}
 
@@ -428,7 +442,7 @@ export default function LeaderboardPage() {
             <div className="px-4 py-4 text-center">
               <button
                 onClick={loadMore}
-                className="bg-white text-sky-500 border border-sky-500 px-6 py-3 rounded-lg hover:bg-sky-50 transition-colors font-medium"
+                className="bg-white text-primary border border-primary px-6 py-3 rounded-lg hover:bg-sky-50 transition-colors font-medium"
               >
                 Load More
               </button>

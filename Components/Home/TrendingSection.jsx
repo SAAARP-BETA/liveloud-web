@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ChevronRight } from 'lucide-react';
-import clsx from 'clsx';
+import React from "react";
+import { ChevronRight } from "lucide-react";
+import clsx from "clsx";
 
 const TrendingSection = ({ trendingTags = [], onTagPress = () => {} }) => {
   return (
@@ -18,13 +18,15 @@ const TrendingSection = ({ trendingTags = [], onTagPress = () => {} }) => {
           key={index}
           onClick={() => onTagPress(item)}
           className={clsx(
-            'flex items-center justify-between w-full px-4 py-3 text-left hover:bg-gray-50 transition',
-            index !== trendingTags.length - 1 ? 'border-b border-gray-100' : ''
+            "flex items-center justify-between w-full px-4 py-3 text-left hover:bg-gray-50 transition",
+            index !== trendingTags.length - 1 ? "border-b border-gray-100" : ""
           )}
         >
           <div className="flex items-center">
             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-blue-500 font-bold text-sm">#{index + 1}</span>
+              <span className="text-primary font-bold text-sm">
+                #{index + 1}
+              </span>
             </div>
             <div className="text-left">
               <p className="text-gray-800 font-medium">#{item.tag}</p>

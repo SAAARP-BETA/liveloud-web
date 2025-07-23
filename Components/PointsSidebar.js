@@ -26,7 +26,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
     const levels = [
       { level: 1, title: 'Newcomer', minPoints: 0, color: 'bg-gray-500' },
       { level: 2, title: 'Active Member', minPoints: 100, color: 'bg-green-500' },
-      { level: 3, title: 'Contributor', minPoints: 500, color: 'bg-blue-500' },
+      { level: 3, title: 'Contributor', minPoints: 500, color: 'bg-primary' },
       { level: 4, title: 'Influencer', minPoints: 1000, color: 'bg-purple-500' },
       { level: 5, title: 'Star', minPoints: 2500, color: 'bg-yellow-500' },
       { level: 6, title: 'Superstar', minPoints: 5000, color: 'bg-orange-500' },
@@ -133,8 +133,8 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
       title: 'Creator',
       points: myPoints.creatorPoints,
       icon: Pencil,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-50'
+      color: 'text-primary',
+      bgColor: 'bg-sky-50'
     },
     {
       key: 'fan',
@@ -187,7 +187,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
             Last updated: {lastUpdated.toLocaleTimeString()}
           </p>
           {isLoading && (
-            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
           )}
         </div>
         {error && (
@@ -200,7 +200,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
       {/* Content */}
       <div className="p-4 space-y-4">
         {/* Total Points Card */}
-        <div className="bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-br from-sky-600 to-primary rounded-xl p-4 text-white">
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-white/80 text-sm">Total Points</p>

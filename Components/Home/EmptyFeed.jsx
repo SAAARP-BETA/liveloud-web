@@ -41,7 +41,7 @@ const EmptyFeed = ({ isAuthenticated, handleCreatePost, error, onLogin }) => {
       {hasAuthError || !isAuthenticated ? (
         <button
           onClick={onLogin}
-          className="bg-sky-500 py-3 px-8 rounded-full hover:bg-sky-600 transition-colors"
+          className="bg-primary py-3 px-8 rounded-full hover:bg-sky-600 transition-colors"
         >
           <span style={{ fontFamily: fonts.Bold }} className="text-white">
             Login
@@ -50,7 +50,7 @@ const EmptyFeed = ({ isAuthenticated, handleCreatePost, error, onLogin }) => {
       ) : (
         <button
           onClick={handleCreatePost}
-          className="bg-sky-500 py-3 px-8 rounded-full hover:bg-sky-600 transition-colors"
+          className="bg-primary py-3 px-8 rounded-full hover:bg-sky-600 transition-colors"
         >
           <span style={{ fontFamily: fonts.Bold }} className="text-white">
             Create Post

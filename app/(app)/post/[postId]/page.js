@@ -178,12 +178,12 @@ const PostPage = () => {
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             placeholder="Add a comment..."
-                            className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
+                            className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"
                             rows="1"
                         />
                         <button
                             type="submit"
-                            className="bg-sky-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-gray-400"
+                            className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-gray-400"
                             disabled={!newComment.trim() || !isAuthenticated}
                         >
                             Post

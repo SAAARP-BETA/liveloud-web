@@ -126,7 +126,7 @@ const PointsDisplay = ({ points, loading }) => {
             <span className="text-sm font-medium text-gray-700">
               Level {currentLevel.level}
             </span>
-            <div className="ml-2 px-2 py-1 bg-sky-500 rounded-full">
+            <div className="ml-2 px-2 py-1 bg-primary rounded-full">
               <span className="text-xs text-white font-medium">
                 {currentLevel.title}
               </span>
@@ -150,15 +150,15 @@ const PointsDisplay = ({ points, loading }) => {
         </div>
         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full transition-all duration-300"
+            className="h-full bg-gradient-to-r from-sky-400 to-primary rounded-full transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
       </div>
       <div className="flex justify-between">
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
-            <Edit2 size={16} className="text-blue-600" />
+          <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-1">
+            <Edit2 size={16} className="text-primary" />
           </div>
           <p className="text-base font-bold text-gray-900">
             {points.creatorPoints || 0}
@@ -185,7 +185,7 @@ const PointsDisplay = ({ points, loading }) => {
         </div>
       </div>
       <button
-        className="mt-3 w-full py-2 bg-sky-500 hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
+        className="mt-3 w-full py-2 bg-primary hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
         onClick={handleLeaderboardPress}
       >
         Leaderboard
@@ -217,7 +217,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
       {tabs.map((tab) => (
         <button
           key={tab.key}
-          className={`flex-1 flex items-center justify-center pb-2 ${activeTab === tab.key ? "border-b-2 border-sky-500" : ""
+          className={`flex-1 flex items-center justify-center pb-2 ${activeTab === tab.key ? "border-b-2 border-primary" : ""
             }`}
           onClick={() => onTabPress(tab.key)}
         >
@@ -226,7 +226,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               <Grid
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500"
                 }
               />
             )}
@@ -234,12 +234,12 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               <ImageIcon
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500"
                 }
               />
             )}
             <span
-              className={`ml-1 text-sm font-medium ${activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+              className={`ml-1 text-sm font-medium ${activeTab === tab.key ? "text-primary" : "text-gray-500"
                 }`}
             >
               {tab.title}
@@ -841,7 +841,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     href="/profile/edit"
                     className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
                   >
-                    <Edit2 className="text-blue-500 text-sm" />
+                    <Edit2 className="text-primary text-sm" />
                   </Link>
                 )}
               </motion.div>
@@ -862,7 +862,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   {user.name || user.username || "User"}
                 </h2>
                 {user.isVerified && (
-                  <Verified className="ml-2 text-blue-500 text-xl" />
+                  <Verified className="ml-2 text-primary text-xl" />
                 )}
                 {userPoints && (
                   <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full text-xs text-white font-bold">
@@ -911,7 +911,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                       onClick={handleFollowToggle}
                       className={` cursor-pointer flex-1 py-2.5 rounded-full text-center font-medium ${isFollowing
                         ? "bg-gray-100 text-gray-900"
-                        : "bg-sky-500 text-white"
+                        : "bg-primary text-white"
                         }`}
                     >
                       {isFollowing ? "Following" : "Follow"}
@@ -963,7 +963,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="ml-2 text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+                        className="ml-2 text-sky-400 hover:underline transition-colors"
                       >
                         {user.website}
                       </Link>
@@ -1000,7 +1000,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               <>
                 {isPostsLoading && posts.length === 0 ? (
                   <div className="flex cursor-pointer justify-center items-center py-12">
-                    <Loader2 className="w-8 h-8 text-sky-500 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
                   </div>
                 ) : posts.length > 0 ? (
                   posts.map((post, index) => (
@@ -1038,7 +1038,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     {isMyProfile && (
                       <Link
                         href="/create-post"
-                        className="mt-6 px-6 py-2.5 bg-sky-500 rounded-full text-white font-medium cursor-pointer"
+                        className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium cursor-pointer"
                       >
                         Create First Post
                       </Link>
@@ -1047,7 +1047,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 )}
                 {isPostsLoading && posts.length > 0 && (
                   <div className="flex justify-center items-center py-6">
-                    <Loader2 className="w-6 h-6 text-sky-500 animate-spin" />
+                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
                   </div>
                 )}
                 {!hasMorePosts && posts.length > 0 && (

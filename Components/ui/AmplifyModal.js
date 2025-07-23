@@ -129,7 +129,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
                 <p className="font-medium  text-gray-800">Amplify</p>
                 <p className="text-sm text-gray-600">Share this post with your followers</p>
               </div>
-              {loading && <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />}
+              {loading && <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
             </button>
 
             <button
@@ -155,7 +155,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
             </div>
 
             <textarea
-              className="w-full bg-gray-50 rounded-xl p-4 min-h-32 text-base text-gray-800 mb-4 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-gray-50 rounded-xl p-4 min-h-32 text-base text-gray-800 mb-4 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Add your thoughts..."
               value={quoteContent}
               onChange={(e) => setQuoteContent(e.target.value)}
@@ -227,7 +227,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
               <span className="text-sm text-gray-500">{280 - quoteContent.length} characters left</span>
               <button
                 className={`px-6 py-3 rounded-full font-bold text-white ${
-                  quoteContent.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
+                  quoteContent.trim() ? 'bg-primary hover:bg-sky-600' : 'bg-gray-300 cursor-not-allowed'
                 }`}
                 onClick={handleQuote}
                 disabled={!quoteContent.trim() || loading}

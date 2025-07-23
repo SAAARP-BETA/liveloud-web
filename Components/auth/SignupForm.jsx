@@ -1,7 +1,7 @@
-'use client';
-import { useState } from 'react';
-import { FaGoogle } from 'react-icons/fa';
-import { SiMetamask } from 'react-icons/si';
+"use client";
+import { useState } from "react";
+import { FaGoogle } from "react-icons/fa";
+import { SiMetamask } from "react-icons/si";
 
 export default function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,26 +9,38 @@ export default function SignupForm() {
 
   return (
     <div className="bg-white p-6 rounded-md shadow-sm border">
-      <h2 className="text-2xl font-semibold text-center text-blue-700">Create Your Account</h2>
-      <p className="text-sm text-center text-gray-500 mb-6">Join the most Unfiltered Community</p>
+      <h2 className="text-2xl font-semibold text-center text-primary">
+        Create Your Account
+      </h2>
+      <p className="text-sm text-center text-gray-500 mb-6">
+        Join the most Unfiltered Community
+      </p>
 
       <form className="space-y-4">
         <div>
           <label className="block font-medium mb-1">Full Name</label>
-          <input type="text" placeholder="Enter your full name" className="w-full border border-blue-200 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input
+            type="text"
+            placeholder="Enter your full name"
+            className="w-full border border-blue-200 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
 
         <div>
           <label className="block font-medium mb-1">Email Address</label>
-          <input type="email" placeholder="you@example.com" className="w-full border border-blue-200 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input
+            type="email"
+            placeholder="you@example.com"
+            className="w-full border border-blue-200 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
 
         <div className="relative">
           <label className="block font-medium mb-1">Password</label>
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
-            className="w-full border border-blue-200 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-blue-200 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <button
             type="button"
@@ -44,10 +56,15 @@ export default function SignupForm() {
             <input type="checkbox" />
             Keep me signed in
           </label>
-          <a href="#" className="text-blue-600 hover:underline">Forgot Password?</a>
+          <a href="#" className="text-primary hover:underline">
+            Forgot Password?
+          </a>
         </div>
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition">
+        <button
+          type="submit"
+          className="w-full bg-primary text-white py-2 rounded-full hover:bg-sky-600 transition"
+        >
           Create Account
         </button>
       </form>
@@ -68,7 +85,10 @@ export default function SignupForm() {
       </div>
 
       <p className="text-sm text-center mt-6 text-gray-600">
-        Already have an account? <a href="/login" className="text-blue-600 hover:underline">Log in</a>
+        Already have an account?{" "}
+        <a href="/login" className="text-primary hover:underline">
+          Log in
+        </a>
       </p>
     </div>
   );

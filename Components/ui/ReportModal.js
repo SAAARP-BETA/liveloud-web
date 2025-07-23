@@ -106,7 +106,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
 
         {isSubmitting ? (
           <div className="p-8 flex items-center justify-center flex-col">
-            <div className="w-8 h-8 border-3 border-gray-300 border-t-sky-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-3 border-gray-300 border-t-primary rounded-full animate-spin" />
             <p className="mt-4 text-base text-gray-500">Submitting report...</p>
           </div>
         ) : showCustomInput ? (
@@ -131,7 +131,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
                 <span className="text-gray-600 text-base cursor-pointer">Back</span>
               </button>
               <button
-                className="bg-sky-500 rounded-xl py-3 px-5"
+                className="bg-primary rounded-xl py-3 px-5"
                 onClick={() => submitReport('Other')}
               >
                 <span className="text-white text-base cursor-pointer">Submit Report</span>

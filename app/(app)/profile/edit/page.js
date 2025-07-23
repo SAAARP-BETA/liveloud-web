@@ -169,8 +169,8 @@ const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
                 h-10 w-10 rounded-lg text-sm font-medium transition-colors
                 ${!date ? 'invisible' : ''}
                 ${isFutureDate(date) ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100'}
-                ${isSelectedDate(date) ? 'bg-blue-500 text-white hover:bg-blue-600' : ''}
-                ${isToday(date) && !isSelectedDate(date) ? 'bg-gray-100 text-blue-600' : ''}
+                ${isSelectedDate(date) ? 'bg-primary text-white hover:bg-sky-600' : ''}
+                ${isToday(date) && !isSelectedDate(date) ? 'bg-gray-100 text-sky-600' : ''}
                 ${date && !isSelectedDate(date) && !isToday(date) && !isFutureDate(date) ? 'text-gray-700' : ''}
               `}
             >
@@ -186,7 +186,7 @@ const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
               const today = new Date();
               handleDateClick(today);
             }}
-            className="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm text-primary hover:bg-sky-50 rounded-lg transition-colors"
           >
             Today
           </button>
@@ -507,15 +507,15 @@ const EditPage = () => {
             </div>
           </div>
 
-          <label className="flex flex-row items-center py-3 px-4 mb-3 bg-blue-50 rounded-xl cursor-pointer hover:bg-blue-100 transition-colors">
+          <label className="flex flex-row items-center py-3 px-4 mb-3 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition-colors">
             <input
               type="file"
               accept="image/*"
               onChange={handleImageSelection}
               className="hidden"
             />
-            <Camera className="text-blue-700 w-6 h-6" />
-            <span className="ml-3 text-blue-700 font-medium text-base">
+            <Camera className="text-primary w-6 h-6" />
+            <span className="ml-3 text-primary font-medium text-base">
               Choose from Gallery
             </span>
           </label>
@@ -559,7 +559,7 @@ const EditPage = () => {
   if (authLoading || loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="mt-3 text-gray-600">Loading profile...</p>
       </div>
     );
@@ -570,7 +570,7 @@ const EditPage = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <p className="mt-3 text-gray-600">No profile data found</p>
         <button
-          className="mt-4 py-2 px-4 bg-sky-500 cursor-pointer rounded-lg text-white hover:bg-sky-600 transition-colors"
+          className="mt-4 py-2 px-4 bg-primary cursor-pointer rounded-lg text-white hover:bg-sky-600 transition-colors"
           onClick={() => router.back()}
         >
           Go Back
@@ -585,7 +585,7 @@ const EditPage = () => {
         <header className="flex flex-row items-center justify-between py-3 px-4 bg-white border-b border-gray-100 sticky top-0 z-10">
           <h1 className="text-lg text-gray-900">Edit Profile</h1>
           <button
-            className={`py-2 px-4 bg-sky-500 rounded-full hover:bg-sky-600 transition-colors ${
+            className={`py-2 px-4 bg-primary rounded-full hover:bg-sky-600 transition-colors ${
               submitting ? "opacity-70 cursor-not-allowed" : ""
             }`}
             onClick={handleUpdateProfile}
@@ -675,7 +675,7 @@ const EditPage = () => {
               </div>
             )}
             <button
-              className="absolute right-8 cursor-pointer bottom-8 bg-sky-500 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
+              className="absolute right-8 cursor-pointer bottom-8 bg-primary w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
               onClick={() => openImagePicker("profile")}
             >
               <Camera className="text-white w-4 h-4" />
@@ -882,7 +882,7 @@ const EditPage = () => {
             <button
               type="button"
               className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                profileData.isPrivate ? "bg-sky-500" : "bg-gray-300"
+                profileData.isPrivate ? "bg-primary" : "bg-gray-300"
               }`}
               onClick={() => handleInputChange("isPrivate", !profileData.isPrivate)}
             >

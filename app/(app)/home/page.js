@@ -890,7 +890,7 @@ const HomePage = () => {
               key={feedType.key}
               onClick={() => canAccess && handleTabChange(feedType.key)}
               className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors
-    ${isActive ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+    ${isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
     ${!canAccess ? 'opacity-50 cursor-not-allowed' : ''}
     max-w-[100px] truncate overflow-hidden whitespace-nowrap`}
               disabled={!canAccess}
@@ -945,7 +945,7 @@ const HomePage = () => {
             <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
             <button
               onClick={() => router.push('/login')}
-              className="px-4 py-2 bg-blue-500 cursor-pointer text-white rounded-full hover:bg-blue-600"
+              className="px-4 py-2 bg-primary cursor-pointer text-white rounded-full hover:bg-sky-600"
             >
               Log In
             </button>
@@ -969,7 +969,7 @@ const HomePage = () => {
 
 
               <textarea
-                className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
                 placeholder="What's on your mind?"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
@@ -1049,7 +1049,7 @@ const HomePage = () => {
                 disabled={
                   (!text.trim() && images.length === 0) || isOverLimit
                 }
-                className="p-2 cursor-pointer flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="p-2 cursor-pointer flex items-center justify-center bg-primary text-white rounded-full hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 Post
               </button>
@@ -1058,7 +1058,7 @@ const HomePage = () => {
               <div className="w-full mt-2">
                 <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
                   <div
-                    className="h-2 bg-blue-500 transition-all duration-300"
+                    className="h-2 bg-primary transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -1096,7 +1096,7 @@ const HomePage = () => {
         {/* Initial loading indicator */}
         {currentTabData.loading && currentTabData.posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16">
-            <Loader2 className="w-10 h-10 text-sky-500 animate-spin mb-4" />
+            <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
             <p className="text-lg text-gray-600">Loading fresh posts for you...</p>
           </div>
         ) : currentTabData.posts.length > 0 ? (
@@ -1162,8 +1162,8 @@ const HomePage = () => {
         {currentTabData.loading && currentTabData.posts.length > 0 && (
           <div className="py-6 text-center">
             <div className="inline-flex items-center space-x-3 bg-blue-50 px-6 py-3 rounded-full">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-              <span className="text-blue-600 font-medium">Loading more posts...</span>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+              <span className="text-primary font-medium">Loading more posts...</span>
             </div>
           </div>
         )}
@@ -1186,7 +1186,7 @@ const HomePage = () => {
         <div className="fixed bottom-36 right-4 z-50">
           <button
             onClick={handleCreatePost}
-            className="w-14 h-14 bg-sky-500 rounded-full flex items-center justify-center shadow-lg hover:bg-sky-600 transition-colors"
+            className="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-sky-600 transition-colors"
           >
             <Plus size={24} className="text-white" />
           </button>

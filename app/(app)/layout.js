@@ -28,7 +28,7 @@ export default function AppLayout({ children }) {
           <LeftSidebar />
           
           {/* Main Content */}
-          <main className="flex-1 p-4 overflow-y-auto main-scroll-target custom-scrollbar">
+          <main className="flex-1 w-full p-4 overflow-y-auto main-scroll-target custom-scrollbar">
   {children}
 </main>
           

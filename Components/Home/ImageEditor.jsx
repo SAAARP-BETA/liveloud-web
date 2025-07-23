@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
@@ -299,7 +299,7 @@ const ImageEditor = ({
 
         <button
           onClick={saveImage}
-          className="px-4 py-2 text-blue-500 hover:text-blue-400 font-medium transition-colors"
+          className="px-4 py-2 text-primary hover:text-sky-600 font-medium transition-colors"
         >
           Done
         </button>
@@ -394,7 +394,7 @@ const ImageEditor = ({
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center mb-1 transition-colors ${
                   editOptions.flip.horizontal
-                    ? "bg-blue-600"
+                    ? "bg-primary"
                     : "bg-gray-700 group-hover:bg-gray-600"
                 }`}
               >
@@ -422,7 +422,7 @@ const ImageEditor = ({
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center mb-1 transition-colors ${
                   editOptions.flip.vertical
-                    ? "bg-blue-600"
+                    ? "bg-primary"
                     : "bg-gray-700 group-hover:bg-gray-600"
                 }`}
               >
@@ -488,7 +488,7 @@ const ImageEditor = ({
                 <div
                   className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
                     editOptions.filter === filter
-                      ? "border-blue-500"
+                      ? "border-primary"
                       : "border-gray-600"
                   }`}
                 >
@@ -509,13 +509,13 @@ const ImageEditor = ({
       {/* Loading overlay */}
       {uploading && (
         <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <p className="text-white mt-3 text-lg font-medium">
             Processing image...
           </p>
           <div className="w-64 h-2 bg-gray-700 rounded-full mt-3 overflow-hidden">
             <div
-              className="h-full bg-blue-500 rounded-full transition-all duration-300"
+              className="h-full bg-primary rounded-full transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>

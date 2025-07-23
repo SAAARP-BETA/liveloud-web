@@ -280,7 +280,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                 {item.user?.username || 'Anonymous'}
               </span>
               {item.user?.isVerified && (
-                <CheckCircle size={14} className="text-blue-500 ml-1" />
+                <CheckCircle size={14} className="text-primary ml-1" />
               )}
               <span className="text-xs text-gray-500 ml-2">
                 {formatTimestamp(item.createdAt)}
@@ -432,7 +432,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
           {loadingComments && (
             <div className="py-4 text-center">
-              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           )}
         </div>
@@ -441,7 +441,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
         {replyTo && (
           <div className="flex items-center justify-between bg-gray-100 px-4 py-2">
             <p className="text-xs text-gray-600">
-              Replying to <span className="font-medium text-blue-500">
+              Replying to <span className="font-medium text-primary">
                 @{replyTo.user?.username || 'user'}
               </span>
             </p>
@@ -458,7 +458,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
         <div className="p-4 border-t border-gray-100 bg-white rounded-2xl">
           <div className="flex items-center ">
             <textarea
-              className="flex-1 bg-gray-50 rounded-full px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              className="flex-1 bg-gray-50 rounded-full px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-gray-800"
               placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
@@ -472,7 +472,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
               }}
             />
             <button
-              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${commentText.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300'
+              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${commentText.trim() ? 'bg-primary hover:bg-sky-600' : 'bg-gray-300'
                 }`}
               onClick={handleSubmitComment}
               disabled={!commentText.trim() || loading}

@@ -131,7 +131,7 @@ export default function WalletPage() {
           />
 
           <div className="flex flex-row gap-3">
-            <button className="flex-1 rounded-xl bg-gradient-to-r from-[#3498db] to-[#2980b9] h-12 text-white font-semibold">
+            <button className="flex-1 rounded-xl bg-gradient-to-r from-sky-600 to-primary h-12 text-white font-semibold">
               Top Up
             </button>
             <button className="flex-1 bg-gray-100 rounded-xl h-12 text-gray-800 font-semibold">
@@ -185,7 +185,7 @@ export default function WalletPage() {
           />
 
           <div className="flex flex-row gap-3">
-            <button className="flex-1 rounded-xl bg-gradient-to-r from-[#3498db] to-[#2980b9] h-12 text-white font-semibold">
+            <button className="flex-1 rounded-xl bg-gradient-to-r from-sky-600 to-primary h-12 text-white font-semibold">
               Top Up
             </button>
             <button className="flex-1 bg-gray-100 rounded-xl h-12 text-gray-800 font-semibold">
@@ -198,7 +198,7 @@ export default function WalletPage() {
         <div className="mb-30">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-bold text-gray-800">Recent Transactions</h2>
-            <button className="text-sm text-blue-500 font-medium">View All</button>
+            <button className="text-sm text-primary font-medium">View All</button>
           </div>
 
           <TransactionItem type="Received" amount="50 XP" from="@friend" date="Today, 10:30 AM" />

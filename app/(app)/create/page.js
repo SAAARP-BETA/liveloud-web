@@ -499,7 +499,7 @@ const CreatePost = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -534,7 +534,7 @@ const CreatePost = () => {
             className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ease-in-out
               ${isSubmitDisabled
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed scale-100'
-                : 'bg-blue-500 text-white cursor-pointer hover:bg-blue-600 hover:scale-105 active:scale-95'
+                : 'bg-primary text-white cursor-pointer hover:bg-primary hover:scale-105 active:scale-95'
               }`}
           >
             Post
@@ -596,11 +596,11 @@ const CreatePost = () => {
         {/* Location Display */}
         {location && (
           <div className="px-4 mb-3">
-            <div className="flex items-center bg-blue-50 rounded-lg p-3">
-              <MapPin className="text-blue-500" size={20} />
-              <span className="text-blue-600 ml-2 font-medium">{locationName}</span>
+            <div className="flex items-center bg-primary rounded-lg p-3">
+              <MapPin className="text-primary" size={20} />
+              <span className="text-primary ml-2 font-medium">{locationName}</span>
               <button onClick={clearLocation} className="ml-auto">
-                <X className="text-blue-500" size={20} />
+                <X className="text-primary" size={20} />
               </button>
             </div>
           </div>
@@ -667,10 +667,10 @@ const CreatePost = () => {
               {images.length < MEDIA_LIMIT && (
                 <button
                   onClick={() => setShowMediaOptions(true)}
-                  className="w-28 h-28 rounded-lg border-2 border-dashed border-sky-300 flex flex-col items-center justify-center bg-sky-50 flex-shrink-0"
+                  className="w-28 h-28 rounded-lg border-2 border-dashed border-primary flex flex-col items-center justify-center bg-sky-50 flex-shrink-0"
                 >
-                  <Plus className="text-sky-500" size={24} />
-                  <span className="text-xs text-sky-500 mt-1 font-medium">Add More</span>
+                  <Plus className="text-primary" size={24} />
+                  <span className="text-xs text-primary mt-1 font-medium">Add More</span>
                 </button>
               )}
             </div>
@@ -684,10 +684,10 @@ const CreatePost = () => {
             <div className="flex flex-wrap gap-2">
               {tags.map((tag, index) => (
                 <div key={index} className="bg-blue-50 rounded-full px-3 py-1.5 flex items-center">
-                  <span className="text-blue-600 text-sm">#{tag}</span>
+                  <span className="text-primary text-sm">#{tag}</span>
                   <button
                     onClick={() => removeTag(tag)}
-                    className="ml-2 text-blue-500 hover:text-blue-700"
+                    className="ml-2 text-primary hover:text-blue-700 cursor-pointer"
                   >
                     <X size={14} />
                   </button>
@@ -744,7 +744,7 @@ const CreatePost = () => {
 
             <button onClick={() => setShowPeopleTagModal(true)} className="flex flex-col items-center">
               <div className="w-12 h-12 rounded-full bg-blue-50 cursor-pointer hover:bg-blue-100 flex items-center justify-center">
-                <Users className="text-blue-500" size={20} />
+                <Users className="text-primary" size={20} />
               </div>
               <span className="text-xs mt-1 text-gray-600">Tag People</span>
             </button>
@@ -782,7 +782,7 @@ const CreatePost = () => {
               </div>
               <div className="space-y-3">
                 <label className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-                  <Camera className="text-blue-500 mr-3" size={24} />
+                  <Camera className="text-primary mr-3" size={24} />
                   <span>Upload Photos</span>
                   <input
                     type="file"
