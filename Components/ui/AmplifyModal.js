@@ -107,11 +107,11 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
               </div>
 
               {post && (
-                <div className="flex items-center m-4 p-3 bg-gray-50 rounded-xl">
+                <div className="flex items-center m-4 p-3 bg-gray-50 rounded-xl overflow-hidden">
 <img src={getProfilePicture(post.profilePic)} alt="Profile" className="w-10 h-10 rounded-full" />
-                  <div className="ml-3 flex-1">
+                  <div className="ml-3 flex-1 min-w-0">
                     <p className="font-medium text-gray-800">{post.username}</p>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{post.content}</p>
+                    <p className="text-sm text-gray-600 mt-1 line-clamp-2 break-words overflow-hidden">{post.content}</p>
                   </div>
                 </div>
               )}
@@ -163,13 +163,13 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
             />
 
             {post && (
-              <div className="border border-gray-200 rounded-xl p-3 mb-3">
+              <div className="border border-gray-200 rounded-xl p-3 mb-3 overflow-hidden">
                 <div className="flex items-center mb-2">
 <img src={getProfilePicture(post.profilePic)} alt="Profile" className="w-8 h-8 rounded-full mr-2" />
                   <span className="font-medium text-sm text-gray-800">{post.username}</span>
                   <span className="text-xs text-gray-500 ml-2">{post.timestamp}</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">{post.content}</p>
+                <p className="text-sm text-gray-600 mb-2 break-words whitespace-pre-wrap">{post.content}</p>
                 
                 {/* Display post image if it exists */}
                 {post.image && (

@@ -274,7 +274,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
   className="w-8 h-8 rounded-full"
 />
 
-          <div className="ml-3 flex-1">
+          <div className="ml-3 flex-1 min-w-0">
             <div className="flex items-center">
               <span className="font-medium text-sm text-gray-800">
                 {item.user?.username || 'Anonymous'}
@@ -286,9 +286,9 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                 {formatTimestamp(item.createdAt)}
               </span>
             </div>
-            <p className="text-sm text-gray-800 mt-1">
-              {item.content}
-            </p>
+<p className="text-sm text-gray-800 mt-1 break-words overflow-wrap-anywhere">
+  {item.content}
+</p>
 
             {/* Comment actions */}
             <div className="flex items-center mt-2">
@@ -338,7 +338,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                             {formatTimestamp(reply.createdAt)}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-800">
+                        <p className="text-xs text-gray-800 break-words">
                           {reply.content}
                         </p>
                       </div>
@@ -391,7 +391,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
           {/* Original post preview */}
           {post && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl overflow-hidden">
              <img
   src={getProfilePicture(post.profilePic)}
   alt="Profile"
@@ -399,7 +399,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 />
 
 
-              <div className="ml-3 flex-1">
+              <div className="ml-3 flex-1 min-w-0">
                 <div className="flex items-center">
                   <span className="font-medium text-sm text-gray-800">
                     {post.username}
@@ -408,9 +408,10 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                     {post.timestamp}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                  {post.content}
-                </p>
+<p className="text-sm text-gray-600 mt-1 line-clamp-2 break-words whitespace-pre-wrap overflow-hidden text-ellipsis">
+  {post.content}
+</p>
+                 
               </div>
             </div>
           )}

@@ -23,7 +23,7 @@ const CommentCard = ({ comment }) => {
         return null;
     }
     return (
-        <div className="flex items-start space-x-3 p-4 border-t border-gray-100">
+        <div className="flex items-start space-x-3 p-4 border-t border-gray-100 overflow-hidden">
             <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
                 <Image
                     src={comment.user.profilePicture || '/path/to/default/pic.png'}
@@ -32,15 +32,14 @@ const CommentCard = ({ comment }) => {
                     className="object-cover"
                 />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2">
                     <span className="font-bold text-sm text-gray-900">{comment.user.username}</span>
                     <span className="text-xs text-gray-500">
                         {new Date(comment.createdAt).toLocaleDateString()}
                     </span>
                 </div>
-                <p className="text-gray-800 mt-1">{comment.content}</p>
-            </div>
+<p className="text-gray-800 mt-1 break-words overflow-wrap-anywhere whitespace-pre-wrap">{comment.content}</p>            </div>
         </div>
     );
 };

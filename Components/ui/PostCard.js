@@ -95,8 +95,7 @@ const PostCard = ({
     });
 
     return (
-      <p className="text-base text-gray-800 leading-6 mb-3 font-normal">
-        {contentWithTags}
+<p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words">        {contentWithTags}
       </p>
     );
   };
@@ -238,7 +237,7 @@ const handleNavigateToPost = () => {
 
             <div className="bg-gray-50 p-3 rounded-lg">
               {post.originalPost.content && (
-                <p className="font-normal text-sm text-gray-700">
+                <p className="font-normal text-sm text-gray-700 truncate">
                   {post.originalPost.content}
                 </p>
               )}
