@@ -23,6 +23,7 @@ import {
 } from "../../utils/postFunctions";
 import PostCard from "../../../Components/ui/PostCard";
 import { API_ENDPOINTS } from "../../utils/config";
+
 import {
   ArrowLeft,
   MoreHorizontal,
@@ -43,6 +44,7 @@ import {
   CheckCircle as Verified,
   Loader2,
 } from "lucide-react";
+import ReportModal from '@/Components/ui/ReportModal';
 
 const POST_LIMIT = 10;
 
@@ -112,7 +114,7 @@ const PointsDisplay = ({ points, loading }) => {
           <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
             <Trophy size={20} className="text-white" />
           </div>
-          <div className="ml-3">
+          <div className="ml-3 cursor-pointer">
             <h3 className="text-2xl font-bold text-gray-900">
               {points.totalPoints.toLocaleString() || 0}
             </h3>
@@ -124,7 +126,7 @@ const PointsDisplay = ({ points, loading }) => {
             <span className="text-sm font-medium text-gray-700">
               Level {currentLevel.level}
             </span>
-            <div className="ml-2 px-2 py-1 bg-sky-500 rounded-full">
+            <div className="ml-2 px-2 py-1 bg-primary rounded-full">
               <span className="text-xs text-white font-medium">
                 {currentLevel.title}
               </span>
@@ -148,15 +150,15 @@ const PointsDisplay = ({ points, loading }) => {
         </div>
         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full transition-all duration-300"
+            className="h-full bg-gradient-to-r from-sky-400 to-primary rounded-full transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
       </div>
       <div className="flex justify-between">
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
-            <Edit2 size={16} className="text-blue-600" />
+          <div className="w-12 cursor-pointer h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-1">
+            <Edit2 size={16} className="text-primary" />
           </div>
           <p className="text-base font-bold text-gray-900">
             {points.creatorPoints || 0}
@@ -164,7 +166,7 @@ const PointsDisplay = ({ points, loading }) => {
           <p className="text-xs text-gray-600">Creator</p>
         </div>
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="w-12 cursor-pointer h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
             <Heart size={20} className="text-green-600" />
           </div>
           <p className="text-base font-bold text-gray-900">
@@ -173,7 +175,7 @@ const PointsDisplay = ({ points, loading }) => {
           <p className="text-xs text-gray-600">Fan</p>
         </div>
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="cursor-pointer w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1">
             <Star size={20} className="text-yellow-600" />
           </div>
           <p className="text-base font-bold text-gray-900">
@@ -183,7 +185,7 @@ const PointsDisplay = ({ points, loading }) => {
         </div>
       </div>
       <button
-        className="mt-3 w-full py-2 bg-sky-500 hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
+        className="mt-3 w-full py-2 bg-primary cursor-pointer hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
         onClick={handleLeaderboardPress}
       >
         Leaderboard
@@ -211,20 +213,20 @@ const StreakDisplay = ({ consecutiveDays }) => {
 // Tab Bar Component (unchanged)
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   return (
-    <div className="flex  w-full bg-white border justify-center gap-25 border-gray-100 pt-2">
+    <div className="flex w-full border justify-center gap-25 border-gray-100 pt-2">
       {tabs.map((tab) => (
         <button
           key={tab.key}
-          className={`flex-1 flex items-center justify-center pb-2 ${activeTab === tab.key ? "border-b-2 border-sky-500" : ""
+          className={`flex-1 flex items-center justify-center pb-2 ${activeTab === tab.key ? "border-b-2 border-primary" : ""
             }`}
           onClick={() => onTabPress(tab.key)}
         >
-          <div className="flex items-center">
+          <div className="flex items-center cursor-pointer">
             {tab.key === "posts" && (
               <Grid
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500"
                 }
               />
             )}
@@ -232,12 +234,12 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               <ImageIcon
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500"
                 }
               />
             )}
             <span
-              className={`ml-1 text-sm font-medium ${activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+              className={`ml-1 text-sm font-medium ${activeTab === tab.key ? "text-primary" : "text-gray-500"
                 }`}
             >
               {tab.title}
@@ -311,7 +313,7 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
-    <div className="flex justify-center bg-gray-50">
+    <div className="flex w-xl justify-center bg-gray-50">
       <div className="w-full ">
         <div className=" top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
         <div className="pt-40">
@@ -390,6 +392,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [isCommentModalVisible, setCommentModalVisible] = useState(false);
   const [postToComment, setPostToComment] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  // Report modal
+    const [isReportModalVisible, setReportModalVisible] = useState(false);
+    const [postToReport, setPostToReport] = useState(null);
 
   const [postPage, setPostPage] = useState(1);
   const [hasMorePosts, setHasMorePosts] = useState(true);
@@ -412,7 +417,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         setPostToComment,
         setCommentModalVisible,
         setPostToAmplify,
-        setAmplifyModalVisible
+        setAmplifyModalVisible,
+    
       ),
     [currentUser, token]
   );
@@ -788,6 +794,12 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     );
   }
 
+  const handleReportSuccess = (reportedPostId) => {
+    const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== reportedPostId);
+    updateTabData(activeTab, { posts: updatedPosts });
+  };
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-xl max-sm:w-100 flex flex-col items-center relative">
@@ -829,7 +841,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     href="/profile/edit"
                     className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
                   >
-                    <Edit2 className="text-blue-500 text-sm" />
+                    <Edit2 className="text-primary text-sm" />
                   </Link>
                 )}
               </motion.div>
@@ -850,7 +862,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   {user.name || user.username || "User"}
                 </h2>
                 {user.isVerified && (
-                  <Verified className="ml-2 text-blue-500 text-xl" />
+                  <Verified className="ml-2 text-primary text-xl" />
                 )}
                 {userPoints && (
                   <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full text-xs text-white font-bold">
@@ -899,7 +911,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                       onClick={handleFollowToggle}
                       className={` cursor-pointer flex-1 py-2.5 rounded-full text-center font-medium ${isFollowing
                         ? "bg-gray-100 text-gray-900"
-                        : "bg-sky-500 text-white"
+                        : "bg-primary text-white"
                         }`}
                     >
                       {isFollowing ? "Following" : "Follow"}
@@ -951,7 +963,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="ml-2 text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+                        className="ml-2 text-sky-400 hover:underline transition-colors"
                       >
                         {user.website}
                       </Link>
@@ -988,7 +1000,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               <>
                 {isPostsLoading && posts.length === 0 ? (
                   <div className="flex cursor-pointer justify-center items-center py-12">
-                    <Loader2 className="w-8 h-8 text-sky-500 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
                   </div>
                 ) : posts.length > 0 ? (
                   posts.map((post, index) => (
@@ -1006,6 +1018,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
                         setSelectedPost={setSelectedPost}
                         setModalVisible={setModalVisible}
+                        handleDislikePost={postHandlers.handleDislikePost}
+                      handleUndislikePost={postHandlers.handleUndislikePost}
                       />
                     </div>
                   ))
@@ -1024,7 +1038,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     {isMyProfile && (
                       <Link
                         href="/create-post"
-                        className="mt-6 px-6 py-2.5 bg-sky-500 rounded-full text-white font-medium cursor-pointer"
+                        className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium cursor-pointer"
                       >
                         Create First Post
                       </Link>
@@ -1033,7 +1047,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 )}
                 {isPostsLoading && posts.length > 0 && (
                   <div className="flex justify-center items-center py-6">
-                    <Loader2 className="w-6 h-6 text-sky-500 animate-spin" />
+                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
                   </div>
                 )}
                 {!hasMorePosts && posts.length > 0 && (
@@ -1140,10 +1154,13 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 Save Post
               </span>
             </button>
-            <Link
-              href={`/home/post-detail?postId=${selectedPost?.id}`}
+            <button
+              // href={`/home/post-detail?postId=${selectedPost?.id}`}
               className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-              onClick={() => setModalVisible(false)}
+              onClick={() => {
+                setModalVisible(false);
+                postHandlers.handleCommentPost(selectedPost.id)
+              }}
             >
               <div className="w-8">
                 <MessageCircle className="text-gray-600 text-xl" />
@@ -1151,8 +1168,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               <span className="text-base text-gray-800 font-medium">
                 View Comments
               </span>
-            </Link>
-            <button
+            </button>
+            {/* <button
               className="flex items-center py-4 border-b border-gray-100 w-full text-left"
               onClick={() => {
                 setModalVisible(false);
@@ -1167,7 +1184,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               <span className="text-base text-red-500 font-medium">
                 Report Post
               </span>
-            </button>
+            </button> */}
             <button
               onClick={() => setModalVisible(false)}
               className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
@@ -1186,13 +1203,59 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             fetchUserProfile();
           }}
         />
-        <CommentModal
-          isVisible={isCommentModalVisible}
-          onClose={() => setCommentModalVisible(false)}
-          post={postToComment}
-          token={token}
-          onSuccess={handleCommentSuccess}
-        />
+        
+        
+              {/* Comment Modal */}
+              <CommentModal
+                visible={isCommentModalVisible}
+                onClose={() => setCommentModalVisible(false)}
+                title="Add Comment"
+                post={postToComment}
+                onSuccess={handleCommentSuccess}
+                token={token}
+              >
+        
+              </CommentModal>
+        
+              {/* Amplify Modal */}
+              <AmplifyModal
+                visible={isAmplifyModalVisible}
+                onClose={() => setAmplifyModalVisible(false)}
+                post={postToAmplify
+                }
+                token={token}
+        
+                title="Amplify Post"
+                onSuccess={(postId) => {
+                  // Update amplify count in current posts
+                  const currentPosts = getCurrentTabData().posts;
+                  const updatedPosts = currentPosts.map(post => {
+                    if (post.id === postId) {
+                      return {
+                        ...post,
+                        amplifyCount: post.amplifyCount + 1,
+                        hasAmplified: true
+                      };
+                    }
+                    return post;
+                  });
+                  updateTabData(activeTab, { posts: updatedPosts });
+                }}
+              >
+        
+              </AmplifyModal>
+        
+              {/* Report Modal */}
+              <ReportModal
+                visible={isReportModalVisible}
+                onClose={() => setReportModalVisible(false)}
+                title="Report Post"
+                post={postToReport}
+                onSuccess={handleReportSuccess}
+                token={token}
+              >
+        
+              </ReportModal>
       </div>
     </div>
   );

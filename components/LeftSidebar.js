@@ -10,10 +10,14 @@ import {
   Wallet,
   User,
   LogOut,
-  AlignEndHorizontal
+  AlignEndHorizontal,
+  MoreHorizontal,
+  Crown,
+  Users
 } from "lucide-react"
 import { useAuth } from "../app/context/AuthContext"
 import { API_ENDPOINTS } from "../app/utils/config"
+import { useState } from "react"
 
 const tabs = [
   { name: "Home", href: "/home", icon: Home },
@@ -22,12 +26,15 @@ const tabs = [
   { name: "Wallet", href: "/wallet", icon: Wallet },
   { name: "Profile", href: "/profile", icon: User },
   { name: "Leaderboard", href: "/leaderboard", icon: AlignEndHorizontal },
+  { name: "Premium", href: "/premium", icon: Crown },
+  { name: "Referral", href: "/referral", icon: Users },
 ]
 
 export default function LeftSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { token, logout, isAuthenticated } = useAuth()
+  const { token, logout, isAuthenticated, user } = useAuth()
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -147,15 +154,15 @@ export default function LeftSidebar() {
     )
   }
 
-  const LogoutButton = () => {
+  const ProfileSection = () => {
     if (!isAuthenticated) return null
 
     return (
       <>
-        {/* Mobile Logout */}
+        {/* Mobile Profile */}
         <div className="sm:hidden">
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutMenu(!showLogoutMenu)}
             className="relative flex flex-col items-center justify-center py-2 px-3 min-w-0 flex-1"
           >
             <motion.div
@@ -163,10 +170,18 @@ export default function LeftSidebar() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <LogOut className="w-6 h-6 text-red-500" />
+              {user?.profilePicture ? (
+                <img
+                  src={user.profilePicture}
+                  alt="Profile"
+                  className="w-6 h-6 rounded-full border border-gray-300"
+                />
+              ) : (
+                <User className="w-6 h-6 text-gray-500" />
+              )}
             </motion.div>
             <motion.span
-              className="text-[11px] font-medium relative z-10 text-red-500 text-center"
+              className="text-[11px] font-medium relative z-10 text-gray-600 text-center"
               style={{
                 maxWidth: "48px",
                 overflow: "hidden",
@@ -176,37 +191,83 @@ export default function LeftSidebar() {
               }}
               transition={{ duration: 0.2 }}
             >
-              Logout
+              Me
             </motion.span>
           </button>
         </div>
 
-        {/* Desktop Logout */}
-        <div className="hidden sm:block">
+        {/* Desktop Profile */}
+        <div className="hidden sm:block relative">
           <button
-            onClick={handleLogout}
-            className="group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 text-red-600 hover:bg-red-50 w-full"
+            onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+            className="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 w-full"
           >
             <motion.div
               className="flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {user?.profilePicture ? (
+                <img
+                  src={user.profilePicture}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full border-2 border-gray-200"
+                />
+              ) : (
+                <img
+                  src={user.coverPhoto}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full border-2 border-gray-200"
+                />
+              )}
+            </motion.div>
+            
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {user?.name || user?.username || 'User'}
+              </p>
+              <p className="text-sm text-gray-500 truncate">
+                @{user?.username || 'username'}
+              </p>
+            </div>
+
+            <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <LogOut className="w-6 h-6 text-red-500 group-hover:text-red-600" />
+              <MoreHorizontal className="w-5 h-5 cursor-pointer text-gray-400 group-hover:text-gray-600" />
             </motion.div>
-            <span
-              className="text-base"
-              style={{
-                maxWidth: "160px",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
-                display: "inline-block"
-              }}
-            >
-              Logout
-            </span>
           </button>
+
+          {/* Logout Dropdown */}
+          <AnimatePresence>
+            {showLogoutMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute cursor-pointer bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
+              >
+                <button
+                  onClick={handleLogout}
+                  className="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span className="text-sm font-medium">Logout</span>
+                  {/* <span className="text-sm font-medium">Logout @{user?.username || 'username'}</span> */}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Backdrop to close menu */}
+          {showLogoutMenu && (
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setShowLogoutMenu(false)}
+            />
+          )}
         </div>
       </>
     )
@@ -252,7 +313,7 @@ export default function LeftSidebar() {
                   damping: 25,
                 }}
               >
-                <LogoutButton />
+                <ProfileSection />
               </motion.div>
             )}
           </div>
@@ -261,7 +322,8 @@ export default function LeftSidebar() {
 
       {/* Desktop Sidebar */}
       <motion.aside
-className="hidden sm:flex h-screen md:w-80 max-w-80 px-6 py-8 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl flex-col"        initial={{ x: -100, opacity: 0 }}
+        className="hidden sm:flex h-screen md:w-80 max-w-80 px-6 py-8 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl flex-col"
+        initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
@@ -280,12 +342,12 @@ className="hidden sm:flex h-screen md:w-80 max-w-80 px-6 py-8 bg-white/80 backdr
 
         {isAuthenticated && (
           <motion.div
-            className="mt-auto pt-4 border-t border-gray-200 truncate"
+            className="mt-auto pt-4 border-t border-gray-200"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: (tabs.length + 1) * 0.1 }}
           >
-            <LogoutButton />
+            <ProfileSection />
           </motion.div>
         )}
       </motion.aside>

@@ -80,13 +80,13 @@ const PostCard = ({
     const contentWithTags = post.content.split(/(\s+)/).map((word, i) => {
       if (word.startsWith("#")) {
         return (
-          <span key={i} className="font-medium text-sky-500">
+          <span key={i} className="font-medium text-primary">
             {word}
           </span>
         );
       } else if (word.startsWith("@")) {
         return (
-          <span key={i} className="font-medium text-sky-600">
+          <span key={i} className="font-medium text-primary">
             {word}
           </span>
         );
@@ -95,8 +95,7 @@ const PostCard = ({
     });
 
     return (
-      <p className="text-base text-gray-800 leading-6 mb-3 font-normal">
-        {contentWithTags}
+<p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words">        {contentWithTags}
       </p>
     );
   };
@@ -128,7 +127,9 @@ const PostCard = ({
       router.push(`/UserProfile/${post.username}`); // someone else's profile
     }
   };
-
+const handleNavigateToPost = () => {
+  router.push(`/post/${post.id}`);
+};
   const handleImageClick = () => {
     router.push({
       pathname: "/media-viewer",
@@ -173,7 +174,7 @@ const PostCard = ({
                 {post.username}
               </span>
               {post.isVerified && (
-                <CheckCircle size={16} className="text-blue-500 ml-1" />
+                <CheckCircle size={16} className="text-primary ml-1" />
               )}
             </div>
             <span className="font-normal text-xs text-gray-500">
@@ -194,7 +195,10 @@ const PostCard = ({
       </div>
 
       {/* Post content */}
-      <div className="px-4 pb-3">
+      <div 
+            className="px-4 pb-3 cursor-pointer"
+            onClick={() => router.push(`/post/${post.id}`)}
+        >
         {renderContent()}
 
         {/* Tags */}
@@ -219,7 +223,7 @@ const PostCard = ({
             <div className="flex items-center mb-2">
               <span className="font-medium text-xs text-gray-500">
                 Amplified from
-                <span className="text-sky-500">
+                <span className="text-primary">
                   @{post.originalPost.user?.username || "user"}
                 </span>
               </span>
@@ -233,18 +237,19 @@ const PostCard = ({
 
             <div className="bg-gray-50 p-3 rounded-lg">
               {post.originalPost.content && (
-                <p className="font-normal text-sm text-gray-700">
+                <p className="font-normal text-sm text-gray-700 truncate">
                   {post.originalPost.content}
                 </p>
               )}
 
               {post.originalPost.media && post.originalPost.media.length > 0 && (
-                <div className="w-full h-48 relative rounded-lg mt-2 overflow-hidden">
+                <div className="w-full relative rounded-lg mt-2 overflow-hidden">
                   <Image
                     src={post.originalPost.media[0]}
                     alt="Original post media"
-                    fill
-                    className="object-cover cursor-pointer"
+                    width={400}
+                    height={300}
+                    className="w-full h-auto rounded-lg"
                     onLoad={() =>
                       console.log("Amplified image loaded:", post.originalPost.media[0])
                     }
@@ -301,7 +306,7 @@ const PostCard = ({
                       }
                     }}
                     className={`w-2 h-2 rounded-full mx-1 transition-colors ${
-                      index === currentImageIndex ? "bg-sky-500" : "bg-gray-300"
+                      index === currentImageIndex ? "bg-primary" : "bg-gray-300"
                     }`}
                   />
                 ))}
@@ -346,10 +351,10 @@ const PostCard = ({
         >
           <ThumbsUp
             size={18}
-            className={isLiked ? "text-blue-500 fill-current" : " text-gray-600"}
+            className={isLiked ? "text-primary fill-current" : " text-gray-600"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${isLiked ? " text-blue-500" : " text-gray-600"}`}
+            className={`ml-2 text-sm font-medium ${isLiked ? " text-primary" : " text-gray-600"}`}
           >
             Like
           </span>
@@ -405,12 +410,12 @@ const PostCard = ({
           <Bookmark
             size={18}
             className={
-              isBookmarked ? "text-sky-500 fill-current" : "text-gray-600"
+              isBookmarked ? "text-primary fill-current" : "text-gray-600"
             }
           />
           <span
             className={`ml-2 text-sm font-medium ${
-              isBookmarked ? "text-sky-500" : "text-gray-600"
+              isBookmarked ? "text-primary" : "text-gray-600"
             }`}
           >
             Save

@@ -32,7 +32,7 @@ const CustomModal = ({
     <div className="flex flex-col items-center justify-center p-6 text-center">
       <p className="text-gray-500 text-base mb-4">No options available</p>
       <button
-        className="text-sky-500 font-semibold py-2 px-4"
+        className="text-primary font-semibold py-2 px-4"
         onClick={onClose}
       >
         Close

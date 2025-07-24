@@ -58,3 +58,7 @@ body {
 .main-scroll-target::-webkit-scrollbar {
   display: none; /* WebKit */
 }
+
+@theme {
+  --color-primary: #00a6f4;
+}

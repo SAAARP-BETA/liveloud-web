@@ -63,7 +63,7 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen bg-white px-8 py-10">
-      <h1 className="text-sky-500 text-2xl font-bold text-center">Create Your Account</h1>
+      <h1 className="text-primary text-2xl font-bold text-center">Create Your Account</h1>
       <p className="text-gray-500 text-center mb-6">Join the most Unfiltered Community</p>
 
       <label className="text-base font-semibold">Full Name</label>
@@ -107,7 +107,7 @@ export default function Signup() {
 
       <div className="flex items-center mt-4">
         <button
-          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${isChecked ? 'border-sky-500 bg-sky-500' : 'border-gray-300'
+          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${isChecked ? 'border-primary bg-primary' : 'border-gray-300'
             }`}
           onClick={() => setIsChecked(!isChecked)}
           disabled={isLoading}
@@ -120,7 +120,7 @@ export default function Signup() {
       </div>
 
       <button
-        className={`bg-sky-500 rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
+        className={`bg-primary rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
           }`}
         onClick={handleSignup}
         disabled={isLoading}
@@ -168,7 +168,7 @@ export default function Signup() {
         Already have an account?{' '}
         <button
           onClick={() => router.push('/auth/login')}
-          className="text-sky-500 font-semibold"
+          className="text-primary font-semibold"
           disabled={isLoading}
         >
           Login

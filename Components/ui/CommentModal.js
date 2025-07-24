@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, MessageCircle, Send, CheckCircle } from 'lucide-react';
 import { API_ENDPOINTS } from '../../app/utils/config';
+import { getProfilePicture } from "@/app/utils/fallbackImage";
+
 // const API_URL = "http://192.168.1.13:3002/api/";
 
 
@@ -267,25 +269,26 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
       <div className="p-4 border-b border-gray-100">
         <div className="flex">
           <img
-            src={item.user?.profilePicture || 'https://via.placeholder.com/150'}
-            alt="Profile"
-            className="w-8 h-8 rounded-full"
-          />
-          <div className="ml-3 flex-1">
+  src={getProfilePicture(item.user?.profilePicture)}
+  alt="Profile"
+  className="w-8 h-8 rounded-full"
+/>
+
+          <div className="ml-3 flex-1 min-w-0">
             <div className="flex items-center">
               <span className="font-medium text-sm text-gray-800">
                 {item.user?.username || 'Anonymous'}
               </span>
               {item.user?.isVerified && (
-                <CheckCircle size={14} className="text-blue-500 ml-1" />
+                <CheckCircle size={14} className="text-primary ml-1" />
               )}
               <span className="text-xs text-gray-500 ml-2">
                 {formatTimestamp(item.createdAt)}
               </span>
             </div>
-            <p className="text-sm text-gray-800 mt-1">
-              {item.content}
-            </p>
+<p className="text-sm text-gray-800 mt-1 break-words overflow-wrap-anywhere">
+  {item.content}
+</p>
 
             {/* Comment actions */}
             <div className="flex items-center mt-2">
@@ -319,11 +322,13 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                 {item.replies.map((reply, index) => (
                   <div key={index} className={index < item.replies.length - 1 ? "mb-2" : ""}>
                     <div className="flex">
-                      <img
-                        src={reply.user?.profilePicture || 'https://via.placeholder.com/150'}
-                        alt="Profile"
-                        className="w-6 h-6 rounded-full"
-                      />
+                <img
+  src={getProfilePicture(reply.user?.profilePicture)}
+  alt="Profile"
+  className="w-6 h-6 rounded-full"
+/>
+
+
                       <div className="ml-2 flex-1">
                         <div className="flex items-center">
                           <span className="font-medium text-xs text-gray-800">
@@ -333,7 +338,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                             {formatTimestamp(reply.createdAt)}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-800">
+                        <p className="text-xs text-gray-800 break-words">
                           {reply.content}
                         </p>
                       </div>
@@ -386,13 +391,15 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
           {/* Original post preview */}
           {post && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <img
-                src={post.profilePic}
-                alt="Profile"
-                className="w-8 h-8 rounded-full"
-              />
-              <div className="ml-3 flex-1">
+            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl overflow-hidden">
+             <img
+  src={getProfilePicture(post.profilePic)}
+  alt="Profile"
+  className="w-8 h-8 rounded-full"
+/>
+
+
+              <div className="ml-3 flex-1 min-w-0">
                 <div className="flex items-center">
                   <span className="font-medium text-sm text-gray-800">
                     {post.username}
@@ -401,9 +408,10 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                     {post.timestamp}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                  {post.content}
-                </p>
+<p className="text-sm text-gray-600 mt-1 line-clamp-2 break-words whitespace-pre-wrap overflow-hidden text-ellipsis">
+  {post.content}
+</p>
+                 
               </div>
             </div>
           )}
@@ -425,7 +433,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
           {loadingComments && (
             <div className="py-4 text-center">
-              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           )}
         </div>
@@ -434,7 +442,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
         {replyTo && (
           <div className="flex items-center justify-between bg-gray-100 px-4 py-2">
             <p className="text-xs text-gray-600">
-              Replying to <span className="font-medium text-blue-500">
+              Replying to <span className="font-medium text-primary">
                 @{replyTo.user?.username || 'user'}
               </span>
             </p>
@@ -451,7 +459,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
         <div className="p-4 border-t border-gray-100 bg-white rounded-2xl">
           <div className="flex items-center ">
             <textarea
-              className="flex-1 bg-gray-50 rounded-full px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              className="flex-1 bg-gray-50 rounded-full px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-gray-800"
               placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
@@ -465,7 +473,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
               }}
             />
             <button
-              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${commentText.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300'
+              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${commentText.trim() ? 'bg-primary hover:bg-sky-600' : 'bg-gray-300'
                 }`}
               onClick={handleSubmitComment}
               disabled={!commentText.trim() || loading}

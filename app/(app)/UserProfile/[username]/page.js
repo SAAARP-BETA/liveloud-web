@@ -16,12 +16,16 @@ import { useAuth } from "../../../context/AuthContext";
 import CustomModal from "../../../../Components/ui/Modal";
 import AmplifyModal from "../../../../Components/ui/AmplifyModal";
 import CommentModal from "../../../../Components/ui/CommentModal";
+import toast from 'react-hot-toast';
+
 import {
     createPostHandlers,
     formatPostFromApi,
 } from "../../../utils/postFunctions";
 import PostCard from "../../../../Components/ui/PostCard";
 import { API_ENDPOINTS } from "../../../utils/config";
+import { getProfilePicture } from "@/app/utils/fallbackImage";
+
 import {
     ArrowLeft,
     MoreHorizontal,
@@ -39,6 +43,8 @@ import {
     Star,
     Heart,
     Edit2,
+    UserPlus,
+    Ban,
     CheckCircle as Verified,
 } from "lucide-react";
 
@@ -102,7 +108,7 @@ const PointsDisplay = ({ points, loading }) => {
     };
 
     return (
-        <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl border border-sky-100">
+    <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl border border-sky-100">
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center">
                     <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -120,7 +126,7 @@ const PointsDisplay = ({ points, loading }) => {
                         <span className="text-sm font-medium text-gray-700">
                             Level {currentLevel.level}
                         </span>
-                        <div className="ml-2 px-2 py-1 bg-sky-500 rounded-full">
+                        <div className="ml-2 px-2 py-1 bg-primary rounded-full">
                             <span className="text-xs text-white font-medium">
                                 {currentLevel.title}
                             </span>
@@ -144,15 +150,15 @@ const PointsDisplay = ({ points, loading }) => {
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                        className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full transition-all duration-300"
+                        className="h-full bg-gradient-to-r from-sky-400 to-primary rounded-full transition-all duration-300"
                         style={{ width: `${progressPercentage}%` }}
                     />
                 </div>
             </div>
             <div className="flex justify-between">
                 <div className="flex-1 text-center">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
-                        <Edit2 size={16} className="text-blue-600" />
+                    <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <Edit2 size={16} className="text-primary" />
                     </div>
                     <p className="text-base font-bold text-gray-900">
                         {points.creatorPoints || 0}
@@ -179,7 +185,7 @@ const PointsDisplay = ({ points, loading }) => {
                 </div>
             </div>
             <button
-                className="mt-3 w-full py-2 bg-sky-500 hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
+                className="mt-3 w-full py-2 bg-primary hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
                 onClick={handleLeaderboardPress}
             >
                 Leaderboard
@@ -207,20 +213,20 @@ const StreakDisplay = ({ consecutiveDays }) => {
 // Tab Bar Component (unchanged)
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
     return (
-        <div className="flex  w-full bg-white border justify-center gap-25 border-gray-100 pt-2">
+        <div className="flex  w-full  border justify-center gap-25 border-gray-100 pt-2">
             {tabs.map((tab) => (
                 <button
                     key={tab.key}
-                    className={`flex-1 flex items-center justify-center pb-2 ${activeTab === tab.key ? "border-b-2 border-sky-500" : ""
+                    className={`flex-1 flex items-center justify-center pb-2 ${activeTab === tab.key ? "border-b-2 border-primary" : ""
                         }`}
                     onClick={() => onTabPress(tab.key)}
                 >
-                    <div className="flex items-center">
+                    <div className="flex items-center cursor-pointer">
                         {tab.key === "posts" && (
                             <Grid
                                 size={18}
                                 className={
-                                    activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+                                    activeTab === tab.key ? "text-primary" : "text-gray-500"
                                 }
                             />
                         )}
@@ -228,12 +234,12 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
                             <ImageIcon
                                 size={18}
                                 className={
-                                    activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+                                    activeTab === tab.key ? "text-primary" : "text-gray-500"
                                 }
                             />
                         )}
                         <span
-                            className={`ml-1 text-sm font-medium ${activeTab === tab.key ? "text-sky-500" : "text-gray-500"
+                            className={`ml-1 text-sm font-medium ${activeTab === tab.key ? "text-primary" : "text-gray-500"
                                 }`}
                         >
                             {tab.title}
@@ -307,9 +313,9 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
     return (
-        <div className="min-h-screen flex justify-center bg-gray-50">
-            <div className="w-full max-w-2xl">
-                <div className="fixed top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
+        <div className="flex w-xl justify-center bg-gray-50">
+            <div className="w-full">
+                <div className="top-0 left-0 right-0 max-w-2xl mx-auto h-40 bg-gray-200 animate-pulse" />
                 <div className="pt-40">
                     <div className="flex justify-center -mt-12">
                         <div className="w-24 h-24 rounded-full bg-gray-300 border-4 border-white animate-pulse" />
@@ -387,6 +393,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [hasFetched, setHasFetched] = useState(false);
     const [error, setError] = useState();
+const [followLoading, setFollowLoading] = useState(false);
 
     // Loading guards
     const [isProfileLoading, setIsProfileLoading] = useState(false);
@@ -410,36 +417,114 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         [currentUser, token]
     );
 
-    // More options
-    const moreOptions = useMemo(
-        () => [
-            {
-                label: "Share Profile",
-                icon: <Share2 className="text-gray-600 text-xl" />,
-                onPress: () =>
-                    toast.error(
-                        `Coming soon! Sharing profile for ${user?.username || "this user"}.`
-                    ),
+const handleBlockUser = async (userId) => {
+    if (!isAuthenticated) {
+        toast.error('Please login to block users');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to block this user? You will no longer see their content and they won\'t be able to interact with you.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/users/block/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to block user');
+        }
+
+        toast.success('User has been blocked');
+        setIsMoreModalVisible(false); // Close the modal
+        router.push('/'); // Redirect away from blocked user's profile
+    } catch (error) {
+        console.error('Error blocking user:', error);
+        toast.error(`Failed to block user: ${error.message}`);
+    }
+};
+
+const handleReportUser = async () => {
+    if (!isAuthenticated) {
+        toast.error('Please login to report users');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to report this user?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/reports/user`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
-            {
-                label: isMyProfile ? "Edit Profile" : "Report User",
-                icon: isMyProfile ? (
-                    <Edit2 className="text-gray-600 text-xl" />
-                ) : (
-                    <Flag className="text-red-500 text-xl" />
-                ),
-                onPress: isMyProfile
-                    ? () => router.push("/profile/edit")
-                    : () => {
-                        if (confirm("Are you sure you want to report this user?")) {
-                            toast.success("Thank you for your report.");
-                        }
-                    },
-                danger: !isMyProfile,
+            body: JSON.stringify({
+                reportedUserId: user?._id,
+                reason: 'inappropriate_behavior',
+                description: 'User reported from profile'
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to report user');
+        }
+
+        toast.success('Thank you for your report. We will review it shortly.');
+        setIsMoreModalVisible(false); // Close the modal
+    } catch (error) {
+        console.error('Error reporting user:', error);
+        toast.error(`Failed to report user: ${error.message}`);
+    }
+};
+
+// Enhanced moreOptions with block/report
+const moreOptions = useMemo(() => {
+    const options = [
+        {
+            label: "Share Profile",
+            icon: Share2,
+            onPress: () => {
+                toast.error(`Coming soon! Sharing profile for ${user?.username || "this user"}.`);
+                setIsMoreModalVisible(false);
             },
-        ],
-        [isMyProfile, user?.username]
-    );
+        },
+    ];
+
+    // Add block option for other users
+    if (!isMyProfile && isAuthenticated) {
+        options.push({
+            label: "Block User",
+            icon: Ban,
+            onPress: () => handleBlockUser(user?._id),
+            danger: true,
+        });
+    }
+
+    // Edit Profile for own profile, Report for others
+    options.push({
+        label: isMyProfile ? "Edit Profile" : "Report User",
+        icon: isMyProfile ? Edit2 : Flag,
+        onPress: isMyProfile
+            ? () => {
+                router.push("/profile/edit");
+                setIsMoreModalVisible(false);
+              }
+            : handleReportUser,
+        danger: !isMyProfile,
+    });
+
+    return options;
+}, [isMyProfile, user?.username, user?._id, isAuthenticated]);
 
     // Scroll handler with debouncing
     const handleScroll = useCallback(
@@ -796,40 +881,59 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         fetchUserPosts
     ]);
 
-    const handleFollowToggle = async () => {
-        if (!isAuthenticated) {
-            toast.error("Please login to follow users");
-            return;
-        }
+   const handleFollowToggle = async () => {
+    if (!isAuthenticated) {
+        toast.error("Please login to follow users");
+        return;
+    }
 
-        const wasFollowing = isFollowing;
+    if (followLoading) return; // Prevent multiple clicks
 
-        try {
-            setIsFollowing(!wasFollowing);
-            setFollowersCount((prev) => (wasFollowing ? prev - 1 : prev + 1));
+    const wasFollowing = isFollowing;
+    setFollowLoading(true);
 
-            const endpoint = wasFollowing ? "unfollow" : "follow";
-            const response = await fetch(
-                `${API_ENDPOINTS.SOCIAL}/followers/${user._id}/${endpoint}`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+    // Optimistic update
+    setIsFollowing(!wasFollowing);
+    setFollowersCount((prev) => (wasFollowing ? prev - 1 : prev + 1));
 
-            if (!response.ok) {
-                throw new Error("Failed to update follow status");
+    try {
+        const endpoint = wasFollowing ? "unfollow" : "follow";
+        const response = await fetch(
+            `${API_ENDPOINTS.SOCIAL}/followers/${user._id}/${endpoint}`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
             }
-        } catch (error) {
-            setIsFollowing(wasFollowing);
-            setFollowersCount((prev) => (wasFollowing ? prev + 1 : prev - 1));
-            console.error("Error updating follow status:", error);
-            toast.error("Failed to update follow status. Please try again.");
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed to ${endpoint} user`);
         }
-    };
+
+        const result = await response.json();
+        toast.success(wasFollowing ? "User unfollowed successfully" : "User followed successfully");
+        
+        // Update counts from server response if available
+        if (result.followersCount !== undefined) {
+            setFollowersCount(result.followersCount);
+        }
+        
+    } catch (error) {
+        // Revert optimistic update on error
+        setIsFollowing(wasFollowing);
+        setFollowersCount((prev) => (wasFollowing ? prev + 1 : prev - 1));
+        
+        console.error("Error updating follow status:", error);
+        toast.error(`Failed to ${wasFollowing ? 'unfollow' : 'follow'} user: ${error.message}`);
+    } finally {
+        setFollowLoading(false);
+    }
+};
+
 
     const handleShareProfile = async () => {
         try {
@@ -902,7 +1006,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     if (!user && !isLoading) {
         return (
             <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
-                <div className="w-full max-w-md px-6">
+                <div className="w-xl max-sm:w-100 px-6">
                     <div className="text-center">
                         <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="text-gray-400 text-3xl">😔</span>
@@ -916,7 +1020,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                         <div className="space-y-3">
                             <button
                                 onClick={() => router.back()}
-                                className="w-full px-4 py-2.5 bg-sky-500 text-white rounded-full font-medium hover:bg-sky-600 transition-colors"
+                                className="w-full px-4 py-2.5 bg-primary text-white rounded-full font-medium hover:bg-sky-600 transition-colors"
                             >
                                 Go Back
                             </button>
@@ -935,7 +1039,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white">
-            <div className="w-full max-w-2xl flex flex-col items-center relative">
+            <div className="w-xl flex flex-col items-center relative overflow-hidden">
                 {/* Scrollable Content */}
                 <div
                     className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
@@ -977,7 +1081,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                                         href="/profile/edit"
                                         className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center"
                                     >
-                                        <Edit2 className="text-blue-500 text-sm" />
+                                        <Edit2 className="text-primary text-sm" />
                                     </Link>
                                 )}
                             </motion.div>
@@ -1004,7 +1108,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                                     {user.name || user.username || "User"}
                                 </h2>
                                 {user.isVerified && (
-                                    <Verified className="ml-2 text-blue-500 text-xl" />
+                                    <Verified className="ml-2 text-primary text-xl" />
                                 )}
                                 {userPoints && (
                                     <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full text-xs text-white font-bold">
@@ -1050,14 +1154,25 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                                 ) : (
                                     <>
                                         <button
-                                            onClick={handleFollowToggle}
-                                            className={`flex-1 py-2.5 rounded-full text-center font-medium ${isFollowing
-                                                ? "bg-gray-100 text-gray-900"
-                                                : "bg-sky-500 text-white"
-                                                }`}
-                                        >
-                                            {isFollowing ? "Following" : "Follow"}
-                                        </button>
+    onClick={handleFollowToggle}
+    disabled={followLoading}
+    className={`flex-1 py-2.5 rounded-full text-center font-medium transition-colors disabled:opacity-50 ${
+        isFollowing
+            ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
+            : "bg-primary text-white hover:bg-sky-600"
+    }`}
+>
+    {followLoading ? (
+        <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+            <span className="ml-2">
+                {isFollowing ? "Unfollowing..." : "Following..."}
+            </span>
+        </div>
+    ) : (
+        isFollowing ? "Following" : "Follow"
+    )}
+</button>
                                         {user._id && (
                                             <Link
                                                 href={`/messages/chat/${user._id}`}
@@ -1114,18 +1229,18 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                         </div>
                     </motion.div>
 
-                    <TabBarAnimated
+                    <TabBarAnimated 
                         tabs={[
                             { key: "posts", title: "Posts", icon: "grid" },
                             { key: "media", title: "Media", icon: "image" },
                         ]}
                         activeTab={activeTab}
                         onTabPress={setActiveTab}
-                        className="border-2 w-full flex  justify-between"
+                        className="border-2 w-full flex justify-between"
                     />
 
                     <motion.div
-                        className="px-4 pt-2 w-full "
+                        className="pt-2 w-full "
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
@@ -1134,21 +1249,27 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                             <>
                                 {posts.length > 0 ? (
                                     posts.map((post, index) => (
-                                        <PostCard
-                                            key={post.id || index}
-                                            post={post}
-                                            handleLikePost={postHandlers.handleLikePost}
-                                            handleUnlikePost={postHandlers.handleUnlikePost}
-                                            handleCommentPost={postHandlers.handleCommentPost}
-                                            handleAmplifyPost={postHandlers.handleAmplifyPost}
-                                            handleBookmarkPost={postHandlers.handleBookmarkPost}
-                                            handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                                            setSelectedPost={setSelectedPost}
-                                            setModalVisible={setModalVisible}
-                                        />
+                                         <PostCard
+                        post={post}
+                        handleLikePost={postHandlers.handleLikePost}
+                        handleUnlikePost={postHandlers.handleUnlikePost}
+                        handleCommentPost={postHandlers.handleCommentPost}
+                        handleAmplifyPost={postHandlers.handleAmplifyPost}
+                        handleBookmarkPost={postHandlers.handleBookmarkPost}
+                        handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                        setSelectedPost={setSelectedPost}
+                        setModalVisible={setModalVisible}
+                        handleDislikePost={postHandlers.handleDislikePost}
+                      handleUndislikePost={postHandlers.handleUndislikePost}
+                      />
                                     ))
                                 ) : (
-                                    <div className="flex flex-col border-2 items-center justify-center py-12">
+                                        // {isPostsLoading && posts.length === 0 ? (
+                                                        //   <div className="flex cursor-pointer justify-center items-center py-12">
+                                                        //     <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                                        //   </div>
+                                                        // )
+                                    <div className="flex flex-col border-2 w-xl items-center justify-center py-12">
                                         <ImageIcon className="text-gray-300 text-5xl" />
                                         <h3 className="mt-4 text-lg font-medium text-gray-700">
                                             No posts yet
@@ -1162,7 +1283,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                                         {isMyProfile && (
                                             <Link
                                                 href="/create-post"
-                                                className="mt-6 px-6 py-2.5 bg-sky-500 rounded-full text-white font-medium"
+                                                className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium"
                                             >
                                                 Create First Post
                                             </Link>
@@ -1203,26 +1324,28 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                 >
                     <div className="bg-white p-4">
                         {moreOptions.map((option, index) => (
-                            <button
-                                key={index}
-                                className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-                                onClick={() => {
-                                    setIsMoreModalVisible(false);
-                                    setTimeout(() => option.onPress(), 300);
-                                }}
-                            >
-                                <div className="w-8">{option.icon}</div>
-                                <span
-                                    className={`text-base ${option.danger ? "text-red-500" : "text-gray-800"
-                                        } font-medium`}
-                                >
-                                    {option.label}
-                                </span>
-                            </button>
-                        ))}
+            <button
+                key={index}
+                onClick={option.onPress}
+                disabled={option.loading}
+                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                    option.danger
+                        ? 'hover:bg-red-50 text-red-600'
+                        : 'hover:bg-gray-50 text-gray-700'
+                }`}
+            >
+                <option.icon className="w-5 h-5 mr-3" />
+                <span className="font-medium">{option.label}</span>
+                {option.loading && (
+                    <div className="ml-auto">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                    </div>
+                )}
+            </button>
+        ))}
                         <button
                             onClick={() => setIsMoreModalVisible(false)}
-                            className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
+                            className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium cursor-pointer"
                         >
                             Cancel
                         </button>
@@ -1236,12 +1359,12 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                     <div className="bg-white p-4">
                         {selectedPost && (
                             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-                                <Image
-                                    src={selectedPost.profilePic || "/Profilepic1.png"}
-                                    alt="Profile"
-                                    className="w-10 h-10 rounded-full"
-                                    width={40}
-                                    height={40}
+                                <img
+                                  src={getProfilePicture(selectedPost?.profilePic)}
+                                  alt={selectedPost?.username || "Profile"}
+                                  width={40}
+                                  height={40}
+                                  className="rounded-full"
                                 />
                                 <div className="ml-3">
                                     <h3 className="text-base font-medium text-gray-800">

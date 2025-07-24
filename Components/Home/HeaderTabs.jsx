@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React from 'react';
-import clsx from 'clsx';
+import React from "react";
+import clsx from "clsx";
 
-const tabs = ['ForYou', 'Following', 'Trending'];
+const tabs = ["ForYou", "Following", "Trending"];
 
 const HeaderTabs = ({ activeTab, setActiveTab }) => {
   return (
@@ -13,18 +13,18 @@ const HeaderTabs = ({ activeTab, setActiveTab }) => {
           key={tab}
           onClick={() => setActiveTab(tab)}
           className={clsx(
-            'px-6 py-2 focus:outline-none transition-colors',
-            activeTab === tab ? 'border-b-2 border-sky-500' : ''
+            "px-6 py-2 focus:outline-none transition-colors",
+            activeTab === tab ? "border-b-2 border-primary" : ""
           )}
         >
           <span
             className={clsx(
-              'text-base font-medium',
-              activeTab === tab ? 'text-sky-500' : 'text-gray-600'
+              "text-base font-medium",
+              activeTab === tab ? "text-primary" : "text-gray-600"
             )}
-            style={{ fontFamily: 'var(--font-medium)' }} // optional: map your font in Tailwind config
+            style={{ fontFamily: "var(--font-medium)" }} // optional: map your font in Tailwind config
           >
-            {tab === 'ForYou' ? 'For You' : tab}
+            {tab === "ForYou" ? "For You" : tab}
           </span>
         </button>
       ))}

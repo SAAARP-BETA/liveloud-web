@@ -52,7 +52,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-white px-6 py-10">
-      <h1 className="text-sky-500 text-2xl font-bold text-center">Login to Your Account</h1>
+      <h1 className="text-primary text-2xl font-bold text-center">Login to Your Account</h1>
       <p className="text-gray-500 text-center mt-1">And Say It All Unfiltered</p>
 
       {error && (
@@ -94,7 +94,7 @@ export default function Login() {
       <div className="flex items-center mt-2">
         <button
           onClick={() => setIsChecked(!isChecked)}
-          className={`w-4 h-4 border-2 rounded mr-2 flex items-center justify-center ${isChecked ? 'border-sky-500 bg-sky-500' : 'border-gray-400'
+          className={`w-4 h-4 border-2 rounded mr-2 flex items-center justify-center ${isChecked ? 'border-primary bg-primary' : 'border-gray-400'
             }`}
           disabled={isLoading}
         >
@@ -102,7 +102,7 @@ export default function Login() {
         </button>
         <span className="text-base">Keep me signed in</span>
         <button
-          className="ml-auto text-sky-500 text-sm"
+          className="ml-auto text-primary text-sm"
           onClick={() => router.push('/auth/forgot-password')}
           disabled={isLoading}
         >
@@ -111,7 +111,7 @@ export default function Login() {
       </div>
 
       <button
-        className={`mt-6 w-full bg-sky-500 py-3 rounded-full text-white text-lg font-bold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
+        className={`mt-6 w-full bg-primary py-3 rounded-full text-white text-lg font-bold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
           }`}
         onClick={handleLogin}
         disabled={isLoading}
@@ -154,7 +154,7 @@ export default function Login() {
       <p className="mt-6 text-center text-gray-500">
         Don't have an account?{' '}
         <button
-          className="text-sky-500 font-semibold"
+          className="text-primary font-semibold"
           onClick={() => router.push('/signup')}
           disabled={isLoading}
         >

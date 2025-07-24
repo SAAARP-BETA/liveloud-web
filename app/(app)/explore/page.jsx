@@ -16,19 +16,7 @@ import {
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
 import defaultPic from "../../assets/Profilepic1.png";
-
-const getProfilePicture = (profilePic) => {
-  if (!profilePic) {
-    return defaultPic.src || defaultPic; // Use .src property if it exists
-  }
-
-  // If profilePic is an object (imported image), use its src property
-  if (typeof profilePic === "object" && profilePic.src) {
-    return profilePic.src;
-  }
-
-  return profilePic;
-};
+import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 // Mock data and utilities (since we don't have the actual context)
 const mockUser = {
@@ -102,7 +90,7 @@ const SuggestionItem = ({ item, onPress, showType = true }) => {
               {item.isVerified && (
                 <Verified
                   size={14}
-                  className="ml-1 text-blue-500 fill-current"
+                  className="ml-1 text-primary fill-current"
                 />
               )}
             </div>
@@ -190,7 +178,7 @@ const PostSearchResult = ({ post, onPress }) => {
               {post.user.username}
             </span>
             {post.user.isVerified && (
-              <Verified size={14} className="ml-1 text-blue-500 fill-current" />
+              <Verified size={14} className="ml-1 text-primary fill-current" />
             )}
           </div>
         </div>
@@ -231,7 +219,7 @@ const UserSearchResult = ({ user, onPress }) => {
             {user.username}
           </span>
           {user.isVerified && (
-            <Verified size={16} className="ml-1 text-blue-500 fill-current" />
+            <Verified size={16} className="ml-1 text-primary fill-current" />
           )}
         </div>
 
@@ -260,7 +248,7 @@ const UserSearchResult = ({ user, onPress }) => {
         </div>
       </div>
 
-      <button className="bg-sky-500 hover:bg-sky-600 rounded-full px-4 py-1.5 text-white font-medium transition-colors">
+      <button className="bg-primary hover:bg-sky-600 rounded-full px-4 py-1.5 text-white font-medium transition-colors">
         Follow
       </button>
     </div>
@@ -583,7 +571,7 @@ export default function SearchPage() {
             <form onSubmit={handleSearch} className="flex-1">
               <div
                 className={`flex items-center bg-white rounded-full transition-colors shadow-sm ${
-                  isSearchFocused ? "ring-2 ring-sky-500" : ""
+                  isSearchFocused ? "ring-2 ring-primary" : ""
                 }`}
               >
                 <Search size={20} className="text-gray-500 ml-3 w-5 h-5" />{" "}
@@ -627,7 +615,7 @@ export default function SearchPage() {
                   key={tab}
                   className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-colors cursor-pointer ${
                     activeTab === tab
-                      ? "bg-sky-500 text-white"
+                      ? "bg-primary text-white"
                       : "bg-gray-100 text-gray-700  hover:bg-gray-200"
                   }`}
                   onClick={() => {
@@ -656,7 +644,7 @@ export default function SearchPage() {
                     </h2>
                     <button
                       onClick={clearAllRecentSearches}
-                      className="text-sky-500 hover:text-sky-600 font-medium cursor-pointer"
+                      className="text-primary hover:text-sky-600 font-medium cursor-pointer"
                     >
                       Clear All
                     </button>
@@ -719,7 +707,7 @@ export default function SearchPage() {
                 </div>
               ) : isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 px-6">
@@ -738,7 +726,7 @@ export default function SearchPage() {
             <div className="p-4">
               {isLoading && !isRefreshing ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 border-b-2 border-sky-500"></div>
+                  <div className="animate-spin rounded-full h-12 border-b-2 border-primary"></div>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -823,7 +811,7 @@ export default function SearchPage() {
 
                   {isLoading && !isRefreshing && (
                     <div className="flex justify-center py-4">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-sky-500"></div>
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                     </div>
                   )}
                 </div>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { reportReasons, handleReportPost } from '../../app/utils/postFunctions';
 import toast from 'react-hot-toast';
+import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 // Flag icon component to replace Feather icons
 const FlagIcon = ({ size = 20, color = '#64748B' }) => (
@@ -68,7 +69,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
   return (
     <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
       <div
-        className="absolute inset-0 opacity-100"
+        className="absolute cursor-pointer inset-0 opacity-100"
         onClick={onClose}
         role="button"
         tabIndex={0}
@@ -86,7 +87,12 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
 
           {post && (
             <div className="flex flex-row items-center p-3 mb-4 bg-gray-50 rounded-xl">
-              <img src={post.profilePic} alt="Profile" className="w-10 h-10 rounded-full" />
+             <img
+  src={getProfilePicture(post.profilePic)}
+  alt="Profile"
+  className="w-10 h-10 rounded-full"
+/>
+
               <div className="ml-3 flex-1">
                 <p className="text-base text-gray-800 mb-0.5">{post.username}</p>
                 <p className="text-sm text-gray-500">
@@ -100,7 +106,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
 
         {isSubmitting ? (
           <div className="p-8 flex items-center justify-center flex-col">
-            <div className="w-8 h-8 border-3 border-gray-300 border-t-sky-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-3 border-gray-300 border-t-primary rounded-full animate-spin" />
             <p className="mt-4 text-base text-gray-500">Submitting report...</p>
           </div>
         ) : showCustomInput ? (
@@ -125,7 +131,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
                 <span className="text-gray-600 text-base cursor-pointer">Back</span>
               </button>
               <button
-                className="bg-sky-500 rounded-xl py-3 px-5"
+                className="bg-primary rounded-xl py-3 px-5"
                 onClick={() => submitReport('Other')}
               >
                 <span className="text-white text-base cursor-pointer">Submit Report</span>
