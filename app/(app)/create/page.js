@@ -776,7 +776,7 @@ const CreatePost = () => {
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Add Media</h3>
-                <button onClick={() => setShowMediaOptions(false)} className="text-gray-600 hover:text-gray-900">
+                <button onClick={() => setShowMediaOptions(false)} className="text-gray-600 cursor-pointer hover:text-gray-900">
                   <X size={24} />
                 </button>
               </div>
@@ -875,7 +875,7 @@ const CreatePost = () => {
                     <button
                       key={person._id}
                       onClick={() => handlePeopleTag(person)}
-                      className="flex items-center space-x-3 w-full text-left p-3 hover:bg-gray-50 rounded-lg"
+                      className="flex items-center cursor-pointer space-x-3 w-full text-left p-3 hover:bg-gray-50 rounded-lg"
                     >
                       <img
                         src={person.profilePicture || "/default-avatar.png"}
@@ -917,7 +917,7 @@ const CreatePost = () => {
                       setSelectedFeeling(feeling);
                       setShowFeelingModal(false);
                     }}
-                    className="flex items-center p-3 hover:bg-gray-50 rounded-lg"
+                    className="flex items-center cursor-pointer p-3 hover:bg-gray-50 rounded-lg"
                   >
                     <span className="text-2xl mr-3">{feeling.icon}</span>
                     <span>{feeling.name}</span>

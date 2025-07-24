@@ -100,7 +100,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
     <div
       className={`flex items-center p-4 mx-4 mb-3 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${isCurrentUser ? 'bg-sky-50 border-2 border-sky-300' : 'bg-white shadow-sm hover:shadow-md'
         }`}
-      onClick={() => onPress(item.user)}
+      onClick={() => onPress(item.user, item.username)}
     >
       {/* Rank */}
       <div className="mr-3">
@@ -214,7 +214,11 @@ export default function LeaderboardPage() {
       }
 
       const data = await response.json();
-
+      const username= currentUser?.username || '';
+      console.log("username",username);
+      // console.log(data);
+      
+      
       if (resetData) {
         setLeaderboardData(data.leaderboard || []);
       } else {
@@ -259,13 +263,13 @@ export default function LeaderboardPage() {
   };
 
   // Navigate to user profile
-  const navigateToProfile = (userId) => {
+  const navigateToProfile = (userId,username) => {
     if (!currentUser || !userId) return;
 
     if (userId === currentUser._id) {
-      router.push('/profile/profile');
+      router.push('/profile');
     } else {
-      router.push(`/UserProfile/${userId}`);
+      router.push(`/UserProfile/${username}`);
     }
   };
 
