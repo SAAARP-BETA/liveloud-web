@@ -3,8 +3,16 @@
 
 import { API_ENDPOINTS } from "./config";
 
-// Update this API URL to match your environment
-// const API_URL = "http://192.168.182.7:3002/api/";
+/**
+ * Check if a string is a valid MongoDB ObjectId
+ * @param {string} id - The ID to validate
+ * @returns {boolean} - True if valid, false otherwise
+ */
+export const isValidObjectId = (id) => {
+  if (!id || typeof id !== 'string') return false;
+  // MongoDB ObjectIds are 24 characters long and contain only hexadecimal characters
+  return /^[0-9a-fA-F]{24}$/.test(id);
+};
 
 /**
  * Like a post
@@ -24,17 +32,31 @@ export const handleLikePost = async (postId, user, token, setPosts) => {
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
         const updatedLikes = [...post.likes];
-        if (!updatedLikes.includes(user?._id)) {
-          updatedLikes.push(user?._id || 'current-user');
+        const updatedDislikes = [...(post.dislikes || [])];
+        const userId = user?._id || 'current-user';
+        
+        // Remove from dislikes if present
+        const dislikeIndex = updatedDislikes.indexOf(userId);
+        if (dislikeIndex > -1) {
+          updatedDislikes.splice(dislikeIndex, 1);
         }
+        
+        // Add to likes if not present
+        if (!updatedLikes.includes(userId)) {
+          updatedLikes.push(userId);
+        }
+        
         return {
           ...post,
           likes: updatedLikes,
-          likeCount: post.likeCount + 1
+          dislikes: updatedDislikes,
+          likeCount: updatedLikes.length,
+          dislikeCount: updatedDislikes.length
         };
       }
       return post;
     }));
+
     const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}/like`, {
       method: 'POST',
       headers: {
@@ -48,7 +70,19 @@ export const handleLikePost = async (postId, user, token, setPosts) => {
     }
   } catch (error) {
     console.error('Error liking post:', error);
-    // Error handling could be improved here if needed
+    // Revert optimistic update on error
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        const userId = user?._id || 'current-user';
+        const updatedLikes = post.likes.filter(id => id !== userId);
+        return {
+          ...post,
+          likes: updatedLikes,
+          likeCount: updatedLikes.length
+        };
+      }
+      return post;
+    }));
   }
 };
 
@@ -69,10 +103,13 @@ export const handleUnlikePost = async (postId, user, token, setPosts) => {
     // Optimistically update UI first
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
+        const userId = user?._id || 'current-user';
+        const updatedLikes = post.likes.filter(id => id !== userId);
+        
         return {
           ...post,
-          likes: post.likes.filter(id => id !== (user?._id || 'current-user')),
-          likeCount: Math.max(0, post.likeCount - 1)
+          likes: updatedLikes,
+          likeCount: updatedLikes.length
         };
       }
       return post;
@@ -91,6 +128,22 @@ export const handleUnlikePost = async (postId, user, token, setPosts) => {
     }
   } catch (error) {
     console.error('Error unliking post:', error);
+    // Revert optimistic update on error
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        const userId = user?._id || 'current-user';
+        const updatedLikes = [...post.likes];
+        if (!updatedLikes.includes(userId)) {
+          updatedLikes.push(userId);
+        }
+        return {
+          ...post,
+          likes: updatedLikes,
+          likeCount: updatedLikes.length
+        };
+      }
+      return post;
+    }));
   }
 };
 
@@ -346,25 +399,29 @@ export const formatTimestamp = (timestamp) => {
  * @returns {object} - Formatted post object
  */
 export const formatPostFromApi = (post, index) => {
+  const defaultProfilePic = 'https://via.placeholder.com/150';
 
   if (!post || typeof post !== 'object') {
     console.warn(`Post at index ${index} is invalid:`, post);
     return null;
   }
 
-  // Generate a deterministic ID if one doesn't exist
-  const postId = post._id || `generated-id-${Date.now()}-${index}`;
+  // Check if post has a valid MongoDB ObjectId
+  if (!post._id || !isValidObjectId(post._id)) {
+    console.warn(`Post at index ${index} has invalid or missing ObjectId:`, post._id);
+    return null;
+  }
 
   // Create the formatted post object with all required fields
   return {
-    id: postId,
+    id: post._id,
     user: post.user._id || {},
     content: post.content || '',
     media: post.media || [],
     imageUrl: post.media && post.media.length > 0 ? post.media[0] : null,
     username: post.user?.username || 'Anonymous',
     timestamp: formatTimestamp(post.createdAt),
-    profilePic: post.user?.profilePicture || null,
+    profilePic: post.user?.profilePicture || defaultProfilePic,
     isVerified: post.user?.isVerified || false,
     likes: Array.isArray(post.likes) ? post.likes : [],
     dislikes: Array.isArray(post.dislikes) ? post.dislikes : [],
@@ -375,6 +432,7 @@ export const formatPostFromApi = (post, index) => {
     originalPost: post.originalPost,
     quoteContent: post.quoteContent,
     likeCount: post.likeCount || post.likes?.length || 0,
+    dislikeCount: post.dislikeCount || post.dislikes?.length || 0,
     commentCount: post.commentCount || post.comments?.length || 0,
     bookmarkCount: post.bookmarkCount || post.bookmarks?.length || 0
   };

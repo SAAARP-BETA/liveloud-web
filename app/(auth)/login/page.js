@@ -52,8 +52,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-10">
-      <div className="relative lg:ml-4 w-[300px] h-[100px] ">
+    <div className="min-h-screen bg-white px-6 ">
+      <div className="relative lg:ml-4 w-[300px] h-[70px] ">
           <Image 
             src={Logo} 
             alt="Logo" 

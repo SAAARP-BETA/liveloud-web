@@ -17,8 +17,11 @@ import {
 } from "lucide-react"
 import { useAuth } from "../app/context/AuthContext"
 import { API_ENDPOINTS } from "../app/utils/config"
-import { useState } from "react"
-
+import { useEffect, useState } from "react"
+import Image from "next/image";
+import LongLogo from '@/app/assets/LongLogo.png';
+import LogoLiveloud from '@/app/assets/Liveloud.png';
+import mobileLogo from '@/app/assets/mobileLogo.png';
 const tabs = [
   { name: "Home", href: "/home", icon: Home },
   { name: "Explore", href: "/explore", icon: Search },
@@ -272,7 +275,51 @@ export default function LeftSidebar() {
       </>
     )
   }
+  
+// const Logo = () => {
+//   const [isMobile, setIsMobile] = useState(false);
 
+//   useEffect(() => {
+//     const checkScreenSize = () => {
+//       setIsMobile(window.innerWidth < 769);
+//     };
+
+//     // Check initially
+//     checkScreenSize();
+
+//     // Add resize listener
+//     window.addEventListener("resize", checkScreenSize);
+//     return () => window.removeEventListener("resize", checkScreenSize);
+//   }, []);
+
+//   return (
+//     <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px] 5px] sm:h-[15px] sm:w-[150px] hover:bg-gray-100 rounded-xl">
+//      <Image
+//         src={isMobile ? mobileLogo : LongLogo}
+//         alt="Logo"
+//         width={isMobile ? 180 : 280}  
+//         height={isMobile ? 80 : 60}   
+//         className="object-contain"
+//         priority
+//       />
+//     </div>
+//   );
+// };
+
+const Logo = () => (
+    <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px] hover:bg-gray-100 rounded-xl">
+      <Image 
+        src={LongLogo} 
+        // src={LogoLiveloud}
+    // src={mobileLogo}
+        alt="Logo" 
+        width={280}
+        // height={20}
+        className="object-contain mr-26 md:mr-18 sm:mr-10"
+        priority
+      />
+    </div>
+  );
   return (
     <>
       {/* Mobile Bottom Nav */}
@@ -327,6 +374,7 @@ export default function LeftSidebar() {
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
+        <Logo />
         <nav className="flex flex-col gap-4 mt-10 flex-1">
           {tabs.map((tab, index) => (
             <motion.div
