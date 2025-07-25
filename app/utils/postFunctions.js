@@ -59,15 +59,16 @@ export const handleLikePost = async (postId, user, token, setPosts) => {
       })
     );
 
-    const apiUrl = `${API_ENDPOINTS.SOCIAL}/posts/${postId}/like`;
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${API_ENDPOINTS.SOCIAL}/posts/${postId}/like`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -449,6 +450,8 @@ export const formatTimestamp = (timestamp) => {
  * @returns {object} - Formatted post object
  */
 export const formatPostFromApi = (post, index) => {
+  const defaultProfilePic = "https://via.placeholder.com/150";
+
   if (!post || typeof post !== "object") {
     console.warn(`Post at index ${index} is invalid:`, post);
     return null;
@@ -472,7 +475,7 @@ export const formatPostFromApi = (post, index) => {
     imageUrl: post.media && post.media.length > 0 ? post.media[0] : null,
     username: post.user?.username || "Anonymous",
     timestamp: formatTimestamp(post.createdAt),
-    profilePic: post.user?.profilePicture || "",
+    profilePic: post.user?.profilePicture || defaultProfilePic,
     isVerified: post.user?.isVerified || false,
     likes: Array.isArray(post.likes) ? post.likes : [],
     dislikes: Array.isArray(post.dislikes) ? post.dislikes : [],

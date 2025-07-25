@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
-import Image from 'next/image';
-import google from '@/app/assets/googleicon1.png'
-import metaMask from '@/app/assets/metamaskicon1.png'
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
+import Image from "next/image";
+import google from "@/app/assets/googleicon1.png";
+import metaMask from "@/app/assets/metamaskicon1.png";
+import Logo from "@/app/assets/LongLogo.png";
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState('test@test.com');
-  const [password, setPassword] = useState('Azxs@123');
+  const [email, setEmail] = useState("test@test.com");
+  const [password, setPassword] = useState("Azxs@123");
   const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, error, clearError } = useAuth();
@@ -22,7 +23,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      toast.error('Please enter your email and password');
+      toast.error("Please enter your email and password");
       return;
     }
 
@@ -30,12 +31,12 @@ export default function Login() {
     try {
       const success = await login(email, password);
       if (success) {
-        router.push('/home');
+        router.push("/home");
       } else {
-        console.log('Login failed:', error);
+        console.log("Login failed:", error);
       }
     } catch (err) {
-      toast.error('An unexpected error occurred');
+      toast.error("An unexpected error occurred");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -43,17 +44,32 @@ export default function Login() {
   };
 
   const handleGoogleLogin = () => {
-    toast.error('Google login will be available soon!');
+    toast.error("Google login will be available soon!");
   };
 
   const handleWalletConnect = () => {
-    toast.error('Wallet connection will be available soon!');
+    toast.error("Wallet connection will be available soon!");
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-10">
-      <h1 className="text-primary text-2xl font-bold text-center">Login to Your Account</h1>
-      <p className="text-gray-500 text-center mt-1">And Say It All Unfiltered</p>
+    <div className="min-h-screen bg-white px-6 ">
+      <div className="relative lg:ml-4 w-[300px] h-[70px] ">
+        <Image
+          src={Logo}
+          alt="Logo"
+          // width={150}
+          // height={60}
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
+      <h1 className="text-primary text-2xl font-bold  text-center">
+        Login to Your Account
+      </h1>
+      <p className="text-gray-500 text-center mt-1">
+        And Say It All Unfiltered
+      </p>
 
       {error && (
         <div className="mt-4 p-3 bg-red-100 rounded-md">
@@ -94,8 +110,9 @@ export default function Login() {
       <div className="flex items-center mt-2">
         <button
           onClick={() => setIsChecked(!isChecked)}
-          className={`w-4 h-4 border-2 rounded mr-2 flex items-center justify-center ${isChecked ? 'border-primary bg-primary' : 'border-gray-400'
-            }`}
+          className={`w-4 h-4 border-2 rounded mr-2 flex items-center justify-center ${
+            isChecked ? "border-primary bg-primary" : "border-gray-400"
+          }`}
           disabled={isLoading}
         >
           {isChecked && <span className="text-xs text-white font-bold">✓</span>}
@@ -103,7 +120,7 @@ export default function Login() {
         <span className="text-base">Keep me signed in</span>
         <button
           className="ml-auto text-primary text-sm"
-          onClick={() => router.push('/auth/forgot-password')}
+          onClick={() => router.push("/auth/forgot-password")}
           disabled={isLoading}
         >
           Forgot Password?
@@ -111,12 +128,13 @@ export default function Login() {
       </div>
 
       <button
-        className={`mt-6 w-full bg-primary py-3 rounded-full text-white text-lg font-bold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
-          }`}
+        className={`mt-6 w-full bg-primary py-3 rounded-full text-white text-lg font-bold ${
+          isLoading ? "opacity-70 cursor-not-allowed" : ""
+        }`}
         onClick={handleLogin}
         disabled={isLoading}
       >
-        {isLoading ? 'Logging in...' : 'Log In'}
+        {isLoading ? "Logging in..." : "Log In"}
       </button>
 
       <p className="text-center text-gray-500 mt-4">Or continue with</p>
@@ -152,10 +170,10 @@ export default function Login() {
       </button>
 
       <p className="mt-6 text-center text-gray-500">
-        Don't have an account?{' '}
+        Don't have an account?{" "}
         <button
           className="text-primary font-semibold"
-          onClick={() => router.push('/signup')}
+          onClick={() => router.push("/signup")}
           disabled={isLoading}
         >
           Sign up for free

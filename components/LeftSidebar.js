@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { usePathname, useRouter } from "next/navigation"
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Home,
   Search,
@@ -13,12 +13,15 @@ import {
   AlignEndHorizontal,
   MoreHorizontal,
   Crown,
-  Users
-} from "lucide-react"
-import { useAuth } from "../app/context/AuthContext"
-import { API_ENDPOINTS } from "../app/utils/config"
-import { useState } from "react"
-
+  Users,
+} from "lucide-react";
+import { useAuth } from "../app/context/AuthContext";
+import { API_ENDPOINTS } from "../app/utils/config";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import LongLogo from "@/app/assets/LongLogo.png";
+import LogoLiveloud from "@/app/assets/LongLogo.png";
+import mobileLogo from "@/app/assets/mobileLogo.png";
 const tabs = [
   { name: "Home", href: "/home", icon: Home },
   { name: "Explore", href: "/explore", icon: Search },
@@ -28,47 +31,47 @@ const tabs = [
   { name: "Leaderboard", href: "/leaderboard", icon: AlignEndHorizontal },
   { name: "Premium", href: "/premium", icon: Crown },
   { name: "Referral", href: "/referral", icon: Users },
-]
+];
 
 export default function LeftSidebar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const { token, logout, isAuthenticated, user } = useAuth()
-  const [showLogoutMenu, setShowLogoutMenu] = useState(false)
+  const pathname = usePathname();
+  const router = useRouter();
+  const { token, logout, isAuthenticated, user } = useAuth();
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
   const handleLogout = async () => {
     try {
       if (isAuthenticated && token) {
         await fetch(`${API_ENDPOINTS.AUTH}/logout`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        })
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
       }
     } catch (error) {
-      console.error('Logout error:', error)
+      console.error("Logout error:", error);
     } finally {
-      await logout()
-      router.replace('/(auth)/login')
+      await logout();
+      router.replace("/(auth)/login");
     }
-  }
+  };
 
   const TabButton = ({ tab }) => {
-    const isActive = pathname === tab.href
-    const Icon = tab.icon
+    const isActive = pathname === tab.href;
+    const Icon = tab.icon;
 
     const iconAnimation = {
       rotate: isActive ? 360 : 0,
       scale: isActive ? 1.2 : 1,
-    }
+    };
 
     const iconTransition = {
       type: "spring",
       stiffness: 300,
       damping: 20,
-    }
+    };
 
     return (
       <>
@@ -95,7 +98,11 @@ export default function LeftSidebar() {
               animate={iconAnimation}
               transition={iconTransition}
             >
-              <Icon className={`w-6 h-6 ${isActive ? "text-[#0EA5E9]" : "text-gray-400"}`} />
+              <Icon
+                className={`w-6 h-6 ${
+                  isActive ? "text-[#0EA5E9]" : "text-gray-400"
+                }`}
+              />
             </motion.div>
             <motion.span
               className={`text-[11px] font-medium relative z-10 text-center`}
@@ -121,7 +128,9 @@ export default function LeftSidebar() {
           <Link
             href={tab.href}
             className={`group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
-              isActive ? "bg-[rgba(14,165,233,0.1)] text-[#0EA5E9] font-semibold shadow-sm" : "text-gray-600 hover:bg-gray-100"
+              isActive
+                ? "bg-[rgba(14,165,233,0.1)] text-[#0EA5E9] font-semibold shadow-sm"
+                : "text-gray-600 hover:bg-gray-100"
             }`}
           >
             <motion.div
@@ -131,7 +140,13 @@ export default function LeftSidebar() {
               animate={iconAnimation}
               transition={iconTransition}
             >
-              <Icon className={`w-6 h-6 ${isActive ? "text-[#0EA5E9]" : "text-gray-500 group-hover:text-[#0EA5E9]"}`} />
+              <Icon
+                className={`w-6 h-6 ${
+                  isActive
+                    ? "text-[#0EA5E9]"
+                    : "text-gray-500 group-hover:text-[#0EA5E9]"
+                }`}
+              />
             </motion.div>
             <motion.span
               className="text-base"
@@ -141,7 +156,7 @@ export default function LeftSidebar() {
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 display: "inline-block",
-                color: isActive ? "#0EA5E9" : "#6b7280"
+                color: isActive ? "#0EA5E9" : "#6b7280",
               }}
               transition={{ duration: 0.2 }}
               title={tab.name}
@@ -151,11 +166,11 @@ export default function LeftSidebar() {
           </Link>
         </div>
       </>
-    )
-  }
+    );
+  };
 
   const ProfileSection = () => {
-    if (!isAuthenticated) return null
+    if (!isAuthenticated) return null;
 
     return (
       <>
@@ -187,7 +202,7 @@ export default function LeftSidebar() {
                 overflow: "hidden",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
-                display: "inline-block"
+                display: "inline-block",
               }}
               transition={{ duration: 0.2 }}
             >
@@ -221,20 +236,17 @@ export default function LeftSidebar() {
                 />
               )}
             </motion.div>
-            
+
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-semibold text-gray-900 truncate">
-                {user?.name || user?.username || 'User'}
+                {user?.name || user?.username || "User"}
               </p>
               <p className="text-sm text-gray-500 truncate">
-                @{user?.username || 'username'}
+                @{user?.username || "username"}
               </p>
             </div>
 
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
               <MoreHorizontal className="w-5 h-5 cursor-pointer text-gray-400 group-hover:text-gray-600" />
             </motion.div>
           </button>
@@ -270,9 +282,53 @@ export default function LeftSidebar() {
           )}
         </div>
       </>
-    )
-  }
+    );
+  };
 
+  // const Logo = () => {
+  //   const [isMobile, setIsMobile] = useState(false);
+
+  //   useEffect(() => {
+  //     const checkScreenSize = () => {
+  //       setIsMobile(window.innerWidth < 769);
+  //     };
+
+  //     // Check initially
+  //     checkScreenSize();
+
+  //     // Add resize listener
+  //     window.addEventListener("resize", checkScreenSize);
+  //     return () => window.removeEventListener("resize", checkScreenSize);
+  //   }, []);
+
+  //   return (
+  //     <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px] 5px] sm:h-[15px] sm:w-[150px] hover:bg-gray-100 rounded-xl">
+  //      <Image
+  //         src={isMobile ? mobileLogo : LongLogo}
+  //         alt="Logo"
+  //         width={isMobile ? 180 : 280}
+  //         height={isMobile ? 80 : 60}
+  //         className="object-contain"
+  //         priority
+  //       />
+  //     </div>
+  //   );
+  // };
+
+  const Logo = () => (
+    <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px] hover:bg-gray-100 rounded-xl">
+      <Image
+        src={LongLogo}
+        // src={LogoLiveloud}
+        // src={mobileLogo}
+        alt="Logo"
+        width={280}
+        // height={20}
+        className="object-contain mr-26 md:mr-18 sm:mr-10"
+        priority
+      />
+    </div>
+  );
   return (
     <>
       {/* Mobile Bottom Nav */}
@@ -327,6 +383,7 @@ export default function LeftSidebar() {
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
+        <Logo />
         <nav className="flex flex-col gap-4 mt-10 flex-1">
           {tabs.map((tab, index) => (
             <motion.div
@@ -352,5 +409,5 @@ export default function LeftSidebar() {
         )}
       </motion.aside>
     </>
-  )
+  );
 }
