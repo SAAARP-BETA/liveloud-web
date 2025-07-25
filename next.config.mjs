@@ -33,6 +33,11 @@ const nextConfig = {
         port: '3001',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'backend-4iko.onrender.com',
+        pathname: '/uploads/**',  // Add this line for your backend
+      },
     ],
   },
 };

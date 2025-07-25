@@ -2,7 +2,7 @@
 
 body {
   font-family: "Geist", sans-serif;
-  overflow: hidden; /* Make main content scroll from anywhere on the page */
+  overflow-x: hidden;
 }
 
 /* Capture scroll events on the entire page and redirect to main */

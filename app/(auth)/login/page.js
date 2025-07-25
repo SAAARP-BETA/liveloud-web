@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import Image from 'next/image';
 import google from '@/app/assets/googleicon1.png'
 import metaMask from '@/app/assets/metamaskicon1.png'
+import Logo from '@/app/assets/Liveloud.png';
 
 export default function Login() {
   const router = useRouter();
@@ -52,7 +53,18 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-white px-6 py-10">
-      <h1 className="text-primary text-2xl font-bold text-center">Login to Your Account</h1>
+      <div className="relative lg:ml-4 w-[300px] h-[100px] ">
+          <Image 
+            src={Logo} 
+            alt="Logo" 
+            // width={150}
+            // height={60}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      <h1 className="text-primary text-2xl font-bold  text-center">Login to Your Account</h1>
       <p className="text-gray-500 text-center mt-1">And Say It All Unfiltered</p>
 
       {error && (
@@ -102,7 +114,7 @@ export default function Login() {
         </button>
         <span className="text-base">Keep me signed in</span>
         <button
-          className="ml-auto text-primary text-sm"
+          className="ml-auto text-primary text-sm cursor-pointer"
           onClick={() => router.push('/auth/forgot-password')}
           disabled={isLoading}
         >
@@ -111,7 +123,7 @@ export default function Login() {
       </div>
 
       <button
-        className={`mt-6 w-full bg-primary py-3 rounded-full text-white text-lg font-bold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
+        className={`mt-6 w-full bg-primary py-3 rounded-full text-white text-lg font-bold ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
           }`}
         onClick={handleLogin}
         disabled={isLoading}
@@ -122,7 +134,7 @@ export default function Login() {
       <p className="text-center text-gray-500 mt-4">Or continue with</p>
 
       <button
-        className="mt-4 w-full border border-gray-300 py-3 rounded-full flex items-center justify-center"
+        className="mt-4 w-full border cursor-pointer border-gray-300 py-3 rounded-full flex items-center justify-center"
         onClick={handleGoogleLogin}
         disabled={isLoading}
       >
@@ -137,7 +149,7 @@ export default function Login() {
       </button>
 
       <button
-        className="mt-3 w-full border border-gray-300 py-3 rounded-full flex items-center justify-center"
+        className="mt-3 w-full border border-gray-300 py-3 rounded-full cursor-pointer flex items-center justify-center"
         onClick={handleWalletConnect}
         disabled={isLoading}
       >
@@ -154,7 +166,7 @@ export default function Login() {
       <p className="mt-6 text-center text-gray-500">
         Don't have an account?{' '}
         <button
-          className="text-primary font-semibold"
+          className="text-primary font-semibold cursor-pointer"
           onClick={() => router.push('/signup')}
           disabled={isLoading}
         >

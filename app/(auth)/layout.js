@@ -25,7 +25,7 @@ export default function AuthLayout({ children }) {
 
   return (
     <AuthRoute>
-      <div className="h-screen w-screen flex overflow-hidden bg-white">
+      <div className="min-h-screen w-screen flex overflow-hidden bg-white">
         {/* Left Side - Poker Style Cards */}
         <div className="hidden lg:flex w-[50%] xl:w-[45%] items-center justify-center bg-gray-100">
           <div

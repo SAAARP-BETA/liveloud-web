@@ -6,8 +6,10 @@ import { useAuth } from '@/app/context/AuthContext';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faCheck } from '@fortawesome/free-solid-svg-icons';
-import google from '@/app/assets/googleicon1.png'
-import metaMask from '@/app/assets/metamaskicon1.png'
+import { toast } from 'react-hot-toast'; // <-- ADD THIS
+import google from '@/app/assets/googleicon1.png';
+import metaMask from '@/app/assets/metamaskicon1.png';
+import Logo from '@/app/assets/Liveloud.png';
 
 export default function Signup() {
   const router = useRouter();
@@ -39,7 +41,6 @@ export default function Signup() {
     setIsLoading(true);
     try {
       const success = await signup({ username: fullName, email, password });
-
       if (success) {
         router.push('/home');
       } else {
@@ -53,19 +54,28 @@ export default function Signup() {
     }
   };
 
-  const handleGoogleSignup = () => {
-    toast.error('Google signup will be available soon!');
-  };
-
-  const handleWalletConnect = () => {
-    toast.error('Wallet connection will be available soon!');
-  };
-
   return (
-    <div className="min-h-screen bg-white px-8 py-10">
-      <h1 className="text-primary text-2xl font-bold text-center">Create Your Account</h1>
-      <p className="text-gray-500 text-center mb-6">Join the most Unfiltered Community</p>
+    <div className="min-h-screen bg-white px-8">
+      {/* Logo */}
+       <div className="relative  lg:left-2  w-[280px] mt-5 h-[80px]">
+  <Image
+    src={Logo}
+    alt="Logo"
+    fill
+    className="object-cover"
+    priority
+  />
+</div>
 
+
+      <h1 className="text-primary text-2xl font-bold text-center">
+        Create Your Account
+      </h1>
+      <p className="text-gray-500 text-center mb-6">
+        Join the most Unfiltered Community
+      </p>
+
+      {/* Full Name */}
       <label className="text-base font-semibold">Full Name</label>
       <input
         className="border-2 border-blue-200 rounded-xl p-3 mt-1 mb-4 w-full"
@@ -75,6 +85,7 @@ export default function Signup() {
         disabled={isLoading}
       />
 
+      {/* Email */}
       <label className="text-base font-semibold">Email Address</label>
       <input
         className="border-2 border-blue-200 rounded-xl p-3 mt-1 mb-4 w-full"
@@ -86,6 +97,7 @@ export default function Signup() {
         disabled={isLoading}
       />
 
+      {/* Password */}
       <label className="text-base font-semibold">Password</label>
       <div className="border-2 border-blue-200 rounded-xl p-1 mt-1 flex items-center justify-between">
         <input
@@ -97,6 +109,7 @@ export default function Signup() {
           disabled={isLoading}
         />
         <button
+          type="button"
           className="px-2"
           onClick={() => setShowPassword(!showPassword)}
           disabled={isLoading}
@@ -105,10 +118,13 @@ export default function Signup() {
         </button>
       </div>
 
+      {/* Terms Checkbox */}
       <div className="flex items-center mt-4">
         <button
-          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${isChecked ? 'border-primary bg-primary' : 'border-gray-300'
-            }`}
+          type="button"
+          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${
+            isChecked ? 'border-primary bg-primary' : 'border-gray-300'
+          }`}
           onClick={() => setIsChecked(!isChecked)}
           disabled={isLoading}
         >
@@ -119,24 +135,28 @@ export default function Signup() {
         </span>
       </div>
 
+      {/* Sign Up Button */}
       <button
-        className={`bg-primary rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
-          }`}
+        className={`bg-primary rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${
+          isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+        }`}
         onClick={handleSignup}
         disabled={isLoading}
       >
         {isLoading ? 'Signing up...' : 'Sign Up'}
       </button>
 
+      {/* Divider */}
       <div className="flex items-center my-4">
         <div className="flex-1 h-px bg-gray-300" />
         <span className="mx-2 text-gray-500 text-sm">Or continue with</span>
         <div className="flex-1 h-px bg-gray-300" />
       </div>
 
+      {/* Google Signup */}
       <button
-        className="border-2 border-gray-300 rounded-3xl p-3 flex items-center justify-center mb-3 shadow-md w-full"
-        onClick={handleGoogleSignup}
+        className="border-2 cursor-pointer border-gray-300 rounded-3xl p-3 flex items-center justify-center mb-3 shadow-md w-full"
+        onClick={() => toast.error('Google signup will be available soon!')}
         disabled={isLoading}
       >
         <Image
@@ -149,9 +169,10 @@ export default function Signup() {
         <span>Continue with Google</span>
       </button>
 
+      {/* Metamask Signup */}
       <button
-        className="border-2 border-gray-300 rounded-3xl p-3 flex items-center justify-center shadow-md w-full"
-        onClick={handleWalletConnect}
+        className="border-2 cursor-pointer border-gray-300 rounded-3xl p-3 flex items-center justify-center shadow-md w-full"
+        onClick={() => toast.error('Wallet connection will be available soon!')}
         disabled={isLoading}
       >
         <Image
@@ -164,11 +185,12 @@ export default function Signup() {
         <span>Connect Wallet</span>
       </button>
 
+      {/* Login Link */}
       <div className="mt-6 text-center text-gray-500">
         Already have an account?{' '}
         <button
-          onClick={() => router.push('/auth/login')}
-          className="text-primary font-semibold"
+          onClick={() => router.push('/login')}
+          className="text-primary font-semibold cursor-pointer"
           disabled={isLoading}
         >
           Login
