@@ -1,10 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+   
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'backend-4iko.onrender.com',
         pathname: '/**',
       },
       {
@@ -30,7 +36,7 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '3001',
+        port: '3000',
         pathname: '/uploads/**',
       },
       {

@@ -1280,7 +1280,7 @@ const handleLoadMore = useCallback(() => {
         <div className="p-4">
           {selectedPost && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <img src={getProfilePicture(selectedPost?.profilePic)} alt={selectedPost?.username || "Profile"} width={40} height={40} className="rounded-full" />
+              <Image src={getProfilePicture(selectedPost?.profilePic)} alt={selectedPost?.username || "Profile"} width={40} height={40} className="rounded-full" />
               <div className="ml-3">
                 <p className="font-semibold text-gray-800">{selectedPost.username}</p>
                 <p className="text-sm text-gray-500 truncate">{selectedPost.content}</p>

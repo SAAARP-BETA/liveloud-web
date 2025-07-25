@@ -6,6 +6,7 @@ import React, {
     useRef,
     useCallback,
     useMemo,
+    use
 } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,6 +17,7 @@ import { useAuth } from "../../../context/AuthContext";
 import CustomModal from "../../../../Components/ui/Modal";
 import AmplifyModal from "../../../../Components/ui/AmplifyModal";
 import CommentModal from "../../../../Components/ui/CommentModal";
+import ReportModal from "../../../../Components/ui/ReportModal"; // ADDED: Import ReportModal
 import toast from 'react-hot-toast';
 
 import {
@@ -25,6 +27,7 @@ import {
 import PostCard from "../../../../Components/ui/PostCard";
 import { API_ENDPOINTS } from "../../../utils/config";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
+import { usePostInteractions } from '../../../utils/postinteractions';
 
 import {
     ArrowLeft,
@@ -44,8 +47,12 @@ import {
     Heart,
     Edit2,
     UserPlus,
+    UserMinus, // ADDED: For unfollow option
+    Info, // ADDED: For about account option
     Ban,
+    Trash2, // ADDED: For delete post option
     CheckCircle as Verified,
+    Loader2, // ADDED: For loading states
 } from "lucide-react";
 
 // Window dimensions
@@ -54,6 +61,16 @@ const HEADER_MIN_HEIGHT = 100;
 const PROFILE_IMAGE_MAX_SIZE = 120;
 const PROFILE_IMAGE_MIN_SIZE = 40;
 const SCROLL_SENSITIVITY = 0.5;
+
+// ADDED: Menu options for post interactions (same as in PostPage)
+const menuOptions = [
+    { icon: UserPlus, text: 'Follow' },
+    { icon: UserMinus, text: 'Unfollow' },
+    { icon: Info, text: 'About this account' },
+    { icon: Flag, text: 'Report' },
+    { icon: Ban, text: 'Block' },
+    { icon: Trash2, text: 'Delete Post' },
+];
 
 // Points Display Component (unchanged)
 const PointsDisplay = ({ points, loading }) => {
@@ -353,7 +370,8 @@ const ProfileSkeleton = () => {
 
 const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     const router = useRouter();
-    const usernameParam = params?.username;
+    const resolvedParams = use(params);
+    const usernameParam = resolvedParams?.username;
     const { user: currentUser, token, isAuthenticated } = useAuth();
 
     // State for resizable header
@@ -390,10 +408,16 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     const [postToAmplify, setPostToAmplify] = useState(null);
     const [isCommentModalVisible, setCommentModalVisible] = useState(false);
     const [postToComment, setPostToComment] = useState(null);
+    const [isReportModalVisible, setReportModalVisible] = useState(false); // ADDED: Report modal state
+    const [postToReport, setPostToReport] = useState(null); // ADDED: Post to report state
     const [errorMessage, setErrorMessage] = useState(null);
     const [hasFetched, setHasFetched] = useState(false);
     const [error, setError] = useState();
-const [followLoading, setFollowLoading] = useState(false);
+    const [followLoading, setFollowLoading] = useState(false);
+
+    // ADDED: New states for post menu interactions
+    const [filteredOptions, setFilteredOptions] = useState([]);
+    const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
     // Loading guards
     const [isProfileLoading, setIsProfileLoading] = useState(false);
@@ -402,129 +426,40 @@ const [followLoading, setFollowLoading] = useState(false);
 
     const abortControllerRef = useRef(null);
 
-    // Post handlers
-    const postHandlers = useMemo(
-        () =>
-            createPostHandlers(
-                currentUser,
-                token,
-                setPosts,
-                setPostToComment,
-                setCommentModalVisible,
-                setPostToAmplify,
-                setAmplifyModalVisible
-            ),
-        [currentUser, token]
+    // MODIFIED: Helper function to update posts array (compatible with post interactions)
+    const updatePostData = useCallback((updaterOrNewPosts) => {
+        if (typeof updaterOrNewPosts === 'function') {
+            setPosts(prevPosts => {
+                const updatedPosts = updaterOrNewPosts(prevPosts);
+                return Array.isArray(updatedPosts) ? updatedPosts : prevPosts;
+            });
+        } else if (Array.isArray(updaterOrNewPosts)) {
+            setPosts(updaterOrNewPosts);
+        }
+    }, []);
+
+    // MODIFIED: Post handlers with proper updatePostData function
+    const postHandlers = useMemo(() => createPostHandlers(
+        currentUser, // CHANGED: Use currentUser instead of user for consistency
+        token,
+        updatePostData,
+        setPostToComment,
+        setCommentModalVisible,
+        setPostToAmplify,
+        setAmplifyModalVisible,
+        setPostToReport,
+        setReportModalVisible
+    ), [currentUser, token, updatePostData]);
+    
+    // ADDED: Use the post interactions hook
+    const { handleMenuOptionPress, loadPostMenuOptions } = usePostInteractions(
+        currentUser, // CHANGED: Use currentUser for consistency
+        token,
+        isAuthenticated,
+        postHandlers,
+        router,
+        updatePostData
     );
-
-const handleBlockUser = async (userId) => {
-    if (!isAuthenticated) {
-        toast.error('Please login to block users');
-        return;
-    }
-
-    if (!confirm('Are you sure you want to block this user? You will no longer see their content and they won\'t be able to interact with you.')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/users/block/${userId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to block user');
-        }
-
-        toast.success('User has been blocked');
-        setIsMoreModalVisible(false); // Close the modal
-        router.push('/'); // Redirect away from blocked user's profile
-    } catch (error) {
-        console.error('Error blocking user:', error);
-        toast.error(`Failed to block user: ${error.message}`);
-    }
-};
-
-const handleReportUser = async () => {
-    if (!isAuthenticated) {
-        toast.error('Please login to report users');
-        return;
-    }
-
-    if (!confirm('Are you sure you want to report this user?')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/reports/user`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                reportedUserId: user?._id,
-                reason: 'inappropriate_behavior',
-                description: 'User reported from profile'
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to report user');
-        }
-
-        toast.success('Thank you for your report. We will review it shortly.');
-        setIsMoreModalVisible(false); // Close the modal
-    } catch (error) {
-        console.error('Error reporting user:', error);
-        toast.error(`Failed to report user: ${error.message}`);
-    }
-};
-
-// Enhanced moreOptions with block/report
-const moreOptions = useMemo(() => {
-    const options = [
-        {
-            label: "Share Profile",
-            icon: Share2,
-            onPress: () => {
-                toast.error(`Coming soon! Sharing profile for ${user?.username || "this user"}.`);
-                setIsMoreModalVisible(false);
-            },
-        },
-    ];
-
-    // Add block option for other users
-    if (!isMyProfile && isAuthenticated) {
-        options.push({
-            label: "Block User",
-            icon: Ban,
-            onPress: () => handleBlockUser(user?._id),
-            danger: true,
-        });
-    }
-
-    // Edit Profile for own profile, Report for others
-    options.push({
-        label: isMyProfile ? "Edit Profile" : "Report User",
-        icon: isMyProfile ? Edit2 : Flag,
-        onPress: isMyProfile
-            ? () => {
-                router.push("/profile/edit");
-                setIsMoreModalVisible(false);
-              }
-            : handleReportUser,
-        danger: !isMyProfile,
-    });
-
-    return options;
-}, [isMyProfile, user?.username, user?._id, isAuthenticated]);
 
     // Scroll handler with debouncing
     const handleScroll = useCallback(
@@ -601,16 +536,16 @@ const moreOptions = useMemo(() => {
     // Fetch user posts with rate limit handling
     const fetchUserPosts = useCallback(
         async (userId, page = 1, limit = 10) => {
-            console.log(
-                "fetchUserPosts called for userId:",
-                userId,
-                "at",
-                new Date().toISOString()
-            );
+            // console.log(
+            //     "fetchUserPosts called for userId:",
+            //     userId,
+            //     "at",
+            //     new Date().toISOString()
+            // );
             if (!userId || isPostsLoading || hasFetched) {
-                console.log(
-                    "Skipping fetchUserPosts: No userId, loading, or already fetched"
-                );
+                // console.log(
+                //     "Skipping fetchUserPosts: No userId, loading, or already fetched"
+                // );
                 return;
             }
 
@@ -695,7 +630,7 @@ const moreOptions = useMemo(() => {
                 abortControllerRef.current = null;
             }
         },
-        [token]
+        [token, isPostsLoading, hasFetched] // ADDED: Missing dependencies
     );
 
     // Fetch user points
@@ -744,12 +679,10 @@ const moreOptions = useMemo(() => {
                 setIsPointsLoading(false);
             }
         },
-        [token, isAuthenticated, isMyProfile]
+        [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded] // ADDED: Missing dependencies
     );
 
     // Fetch user profile
-    // Replace the fetchUserProfile function with this fixed version:
-
     const fetchUserProfile = useCallback(async () => {
         if (isProfileLoading) return;
 
@@ -934,7 +867,6 @@ const moreOptions = useMemo(() => {
     }
 };
 
-
     const handleShareProfile = async () => {
         try {
             toast.error(
@@ -953,24 +885,95 @@ const moreOptions = useMemo(() => {
         fetchUserProfile();
     };
 
-    const handleCommentSuccess = () => {
-        if (postToComment) {
-            setPosts((prev) =>
-                prev.map((post) => {
-                    if (post.id === postToComment.id) {
-                        return { ...post, commentCount: post.commentCount + 1 };
-                    }
-                    return post;
-                })
-            );
+    // ADDED: Load menu options when modal is visible (same as PostPage)
+    useEffect(() => {
+        if (!isModalVisible || !selectedPost || isLoadingOptions) {
+            return;
         }
-    };
+
+        const loadOptions = async () => {
+            setIsLoadingOptions(true);
+            try {
+                const options = await loadPostMenuOptions(selectedPost);
+                setFilteredOptions(options);
+            } catch (error) {
+                console.error("Error loading menu options:", error);
+                // Fallback options
+                const isOwnPost = isAuthenticated && currentUser && (selectedPost.user === currentUser._id || selectedPost.userId === currentUser._id);
+                const fallbackOptions = menuOptions.filter(option => {
+                    if (option.text === 'Delete Post') return isOwnPost;
+                    if (option.text === 'Follow' || option.text === 'Unfollow' || option.text === 'Block') return !isOwnPost;
+                    return true;
+                });
+                setFilteredOptions(fallbackOptions);
+            } finally {
+                setIsLoadingOptions(false);
+            }
+        };
+
+        loadOptions();
+    }, [isModalVisible, selectedPost?.id, isAuthenticated, currentUser?._id, loadPostMenuOptions]);
+
+    // ADDED: Handle menu option press with proper parameters (same as PostPage)
+    const handleMenuPress = useCallback((option) => {
+        if (!selectedPost) {
+            toast.error('No post selected');
+            return;
+        }
+        
+        handleMenuOptionPress(option, selectedPost, setModalVisible);
+    }, [selectedPost, handleMenuOptionPress]);
+
+    // ADDED: Handle comment success callback
+    const handleCommentSuccess = useCallback(() => {
+        setCommentModalVisible(false);
+        toast.success('Comment posted successfully!');
+        // Refresh posts to show new comment
+        if (user?._id) {
+            setHasFetched(false);
+            fetchUserPosts(user._id);
+        }
+    }, [user?._id, fetchUserPosts]);
+
+    // ADDED: More options for profile menu
+    const moreOptions = useMemo(() => [
+        {
+            icon: Flag,
+            label: 'Report User',
+            onPress: () => {
+                setIsMoreModalVisible(false);
+                toast.error('Coming soon! Report functionality.');
+            },
+            danger: true,
+            loading: false
+        },
+        {
+            icon: Ban,
+            label: 'Block User',
+            onPress: () => {
+                setIsMoreModalVisible(false);
+                toast.error('Coming soon! Block functionality.');
+            },
+            danger: true,
+            loading: false
+        },
+        {
+            icon: Share2,
+            label: 'Share Profile',
+            onPress: () => {
+                setIsMoreModalVisible(false);
+                handleShareProfile();
+            },
+            danger: false,
+            loading: false
+        }
+    ], []);
 
     useEffect(() => {
         if (!initialUser || isRefreshing) {
             fetchUserProfile();
         }
-    }, [initialUser, isRefreshing]);
+    }, [initialUser, isRefreshing, fetchUserProfile]); // ADDED: Missing dependency
 
     useEffect(() => {
         if (
@@ -1068,8 +1071,7 @@ const moreOptions = useMemo(() => {
                                 }}
                                 transition={{ type: "spring", stiffness: 100 }}
                             >
-                                <Image
-                                    src={user.profilePicture || defaultCover}
+                                <Image                                    src={user.profilePicture || defaultCover}
                                     alt="Profile"
                                     className="w-full h-full rounded-full object-cover"
                                     width={PROFILE_IMAGE_MAX_SIZE}
@@ -1098,9 +1100,6 @@ const moreOptions = useMemo(() => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        {/* Add remaining profile info here... */}
-
-
                         {/* Profile Info */}
                         <div className="mt-4 text-center px-4">
                             <div className="flex items-center justify-center">
@@ -1154,25 +1153,25 @@ const moreOptions = useMemo(() => {
                                 ) : (
                                     <>
                                         <button
-    onClick={handleFollowToggle}
-    disabled={followLoading}
-    className={`flex-1 py-2.5 rounded-full text-center font-medium transition-colors disabled:opacity-50 ${
-        isFollowing
-            ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
-            : "bg-primary text-white hover:bg-sky-600"
-    }`}
->
-    {followLoading ? (
-        <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-            <span className="ml-2">
-                {isFollowing ? "Unfollowing..." : "Following..."}
-            </span>
-        </div>
-    ) : (
-        isFollowing ? "Following" : "Follow"
-    )}
-</button>
+                                            onClick={handleFollowToggle}
+                                            disabled={followLoading}
+                                            className={`flex-1 py-2.5 rounded-full text-center font-medium transition-colors disabled:opacity-50 ${
+                                                isFollowing
+                                                    ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                                                    : "bg-primary text-white hover:bg-sky-600"
+                                            }`}
+                                        >
+                                            {followLoading ? (
+                                                <div className="flex items-center justify-center">
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                                                    <span className="ml-2">
+                                                        {isFollowing ? "Unfollowing..." : "Following..."}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                isFollowing ? "Following" : "Follow"
+                                            )}
+                                        </button>
                                         {user._id && (
                                             <Link
                                                 href={`/messages/chat/${user._id}`}
@@ -1249,26 +1248,23 @@ const moreOptions = useMemo(() => {
                             <>
                                 {posts.length > 0 ? (
                                     posts.map((post, index) => (
-                                         <PostCard
-                        post={post}
-                        handleLikePost={postHandlers.handleLikePost}
-                        handleUnlikePost={postHandlers.handleUnlikePost}
-                        handleCommentPost={postHandlers.handleCommentPost}
-                        handleAmplifyPost={postHandlers.handleAmplifyPost}
-                        handleBookmarkPost={postHandlers.handleBookmarkPost}
-                        handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                        setSelectedPost={setSelectedPost}
-                        setModalVisible={setModalVisible}
-                        handleDislikePost={postHandlers.handleDislikePost}
-                      handleUndislikePost={postHandlers.handleUndislikePost}
-                      />
+                                        <PostCard
+                                            key={post.id || index}
+                                            post={post}
+                                            handleLikePost={postHandlers.handleLikePost}
+                                            handleUnlikePost={postHandlers.handleUnlikePost}
+                                            handleDislikePost={postHandlers.handleDislikePost}
+                                            handleUndislikePost={postHandlers.handleUndislikePost}
+                                            handleCommentPost={postHandlers.handleCommentPost}
+                                            handleAmplifyPost={postHandlers.handleAmplifyPost}
+                                            handleBookmarkPost={postHandlers.handleBookmarkPost}
+                                            handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                                            setSelectedPost={setSelectedPost}
+                                            setModalVisible={setModalVisible}
+                                            username={currentUser?.username}
+                                        />
                                     ))
                                 ) : (
-                                        // {isPostsLoading && posts.length === 0 ? (
-                                                        //   <div className="flex cursor-pointer justify-center items-center py-12">
-                                                        //     <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                                                        //   </div>
-                                                        // )
                                     <div className="flex flex-col border-2 w-xl items-center justify-center py-12">
                                         <ImageIcon className="text-gray-300 text-5xl" />
                                         <h3 className="mt-4 text-lg font-medium text-gray-700">
@@ -1317,133 +1313,116 @@ const moreOptions = useMemo(() => {
                     <div className="h-20"></div>
                 </div>
 
+                {/* --- MODALS --- */}
+                {/* Profile More Options Modal */}
                 <CustomModal
                     visible={isMoreModalVisible}
                     onClose={() => setIsMoreModalVisible(false)}
                     title="More Options"
                 >
-                    <div className="bg-white p-4">
+                    <div className="p-4">
                         {moreOptions.map((option, index) => (
-            <button
-                key={index}
-                onClick={option.onPress}
-                disabled={option.loading}
-                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                    option.danger
-                        ? 'hover:bg-red-50 text-red-600'
-                        : 'hover:bg-gray-50 text-gray-700'
-                }`}
-            >
-                <option.icon className="w-5 h-5 mr-3" />
-                <span className="font-medium">{option.label}</span>
-                {option.loading && (
-                    <div className="ml-auto">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                    </div>
-                )}
-            </button>
-        ))}
-                        <button
-                            onClick={() => setIsMoreModalVisible(false)}
-                            className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium cursor-pointer"
-                        >
-                            Cancel
-                        </button>
+                            <button
+                                key={index}
+                                onClick={option.onPress}
+                                disabled={option.loading}
+                                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    option.danger
+                                        ? 'hover:bg-red-50 text-red-600'
+                                        : 'hover:bg-gray-50 text-gray-700'
+                                }`}
+                            >
+                                <option.icon className="w-5 h-5 mr-3" />
+                                <span className="font-medium">{option.label}</span>
+                                {option.loading && (
+                                    <div className="ml-auto">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                                    </div>
+                                )}
+                            </button>
+                        ))}
                     </div>
                 </CustomModal>
-                <CustomModal
-                    visible={isModalVisible}
-                    onClose={() => setModalVisible(false)}
-                    title="Post Options"
-                >
-                    <div className="bg-white p-4">
+
+                {/* MODIFIED: Post Options Modal (same structure as PostPage) */}
+                <CustomModal visible={isModalVisible} onClose={() => setModalVisible(false)} title="Post Options">
+                    <div className="p-4">
                         {selectedPost && (
                             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-                                <img
-                                  src={getProfilePicture(selectedPost?.profilePic)}
-                                  alt={selectedPost?.username || "Profile"}
-                                  width={40}
-                                  height={40}
-                                  className="rounded-full"
+                                <Image 
+                                    src={getProfilePicture(selectedPost?.profilePic)} 
+                                    alt={selectedPost?.username || "Profile"} 
+                                    width={40} 
+                                    height={40} 
+                                    className="rounded-full" 
                                 />
                                 <div className="ml-3">
-                                    <h3 className="text-base font-medium text-gray-800">
-                                        {selectedPost.username}
-                                    </h3>
-                                    <p className="text-xs text-gray-500">
-                                        {selectedPost.timestamp}
-                                    </p>
+                                    <p className="font-semibold text-gray-800">{selectedPost.username}</p>
+                                    <p className="text-sm text-gray-500 truncate">{selectedPost.content}</p>
                                 </div>
                             </div>
                         )}
-                        <button
-                            className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-                            onClick={() => {
-                                setModalVisible(false);
-                                if (selectedPost) {
-                                    postHandlers.handleBookmarkPost(selectedPost.id);
-                                }
-                            }}
-                        >
-                            <div className="w-8">
-                                <Bookmark className="text-gray-600 text-xl" />
-                            </div>
-                            <span className="text-base text-gray-800 font-medium">
-                                Save Post
-                            </span>
-                        </button>
-                        <Link
-                            href={`/home/post-detail?postId=${selectedPost?.id}`}
-                            className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-                            onClick={() => setModalVisible(false)}
-                        >
-                            <div className="w-8">
-                                <MessageCircle className="text-gray-600 text-xl" />
-                            </div>
-                            <span className="text-base text-gray-800 font-medium">
-                                View Comments
-                            </span>
-                        </Link>
-                        <button
-                            className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-                            onClick={() => {
-                                setModalVisible(false);
-                                if (confirm("Are you sure you want to report this post?")) {
-                                    toast.success("Thank you for your report.");
-                                }
-                            }}
-                        >
-                            <div className="w-8">
-                                <Flag className="text-gray-600 text-xl" />
-                            </div>
-                            <span className="text-base text-red-500 font-medium">
-                                Report Post
-                            </span>
-                        </button>
-                        <button
-                            onClick={() => setModalVisible(false)}
-                            className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
-                        >
-                            Cancel
-                        </button>
+                        <div className="space-y-2">
+                            {isLoadingOptions ? (
+                                <div className="flex items-center justify-center p-4">
+                                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                    <span>Loading options...</span>
+                                </div>
+                            ) : (
+                                filteredOptions.map((option, index) => (
+                                    <button 
+                                        key={`${option.text}-${index}`}
+                                        onClick={() => handleMenuPress(option)} 
+                                        className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
+                                            option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report' 
+                                                ? 'hover:bg-red-50 text-red-600' 
+                                                : 'hover:bg-gray-50 text-gray-700'
+                                        }`}
+                                    >
+                                        <option.icon className="w-5 h-5 mr-3" />
+                                        <span className="font-medium">{option.text}</span>
+                                    </button>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </CustomModal>
+
+                {/* ADDED: Comment Modal */}
+                <CommentModal 
+                    visible={isCommentModalVisible} 
+                    onClose={() => setCommentModalVisible(false)} 
+                    title="Add Comment" 
+                    post={postToComment} 
+                    onSuccess={handleCommentSuccess}
+                    token={token} 
+                />
+
+                {/* ADDED: Amplify Modal */}
                 <AmplifyModal
-                    isVisible={isAmplifyModalVisible}
+                    visible={isAmplifyModalVisible}
                     onClose={() => setAmplifyModalVisible(false)}
                     post={postToAmplify}
                     token={token}
                     onSuccess={() => {
                         setAmplifyModalVisible(false);
-                        fetchUserProfile();
+                        // Refresh posts to show amplification
+                        if (user?._id) {
+                            setHasFetched(false);
+                            fetchUserPosts(user._id);
+                        }
                     }}
                 />
-                <CommentModal
-                    isVisible={isCommentModalVisible}
-                    onClose={() => setCommentModalVisible(false)}
-                    post={postToComment}
+
+                {/* ADDED: Report Modal */}
+                <ReportModal
+                    visible={isReportModalVisible}
+                    onClose={() => setReportModalVisible(false)}
+                    post={postToReport}
                     token={token}
-                    onSuccess={handleCommentSuccess}
+                    onSuccess={() => {
+                        setReportModalVisible(false);
+                    }}
                 />
             </div>
         </div>
