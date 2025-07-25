@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { fonts } from "../../app/utils/fonts";
 
 // Update EmptyFeed.js to handle session expiration
 const EmptyFeed = ({ isAuthenticated, handleCreatePost, error, onLogin }) => {
@@ -21,16 +20,10 @@ const EmptyFeed = ({ isAuthenticated, handleCreatePost, error, onLogin }) => {
         alt="No posts placeholder"
         className="w-40 h-40 mb-6"
       />
-      <h2
-        style={{ fontFamily: fonts.Bold }}
-        className="text-xl text-gray-700 mb-2 text-center"
-      >
+      <h2 className="text-xl text-gray-700 mb-2 text-center">
         {hasAuthError ? "Session Expired" : "No posts yet"}
       </h2>
-      <p
-        style={{ fontFamily: fonts.Regular }}
-        className="text-base text-gray-500 mb-6 text-center"
-      >
+      <p className="text-base text-gray-500 mb-6 text-center">
         {hasAuthError
           ? "Your session has expired. Please login again."
           : isAuthenticated
@@ -43,18 +36,14 @@ const EmptyFeed = ({ isAuthenticated, handleCreatePost, error, onLogin }) => {
           onClick={onLogin}
           className="bg-primary py-3 px-8 rounded-full hover:bg-sky-600 transition-colors"
         >
-          <span style={{ fontFamily: fonts.Bold }} className="text-white">
-            Login
-          </span>
+          <span className="text-white">Login</span>
         </button>
       ) : (
         <button
           onClick={handleCreatePost}
           className="bg-primary py-3 px-8 rounded-full hover:bg-sky-600 transition-colors"
         >
-          <span style={{ fontFamily: fonts.Bold }} className="text-white">
-            Create Post
-          </span>
+          <span className="text-white">Create Post</span>
         </button>
       )}
     </div>
