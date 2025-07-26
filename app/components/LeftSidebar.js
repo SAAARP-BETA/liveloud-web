@@ -15,8 +15,8 @@ import {
   Crown,
   Users,
 } from "lucide-react";
-import { useAuth } from "../app/context/AuthContext";
-import { API_ENDPOINTS } from "../app/utils/config";
+import { useAuth } from "../context/AuthContext";
+import { API_ENDPOINTS } from "../utils/config";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import LongLogo from "@/app/assets/LongLogo.png";

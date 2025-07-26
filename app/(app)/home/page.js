@@ -24,10 +24,7 @@ import {
   Ban,
   Loader2,
 } from "lucide-react";
-import {
-  Image as PhotoIcon,
-  X as XMarkIcon,
-} from 'lucide-react';
+import { Image as PhotoIcon, X as XMarkIcon } from "lucide-react";
 
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
@@ -35,16 +32,15 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
 
-
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import PostCard from '../../../Components/ui/PostCard';
-import EmptyFeed from '@/Components/home/EmptyFeed';
-import CommentModal from '@/Components/ui/CommentModal';
-import AmplifyModal from '@/Components/ui/AmplifyModal';
-import CustomModal from '@/Components/ui/Modal';
-import ReportModal from '@/Components/ui/ReportModal';
-import Image from 'next/image';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import PostCard from "../../components/ui/PostCard";
+import EmptyFeed from "@/app/components/Home/EmptyFeed";
+import CommentModal from "@/app/components/ui/CommentModal";
+import AmplifyModal from "@/app/components/ui/AmplifyModal";
+import CustomModal from "@/app/components/ui/Modal";
+import ReportModal from "@/app/components/ui/ReportModal";
+import Image from "next/image";
+import toast from "react-hot-toast";
 // import {
 //   Plus as PlusIcon,
 //   Image as PhotoIcon,
@@ -69,13 +65,12 @@ import toast from 'react-hot-toast';
 import {
   createPostHandlers,
   formatPostFromApi,
-} from '../../utils/postFunctions';
+} from "../../utils/postFunctions";
 
 const MAX_CHAR_LIMIT = 1000;
 const MEDIA_LIMIT = 4;
 // --- FIX: Define the page limit as a constant ---
 const POST_LIMIT = 10;
-
 
 // Constants
 const REFRESH_INTERVAL = 60000; // 1 minute
@@ -83,23 +78,38 @@ const MIN_FETCH_INTERVAL = 5000; // 5 seconds
 
 // Feed types configuration
 const FEED_TYPES = [
-  { key: 'home', title: 'Home', endpoint: 'home', requiresAuth: true },
-  { key: 'trending', title: 'Trending', endpoint: 'trending', requiresAuth: false },
-  { key: 'latest', title: 'Latest', endpoint: 'latest', requiresAuth: false },
-  { key: 'hot', title: 'Hot', endpoint: 'hot', requiresAuth: false },
-  { key: 'popular', title: 'Popular', endpoint: 'popular', requiresAuth: false },
+  { key: "home", title: "Home", endpoint: "home", requiresAuth: true },
+  {
+    key: "trending",
+    title: "Trending",
+    endpoint: "trending",
+    requiresAuth: false,
+  },
+  { key: "latest", title: "Latest", endpoint: "latest", requiresAuth: false },
+  { key: "hot", title: "Hot", endpoint: "hot", requiresAuth: false },
+  {
+    key: "popular",
+    title: "Popular",
+    endpoint: "popular",
+    requiresAuth: false,
+  },
 ];
-
 
 const HomePage = () => {
   const router = useRouter();
   const { user, token, isAuthenticated, error, logout } = useAuth();
 
   // State management
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState("home");
   const [tabData, setTabData] = useState({
     home: { posts: [], page: 1, hasMore: true, loading: false, error: null },
-    trending: { posts: [], page: 1, hasMore: true, loading: false, error: null },
+    trending: {
+      posts: [],
+      page: 1,
+      hasMore: true,
+      loading: false,
+      error: null,
+    },
     latest: { posts: [], page: 1, hasMore: true, loading: false, error: null },
     hot: { posts: [], page: 1, hasMore: true, loading: false, error: null },
     popular: { posts: [], page: 1, hasMore: true, loading: false, error: null },
@@ -109,10 +119,8 @@ const HomePage = () => {
   const [showComposeButton, setShowComposeButton] = useState(false);
   const [progress, setProgress] = useState(0);
 
-
-
   // Post composer
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
 
   // Modals
   const [isModalVisible, setModalVisible] = useState(false);
@@ -145,9 +153,9 @@ const HomePage = () => {
 
   // Helper function to update tab data
   const updateTabData = (tabKey, updates) => {
-    setTabData(prev => ({
+    setTabData((prev) => ({
       ...prev,
-      [tabKey]: { ...prev[tabKey], ...updates }
+      [tabKey]: { ...prev[tabKey], ...updates },
     }));
   };
 
@@ -159,7 +167,7 @@ const HomePage = () => {
     user,
     token,
     (updater) => {
-      if (typeof updater === 'function') {
+      if (typeof updater === "function") {
         updateTabData(activeTab, { posts: updater(getCurrentTabData().posts) });
       } else {
         updateTabData(activeTab, { posts: updater });
@@ -186,7 +194,7 @@ const HomePage = () => {
 
   // Load feed when tab changes or authentication changes
   useEffect(() => {
-    const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
+    const currentFeedType = FEED_TYPES.find((feed) => feed.key === activeTab);
 
     // Check if feed requires authentication
     if (currentFeedType?.requiresAuth && !isAuthenticated) {
@@ -195,14 +203,17 @@ const HomePage = () => {
 
     // Load feed if not already loaded or if it's the home feed and user just authenticated
     const currentTabData = tabData[activeTab];
-    if (currentTabData.posts.length === 0 || (activeTab === 'home' && isAuthenticated)) {
+    if (
+      currentTabData.posts.length === 0 ||
+      (activeTab === "home" && isAuthenticated)
+    ) {
       fetchFeed(activeTab, 1, true);
     }
   }, [activeTab, isAuthenticated]);
 
   // Periodic refresh for active tab
   useEffect(() => {
-    const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
+    const currentFeedType = FEED_TYPES.find((feed) => feed.key === activeTab);
 
     if (currentFeedType?.requiresAuth && !isAuthenticated) {
       return;
@@ -228,338 +239,353 @@ const HomePage = () => {
     }
   }, []);
 
-
-
   // Fetch feed for specific tab
-  const fetchFeed = useCallback(async (feedType, pageNum = 1, refresh = false) => {
-  const feedConfig = FEED_TYPES.find(feed => feed.key === feedType);
-  if (!feedConfig) return;
+  const fetchFeed = useCallback(
+    async (feedType, pageNum = 1, refresh = false) => {
+      const feedConfig = FEED_TYPES.find((feed) => feed.key === feedType);
+      if (!feedConfig) return;
 
-  // Get current state synchronously
-  const currentTabData = tabData[feedType];
-  
-  // Validation checks
-  if (currentTabData.loading) return;
-  if (!currentTabData.hasMore && !refresh && pageNum > 1) return;
+      // Get current state synchronously
+      const currentTabData = tabData[feedType];
 
-  // Check authentication requirement
-  if (feedConfig.requiresAuth && !isAuthenticated) {
-    setTabData(prev => ({
-      ...prev,
-      [feedType]: {
-        ...prev[feedType],
-        error: 'Please log in to view this feed',
-        posts: [],
-        hasMore: false,
-        loading: false // Ensure loading is false
-      }
-    }));
-    return;
-  }
+      // Validation checks
+      if (currentTabData.loading) return;
+      if (!currentTabData.hasMore && !refresh && pageNum > 1) return;
 
-  // Set loading state BEFORE async operations
-  setTabData(prev => ({
-    ...prev,
-    [feedType]: {
-      ...prev[feedType],
-      loading: true,
-      error: refresh ? null : prev[feedType].error
-    }
-  }));
-
-  // Move the actual fetch logic here instead of separate function
-  try {
-    // API call throttling
-    const now = Date.now();
-    const lastFetch = lastFetchTime[feedType] || 0;
-    if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
-      setTabData(prev => ({
-        ...prev,
-        [feedType]: { ...prev[feedType], loading: false }
-      }));
-      return;
-    }
-
-    setLastFetchTime(prev => ({ ...prev, [feedType]: now }));
-
-    // Set request headers
-    const headers = {
-      'Content-Type': 'application/json'
-    };
-    if (token && feedConfig.requiresAuth) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
-
-    const response = await fetch(url, {
-      headers,
-      signal: AbortSignal.timeout(15000)
-    });
-
-    // Handle auth errors
-    if (response.status === 401 || response.status === 403) {
-      if (feedConfig.requiresAuth) {
-        setTabData(prev => ({
+      // Check authentication requirement
+      if (feedConfig.requiresAuth && !isAuthenticated) {
+        setTabData((prev) => ({
           ...prev,
           [feedType]: {
             ...prev[feedType],
-            error: 'Your session has expired. Please log in again.',
+            error: "Please log in to view this feed",
             posts: [],
             hasMore: false,
-            loading: false
-          }
+            loading: false, // Ensure loading is false
+          },
         }));
-        await logout();
         return;
       }
-    }
 
-    // Handle rate limiting
-    if (response.status === 429) {
-      setTabData(prev => ({
+      // Set loading state BEFORE async operations
+      setTabData((prev) => ({
         ...prev,
         [feedType]: {
           ...prev[feedType],
-          error: 'Rate limited. Please wait a moment before refreshing.',
-          loading: false
-        }
+          loading: true,
+          error: refresh ? null : prev[feedType].error,
+        },
       }));
-      return;
-    }
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
-    }
+      // Move the actual fetch logic here instead of separate function
+      try {
+        // API call throttling
+        const now = Date.now();
+        const lastFetch = lastFetchTime[feedType] || 0;
+        if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
+          setTabData((prev) => ({
+            ...prev,
+            [feedType]: { ...prev[feedType], loading: false },
+          }));
+          return;
+        }
 
-    const responseText = await response.text();
-    const data = JSON.parse(responseText);
+        setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
 
-    if (!data.posts || !Array.isArray(data.posts)) {
-      throw new Error('Invalid server response format');
-    }
+        // Set request headers
+        const headers = {
+          "Content-Type": "application/json",
+        };
+        if (token && feedConfig.requiresAuth) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
 
-    // Process posts
-    const formattedPosts = data.posts
-      .map((post, index) => post ? formatPostFromApi(post, index) : null)
-      .filter(Boolean);
+        const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
 
-    const hasMore = formattedPosts.length === POST_LIMIT;
+        const response = await fetch(url, {
+          headers,
+          signal: AbortSignal.timeout(15000),
+        });
 
-    // Update state
-    setTabData(prev => {
-      const prevTabData = prev[feedType];
-      
-      if (refresh) {
-        return {
+        // Handle auth errors
+        if (response.status === 401 || response.status === 403) {
+          if (feedConfig.requiresAuth) {
+            setTabData((prev) => ({
+              ...prev,
+              [feedType]: {
+                ...prev[feedType],
+                error: "Your session has expired. Please log in again.",
+                posts: [],
+                hasMore: false,
+                loading: false,
+              },
+            }));
+            await logout();
+            return;
+          }
+        }
+
+        // Handle rate limiting
+        if (response.status === 429) {
+          setTabData((prev) => ({
+            ...prev,
+            [feedType]: {
+              ...prev[feedType],
+              error: "Rate limited. Please wait a moment before refreshing.",
+              loading: false,
+            },
+          }));
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch ${feedType} feed: ${response.status}`
+          );
+        }
+
+        const responseText = await response.text();
+        const data = JSON.parse(responseText);
+
+        if (!data.posts || !Array.isArray(data.posts)) {
+          throw new Error("Invalid server response format");
+        }
+
+        // Process posts
+        const formattedPosts = data.posts
+          .map((post, index) => (post ? formatPostFromApi(post, index) : null))
+          .filter(Boolean);
+
+        const hasMore = formattedPosts.length === POST_LIMIT;
+
+        // Update state
+        setTabData((prev) => {
+          const prevTabData = prev[feedType];
+
+          if (refresh) {
+            return {
+              ...prev,
+              [feedType]: {
+                posts: formattedPosts,
+                page: 1,
+                hasMore,
+                error: null,
+                loading: false, // Always set loading to false
+              },
+            };
+          } else {
+            const existingIds = new Set(prevTabData.posts.map((p) => p.id));
+            const uniqueNewPosts = formattedPosts.filter(
+              (p) => !existingIds.has(p.id)
+            );
+
+            return {
+              ...prev,
+              [feedType]: {
+                ...prevTabData,
+                posts: [...prevTabData.posts, ...uniqueNewPosts],
+                page: pageNum,
+                hasMore,
+                loading: false, // Always set loading to false
+              },
+            };
+          }
+        });
+      } catch (error) {
+        console.error(`Error fetching ${feedType} feed:`, error);
+
+        setTabData((prev) => ({
           ...prev,
           [feedType]: {
-            posts: formattedPosts,
-            page: 1,
-            hasMore,
-            error: null,
-            loading: false // Always set loading to false
-          }
-        };
-      } else {
-        const existingIds = new Set(prevTabData.posts.map(p => p.id));
-        const uniqueNewPosts = formattedPosts.filter(p => !existingIds.has(p.id));
+            ...prev[feedType],
+            error: `Failed to load posts: ${error.message}`,
+            posts: refresh ? [] : prev[feedType].posts,
+            loading: false, // Always set loading to false on error
+          },
+        }));
 
-        return {
+        if (
+          error.message &&
+          (error.message.includes("unauthorized") ||
+            error.message.includes("forbidden") ||
+            error.message.includes("authentication")) &&
+          feedConfig.requiresAuth
+        ) {
+          await logout();
+        }
+      } finally {
+        // Ensure loading is always set to false
+        setRefreshing(false);
+        setTabData((prev) => ({
           ...prev,
           [feedType]: {
-            ...prevTabData,
-            posts: [...prevTabData.posts, ...uniqueNewPosts],
-            page: pageNum,
-            hasMore,
-            loading: false // Always set loading to false
-          }
-        };
+            ...prev[feedType],
+            loading: false,
+          },
+        }));
       }
-    });
-
-  } catch (error) {
-    console.error(`Error fetching ${feedType} feed:`, error);
-    
-    setTabData(prev => ({
-      ...prev,
-      [feedType]: {
-        ...prev[feedType],
-        error: `Failed to load posts: ${error.message}`,
-        posts: refresh ? [] : prev[feedType].posts,
-        loading: false // Always set loading to false on error
-      }
-    }));
-
-    if (error.message && (
-      error.message.includes('unauthorized') ||
-      error.message.includes('forbidden') ||
-      error.message.includes('authentication')
-    ) && feedConfig.requiresAuth) {
-      await logout();
-    }
-  } finally {
-    // Ensure loading is always set to false
-    setRefreshing(false);
-    setTabData(prev => ({
-      ...prev,
-      [feedType]: {
-        ...prev[feedType],
-        loading: false
-      }
-    }));
-  }
-}, [isAuthenticated, token, logout, tabData, lastFetchTime]);
+    },
+    [isAuthenticated, token, logout, tabData, lastFetchTime]
+  );
   // Handle tab change
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
   };
-  const performFetch = async (feedType, pageNum, refresh, feedConfig, currentTabData) => {
-  // API call throttling
-  const now = Date.now();
-  const lastFetch = lastFetchTime[feedType] || 0;
-  if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
-    setTabData(prev => ({
-      ...prev,
-      [feedType]: { ...prev[feedType], loading: false }
-    }));
-    return;
-  }
-
-  setLastFetchTime(prev => ({ ...prev, [feedType]: now }));
-
-  try {
-    // Set request headers
-    const headers = {
-      'Content-Type': 'application/json'
-    };
-    if (token && feedConfig.requiresAuth) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
-
-    const response = await fetch(url, {
-      headers,
-      signal: AbortSignal.timeout(15000)
-    });
-
-    // Handle auth errors
-    if (response.status === 401 || response.status === 403) {
-      if (feedConfig.requiresAuth) {
-        setTabData(prev => ({
-          ...prev,
-          [feedType]: {
-            ...prev[feedType],
-            error: 'Your session has expired. Please log in again.',
-            posts: [],
-            hasMore: false,
-            loading: false
-          }
-        }));
-        await logout();
-        return;
-      }
-    }
-
-    // Handle rate limiting
-    if (response.status === 429) {
-      setTabData(prev => ({
+  const performFetch = async (
+    feedType,
+    pageNum,
+    refresh,
+    feedConfig,
+    currentTabData
+  ) => {
+    // API call throttling
+    const now = Date.now();
+    const lastFetch = lastFetchTime[feedType] || 0;
+    if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
+      setTabData((prev) => ({
         ...prev,
-        [feedType]: {
-          ...prev[feedType],
-          error: 'Rate limited. Please wait a moment before refreshing.',
-          loading: false
-        }
+        [feedType]: { ...prev[feedType], loading: false },
       }));
       return;
     }
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
-    }
+    setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
 
-    const responseText = await response.text();
-    const data = JSON.parse(responseText);
+    try {
+      // Set request headers
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (token && feedConfig.requiresAuth) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
 
-    if (!data.posts || !Array.isArray(data.posts)) {
-      throw new Error('Invalid server response format');
-    }
+      const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
 
-    // Process posts
-    const formattedPosts = data.posts
-      .map((post, index) => post ? formatPostFromApi(post, index) : null)
-      .filter(Boolean);
+      const response = await fetch(url, {
+        headers,
+        signal: AbortSignal.timeout(15000),
+      });
 
-    const hasMore = formattedPosts.length === POST_LIMIT;
+      // Handle auth errors
+      if (response.status === 401 || response.status === 403) {
+        if (feedConfig.requiresAuth) {
+          setTabData((prev) => ({
+            ...prev,
+            [feedType]: {
+              ...prev[feedType],
+              error: "Your session has expired. Please log in again.",
+              posts: [],
+              hasMore: false,
+              loading: false,
+            },
+          }));
+          await logout();
+          return;
+        }
+      }
 
-    // Update state with functional update
-    setTabData(prev => {
-      const prevTabData = prev[feedType];
-      
-      if (refresh) {
-        return {
+      // Handle rate limiting
+      if (response.status === 429) {
+        setTabData((prev) => ({
           ...prev,
           [feedType]: {
-            ...prevTabData,
-            posts: formattedPosts,
-            page: 1,
-            hasMore,
-            error: null,
-            loading: false
-          }
-        };
-      } else {
-        const existingIds = new Set(prevTabData.posts.map(p => p.id));
-        const uniqueNewPosts = formattedPosts.filter(p => !existingIds.has(p.id));
-
-        return {
-          ...prev,
-          [feedType]: {
-            ...prevTabData,
-            posts: [...prevTabData.posts, ...uniqueNewPosts],
-            page: pageNum,
-            hasMore,
-            loading: false
-          }
-        };
+            ...prev[feedType],
+            error: "Rate limited. Please wait a moment before refreshing.",
+            loading: false,
+          },
+        }));
+        return;
       }
-    });
 
-  } catch (error) {
-    console.error(`Error fetching ${feedType} feed:`, error);
-    
-    setTabData(prev => ({
-      ...prev,
-      [feedType]: {
-        ...prev[feedType],
-        error: `Failed to load posts: ${error.message}`,
-        posts: refresh ? [] : prev[feedType].posts,
-        loading: false
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
       }
-    }));
 
-    if (error.message && (
-      error.message.includes('unauthorized') ||
-      error.message.includes('forbidden') ||
-      error.message.includes('authentication')
-    ) && feedConfig.requiresAuth) {
-      await logout();
+      const responseText = await response.text();
+      const data = JSON.parse(responseText);
+
+      if (!data.posts || !Array.isArray(data.posts)) {
+        throw new Error("Invalid server response format");
+      }
+
+      // Process posts
+      const formattedPosts = data.posts
+        .map((post, index) => (post ? formatPostFromApi(post, index) : null))
+        .filter(Boolean);
+
+      const hasMore = formattedPosts.length === POST_LIMIT;
+
+      // Update state with functional update
+      setTabData((prev) => {
+        const prevTabData = prev[feedType];
+
+        if (refresh) {
+          return {
+            ...prev,
+            [feedType]: {
+              ...prevTabData,
+              posts: formattedPosts,
+              page: 1,
+              hasMore,
+              error: null,
+              loading: false,
+            },
+          };
+        } else {
+          const existingIds = new Set(prevTabData.posts.map((p) => p.id));
+          const uniqueNewPosts = formattedPosts.filter(
+            (p) => !existingIds.has(p.id)
+          );
+
+          return {
+            ...prev,
+            [feedType]: {
+              ...prevTabData,
+              posts: [...prevTabData.posts, ...uniqueNewPosts],
+              page: pageNum,
+              hasMore,
+              loading: false,
+            },
+          };
+        }
+      });
+    } catch (error) {
+      console.error(`Error fetching ${feedType} feed:`, error);
+
+      setTabData((prev) => ({
+        ...prev,
+        [feedType]: {
+          ...prev[feedType],
+          error: `Failed to load posts: ${error.message}`,
+          posts: refresh ? [] : prev[feedType].posts,
+          loading: false,
+        },
+      }));
+
+      if (
+        error.message &&
+        (error.message.includes("unauthorized") ||
+          error.message.includes("forbidden") ||
+          error.message.includes("authentication")) &&
+        feedConfig.requiresAuth
+      ) {
+        await logout();
+      }
+    } finally {
+      setRefreshing(false);
     }
-  } finally {
-    setRefreshing(false);
-  }
-};
+  };
 
   // character count and media upload: create post
   const charCount = text.length;
   const isApproachingLimit = charCount > MAX_CHAR_LIMIT * 0.8;
   const isOverLimit = charCount > MAX_CHAR_LIMIT;
   const gradientColors = isOverLimit
-    ? ['#FF6B6B', '#FF0000']
+    ? ["#FF6B6B", "#FF0000"]
     : isApproachingLimit
-      ? ['#FFD166', '#FF9F1C']
-      : ['#06D6A0', '#1B9AAA'];
+    ? ["#FFD166", "#FF9F1C"]
+    : ["#06D6A0", "#1B9AAA"];
 
   // media upload
   const uploadMedia = async () => {
@@ -570,7 +596,7 @@ const HomePage = () => {
 
       const base64Images = await Promise.all(
         images.map(async (image, i) => {
-          if (image.startsWith('data:image')) return image;
+          if (image.startsWith("data:image")) return image;
 
           const response = await fetch(image);
           const blob = await response.blob();
@@ -596,9 +622,9 @@ const HomePage = () => {
 
       const res = await fetch(`${API_ENDPOINTS.MEDIA}/post`, {
         // const res = await fetch(`${API_ENDPOINTS.MEDIA}/post`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ images: base64Images, metadata }),
@@ -606,7 +632,7 @@ const HomePage = () => {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Failed to upload media');
+        throw new Error(err.message || "Failed to upload media");
       }
 
       const data = await res.json();
@@ -617,26 +643,26 @@ const HomePage = () => {
       };
     } catch (error) {
       setProgress(0);
-      throw new Error(error.message || 'Upload failed');
+      throw new Error(error.message || "Upload failed");
     }
   };
-
-
 
   // create post handlers
   const handleCreatePost = async () => {
     if (!isAuthenticated) {
-      toast.error('Please login to create posts');
+      toast.error("Please login to create posts");
       return;
     }
 
     if (!text.trim() && images.length === 0) {
-      toast.error('Please add some text or images to your post');
+      toast.error("Please add some text or images to your post");
       return;
     }
 
     if (isOverLimit) {
-      toast.error(`Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`);
+      toast.error(
+        `Content Too Long: Your post exceeds the ${MAX_CHAR_LIMIT} character limit.`
+      );
       return;
     }
 
@@ -649,22 +675,22 @@ const HomePage = () => {
       if (images.length > 0) {
         const uploadResults = await uploadMedia();
         if (!uploadResults || !uploadResults.urls || !uploadResults.metadata) {
-          throw new Error('Invalid upload response');
+          throw new Error("Invalid upload response");
         }
         mediaUrls = uploadResults.urls;
-        mediaIds = uploadResults.metadata.map(item => item.publicId);
+        mediaIds = uploadResults.metadata.map((item) => item.publicId);
       }
 
       setProgress(90); // Almost done
 
       const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          content: text.trim() || '[media-only-post]',
+          content: text.trim() || "[media-only-post]",
           media: mediaUrls,
           mediaIds: mediaIds,
         }),
@@ -672,26 +698,22 @@ const HomePage = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to create post');
+        throw new Error(errorData.message || "Failed to create post");
       }
 
       setProgress(100);
-      toast.success('Post created successfully!');
-      setText('');
+      toast.success("Post created successfully!");
+      setText("");
       setImages([]);
       setImageFilters([]);
       setIsInputFocused(false);
       setProgress(0);
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error("Error creating post:", error);
       toast.error(`Failed to create post: ${error.message}`);
       setProgress(0);
     }
   };
-
-
-
-
 
   const handleMediaButtonClick = () => {
     if (fileInputRef.current) {
@@ -701,85 +723,89 @@ const HomePage = () => {
 
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
-    files.forEach(file => {
+    files.forEach((file) => {
       if (images.length < MEDIA_LIMIT) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          setImages(prev => [...prev, e.target.result]);
-          setImageFilters(prev => [...prev, 'none']);
+          setImages((prev) => [...prev, e.target.result]);
+          setImageFilters((prev) => [...prev, "none"]);
         };
         reader.readAsDataURL(file);
       }
     });
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
-
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
+    if (e.key === "Enter" && e.ctrlKey) {
       handleCreatePost();
     }
   };
 
-
   // User interaction handlers
   const handleFollowUser = async (userId) => {
     if (!isAuthenticated) {
-      toast.error('Please login to follow users');
+      toast.error("Please login to follow users");
       return;
     }
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/followers/${userId}/follow`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/followers/${userId}/follow`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to follow user');
+        throw new Error("Failed to follow user");
       }
 
-      toast.error('You are now following this user');
+      toast.error("You are now following this user");
 
       // Update posts in current tab to reflect new following status
-      const updatedPosts = getCurrentTabData().posts.map(post =>
+      const updatedPosts = getCurrentTabData().posts.map((post) =>
         post.userId === userId ? { ...post, isFollowing: true } : post
       );
       updateTabData(activeTab, { posts: updatedPosts });
     } catch (error) {
-      console.error('Error following user:', error);
+      console.error("Error following user:", error);
       toast.error(`Failed to follow user: ${error.message}`);
     }
   };
 
   const handleUnfollowUser = async (userId) => {
     if (!isAuthenticated) {
-      toast.error('Please login to unfollow users');
+      toast.error("Please login to unfollow users");
       return;
     }
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/followers/${userId}/unfollow`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/followers/${userId}/unfollow`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to unfollow user');
+        throw new Error("Failed to unfollow user");
       }
 
-      toast.success('You have unfollowed this user');
+      toast.success("You have unfollowed this user");
 
       // Update posts in current tab to reflect new following status
-      const updatedPosts = getCurrentTabData().posts.map(post => {
+      const updatedPosts = getCurrentTabData().posts.map((post) => {
         if (post.user === userId) {
           return { ...post, isFollowing: false };
         }
@@ -787,7 +813,7 @@ const HomePage = () => {
       });
       updateTabData(activeTab, { posts: updatedPosts });
     } catch (error) {
-      console.error('Error unfollowing user:', error);
+      console.error("Error unfollowing user:", error);
       toast.error(`Failed to unfollow user: ${error.message}`);
     }
   };
@@ -797,36 +823,43 @@ const HomePage = () => {
   };
 
   const handleHidePost = (postId) => {
-    const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== postId);
+    const updatedPosts = getCurrentTabData().posts.filter(
+      (post) => post.id !== postId
+    );
     updateTabData(activeTab, { posts: updatedPosts });
-    toast.success('This post will no longer appear in your feed');
+    toast.success("This post will no longer appear in your feed");
   };
 
   const handleBlockUser = async (userId) => {
     if (!isAuthenticated) {
-      toast.error('Please login to block users');
+      toast.error("Please login to block users");
       return;
     }
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/users/block/${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/users/block/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to block user');
+        throw new Error("Failed to block user");
       }
 
       // Remove all posts from this user in current tab
-      const updatedPosts = getCurrentTabData().posts.filter(post => post.userId !== userId);
+      const updatedPosts = getCurrentTabData().posts.filter(
+        (post) => post.userId !== userId
+      );
       updateTabData(activeTab, { posts: updatedPosts });
-      toast.success('You will no longer see content from this user');
+      toast.success("You will no longer see content from this user");
     } catch (error) {
-      console.error('Error blocking user:', error);
+      console.error("Error blocking user:", error);
       toast.error(`Failed to block user: ${error.message}`);
     }
   };
@@ -834,7 +867,7 @@ const HomePage = () => {
   const handleCommentSuccess = () => {
     // Update comment count without full refresh
     if (postToComment) {
-      const updatedPosts = getCurrentTabData().posts.map(post => {
+      const updatedPosts = getCurrentTabData().posts.map((post) => {
         if (post.id === postToComment.id) {
           return { ...post, commentCount: post.commentCount + 1 };
         }
@@ -848,75 +881,77 @@ const HomePage = () => {
     setRefreshing(true);
     fetchFeed(activeTab, 1, true);
   }, [fetchFeed, activeTab]);
-const handleLoadMore = useCallback(() => {
-  const currentTabData = tabData[activeTab];
-  console.log('Load more triggered:', {
-    loading: currentTabData.loading,
-    hasMore: currentTabData.hasMore,
-    page: currentTabData.page
-  });
-  
-  if (!currentTabData.loading && currentTabData.hasMore) {
-    const nextPage = currentTabData.page + 1;
-    console.log('Fetching page:', nextPage);
-    fetchFeed(activeTab, nextPage);
-  }
-}, [activeTab, tabData, fetchFeed]);
+  const handleLoadMore = useCallback(() => {
+    const currentTabData = tabData[activeTab];
+    console.log("Load more triggered:", {
+      loading: currentTabData.loading,
+      hasMore: currentTabData.hasMore,
+      page: currentTabData.page,
+    });
 
+    if (!currentTabData.loading && currentTabData.hasMore) {
+      const nextPage = currentTabData.page + 1;
+      console.log("Fetching page:", nextPage);
+      fetchFeed(activeTab, nextPage);
+    }
+  }, [activeTab, tabData, fetchFeed]);
 
   // Check follow status for menu options
   const checkFollowStatus = async (userId) => {
     if (!isAuthenticated || !token) return false;
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/followers/${userId}/status`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/followers/${userId}/status`,
+        {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (!response.ok) return false;
 
       const data = await response.json();
       return data.isFollowing || false;
     } catch (error) {
-      console.error('Error checking follow status:', error);
+      console.error("Error checking follow status:", error);
       return false;
     }
   };
 
   // Menu options configuration
   const menuOptions = [
-    { icon: UserPlus, text: 'Follow' },
-    { icon: UserMinus, text: 'Unfollow' },
-    { icon: Info, text: 'About this account' },
-    { icon: Flag, text: 'Report' },
-    { icon: Ban, text: 'Block' },
-    { icon: Trash2, text: 'Delete Post' },
+    { icon: UserPlus, text: "Follow" },
+    { icon: UserMinus, text: "Unfollow" },
+    { icon: Info, text: "About this account" },
+    { icon: Flag, text: "Report" },
+    { icon: Ban, text: "Block" },
+    { icon: Trash2, text: "Delete Post" },
   ];
 
   // Load menu options based on post and user context
   const loadMenuOptions = async () => {
     if (!selectedPost || !selectedPost.user) {
       console.log(selectedPost);
-      console.log('Missing post data for menu options');
+      console.log("Missing post data for menu options");
       setFilteredOptions([]);
       return;
     }
 
     try {
       // Determine if this is the user's own post
-      const isOwnPost = isAuthenticated && user &&
-        selectedPost.user === user._id;
+      const isOwnPost =
+        isAuthenticated && user && selectedPost.user === user._id;
 
       // Check follow status if needed
       let isFollowing = selectedPost.isFollowing;
       if (isAuthenticated && !isOwnPost && isFollowing === undefined) {
         try {
-          console.log('Checking follow status for:', selectedPost.user);
+          console.log("Checking follow status for:", selectedPost.user);
           isFollowing = await checkFollowStatus(selectedPost.user);
 
           // Update post with follow status in current tab
-          const updatedPosts = getCurrentTabData().posts.map(post => {
+          const updatedPosts = getCurrentTabData().posts.map((post) => {
             if (post.id === selectedPost._id) {
               return { ...post, isFollowing };
             }
@@ -924,71 +959,78 @@ const handleLoadMore = useCallback(() => {
           });
           updateTabData(activeTab, { posts: updatedPosts });
         } catch (error) {
-          console.error('Error fetching follow status:', error);
+          console.error("Error fetching follow status:", error);
           isFollowing = false;
         }
       }
 
       // Filter menu options based on conditions
-      const filtered = menuOptions.filter(option => {
-        if (option.text === 'Follow') {
+      const filtered = menuOptions.filter((option) => {
+        if (option.text === "Follow") {
           return !isOwnPost && !isFollowing;
         }
-        if (option.text === 'Unfollow') {
+        if (option.text === "Unfollow") {
           return !isOwnPost && isFollowing;
         }
-        if (option.text === 'Block') {
+        if (option.text === "Block") {
           return !isOwnPost;
         }
-        if (option.text === 'Delete Post') {
+        if (option.text === "Delete Post") {
           return isOwnPost;
         }
         return true;
       });
 
-      console.log('Filtered options:', filtered.length);
+      console.log("Filtered options:", filtered.length);
       setFilteredOptions(filtered);
     } catch (error) {
-      console.error('Error loading menu options:', error);
+      console.error("Error loading menu options:", error);
       // Set default options if there's an error
       setFilteredOptions([
-        { icon: Flag, text: 'Report' },
-        { icon: EyeOff, text: 'Hide' }
+        { icon: Flag, text: "Report" },
+        { icon: EyeOff, text: "Hide" },
       ]);
     }
   };
 
   const handleDeletePost = async (postId) => {
     if (!isAuthenticated) {
-      toast.error('Please login to delete posts');
+      toast.error("Please login to delete posts");
       return;
     }
 
-    if (confirm('Are you sure you want to delete this post?')) {
+    if (confirm("Are you sure you want to delete this post?")) {
       try {
-        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const response = await fetch(
+          `${API_ENDPOINTS.SOCIAL}/posts/${postId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to delete post');
+          throw new Error("Failed to delete post");
         }
 
-        const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== postId);
+        const updatedPosts = getCurrentTabData().posts.filter(
+          (post) => post.id !== postId
+        );
         updateTabData(activeTab, { posts: updatedPosts });
-        toast.success('Post deleted successfully');
+        toast.success("Post deleted successfully");
       } catch (error) {
-        console.error('Error deleting post:', error);
+        console.error("Error deleting post:", error);
         toast.error(`Failed to delete post: ${error.message}`);
       }
     }
   };
 
   const handleReportSuccess = (reportedPostId) => {
-    const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== reportedPostId);
+    const updatedPosts = getCurrentTabData().posts.filter(
+      (post) => post.id !== reportedPostId
+    );
     updateTabData(activeTab, { posts: updatedPosts });
   };
 
@@ -999,30 +1041,30 @@ const handleLoadMore = useCallback(() => {
     const userId = selectedPost?.user;
 
     switch (option.text) {
-      case 'Follow':
+      case "Follow":
         if (isAuthenticated) {
           handleFollowUser(userId);
         } else {
-          toast.error('Please login to follow users');
+          toast.error("Please login to follow users");
         }
         break;
-      case 'Unfollow':
+      case "Unfollow":
         handleUnfollowUser(userId);
         break;
-      case 'Report':
+      case "Report":
         postHandlers.handleInitiateReport(selectedPost);
         break;
-      case 'Hide':
+      case "Hide":
         handleHidePost(selectedPost.id);
         break;
-      case 'Block':
+      case "Block":
         handleBlockUser(userId);
         break;
-      case 'About this account':
+      case "About this account":
         handleViewProfile(userId);
         break;
-      case 'Delete Post':
-        console.log('Delete post:', selectedPost.id);
+      case "Delete Post":
+        console.log("Delete post:", selectedPost.id);
         handleDeletePost(selectedPost.id);
         break;
       default:
@@ -1044,57 +1086,67 @@ const handleLoadMore = useCallback(() => {
               key={feedType.key}
               onClick={() => canAccess && handleTabChange(feedType.key)}
               className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors
-    ${isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-    ${!canAccess ? 'opacity-50 cursor-not-allowed' : ''}
+    ${
+      isActive
+        ? "bg-primary text-white"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+    }
+    ${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
     max-w-[100px] truncate overflow-hidden whitespace-nowrap`}
               disabled={!canAccess}
               title={feedType.title}
             >
               <span className="block truncate">{feedType.title}</span>
-              {feedType.requiresAuth && !isAuthenticated && ' 🔒'}
+              {feedType.requiresAuth && !isAuthenticated && " 🔒"}
             </button>
-
           );
         })}
       </div>
     </div>
   );
 
-
-
-
   const currentTabData = getCurrentTabData();
-  const currentFeedType = FEED_TYPES.find(feed => feed.key === activeTab);
+  const currentFeedType = FEED_TYPES.find((feed) => feed.key === activeTab);
 
   // --- Intersection Observer for Infinite Scroll ---
   const observer = useRef();
- const lastPostElementRef = useCallback(node => {
-  if (currentTabData.loading) return;
-  if (observer.current) observer.current.disconnect();
+  const lastPostElementRef = useCallback(
+    (node) => {
+      if (currentTabData.loading) return;
+      if (observer.current) observer.current.disconnect();
 
-  observer.current = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && currentTabData.hasMore && !currentTabData.loading) {
-      console.log('Intersection observer triggered - loading more posts');
-      // Use setTimeout to prevent multiple rapid triggers
-      setTimeout(() => {
-        setTabData(prevTabData => {
-          const currentTab = prevTabData[activeTab];
-          if (!currentTab.loading && currentTab.hasMore) {
-            fetchFeed(activeTab, currentTab.page + 1);
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (
+            entries[0].isIntersecting &&
+            currentTabData.hasMore &&
+            !currentTabData.loading
+          ) {
+            console.log("Intersection observer triggered - loading more posts");
+            // Use setTimeout to prevent multiple rapid triggers
+            setTimeout(() => {
+              setTabData((prevTabData) => {
+                const currentTab = prevTabData[activeTab];
+                if (!currentTab.loading && currentTab.hasMore) {
+                  fetchFeed(activeTab, currentTab.page + 1);
+                }
+                return prevTabData;
+              });
+            }, 100);
           }
-          return prevTabData;
-        });
-      }, 100);
-    }
-  }, {
-    threshold: 0.1,
-    rootMargin: '100px'
-  });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: "100px",
+        }
+      );
 
-  if (node) observer.current.observe(node);
-}, [currentTabData.loading, currentTabData.hasMore, activeTab, fetchFeed]);
+      if (node) observer.current.observe(node);
+    },
+    [currentTabData.loading, currentTabData.hasMore, activeTab, fetchFeed]
+  );
 
- return (
+  return (
     <>
       {/* --- Block 1: Create Post & Tabs --- */}
       <div className="md:w-xl max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
@@ -1103,9 +1155,11 @@ const handleLoadMore = useCallback(() => {
         {!isAuthenticated ? (
           <div className="min-h-[200px] bg-gray-50 flex items-center justify-center rounded-lg">
             <div className="text-center">
-              <p className="text-lg text-gray-600 mb-4">Please log in to create posts.</p>
+              <p className="text-lg text-gray-600 mb-4">
+                Please log in to create posts.
+              </p>
               <button
-                onClick={() => router.push('/login')}
+                onClick={() => router.push("/login")}
                 className="px-4 py-2 bg-primary cursor-pointer text-white rounded-full hover:bg-sky-600"
               >
                 Log In
@@ -1123,7 +1177,9 @@ const handleLoadMore = useCallback(() => {
                   height={40}
                   className="rounded-full w-[40] h-[40]"
                 />
-                <span className="text-gray-700 cursor-pointer">@{user.username}</span>
+                <span className="text-gray-700 cursor-pointer">
+                  @{user.username}
+                </span>
               </div>
               <div className="flex items-start space-x-3">
                 <textarea
@@ -1140,22 +1196,49 @@ const handleLoadMore = useCallback(() => {
                   <button
                     onClick={handleMediaButtonClick}
                     disabled={images.length >= MEDIA_LIMIT}
-                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${images.length >= MEDIA_LIMIT ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
+                      images.length >= MEDIA_LIMIT
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600" />
                   </button>
-                  <input type="file" multiple accept="image/*" onChange={handleImageUpload} ref={fileInputRef} className="hidden" />
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    ref={fileInputRef}
+                    className="hidden"
+                  />
                 </div>
               </div>
               {images.length > 0 && (
                 <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-thin scrollbar-thumb-gray-300">
                   {images.map((img, index) => (
-                    <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden">
-                      <Image src={img} alt="Uploaded" width={80} height={80} className="w-20 h-20 object-cover" />
-                      <button onClick={() => {
-                        setImages((prev) => prev.filter((_, i) => i !== index));
-                        setImageFilters((prev) => prev.filter((_, i) => i !== index));
-                      }} className="absolute top-1 right-1 bg-black/50 rounded-full p-1">
+                    <div
+                      key={index}
+                      className="relative w-20 h-20 rounded-lg overflow-hidden"
+                    >
+                      <Image
+                        src={img}
+                        alt="Uploaded"
+                        width={80}
+                        height={80}
+                        className="w-20 h-20 object-cover"
+                      />
+                      <button
+                        onClick={() => {
+                          setImages((prev) =>
+                            prev.filter((_, i) => i !== index)
+                          );
+                          setImageFilters((prev) =>
+                            prev.filter((_, i) => i !== index)
+                          );
+                        }}
+                        className="absolute top-1 right-1 bg-black/50 rounded-full p-1"
+                      >
                         <XMarkIcon className="w-4 h-4 text-white" />
                       </button>
                     </div>
@@ -1163,23 +1246,49 @@ const handleLoadMore = useCallback(() => {
                 </div>
               )}
               <div className="flex justify-between mt-2">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${gradientColors.join(', ')})` }}>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{
+                    background: `linear-gradient(135deg, ${gradientColors.join(
+                      ", "
+                    )})`,
+                  }}
+                >
                   <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
-                    <span className={`text-xs font-medium ${isOverLimit ? 'text-red-600' : isApproachingLimit ? 'text-yellow-500' : 'text-cyan-600'}`}>
+                    <span
+                      className={`text-xs font-medium ${
+                        isOverLimit
+                          ? "text-red-600"
+                          : isApproachingLimit
+                          ? "text-yellow-500"
+                          : "text-cyan-600"
+                      }`}
+                    >
                       {MAX_CHAR_LIMIT - charCount}
                     </span>
                   </div>
                 </div>
-                <button onClick={handleCreatePost} disabled={(!text.trim() && images.length === 0) || isOverLimit} className="p-2 cursor-pointer flex items-center justify-center bg-primary text-white rounded-full hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                <button
+                  onClick={handleCreatePost}
+                  disabled={
+                    (!text.trim() && images.length === 0) || isOverLimit
+                  }
+                  className="p-2 cursor-pointer flex items-center justify-center bg-primary text-white rounded-full hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
                   Post
                 </button>
               </div>
               {progress > 0 && progress < 100 && (
                 <div className="w-full mt-2">
                   <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div className="h-2 bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+                    <div
+                      className="h-2 bg-primary transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{Math.floor(progress)}% uploading...</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {Math.floor(progress)}% uploading...
+                  </p>
                 </div>
               )}
             </div>
@@ -1196,16 +1305,26 @@ const handleLoadMore = useCallback(() => {
             <p className="text-lg text-gray-600">Loading posts...</p>
           </div>
         ) : (
-          <div className={`transition-all duration-300 ${isInputFocused || images.length > 0 ? 'blur-sm pointer-events-none' : 'pointer-events-auto'}`}>
+          <div
+            className={`transition-all duration-300 ${
+              isInputFocused || images.length > 0
+                ? "blur-sm pointer-events-none"
+                : "pointer-events-auto"
+            }`}
+          >
             {/* Error states */}
-            {error && activeTab === 'home' && (
+            {error && activeTab === "home" && (
               <div className="p-4 mx-4 mt-4 bg-red-50 rounded-xl border border-red-100">
-                <p className="text-red-600 font-medium">Authentication Error: {error}</p>
+                <p className="text-red-600 font-medium">
+                  Authentication Error: {error}
+                </p>
               </div>
             )}
             {currentTabData.error && (
               <div className="p-4 mx-4 mt-4 bg-yellow-50 rounded-xl border border-yellow-100">
-                <p className="text-yellow-700 font-medium">{currentTabData.error}</p>
+                <p className="text-yellow-700 font-medium">
+                  {currentTabData.error}
+                </p>
               </div>
             )}
 
@@ -1215,7 +1334,10 @@ const handleLoadMore = useCallback(() => {
                 {currentTabData.posts.map((post, index) => {
                   const isLastPost = currentTabData.posts.length === index + 1;
                   return (
-                    <div key={`${post.id}-${activeTab}-${index}`} ref={isLastPost ? lastPostElementRef : null}>
+                    <div
+                      key={`${post.id}-${activeTab}-${index}`}
+                      ref={isLastPost ? lastPostElementRef : null}
+                    >
                       <PostCard
                         post={post}
                         handleLikePost={postHandlers.handleLikePost}
@@ -1237,7 +1359,11 @@ const handleLoadMore = useCallback(() => {
                   <div className="py-8 text-center mx-4">
                     <div className="inline-flex items-center space-x-3 px-6 py-4">
                       <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                      <div><span className="text-primary font-medium block">Loading more posts...</span></div>
+                      <div>
+                        <span className="text-primary font-medium block">
+                          Loading more posts...
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1255,41 +1381,72 @@ const handleLoadMore = useCallback(() => {
             )}
 
             {/* End of feed indicator */}
-            {!currentTabData.loading && currentTabData.posts.length > 5 && !currentTabData.hasMore && (
-              <div className="py-8 text-center">
-                <div className="inline-flex items-center space-x-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-full">
-                  <span className="text-sm font-medium">You're all caught up!</span>
+            {!currentTabData.loading &&
+              currentTabData.posts.length > 5 &&
+              !currentTabData.hasMore && (
+                <div className="py-8 text-center">
+                  <div className="inline-flex items-center space-x-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-full">
+                    <span className="text-sm font-medium">
+                      You're all caught up!
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             <div className="h-20" />
           </div>
         )}
       </div>
 
       {/* --- Block 3: Modals & Floating Button --- */}
-      {showComposeButton && activeTab === 'home' && (
+      {showComposeButton && activeTab === "home" && (
         <div className="fixed bottom-36 right-4 z-50">
-          <button onClick={handleCreatePost} className="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-sky-600 transition-colors">
+          <button
+            onClick={handleCreatePost}
+            className="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:bg-sky-600 transition-colors"
+          >
             <Plus size={24} className="text-white" />
           </button>
         </div>
       )}
 
-      <CustomModal visible={isModalVisible} onClose={() => setModalVisible(false)} title="Post Options">
+      <CustomModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        title="Post Options"
+      >
         <div className="p-4">
           {selectedPost && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
-              <Image src={getProfilePicture(selectedPost?.profilePic)} alt={selectedPost?.username || "Profile"} width={40} height={40} className="rounded-full" />
+              <Image
+                src={getProfilePicture(selectedPost?.profilePic)}
+                alt={selectedPost?.username || "Profile"}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
               <div className="ml-3">
-                <p className="font-semibold text-gray-800">{selectedPost.username}</p>
-                <p className="text-sm text-gray-500 truncate">{selectedPost.content}</p>
+                <p className="font-semibold text-gray-800">
+                  {selectedPost.username}
+                </p>
+                <p className="text-sm text-gray-500 truncate">
+                  {selectedPost.content}
+                </p>
               </div>
             </div>
           )}
           <div className="space-y-2">
             {filteredOptions.map((option, index) => (
-              <button key={index} onClick={() => handleMenuOptionPress(option)} className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${option.text === 'Delete Post' || option.text === 'Block' || option.text === 'Report' ? 'hover:bg-red-50 text-red-600' : 'hover:bg-gray-50 text-gray-700'}`}>
+              <button
+                key={index}
+                onClick={() => handleMenuOptionPress(option)}
+                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
+                  option.text === "Delete Post" ||
+                  option.text === "Block" ||
+                  option.text === "Report"
+                    ? "hover:bg-red-50 text-red-600"
+                    : "hover:bg-gray-50 text-gray-700"
+                }`}
+              >
                 <option.icon className="w-5 h-5 mr-3" />
                 <span className="font-medium">{option.text}</span>
               </button>
@@ -1298,7 +1455,14 @@ const handleLoadMore = useCallback(() => {
         </div>
       </CustomModal>
 
-      <CommentModal visible={isCommentModalVisible} onClose={() => setCommentModalVisible(false)} title="Add Comment" post={postToComment} onSuccess={handleCommentSuccess} token={token} />
+      <CommentModal
+        visible={isCommentModalVisible}
+        onClose={() => setCommentModalVisible(false)}
+        title="Add Comment"
+        post={postToComment}
+        onSuccess={handleCommentSuccess}
+        token={token}
+      />
 
       <AmplifyModal
         visible={isAmplifyModalVisible}
@@ -1308,9 +1472,13 @@ const handleLoadMore = useCallback(() => {
         title="Amplify Post"
         onSuccess={(postId) => {
           const currentPosts = getCurrentTabData().posts;
-          const updatedPosts = currentPosts.map(post => {
+          const updatedPosts = currentPosts.map((post) => {
             if (post.id === postId) {
-              return { ...post, amplifyCount: post.amplifyCount + 1, hasAmplified: true };
+              return {
+                ...post,
+                amplifyCount: post.amplifyCount + 1,
+                hasAmplified: true,
+              };
             }
             return post;
           });
@@ -1318,7 +1486,14 @@ const handleLoadMore = useCallback(() => {
         }}
       />
 
-      <ReportModal visible={isReportModalVisible} onClose={() => setReportModalVisible(false)} title="Report Post" post={postToReport} onSuccess={handleReportSuccess} token={token} />
+      <ReportModal
+        visible={isReportModalVisible}
+        onClose={() => setReportModalVisible(false)}
+        title="Report Post"
+        post={postToReport}
+        onSuccess={handleReportSuccess}
+        token={token}
+      />
     </>
   );
 };

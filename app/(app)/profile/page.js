@@ -1,5 +1,5 @@
 "use client";
-import defaultCover from '../../assets/Profilepic1.png';
+import defaultCover from "../../assets/Profilepic1.png";
 import React, {
   useState,
   useEffect,
@@ -7,21 +7,21 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 // import { fonts } from "../../utils/fonts";
-import CustomModal from "../../../Components/ui/Modal";
-import AmplifyModal from "../../../Components/ui/AmplifyModal";
-import CommentModal from "../../../Components/ui/CommentModal";
+import CustomModal from "../../components/ui/Modal";
+import AmplifyModal from "../../components/ui/AmplifyModal";
+import CommentModal from "../../components/ui/CommentModal";
 import {
   createPostHandlers,
   formatPostFromApi,
 } from "../../utils/postFunctions";
-import PostCard from "../../../Components/ui/PostCard";
+import PostCard from "../../components/ui/PostCard";
 import { API_ENDPOINTS } from "../../utils/config";
 
 import {
@@ -44,7 +44,7 @@ import {
   CheckCircle as Verified,
   Loader2,
 } from "lucide-react";
-import ReportModal from '@/Components/ui/ReportModal';
+import ReportModal from "@/app/components/ui/ReportModal";
 
 const POST_LIMIT = 10;
 
@@ -95,7 +95,7 @@ const PointsDisplay = ({ points, loading }) => {
   const progressPercentage = Math.min(
     ((points.totalPoints - currentLevel.minPoints) /
       currentLevel.pointsToNext) *
-    100,
+      100,
     100
   );
 
@@ -143,7 +143,7 @@ const PointsDisplay = ({ points, loading }) => {
             {Math.max(
               0,
               currentLevel.pointsToNext -
-              (points.totalPoints - currentLevel.minPoints)
+                (points.totalPoints - currentLevel.minPoints)
             )}{" "}
             pts to go
           </span>
@@ -217,8 +217,9 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
       {tabs.map((tab) => (
         <button
           key={tab.key}
-          className={`flex-1 flex items-center justify-center pb-2 ${activeTab === tab.key ? "border-b-2 border-primary" : ""
-            }`}
+          className={`flex-1 flex items-center justify-center pb-2 ${
+            activeTab === tab.key ? "border-b-2 border-primary" : ""
+          }`}
           onClick={() => onTabPress(tab.key)}
         >
           <div className="flex items-center cursor-pointer">
@@ -239,8 +240,9 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               />
             )}
             <span
-              className={`ml-1 text-sm font-medium ${activeTab === tab.key ? "text-primary" : "text-gray-500"
-                }`}
+              className={`ml-1 text-sm font-medium ${
+                activeTab === tab.key ? "text-primary" : "text-gray-500"
+              }`}
             >
               {tab.title}
             </span>
@@ -393,8 +395,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [postToComment, setPostToComment] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   // Report modal
-    const [isReportModalVisible, setReportModalVisible] = useState(false);
-    const [postToReport, setPostToReport] = useState(null);
+  const [isReportModalVisible, setReportModalVisible] = useState(false);
+  const [postToReport, setPostToReport] = useState(null);
 
   const [postPage, setPostPage] = useState(1);
   const [hasMorePosts, setHasMorePosts] = useState(true);
@@ -417,8 +419,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         setPostToComment,
         setCommentModalVisible,
         setPostToAmplify,
-        setAmplifyModalVisible,
-    
+        setAmplifyModalVisible
       ),
     [currentUser, token]
   );
@@ -444,10 +445,10 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         onPress: isMyProfile
           ? () => router.push("/profile/edit")
           : () => {
-            if (confirm("Are you sure you want to report this user?")) {
-              toast.success("Thank you for your report.");
-            }
-          },
+              if (confirm("Are you sure you want to report this user?")) {
+                toast.success("Thank you for your report.");
+              }
+            },
         danger: !isMyProfile,
       },
     ],
@@ -564,9 +565,10 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         );
         setPostPage(page);
         if (page === 1) {
-          setPostsCount(postsData.totalCount || postsData.total || formattedPosts.length);
+          setPostsCount(
+            postsData.totalCount || postsData.total || formattedPosts.length
+          );
         }
-
       } catch (error) {
         console.error("Error fetching user posts:", error);
         setError("Failed to load posts. Please try again later.");
@@ -634,7 +636,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     setHasMorePosts(true);
 
     try {
-      const targetUsername = usernameParam || (currentUser && currentUser.username) || "";
+      const targetUsername =
+        usernameParam || (currentUser && currentUser.username) || "";
       if (!targetUsername) {
         setErrorMessage("No username provided.");
         setIsLoading(false);
@@ -649,7 +652,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         { headers }
       );
 
-      if (!response.ok) throw new Error(`Failed to fetch profile: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`Failed to fetch profile: ${response.status}`);
 
       const userData = await response.json();
       if (!userData || !userData._id) {
@@ -675,7 +679,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
 
       fetchUserPoints(userData._id);
       fetchUserPosts(userData._id, 1);
-
     } catch (error) {
       setErrorMessage(`Failed to load profile: ${error.message}`);
       setUser(null);
@@ -692,7 +695,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     fetchUserPoints,
     fetchUserPosts,
   ]);
-
 
   const handleFollowToggle = async () => {
     if (!isAuthenticated) {
@@ -746,7 +748,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     fetchUserProfile();
   }, [fetchUserProfile]);
 
-
   const handleCommentSuccess = () => {
     if (postToComment) {
       setPosts((prev) =>
@@ -781,7 +782,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     [isPostsLoading, hasMorePosts, user?._id, postPage, fetchUserPosts]
   );
 
-
   if (isLoading || (!initialUser && !user)) {
     return <ProfileSkeleton />;
   }
@@ -795,10 +795,11 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   }
 
   const handleReportSuccess = (reportedPostId) => {
-    const updatedPosts = getCurrentTabData().posts.filter(post => post.id !== reportedPostId);
+    const updatedPosts = getCurrentTabData().posts.filter(
+      (post) => post.id !== reportedPostId
+    );
     updateTabData(activeTab, { posts: updatedPosts });
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
@@ -909,10 +910,11 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   <>
                     <button
                       onClick={handleFollowToggle}
-                      className={` cursor-pointer flex-1 py-2.5 rounded-full text-center font-medium ${isFollowing
-                        ? "bg-gray-100 text-gray-900"
-                        : "bg-primary text-white"
-                        }`}
+                      className={` cursor-pointer flex-1 py-2.5 rounded-full text-center font-medium ${
+                        isFollowing
+                          ? "bg-gray-100 text-gray-900"
+                          : "bg-primary text-white"
+                      }`}
                     >
                       {isFollowing ? "Following" : "Follow"}
                     </button>
@@ -935,10 +937,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               </div>
               {isAuthenticated && userPoints && (
                 <>
-                  <PointsDisplay
-                    points={userPoints}
-                    loading={pointsLoading}
-                  />
+                  <PointsDisplay points={userPoints} loading={pointsLoading} />
                   <StreakDisplay
                     consecutiveDays={userPoints.consecutiveLoginDays}
                   />
@@ -957,10 +956,13 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   {/* --- FIX: Made website a clickable link --- */}
                   {user?.website && (
                     <div className="flex items-center mb-2">
-                      <LinkIcon className='text-gray-600 text-lg' />
+                      <LinkIcon className="text-gray-600 text-lg" />
                       <Link
-
-                        href={user.website.startsWith('http') ? user.website : `https://${user.website}`}
+                        href={
+                          user.website.startsWith("http")
+                            ? user.website
+                            : `https://${user.website}`
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         className="ml-2 text-sky-400 hover:underline transition-colors"
@@ -1006,7 +1008,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   posts.map((post, index) => (
                     <div
                       key={post.id || index}
-                      ref={posts.length === index + 1 ? lastPostElementRef : null}
+                      ref={
+                        posts.length === index + 1 ? lastPostElementRef : null
+                      }
                     >
                       <PostCard
                         post={post}
@@ -1019,7 +1023,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         setSelectedPost={setSelectedPost}
                         setModalVisible={setModalVisible}
                         handleDislikePost={postHandlers.handleDislikePost}
-                      handleUndislikePost={postHandlers.handleUndislikePost}
+                        handleUndislikePost={postHandlers.handleUndislikePost}
                       />
                     </div>
                   ))
@@ -1032,8 +1036,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     <p className="mt-2 text-center text-sm text-gray-500 mx-8">
                       {isMyProfile
                         ? "Start sharing your thoughts, photos, and experiences with the world."
-                        : `${user.username || "This user"
-                        } hasn't posted anything yet.`}
+                        : `${
+                            user.username || "This user"
+                          } hasn't posted anything yet.`}
                     </p>
                     {isMyProfile && (
                       <Link
@@ -1073,8 +1078,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 emptyStateMessage={
                   isMyProfile
                     ? "Share photos and videos with your followers."
-                    : `${user.username || "This user"
-                    } hasn't posted any media yet.`
+                    : `${
+                        user.username || "This user"
+                      } hasn't posted any media yet.`
                 }
               />
             )}
@@ -1098,8 +1104,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               >
                 <div className="w-8">{option.icon}</div>
                 <span
-                  className={`text-base ${option.danger ? "text-red-500" : "text-gray-800"
-                    } font-medium`}
+                  className={`text-base ${
+                    option.danger ? "text-red-500" : "text-gray-800"
+                  } font-medium`}
                 >
                   {option.label}
                 </span>
@@ -1159,7 +1166,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               className="flex items-center py-4 border-b border-gray-100 w-full text-left"
               onClick={() => {
                 setModalVisible(false);
-                postHandlers.handleCommentPost(selectedPost.id)
+                postHandlers.handleCommentPost(selectedPost.id);
               }}
             >
               <div className="w-8">
@@ -1203,63 +1210,53 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             fetchUserProfile();
           }}
         />
-        
-        
-              {/* Comment Modal */}
-              <CommentModal
-                visible={isCommentModalVisible}
-                onClose={() => setCommentModalVisible(false)}
-                title="Add Comment"
-                post={postToComment}
-                onSuccess={handleCommentSuccess}
-                token={token}
-              >
-        
-              </CommentModal>
-        
-              {/* Amplify Modal */}
-              <AmplifyModal
-                visible={isAmplifyModalVisible}
-                onClose={() => setAmplifyModalVisible(false)}
-                post={postToAmplify
-                }
-                token={token}
-        
-                title="Amplify Post"
-                onSuccess={(postId) => {
-                  // Update amplify count in current posts
-                  const currentPosts = getCurrentTabData().posts;
-                  const updatedPosts = currentPosts.map(post => {
-                    if (post.id === postId) {
-                      return {
-                        ...post,
-                        amplifyCount: post.amplifyCount + 1,
-                        hasAmplified: true
-                      };
-                    }
-                    return post;
-                  });
-                  updateTabData(activeTab, { posts: updatedPosts });
-                }}
-              >
-        
-              </AmplifyModal>
-        
-              {/* Report Modal */}
-              <ReportModal
-                visible={isReportModalVisible}
-                onClose={() => setReportModalVisible(false)}
-                title="Report Post"
-                post={postToReport}
-                onSuccess={handleReportSuccess}
-                token={token}
-              >
-        
-              </ReportModal>
+
+        {/* Comment Modal */}
+        <CommentModal
+          visible={isCommentModalVisible}
+          onClose={() => setCommentModalVisible(false)}
+          title="Add Comment"
+          post={postToComment}
+          onSuccess={handleCommentSuccess}
+          token={token}
+        ></CommentModal>
+
+        {/* Amplify Modal */}
+        <AmplifyModal
+          visible={isAmplifyModalVisible}
+          onClose={() => setAmplifyModalVisible(false)}
+          post={postToAmplify}
+          token={token}
+          title="Amplify Post"
+          onSuccess={(postId) => {
+            // Update amplify count in current posts
+            const currentPosts = getCurrentTabData().posts;
+            const updatedPosts = currentPosts.map((post) => {
+              if (post.id === postId) {
+                return {
+                  ...post,
+                  amplifyCount: post.amplifyCount + 1,
+                  hasAmplified: true,
+                };
+              }
+              return post;
+            });
+            updateTabData(activeTab, { posts: updatedPosts });
+          }}
+        ></AmplifyModal>
+
+        {/* Report Modal */}
+        <ReportModal
+          visible={isReportModalVisible}
+          onClose={() => setReportModalVisible(false)}
+          title="Report Post"
+          post={postToReport}
+          onSuccess={handleReportSuccess}
+          token={token}
+        ></ReportModal>
       </div>
     </div>
   );
 };
-
 
 export default ProfilePage;

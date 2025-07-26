@@ -1,19 +1,20 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/context/AuthContext';
-import Image from 'next/image';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash, faCheck } from '@fortawesome/free-solid-svg-icons';
-import google from '@/app/assets/googleicon1.png'
-import metaMask from '@/app/assets/metamaskicon1.png'
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
+import Image from "next/image";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash, faCheck } from "@fortawesome/free-solid-svg-icons";
+import google from "@/app/assets/googleicon1.png";
+import metaMask from "@/app/assets/metamaskicon1.png";
+import Logo from "@/app/assets/LongLogo.png";
 
 export default function Signup() {
   const router = useRouter();
-  const [fullName, setFullName] = useState('test');
-  const [email, setEmail] = useState('test@test.com');
-  const [password, setPassword] = useState('Azxs@123');
+  const [fullName, setFullName] = useState("test");
+  const [email, setEmail] = useState("test@test.com");
+  const [password, setPassword] = useState("Azxs@123");
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,17 +23,17 @@ export default function Signup() {
 
   const handleSignup = async () => {
     if (!fullName.trim() || !email.trim() || !password.trim()) {
-      toast.error('Please fill in all fields');
+      toast.error("Please fill in all fields");
       return;
     }
 
     if (password.length < 6) {
-      toast.error('Password must be at least 6 characters long');
+      toast.error("Password must be at least 6 characters long");
       return;
     }
 
     if (!isChecked) {
-      toast.error('Please agree to the Terms and Privacy Policy');
+      toast.error("Please agree to the Terms and Privacy Policy");
       return;
     }
 
@@ -41,30 +42,45 @@ export default function Signup() {
       const success = await signup({ username: fullName, email, password });
 
       if (success) {
-        router.push('/home');
+        router.push("/home");
       } else {
-        toast.error(error || 'Signup failed. Please try again.');
+        toast.error(error || "Signup failed. Please try again.");
       }
     } catch (err) {
-      console.error('Signup error:', err);
-      toast.error('An unexpected error occurred');
+      console.error("Signup error:", err);
+      toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignup = () => {
-    toast.error('Google signup will be available soon!');
+    toast.error("Google signup will be available soon!");
   };
 
   const handleWalletConnect = () => {
-    toast.error('Wallet connection will be available soon!');
+    toast.error("Wallet connection will be available soon!");
   };
 
   return (
     <div className="min-h-screen bg-white px-8 py-10">
-      <h1 className="text-primary text-2xl font-bold text-center">Create Your Account</h1>
-      <p className="text-gray-500 text-center mb-6">Join the most Unfiltered Community</p>
+      <div className="relative lg:ml-4 w-[300px] h-[70px] ">
+        <Image
+          src={Logo}
+          alt="Logo"
+          // width={150}
+          // height={60}
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
+      <h1 className="text-primary text-2xl font-bold text-center">
+        Create Your Account
+      </h1>
+      <p className="text-gray-500 text-center mb-6">
+        Join the most Unfiltered Community
+      </p>
 
       <label className="text-base font-semibold">Full Name</label>
       <input
@@ -91,7 +107,7 @@ export default function Signup() {
         <input
           className="flex-1 p-2 outline-none"
           placeholder="Enter your password"
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
@@ -107,12 +123,15 @@ export default function Signup() {
 
       <div className="flex items-center mt-4">
         <button
-          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${isChecked ? 'border-primary bg-primary' : 'border-gray-300'
-            }`}
+          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${
+            isChecked ? "border-primary bg-primary" : "border-gray-300"
+          }`}
           onClick={() => setIsChecked(!isChecked)}
           disabled={isLoading}
         >
-          {isChecked && <FontAwesomeIcon icon={faCheck} size="sm" color="white" />}
+          {isChecked && (
+            <FontAwesomeIcon icon={faCheck} size="sm" color="white" />
+          )}
         </button>
         <span className="text-gray-600 flex-1 text-sm">
           I agree to the Terms and Privacy Policy
@@ -120,12 +139,13 @@ export default function Signup() {
       </div>
 
       <button
-        className={`bg-primary rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
-          }`}
+        className={`bg-primary rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${
+          isLoading ? "opacity-70 cursor-not-allowed" : ""
+        }`}
         onClick={handleSignup}
         disabled={isLoading}
       >
-        {isLoading ? 'Signing up...' : 'Sign Up'}
+        {isLoading ? "Signing up..." : "Sign Up"}
       </button>
 
       <div className="flex items-center my-4">
@@ -165,9 +185,9 @@ export default function Signup() {
       </button>
 
       <div className="mt-6 text-center text-gray-500">
-        Already have an account?{' '}
+        Already have an account?{" "}
         <button
-          onClick={() => router.push('/auth/login')}
+          onClick={() => router.push("/login")}
           className="text-primary font-semibold"
           disabled={isLoading}
         >

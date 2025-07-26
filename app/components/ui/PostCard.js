@@ -12,7 +12,7 @@ import {
   ThumbsDown,
   CheckCircle,
 } from "lucide-react";
-import { useAuth } from "../../app/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import FilteredImage from "../common/FilteredImage";
 
 const PostCard = ({
@@ -27,7 +27,7 @@ const PostCard = ({
   setModalVisible,
   username,
   handleDislikePost,
-  handleUndislikePost
+  handleUndislikePost,
 }) => {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -95,7 +95,9 @@ const PostCard = ({
     });
 
     return (
-<p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words">        {contentWithTags}
+      <p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words">
+        {" "}
+        {contentWithTags}
       </p>
     );
   };
@@ -117,8 +119,7 @@ const PostCard = ({
 
   // Determine if we should render media
   const hasMedia = post.media && post.media.length > 0;
-  const hasSingleImage =
-    post.imageUrl || (hasMedia && post.media.length === 1);
+  const hasSingleImage = post.imageUrl || (hasMedia && post.media.length === 1);
 
   const handleProfileClick = () => {
     if (post.user === user._id) {
@@ -127,9 +128,9 @@ const PostCard = ({
       router.push(`/UserProfile/${post.username}`); // someone else's profile
     }
   };
-const handleNavigateToPost = () => {
-  router.push(`/post/${post.id}`);
-};
+  const handleNavigateToPost = () => {
+    router.push(`/post/${post.id}`);
+  };
   const handleImageClick = () => {
     router.push({
       pathname: "/media-viewer",
@@ -146,8 +147,9 @@ const handleNavigateToPost = () => {
 
   return (
     <div
-      className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-        }`}
+      className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 ${
+        isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
       ref={containerRef}
     >
       {/* Post header */}
@@ -195,10 +197,10 @@ const handleNavigateToPost = () => {
       </div>
 
       {/* Post content */}
-      <div 
-            className="px-4 pb-3 cursor-pointer"
-            onClick={() => router.push(`/post/${post.id}`)}
-        >
+      <div
+        className="px-4 pb-3 cursor-pointer"
+        onClick={() => router.push(`/post/${post.id}`)}
+      >
         {renderContent()}
 
         {/* Tags */}
@@ -242,23 +244,30 @@ const handleNavigateToPost = () => {
                 </p>
               )}
 
-              {post.originalPost.media && post.originalPost.media.length > 0 && (
-                <div className="w-full relative rounded-lg mt-2 overflow-hidden">
-                  <Image
-                    src={post.originalPost.media[0]}
-                    alt="Original post media"
-                    width={400}
-                    height={300}
-                    className="w-full h-auto rounded-lg"
-                    onLoad={() =>
-                      console.log("Amplified image loaded:", post.originalPost.media[0])
-                    }
-                    onError={() =>
-                      console.error("Amplified image error:", post.originalPost.media[0])
-                    }
-                  />
-                </div>
-              )}
+              {post.originalPost.media &&
+                post.originalPost.media.length > 0 && (
+                  <div className="w-full relative rounded-lg mt-2 overflow-hidden">
+                    <Image
+                      src={post.originalPost.media[0]}
+                      alt="Original post media"
+                      width={400}
+                      height={300}
+                      className="w-full h-auto rounded-lg"
+                      onLoad={() =>
+                        console.log(
+                          "Amplified image loaded:",
+                          post.originalPost.media[0]
+                        )
+                      }
+                      onError={() =>
+                        console.error(
+                          "Amplified image error:",
+                          post.originalPost.media[0]
+                        )
+                      }
+                    />
+                  </div>
+                )}
             </div>
           </div>
         )}
@@ -299,7 +308,8 @@ const handleNavigateToPost = () => {
                   <button
                     key={index}
                     onClick={() => {
-                      const container = containerRef.current?.querySelector(".overflow-x-auto");
+                      const container =
+                        containerRef.current?.querySelector(".overflow-x-auto");
                       if (container) {
                         container.scrollLeft = index * container.clientWidth;
                         setCurrentImageIndex(index);
@@ -344,17 +354,21 @@ const handleNavigateToPost = () => {
 
       {/* Post actions */}
       <div className="flex items-center justify-around py-3 border-t border-gray-100">
-                {/* Like Button - Thumbs Up */}
+        {/* Like Button - Thumbs Up */}
         <button
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() => (isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id))}
+          onClick={() =>
+            isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id)
+          }
         >
           <ThumbsUp
             size={18}
             className={isLiked ? "text-primary fill-current" : " text-gray-600"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${isLiked ? " text-primary" : " text-gray-600"}`}
+            className={`ml-2 text-sm font-medium ${
+              isLiked ? " text-primary" : " text-gray-600"
+            }`}
           >
             Like
           </span>
@@ -363,14 +377,22 @@ const handleNavigateToPost = () => {
         {/* Dislike Button - Thumbs Down */}
         <button
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() => (isDisliked ? handleUndislikePost(post.id) : handleDislikePost(post.id))}
+          onClick={() =>
+            isDisliked
+              ? handleUndislikePost(post.id)
+              : handleDislikePost(post.id)
+          }
         >
           <ThumbsDown
             size={18}
-            className={isDisliked ? "text-orange-500 fill-current" : "text-gray-600"}
+            className={
+              isDisliked ? "text-orange-500 fill-current" : "text-gray-600"
+            }
           />
           <span
-            className={`ml-2 text-sm font-medium ${isDisliked ? "text-orange-500" : "text-gray-600"}`}
+            className={`ml-2 text-sm font-medium ${
+              isDisliked ? "text-orange-500" : "text-gray-600"
+            }`}
           >
             Dislike
           </span>
