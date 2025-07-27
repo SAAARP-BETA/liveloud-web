@@ -161,7 +161,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
                 <Edit size={20} className="text-gray-600" />
               </div>
               <div className="flex-1 cursor-pointer text-left">
-                <p className="font-medium text-gray-800">Quote</p>
+                <p className="font-medium text-gray-800">Amplify with Quote</p>
                 <p className="text-sm text-gray-600">
                   Add your own thoughts to this post
                 </p>

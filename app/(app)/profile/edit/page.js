@@ -411,7 +411,7 @@ const EditPage = () => {
       
       // When sending the request, make sure you don't set any additional headers
       // that would interfere with the content-type boundary
-      const response = await fetch(`${API_ENDPOINTS.USER}/profiles/profile`, {
+      const response = await fetch(`${API_ENDPOINTS.USER}/profiles`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

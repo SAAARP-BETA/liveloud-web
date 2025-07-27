@@ -179,7 +179,7 @@ const PostCard = ({
                 <CheckCircle size={16} className="text-primary ml-1" />
               )}
             </div>
-            <span className="font-normal text-xs text-gray-500">
+            <span className="font-normal text-md text-gray-500">
               {post.timestamp}
             </span>
           </div>
@@ -211,7 +211,7 @@ const PostCard = ({
                 key={index}
                 className="bg-gray-100 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 transition-colors"
               >
-                <span className="font-medium text-xs text-gray-700">
+                <span className="font-medium text-md text-gray-700">
                   #{tag}
                 </span>
               </button>
@@ -223,7 +223,7 @@ const PostCard = ({
         {post.isAmplified && post.originalPost && (
           <div className="border border-gray-200 rounded-xl p-3 mb-3">
             <div className="flex items-center mb-2">
-              <span className="font-medium text-xs text-gray-500">
+              <span className="font-medium text-md text-gray-500">
                 Amplified from
                 <span className="text-primary">
                   @{post.originalPost.user?.username || "user"}
@@ -232,14 +232,14 @@ const PostCard = ({
             </div>
 
             {post.quoteContent && (
-              <p className="font-normal text-sm text-gray-700 mb-2">
+              <p className="font-normal text-md text-gray-700 mb-2">
                 {post.quoteContent}
               </p>
             )}
 
             <div className="bg-gray-50 p-3 rounded-lg">
               {post.originalPost.content && (
-                <p className="font-normal text-sm text-gray-700 truncate">
+                <p className="font-normal text-md text-gray-700 truncate">
                   {post.originalPost.content}
                 </p>
               )}
@@ -326,9 +326,9 @@ const PostCard = ({
         )}
 
         {/* Post stats */}
-        <div className="flex items-center mb-2">
+        {/* <div className="flex items-center mb-2">
           <div className="flex items-center">
-            <span className="font-medium cursor-pointer text-xs text-gray-500">
+            <span className="font-medium cursor-pointer text-md text-gray-500">
               {post.likeCount} likes
             </span>
           </div>
@@ -337,19 +337,19 @@ const PostCard = ({
             onClick={handleCommentsClick}
             className="hover:text-gray-700 transition-colors"
           >
-            <span className="font-medium  cursor-pointer text-xs text-gray-500">
+            <span className="font-medium  cursor-pointer text-md text-gray-500">
               {post.commentCount} comments
             </span>
           </button>
           {post.bookmarkCount > 0 && (
             <>
               <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
-              <span className="font-medium cursor-pointer text-xs text-gray-500">
+              <span className="font-medium cursor-pointer text-md text-gray-500">
                 {post.bookmarkCount} saves
               </span>
             </>
           )}
-        </div>
+        </div> */}
       </div>
 
       {/* Post actions */}
@@ -362,15 +362,15 @@ const PostCard = ({
           }
         >
           <ThumbsUp
-            size={18}
+            size={20}
             className={isLiked ? "text-primary fill-current" : " text-gray-600"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${
+            className={`ml-2 text-md font-medium ${
               isLiked ? " text-primary" : " text-gray-600"
             }`}
           >
-            Like
+            {post.likeCount}
           </span>
         </button>
 
@@ -384,17 +384,17 @@ const PostCard = ({
           }
         >
           <ThumbsDown
-            size={18}
+            size={20}
             className={
               isDisliked ? "text-orange-500 fill-current" : "text-gray-600"
             }
           />
           <span
-            className={`ml-2 text-sm font-medium ${
+            className={`ml-2 text-md font-medium ${
               isDisliked ? "text-orange-500" : "text-gray-600"
             }`}
           >
-            Dislike
+            {post.dislikeCount}
           </span>
         </button>
 
@@ -403,9 +403,9 @@ const PostCard = ({
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleCommentPost(post)}
         >
-          <MessageCircle size={18} className="text-gray-600" />
-          <span className="ml-2 text-sm text-gray-600 font-medium">
-            Comment
+          <MessageCircle size={20} className="text-gray-600" />
+          <span className="ml-2 text-md text-gray-600 font-medium">
+            {post.commentCount}
           </span>
         </button>
 
@@ -414,9 +414,10 @@ const PostCard = ({
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleAmplifyPost(post)}
         >
-          <Repeat size={18} className="text-gray-600" />
-          <span className="ml-2 text-sm text-gray-600 font-medium">
-            Amplify
+          <Repeat size={20} className="text-gray-600" />
+          <span className="ml-2 text-md text-gray-600 font-medium">
+            {post.amplifyCount}
+            {console.log("lslkdfoksjodfjlsjdofjos: ", post)}
           </span>
         </button>
 
@@ -430,17 +431,17 @@ const PostCard = ({
           }
         >
           <Bookmark
-            size={18}
+            size={20}
             className={
               isBookmarked ? "text-primary fill-current" : "text-gray-600"
             }
           />
           <span
-            className={`ml-2 text-sm font-medium ${
+            className={`ml-2 text-md font-medium ${
               isBookmarked ? "text-primary" : "text-gray-600"
             }`}
           >
-            Save
+            {post.bookmarkCount}
           </span>
         </button>
       </div>
