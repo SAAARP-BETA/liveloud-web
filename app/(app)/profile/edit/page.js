@@ -384,7 +384,7 @@ const EditPage = () => {
           }
         } catch (error) {
           console.error('Error preparing profile image:', error);
-          alert('Failed to prepare profile image for upload');
+          toast.error('Failed to prepare profile image for upload');
         }
       }
       
@@ -405,7 +405,7 @@ const EditPage = () => {
           }
         } catch (error) {
           console.error('Error preparing cover image:', error);
-          alert('Failed to prepare cover image for upload');
+          toast.error('Failed to prepare cover image for upload');
         }
       }
       
@@ -438,7 +438,7 @@ const EditPage = () => {
       router.back();
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert(error.message || 'Failed to update profile');
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setSubmitting(false);
     }
@@ -594,7 +594,7 @@ const EditPage = () => {
             {submitting ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <span className="text-white text-sm">Save</span>
+              <span className="text-white cursor-pointer text-sm">Save</span>
             )}
           </button>
         </header>

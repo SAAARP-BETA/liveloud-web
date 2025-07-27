@@ -169,6 +169,11 @@ export default function LeftSidebar() {
     );
   };
 
+  const handleProfileClick = () => {
+    
+      router.push("/profile"); // own profile
+  };
+
   const ProfileSection = () => {
     if (!isAuthenticated) return null;
 
@@ -210,23 +215,27 @@ export default function LeftSidebar() {
             </motion.span>
           </button>
         </div>
+        
 
         {/* Desktop Profile */}
         <div className="hidden sm:block relative">
           <button
-            onClick={() => setShowLogoutMenu(!showLogoutMenu)}
-            className="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 w-full"
+            
+            className="group  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 w-full"
           >
             <motion.div
-              className="flex items-center justify-center"
+              className="flex items-center cursor-pointer justify-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              
             >
               {user?.profilePicture ? (
                 <img
                   src={user.profilePicture}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200"
+                  className="w-10 h-10  rounded-full border-2 border-gray-200"
+                  onClick={handleProfileClick}
+                  
                 />
               ) : (
                 <img
@@ -247,7 +256,9 @@ export default function LeftSidebar() {
             </div>
 
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-              <MoreHorizontal className="w-5 h-5 cursor-pointer text-gray-400 group-hover:text-gray-600" />
+              <MoreHorizontal className="w-5  h-5 cursor-pointer text-gray-400 group-hover:text-gray-600" 
+               onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+              />
             </motion.div>
           </button>
 
@@ -379,14 +390,14 @@ export default function LeftSidebar() {
 
       {/* Desktop Sidebar */}
       <motion.aside
-        className="hidden sm:flex h-screen md:w-80 max-w-80 px-6 py-8 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl flex-col"
+        className="hidden custom-scrollbar sm:flex h-screen md:w-80 max-w-80 px-6 py-10 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         <Logo />
         <nav className="flex flex-col gap-4 mt-10 flex-1">
-          {tabs.map((tab, index) => (
+           {tabs.map((tab, index) => (
             <motion.div
               key={tab.name}
               initial={{ opacity: 0, x: -20 }}
