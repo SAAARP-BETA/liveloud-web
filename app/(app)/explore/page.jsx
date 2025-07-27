@@ -17,19 +17,8 @@ import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
 import defaultPic from "../../assets/Profilepic1.png";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
-
-// Mock data and utilities (since we don't have the actual context)
-const mockUser = {
-  username: "currentuser",
-  profilePicture: defaultPic,
-};
-
-const mockToken = "mock-token";
-const isAuthenticated = true;
-
-// const API_ENDPOINTS = {
-//   SEARCH: "http://localhost:3006/api",
-// };
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 
 const fonts = {
   Regular: "Inter, sans-serif",
@@ -257,10 +246,11 @@ const UserSearchResult = ({ user, onPress }) => {
 
 // Main Search Page component
 export default function SearchPage() {
-  // Mock router functions
-  const router = {
-    push: (path) => console.log("Navigate to:", path),
+  const router = useRouter();
+  const handleNavigateToPost = () => {
+    router.push(`/post/${post.id}`);
   };
+   const { user, token } = useAuth();
 
   // States
   const [searchQuery, setSearchQuery] = useState("");
@@ -496,16 +486,10 @@ export default function SearchPage() {
       saveRecentSearch(item);
       console.log("item in handleSuggestionPress", item);
 
-      if (item.username === mockUser.username) {
-        router.push(`/profile/profile`);
+      if (item.username === user.username) {
+        router.push(`/profile`);
       } else {
-        router.push({
-          pathname: `/UserProfile/${item.username}`,
-          params: {
-            username: item.username,
-            userId: item._id,
-          },
-        });
+        router.push(`/UserProfile/${item.username}`);
       }
     } else if (item.type === "tag") {
       saveRecentSearch(item);
@@ -519,9 +503,10 @@ export default function SearchPage() {
   const handleResultPress = (item, type) => {
     if (type === "user") {
       saveRecentSearch(item);
-      router.push(`/profile/${item.username}`);
+      console.log("item in handleResultPress", item.username);
+      router.push(`/UserProfile/${item.username}`);
     } else if (type === "post") {
-      router.push(`/home/post-detail?postId=${item._id}`);
+      router.push(`/post/${item._id}`);
     } else if (type === "tag") {
       saveRecentSearch(item);
       setSearchQuery(`#${item.tag}`);
@@ -539,7 +524,7 @@ export default function SearchPage() {
 
   const handleRecentSearchPress = (item) => {
     if (item.type === "user") {
-      router.push(`/profile/${item.username}`);
+      router.push(`/UserProfile/${item.username}`);
     } else if (item.type === "tag") {
       setSearchQuery(`#${item.tag}`);
       setSearchMode("results");
