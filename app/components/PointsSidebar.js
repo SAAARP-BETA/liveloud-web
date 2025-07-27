@@ -244,7 +244,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
             const percentage = myPoints.totalPoints > 0 ? ((item.points / myPoints.totalPoints) * 100) : 0;
 
             return (
-              <div key={item.key} className="bg-white rounded-lg border border-gray-100 p-3 hover:shadow-md transition-shadow cursor-pointer">
+              <div key={item.key} className="bg-white rounded-lg border border-gray-100 p-3 hover:shadow-md transition-shadow ">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className={`w-10 h-10 rounded-full ${item.bgColor} flex items-center justify-center`}>
@@ -271,10 +271,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
 
         {/* Quick Actions */}
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-            <Zap className="w-4 h-4 mr-2" />
-            Quick Actions
-          </h3>
+         
 
           <div className="w-full">
             <button
@@ -284,14 +281,6 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
               <Trophy className="w-5 h-5" />
               <span>View Leaderboard</span>
             </button>
-          </div>
-        </div>
-
-        {/* Auto-refresh indicator */}
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <div className="flex items-center justify-center space-x-2 text-gray-600">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs">Auto-updating every 15 seconds</span>
           </div>
         </div>
       </div>

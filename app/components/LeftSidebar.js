@@ -316,7 +316,8 @@ export default function LeftSidebar() {
   // };
 
   const Logo = () => (
-    <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px] hover:bg-gray-100 rounded-xl">
+    <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px]">
+      <Link href="/home">
       <Image
         src={LongLogo}
         // src={LogoLiveloud}
@@ -326,7 +327,7 @@ export default function LeftSidebar() {
         // height={20}
         className="object-contain mr-26 md:mr-18 sm:mr-10"
         priority
-      />
+      /></Link>
     </div>
   );
   return (

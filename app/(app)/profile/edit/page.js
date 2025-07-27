@@ -560,7 +560,7 @@ const EditPage = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="mt-3 text-gray-600">Loading profile...</p>
+        <p className="flex mt-3 w-xl items-center justify-center  text-gray-600">Loading profile</p>
       </div>
     );
   }
@@ -585,7 +585,7 @@ const EditPage = () => {
         <header className="flex flex-row items-center justify-between py-3 px-4 bg-white border-b border-gray-100 sticky top-0 z-10">
           <h1 className="text-lg text-gray-900">Edit Profile</h1>
           <button
-            className={`py-2 px-4 bg-primary rounded-full hover:bg-sky-600 transition-colors ${
+            className={`py-2 px-4 cursor-pointer bg-primary rounded-full hover:bg-sky-600 transition-colors ${
               submitting ? "opacity-70 cursor-not-allowed" : ""
             }`}
             onClick={handleUpdateProfile}
@@ -874,40 +874,8 @@ const EditPage = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl">
-            <div>
-              <h3 className="text-gray-800 font-medium">Private Account</h3>
-              <p className="text-sm text-gray-500">Only approved followers can see your posts</p>
-            </div>
-            <button
-              type="button"
-              className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                profileData.isPrivate ? "bg-primary" : "bg-gray-300"
-              }`}
-              onClick={() => handleInputChange("isPrivate", !profileData.isPrivate)}
-            >
-              <div
-                className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200 ${
-                  profileData.isPrivate ? "translate-x-6" : "translate-x-0.5"
-                }`}
-              />
-            </button>
-          </div>
 
-          <div className="pb-8">
-            <button
-              type="button"
-              className="w-full py-3 px-4 bg-red-50 rounded-xl text-red-600 font-medium hover:bg-red-100 transition-colors"
-              onClick={() => {
-                if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-                  // Add delete account logic here
-                  alert("Account deletion is not implemented yet");
-                }
-              }}
-            >
-              Delete Account
-            </button>
-          </div>
+         
         </form>
 
         {/* Custom Calendar Modal */}
