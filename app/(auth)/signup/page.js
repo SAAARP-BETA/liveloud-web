@@ -113,7 +113,7 @@ export default function Signup() {
           disabled={isLoading}
         />
         <button
-          className="px-2"
+          className="px-2 cursor-pointer"
           onClick={() => setShowPassword(!showPassword)}
           disabled={isLoading}
         >
