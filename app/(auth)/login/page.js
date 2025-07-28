@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import Image from 'next/image';
 import google from '@/app/assets/googleicon1.png'
 import metaMask from '@/app/assets/metamaskicon1.png'
-import Logo from '@/app/assets/Liveloud.png';
+import Logo from '@/app/assets/LiveLoud.svg';
 
 export default function Login() {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-10">
+    <div className="min-h-screen bg-white px-6">
       <div className="relative lg:ml-4 w-[300px] h-[100px] ">
           <Image 
             src={Logo} 

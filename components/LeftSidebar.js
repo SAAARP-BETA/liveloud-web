@@ -18,6 +18,7 @@ import {
 import { useAuth } from "../app/context/AuthContext"
 import { API_ENDPOINTS } from "../app/utils/config"
 import { useState } from "react"
+import Logo from "@/app/assets/Liveloud.png" // Adjust the import path as necessary
 
 const tabs = [
   { name: "Home", href: "/home", icon: Home },
@@ -29,6 +30,11 @@ const tabs = [
   { name: "Premium", href: "/premium", icon: Crown },
   { name: "Referral", href: "/referral", icon: Users },
 ]
+
+// Mobile tabs - only Home, Explore, Wallet, Create
+const mobileTabs = tabs.filter(tab => 
+  ["Home", "Explore", "Create", "Wallet"].includes(tab.name)
+)
 
 export default function LeftSidebar() {
   const pathname = usePathname()
@@ -285,7 +291,7 @@ export default function LeftSidebar() {
         <div className="relative bg-white/90 backdrop-blur-xl border border-white/50">
           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full" />
           <div className="flex justify-around items-center px-2 py-3 safe-area-pb">
-            {tabs.map((tab, index) => (
+            {mobileTabs.map((tab, index) => (
               <motion.div
                 key={tab.name}
                 className="flex-1 truncate"
@@ -307,7 +313,7 @@ export default function LeftSidebar() {
                 initial={{ opacity: 0, y: 30, scale: 0.8 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{
-                  delay: tabs.length * 0.1,
+                  delay: mobileTabs.length * 0.1,
                   type: "spring",
                   stiffness: 400,
                   damping: 25,
@@ -327,6 +333,21 @@ export default function LeftSidebar() {
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
+        {/* Desktop Logo */}
+        <motion.div
+          className="flex items-center justify-center mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          
+          <img
+            src={Logo} // Replace with your desktop logo path
+            alt="Logo"
+            className="h-12 w-auto" // Adjust height as needed
+          />
+        </motion.div>
+
         <nav className="flex flex-col gap-4 mt-10 flex-1">
           {tabs.map((tab, index) => (
             <motion.div
@@ -351,6 +372,23 @@ export default function LeftSidebar() {
           </motion.div>
         )}
       </motion.aside>
+
+      {/* Mobile Top Logo */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-200 px-4 py-3 sm:hidden"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      >
+        <div className="flex items-center justify-center">
+
+          <img
+            src={Logo} // Replace with your mobile logo path
+            alt="Logo"
+            className="h-10 w-auto" // Adjust height as needed
+          />
+        </div>
+      </motion.div>
     </>
   )
 }

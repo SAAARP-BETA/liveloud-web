@@ -9,7 +9,7 @@ import { faEye, faEyeSlash, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-hot-toast'; // <-- ADD THIS
 import google from '@/app/assets/googleicon1.png';
 import metaMask from '@/app/assets/metamaskicon1.png';
-import Logo from '@/app/assets/Liveloud.png';
+import Logo from '@/app/assets/LiveLoud.svg';
 
 export default function Signup() {
   const router = useRouter();
