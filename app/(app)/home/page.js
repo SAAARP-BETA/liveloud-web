@@ -584,8 +584,8 @@ const HomePage = () => {
   const gradientColors = isOverLimit
     ? ["#FF6B6B", "#FF0000"]
     : isApproachingLimit
-    ? ["#FFD166", "#FF9F1C"]
-    : ["#06D6A0", "#1B9AAA"];
+      ? ["#FFD166", "#FF9F1C"]
+      : ["#06D6A0", "#1B9AAA"];
 
   // media upload
   const uploadMedia = async () => {
@@ -767,7 +767,7 @@ const HomePage = () => {
         throw new Error("Failed to follow user");
       }
 
-      toast.error("You are now following this user");
+      toast.success("You are now following this user");
 
       // Update posts in current tab to reflect new following status
       const updatedPosts = getCurrentTabData().posts.map((post) =>
@@ -1075,7 +1075,7 @@ const HomePage = () => {
 
   // Render tab bar
   const renderTabBar = () => (
-    <div className="bg-white border-b border-gray-200 truncate">
+    <div className="bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
       <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max">
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
@@ -1086,11 +1086,10 @@ const HomePage = () => {
               key={feedType.key}
               onClick={() => canAccess && handleTabChange(feedType.key)}
               className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors
-    ${
-      isActive
-        ? "bg-primary text-white"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-    }
+    ${isActive
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }
     ${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
     max-w-[100px] truncate overflow-hidden whitespace-nowrap`}
               disabled={!canAccess}
@@ -1147,7 +1146,8 @@ const HomePage = () => {
   );
 
   return (
-    <>
+    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar">
+
       {/* --- Block 1: Create Post & Tabs --- */}
       <div className="md:w-xl max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
         {renderTabBar()}
@@ -1196,11 +1196,10 @@ const HomePage = () => {
                   <button
                     onClick={handleMediaButtonClick}
                     disabled={images.length >= MEDIA_LIMIT}
-                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
-                      images.length >= MEDIA_LIMIT
+                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${images.length >= MEDIA_LIMIT
                         ? "opacity-50 cursor-not-allowed"
                         : ""
-                    }`}
+                      }`}
                   >
                     <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600" />
                   </button>
@@ -1256,13 +1255,12 @@ const HomePage = () => {
                 >
                   <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
                     <span
-                      className={`text-xs font-medium ${
-                        isOverLimit
+                      className={`text-xs font-medium ${isOverLimit
                           ? "text-red-600"
                           : isApproachingLimit
-                          ? "text-yellow-500"
-                          : "text-cyan-600"
-                      }`}
+                            ? "text-yellow-500"
+                            : "text-cyan-600"
+                        }`}
                     >
                       {MAX_CHAR_LIMIT - charCount}
                     </span>
@@ -1306,11 +1304,10 @@ const HomePage = () => {
           </div>
         ) : (
           <div
-            className={`transition-all duration-300 ${
-              isInputFocused || images.length > 0
+            className={`transition-all duration-300 ${isInputFocused || images.length > 0
                 ? "blur-sm pointer-events-none"
                 : "pointer-events-auto"
-            }`}
+              }`}
           >
             {/* Error states */}
             {error && activeTab === "home" && (
@@ -1439,13 +1436,12 @@ const HomePage = () => {
               <button
                 key={index}
                 onClick={() => handleMenuOptionPress(option)}
-                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
-                  option.text === "Delete Post" ||
-                  option.text === "Block" ||
-                  option.text === "Report"
+                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${option.text === "Delete Post" ||
+                    option.text === "Block" ||
+                    option.text === "Report"
                     ? "hover:bg-red-50 text-red-600"
                     : "hover:bg-gray-50 text-gray-700"
-                }`}
+                  }`}
               >
                 <option.icon className="w-5 h-5 mr-3" />
                 <span className="font-medium">{option.text}</span>
@@ -1494,7 +1490,7 @@ const HomePage = () => {
         onSuccess={handleReportSuccess}
         token={token}
       />
-    </>
+    </div>
   );
 };
 

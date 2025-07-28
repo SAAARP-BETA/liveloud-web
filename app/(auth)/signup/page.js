@@ -123,7 +123,7 @@ export default function Signup() {
 
       <div className="flex items-center mt-4">
         <button
-          className={`border-2 rounded-sm mr-2 w-6 h-6 flex items-center justify-center ${
+          className={`border-2 rounded-sm mr-2 w-6 h-6  cursor-pointer flex items-center justify-center ${
             isChecked ? "border-primary bg-primary" : "border-gray-300"
           }`}
           onClick={() => setIsChecked(!isChecked)}
@@ -139,7 +139,7 @@ export default function Signup() {
       </div>
 
       <button
-        className={`bg-primary rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${
+        className={`bg-primary rounded-md p-3 mt-6 w-full  cursor-pointer text-white text-lg font-semibold ${
           isLoading ? "opacity-70 cursor-not-allowed" : ""
         }`}
         onClick={handleSignup}
@@ -155,7 +155,7 @@ export default function Signup() {
       </div>
 
       <button
-        className="border-2 border-gray-300 rounded-3xl p-3 flex items-center justify-center mb-3 shadow-md w-full"
+        className="border-2 border-gray-300 rounded-3xl  cursor-pointer p-3 flex items-center justify-center mb-3 shadow-md w-full"
         onClick={handleGoogleSignup}
         disabled={isLoading}
       >
@@ -170,7 +170,7 @@ export default function Signup() {
       </button>
 
       <button
-        className="border-2 border-gray-300 rounded-3xl p-3 flex items-center justify-center shadow-md w-full"
+        className="border-2 border-gray-300 rounded-3xl p-3  cursor-pointer flex items-center justify-center shadow-md w-full"
         onClick={handleWalletConnect}
         disabled={isLoading}
       >
@@ -188,7 +188,7 @@ export default function Signup() {
         Already have an account?{" "}
         <button
           onClick={() => router.push("/login")}
-          className="text-primary font-semibold"
+          className="text-primary  cursor-pointer font-semibold"
           disabled={isLoading}
         >
           Login

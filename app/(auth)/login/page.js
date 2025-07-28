@@ -112,7 +112,7 @@ export default function Login() {
       <div className="flex items-center mt-2">
         <button
           onClick={() => setIsChecked(!isChecked)}
-          className={`w-4 h-4 border-2 rounded mr-2 flex items-center justify-center ${
+          className={`w-4 h-4 border-2 rounded mr-2 flex  cursor-pointer items-center justify-center ${
             isChecked ? "border-primary bg-primary" : "border-gray-400"
           }`}
           disabled={isLoading}
@@ -121,7 +121,7 @@ export default function Login() {
         </button>
         <span className="text-base">Keep me signed in</span>
         <button
-          className="ml-auto text-primary text-sm"
+          className="ml-auto cursor-pointer text-primary text-sm"
           onClick={() => router.push("/auth/forgot-password")}
           disabled={isLoading}
         >
@@ -130,7 +130,7 @@ export default function Login() {
       </div>
 
       <button
-        className={`mt-6 w-full bg-primary py-3 rounded-full text-white text-lg font-bold ${
+        className={`mt-6 w-full bg-primary py-3 rounded-full  cursor-pointer text-white text-lg font-bold ${
           isLoading ? "opacity-70 cursor-not-allowed" : ""
         }`}
         onClick={handleLogin}
@@ -142,7 +142,7 @@ export default function Login() {
       <p className="text-center text-gray-500 mt-4">Or continue with</p>
 
       <button
-        className="mt-4 w-full border border-gray-300 py-3 rounded-full flex items-center justify-center"
+        className="mt-4 w-full border border-gray-300 py-3 cursor-pointer rounded-full flex items-center justify-center"
         onClick={handleGoogleLogin}
         disabled={isLoading}
       >
@@ -157,7 +157,7 @@ export default function Login() {
       </button>
 
       <button
-        className="mt-3 w-full border border-gray-300 py-3 rounded-full flex items-center justify-center"
+        className="mt-3 w-full border border-gray-300 cursor-pointer py-3 rounded-full flex items-center justify-center"
         onClick={handleWalletConnect}
         disabled={isLoading}
       >
@@ -174,7 +174,7 @@ export default function Login() {
       <p className="mt-6 text-center text-gray-500">
         Don't have an account?{" "}
         <button
-          className="text-primary font-semibold"
+          className="text-primary  cursor-pointer font-semibold"
           onClick={() => router.push("/signup")}
           disabled={isLoading}
         >

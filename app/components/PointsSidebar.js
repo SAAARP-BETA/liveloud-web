@@ -165,15 +165,18 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   // Don't render if not authenticated, not visible, or on mobile
   if (!isAuthenticated || !isVisible) return null;
 
-  return (
-<div className="w-80 bg-white shadow-xl border-l border-gray-200 hidden lg:block h-screen flex flex-col">    {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-100 p-4">
+ return (
+  <div className="flex h-screen"> 
+    {/* Sidebar */}
+    <div className="w-80 bg-white shadow-xl border-l border-gray-200 hidden lg:flex flex-col overflow-y-auto custom-scrollbar h-screen">
+      
+      {/* Header */}
+      <div className="top-0 bg-white border-b border-gray-100 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Trophy className="w-5 h-5 text-yellow-500" />
             <h2 className="text-lg font-semibold text-gray-800">My Points</h2>
           </div>
-          
         </div>
         <div className="flex items-center justify-between">
           <p className="text-xs text-gray-500 mt-1">
@@ -191,7 +194,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-4">
+      <div className="px-4 py-10 space-y-4">
         {/* Total Points Card */}
         <div className="bg-gradient-to-br from-sky-600 to-primary rounded-xl p-4 text-white">
           <div className="flex items-center justify-between mb-3">
@@ -209,7 +212,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
           </div>
 
           {/* Level Info */}
-          <div className="bg-white/20 rounded-lg p-3">
+          <div className="bg-white/20 rounded-lg py-5 p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Level {levelInfo.level}</span>
               <span className="text-xs text-white/80">{levelInfo.title}</span>
@@ -218,7 +221,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
             {/* Progress Bar */}
             {progressInfo.nextLevel && (
               <div>
-                <div className="bg-white/20 rounded-full h-2 mb-1">
+                <div className="bg-white/20  rounded-full h-2 mb-1">
                   <div
                     className="bg-white rounded-full h-2 transition-all duration-500"
                     style={{ width: `${progressInfo.progress}%` }}
@@ -241,13 +244,21 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
 
           {pointsData.map((item) => {
             const Icon = item.icon;
-            const percentage = myPoints.totalPoints > 0 ? ((item.points / myPoints.totalPoints) * 100) : 0;
+            const percentage =
+              myPoints.totalPoints > 0
+                ? (item.points / myPoints.totalPoints) * 100
+                : 0;
 
             return (
-              <div key={item.key} className="bg-white rounded-lg border border-gray-100 p-3 hover:shadow-md transition-shadow cursor-pointer">
+              <div
+                key={item.key}
+                className="bg-white rounded-lg border py-5 border-gray-100 p-3 hover:shadow-md transition-shadow "
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-full ${item.bgColor} flex items-center justify-center`}>
+                    <div
+                      className={`w-10 h-10 rounded-full ${item.bgColor} flex items-center justify-center`}
+                    >
                       <Icon className={`w-5 h-5 ${item.color}`} />
                     </div>
                     <div>
@@ -259,9 +270,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
                     <p className="text-lg font-semibold text-gray-900">
                       {item.points?.toLocaleString() || '0'}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {percentage.toFixed(1)}%
-                    </p>
+                    <p className="text-xs text-gray-500">{percentage.toFixed(1)}%</p>
                   </div>
                 </div>
               </div>
@@ -271,12 +280,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
 
         {/* Quick Actions */}
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-            <Zap className="w-4 h-4 mr-2" />
-            Quick Actions
-          </h3>
-
-          <div className="w-full">
+          <div className="w-full py-5">
             <button
               onClick={handleLeaderboardClick}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
@@ -286,17 +290,16 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
             </button>
           </div>
         </div>
-
-        {/* Auto-refresh indicator */}
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <div className="flex items-center justify-center space-x-2 text-gray-600">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs">Auto-updating every 15 seconds</span>
-          </div>
-        </div>
       </div>
     </div>
-  );
+
+    {/* Main Content (Example) */}
+    <div className="flex-1 overflow-y-auto bg-gray-50">
+      {/* Your Home Content goes here */}
+    </div>
+  </div>
+);
+
 };
 
 export default PointsSidebar;
