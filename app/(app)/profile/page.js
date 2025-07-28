@@ -1,5 +1,5 @@
 "use client";
-import defaultCover from "../../assets/Profilepic1.png";
+import defaultCover from "../../assets/avatar.png";
 import React, {
   useState,
   useEffect,
@@ -1129,7 +1129,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             {selectedPost && (
               <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
                 <Image
-                  src={selectedPost.profilePic || "/Profilepic1.png"}
+                  src={selectedPost.profilePic || "/avatar.png"}
                   alt="Profile"
                   className="w-10 h-10 rounded-full"
                   width={40}

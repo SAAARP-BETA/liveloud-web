@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
-import defaultPic from "../../assets/Profilepic1.png";
+import defaultPic from "../../assets/avatar.png";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';

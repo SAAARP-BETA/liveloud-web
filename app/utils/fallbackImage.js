@@ -1,5 +1,5 @@
 // utils/imageUtils.js
-import defaultPic from "../assets/Profilepic1.png";
+import defaultPic from "../assets/avatar.png";
 
 export const getProfilePicture = (profilePic) => {
   if (!profilePic) return defaultPic.src || defaultPic;
