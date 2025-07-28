@@ -1,5 +1,6 @@
 "use client";
-import defaultCover from "../../assets/avatar.png";
+import defaultCover from "../../assets/Profilepic1.png";
+import defaultPic from "../../assets/avatar.png";
 import React, {
   useState,
   useEffect,
@@ -829,7 +830,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 transition={{ type: "spring", stiffness: 100 }}
               >
                 <Image
-                  src={user.profilePicture}
+                  src={user?.profilePicture || defaultPic}
                   alt="Profile"
                   className="w-full h-full rounded-full object-cover"
                   width={PROFILE_IMAGE_MAX_SIZE}

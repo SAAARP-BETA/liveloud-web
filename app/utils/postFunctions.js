@@ -450,7 +450,6 @@ export const formatTimestamp = (timestamp) => {
  * @returns {object} - Formatted post object
  */
 export const formatPostFromApi = (post, index) => {
-  const defaultProfilePic = "https://via.placeholder.com/150";
 
   if (!post || typeof post !== "object") {
     console.warn(`Post at index ${index} is invalid:`, post);
@@ -475,7 +474,7 @@ export const formatPostFromApi = (post, index) => {
     imageUrl: post.media && post.media.length > 0 ? post.media[0] : null,
     username: post.user?.username || "Anonymous",
     timestamp: formatTimestamp(post.createdAt),
-    profilePic: post.user?.profilePicture || defaultProfilePic,
+    profilePic: post.user?.profilePicture || null,
     isVerified: post.user?.isVerified || false,
     likes: Array.isArray(post.likes) ? post.likes : [],
     dislikes: Array.isArray(post.dislikes) ? post.dislikes : [],

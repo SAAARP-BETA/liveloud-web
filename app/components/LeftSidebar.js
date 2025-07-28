@@ -19,6 +19,7 @@ import { useAuth } from "../context/AuthContext";
 import { API_ENDPOINTS } from "../utils/config";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import defaultPic from "../assets/avatar.png";
 import LongLogo from "@/app/assets/LongLogo.png";
 import LogoLiveloud from "@/app/assets/LongLogo.png";
 import mobileLogo from "@/app/assets/mobileLogo.png";
@@ -34,7 +35,7 @@ const tabs = [
 ];
 
 // Mobile tabs - only Home, Explore, Wallet, Create
-const mobileTabs = tabs.filter(tab => 
+const mobileTabs = tabs.filter(tab =>
   ["Home", "Explore", "Create", "Wallet"].includes(tab.name)
 )
 
@@ -104,9 +105,8 @@ export default function LeftSidebar() {
               transition={iconTransition}
             >
               <Icon
-                className={`w-6 h-6 ${
-                  isActive ? "text-[#0EA5E9]" : "text-gray-400"
-                }`}
+                className={`w-6 h-6 ${isActive ? "text-[#0EA5E9]" : "text-gray-400"
+                  }`}
               />
             </motion.div>
             <motion.span
@@ -132,11 +132,10 @@ export default function LeftSidebar() {
         <div className="hidden sm:block">
           <Link
             href={tab.href}
-            className={`group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
-              isActive
+            className={`group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
                 ? "bg-[rgba(14,165,233,0.1)] text-[#0EA5E9] font-semibold shadow-sm"
                 : "text-gray-600 hover:bg-gray-100"
-            }`}
+              }`}
           >
             <motion.div
               className="flex items-center justify-center"
@@ -146,11 +145,10 @@ export default function LeftSidebar() {
               transition={iconTransition}
             >
               <Icon
-                className={`w-6 h-6 ${
-                  isActive
+                className={`w-6 h-6 ${isActive
                     ? "text-[#0EA5E9]"
                     : "text-gray-500 group-hover:text-[#0EA5E9]"
-                }`}
+                  }`}
               />
             </motion.div>
             <motion.span
@@ -175,8 +173,8 @@ export default function LeftSidebar() {
   };
 
   const handleProfileClick = () => {
-    
-      router.push("/profile"); // own profile
+
+    router.push("/profile"); // own profile
   };
 
   const ProfileSection = () => {
@@ -197,12 +195,16 @@ export default function LeftSidebar() {
             >
               {user?.profilePicture ? (
                 <img
-                  src={user.profilePicture}
+                  src={user?.profilePicture}
                   alt="Profile"
                   className="w-6 h-6 rounded-full border border-gray-300"
                 />
               ) : (
-                <User className="w-6 h-6 text-gray-500" />
+                <img
+                  src={defaultPic.src}
+                  alt="Profile"
+                  className="w-6 h-6 rounded-full border border-gray-300"
+                />
               )}
             </motion.div>
             <motion.span
@@ -238,15 +240,15 @@ export default function LeftSidebar() {
                 <img
                   src={user.profilePicture}
                   alt="Profile"
-                  className="w-10 h-10  rounded-full border-2 border-gray-200"
+                  className="w-10 h-10 rounded-full border-2 border-gray-200"
                   onClick={handleProfileClick}
-                  
                 />
               ) : (
                 <img
-                  src={user.coverPhoto}
+                  src={defaultPic.src}
                   alt="Profile"
                   className="w-10 h-10 rounded-full border-2 border-gray-200"
+                  onClick={handleProfileClick}  // Also added missing onClick
                 />
               )}
             </motion.div>
@@ -261,8 +263,8 @@ export default function LeftSidebar() {
             </div>
 
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-              <MoreHorizontal className="w-5  h-5 cursor-pointer text-gray-400 group-hover:text-gray-600" 
-               onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+              <MoreHorizontal className="w-5  h-5 cursor-pointer text-gray-400 group-hover:text-gray-600"
+                onClick={() => setShowLogoutMenu(!showLogoutMenu)}
               />
             </motion.div>
           </button>
@@ -334,16 +336,16 @@ export default function LeftSidebar() {
   const Logo = () => (
     <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px]">
       <Link href="/home">
-      <Image
-        src={LongLogo}
-        // src={LogoLiveloud}
-        // src={mobileLogo}
-        alt="Logo"
-        width={280}
-        // height={20}
-        className="object-contain mr-26 md:mr-18 sm:mr-10"
-        priority
-      /></Link>
+        <Image
+          src={LongLogo}
+          // src={LogoLiveloud}
+          // src={mobileLogo}
+          alt="Logo"
+          width={280}
+          // height={20}
+          className="object-contain mr-26 md:mr-18 sm:mr-10"
+          priority
+        /></Link>
     </div>
   );
   return (
@@ -402,7 +404,7 @@ export default function LeftSidebar() {
       >
         <Logo />
         <nav className="flex flex-col gap-4 mt-10 flex-1">
-           {tabs.map((tab, index) => (
+          {tabs.map((tab, index) => (
             <motion.div
               key={tab.name}
               initial={{ opacity: 0, x: -20 }}

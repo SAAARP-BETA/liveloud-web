@@ -25,7 +25,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Image as PhotoIcon, X as XMarkIcon } from "lucide-react";
-
+import defaultPic from "../../assets/avatar.png";
 import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
 import { useRouter } from "next/navigation";
@@ -1171,7 +1171,7 @@ const HomePage = () => {
             <div className="p-4 bg-white cursor-pointer rounded-xl relative z-10">
               <div className="flex items-center mb-2 space-x-3">
                 <Image
-                  src={user?.profilePicture}
+                  src={user?.profilePicture || defaultPic}
                   alt="Profile"
                   width={40}
                   height={40}

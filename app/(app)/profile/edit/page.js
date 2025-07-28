@@ -24,8 +24,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import defaultCover from '../../../assets/avatar.png';
-
+import defaultCover from "../../../assets/Profilepic1.png";
+import defaultPic from "../../../assets/avatar.png";
 const PROFILE_IMAGE_MAX_SIZE = 120;
 
 // Custom Calendar Component
