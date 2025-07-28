@@ -149,7 +149,7 @@ const CreatePost = () => {
     if (showPeopleTagModal) {
       const fetchPeopleSuggestions = async () => {
         try {
-          const response = await fetch(`${API_ENDPOINTS.USER}/suggestions`, {
+          const response = await fetch(`${API_ENDPOINTS.USER}/users/suggestions`,{
             headers: { Authorization: `Bearer ${token}` }
           });
           if (response.ok) {

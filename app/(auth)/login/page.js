@@ -6,7 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
 import google from "@/app/assets/googleicon1.png";
 import metaMask from "@/app/assets/metamaskicon1.png";
-import Logo from "@/app/assets/LongLogo.png";
+import Logo from "@/app/assets/combinedLogo.png";
 
 export default function Login() {
   const router = useRouter();

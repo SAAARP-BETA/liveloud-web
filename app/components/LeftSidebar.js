@@ -20,7 +20,7 @@ import { API_ENDPOINTS } from "../utils/config";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import defaultPic from "../assets/avatar.png";
-import LongLogo from "@/app/assets/LongLogo.png";
+import combinedLogo from "@/app/assets/combinedLogo.png";
 import LogoLiveloud from "@/app/assets/LongLogo.png";
 import mobileLogo from "@/app/assets/mobileLogo.png";
 const tabs = [
@@ -337,7 +337,7 @@ export default function LeftSidebar() {
     <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px]">
       <Link href="/home">
         <Image
-          src={LongLogo}
+          src={combinedLogo}
           // src={LogoLiveloud}
           // src={mobileLogo}
           alt="Logo"
