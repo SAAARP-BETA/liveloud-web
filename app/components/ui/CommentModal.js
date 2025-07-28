@@ -1,14 +1,13 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import { X, Heart, MessageCircle, Send, CheckCircle } from 'lucide-react';
-import { API_ENDPOINTS } from '../../app/utils/config';
+"use client";
+import React, { useState, useEffect } from "react";
+import { X, Heart, MessageCircle, Send, CheckCircle } from "lucide-react";
+import { API_ENDPOINTS } from "../../utils/config";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 // const API_URL = "http://192.168.1.13:3002/api/";
 
-
 const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
-  const [commentText, setCommentText] = useState('');
+  const [commentText, setCommentText] = useState("");
   const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
@@ -36,21 +35,24 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
     try {
       setLoadingComments(true);
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comments?page=${pageNum}&limit=10`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comments?page=${pageNum}&limit=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch comments');
+        throw new Error("Failed to fetch comments");
       }
 
       const data = await response.json();
 
       // Check if comments array exists
       if (!data.comments || !Array.isArray(data.comments)) {
-        throw new Error('Invalid comments response format');
+        throw new Error("Invalid comments response format");
       }
 
       // Update pagination info
@@ -60,11 +62,11 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
         setComments(data.comments);
         setPage(1);
       } else {
-        setComments(prev => [...prev, ...data.comments]);
+        setComments((prev) => [...prev, ...data.comments]);
       }
     } catch (error) {
-      console.error('Error fetching comments:', error);
-      toast.error('Error - Failed to load comments');
+      console.error("Error fetching comments:", error);
+      toast.error("Error - Failed to load comments");
     } finally {
       setLoadingComments(false);
     }
@@ -72,7 +74,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
-    if (!timestamp) return 'Just now';
+    if (!timestamp) return "Just now";
 
     const commentDate = new Date(timestamp);
     const now = new Date();
@@ -97,7 +99,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
     }
 
     if (!token) {
-      toast.error('Login Required - Please login to comment');
+      toast.error("Login Required - Please login to comment");
       return;
     }
 
@@ -106,65 +108,73 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
       // If replying to a comment
       if (replyTo) {
-        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${replyTo._id}/reply`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            content: commentText.trim()
-          })
-        });
+        const response = await fetch(
+          `${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${replyTo._id}/reply`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              content: commentText.trim(),
+            }),
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to submit reply');
+          throw new Error("Failed to submit reply");
         }
 
         const data = await response.json();
 
         // Update the comment with the new reply
-        setComments(prev => prev.map(comment => {
-          if (comment._id === replyTo._id) {
-            if (!comment.replies) comment.replies = [];
-            comment.replies.push(data.reply);
-          }
-          return comment;
-        }));
+        setComments((prev) =>
+          prev.map((comment) => {
+            if (comment._id === replyTo._id) {
+              if (!comment.replies) comment.replies = [];
+              comment.replies.push(data.reply);
+            }
+            return comment;
+          })
+        );
 
         // Clear reply mode
         setReplyTo(null);
       } else {
         // Regular comment
-        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            content: commentText.trim()
-          })
-        });
+        const response = await fetch(
+          `${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              content: commentText.trim(),
+            }),
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to submit comment');
+          throw new Error("Failed to submit comment");
         }
 
         const data = await response.json();
 
         // Add the new comment to the top of the list
-        setComments(prev => [data.comment, ...prev]);
+        setComments((prev) => [data.comment, ...prev]);
       }
 
       // Clear the input
-      setCommentText('');
+      setCommentText("");
 
       // Call the success callback
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Error posting comment/reply:', error);
-      toast.error('Error - Failed to post comment');
+      console.error("Error posting comment/reply:", error);
+      toast.error("Error - Failed to post comment");
     } finally {
       setLoading(false);
     }
@@ -173,37 +183,41 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
   // Like a comment
   const handleLikeComment = async (commentId) => {
     if (!token) {
-      toast.error('Login Required - Please login to like comments');
+      toast.error("Login Required - Please login to like comments");
       return;
     }
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${commentId}/like`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${commentId}/like`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to like comment');
+        throw new Error("Failed to like comment");
       }
 
       // Update comment in state
-      setComments(prev => prev.map(comment => {
-        if (comment._id === commentId) {
-          if (!comment.likes) comment.likes = [];
-          // Add current user's ID to likes if not already there
-          if (!comment.likes.some(like => like._id === post.user?._id)) {
-            comment.likes.push({ _id: post.user?._id });
+      setComments((prev) =>
+        prev.map((comment) => {
+          if (comment._id === commentId) {
+            if (!comment.likes) comment.likes = [];
+            // Add current user's ID to likes if not already there
+            if (!comment.likes.some((like) => like._id === post.user?._id)) {
+              comment.likes.push({ _id: post.user?._id });
+            }
           }
-        }
-        return comment;
-      }));
-
+          return comment;
+        })
+      );
     } catch (error) {
-      console.error('Error liking comment:', error);
+      console.error("Error liking comment:", error);
     }
   };
 
@@ -214,28 +228,34 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
     }
 
     try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${commentId}/unlike`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${post.id}/comment/${commentId}/unlike`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to unlike comment');
+        throw new Error("Failed to unlike comment");
       }
 
       // Update comment in state
-      setComments(prev => prev.map(comment => {
-        if (comment._id === commentId && comment.likes) {
-          comment.likes = comment.likes.filter(like => like._id !== post.user?._id);
-        }
-        return comment;
-      }));
-
+      setComments((prev) =>
+        prev.map((comment) => {
+          if (comment._id === commentId && comment.likes) {
+            comment.likes = comment.likes.filter(
+              (like) => like._id !== post.user?._id
+            );
+          }
+          return comment;
+        })
+      );
     } catch (error) {
-      console.error('Error unliking comment:', error);
+      console.error("Error unliking comment:", error);
     }
   };
 
@@ -248,13 +268,17 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
   // Cancel reply
   const cancelReply = () => {
     setReplyTo(null);
-    setCommentText('');
+    setCommentText("");
   };
 
   // Handle scroll to load more comments
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
-    if (scrollHeight - scrollTop === clientHeight && !loadingComments && hasMoreComments) {
+    if (
+      scrollHeight - scrollTop === clientHeight &&
+      !loadingComments &&
+      hasMoreComments
+    ) {
       const nextPage = page + 1;
       setPage(nextPage);
       fetchComments(nextPage);
@@ -263,21 +287,22 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
   // Render a comment item
   const CommentItem = ({ item }) => {
-    const isLiked = item.likes && item.likes.some(like => like._id === post.user?._id);
+    const isLiked =
+      item.likes && item.likes.some((like) => like._id === post.user?._id);
 
     return (
       <div className="p-4 border-b border-gray-100">
         <div className="flex">
           <img
-  src={getProfilePicture(item.user?.profilePicture)}
-  alt="Profile"
-  className="w-8 h-8 rounded-full"
-/>
+            src={getProfilePicture(item.user?.profilePicture)}
+            alt="Profile"
+            className="w-8 h-8 rounded-full"
+          />
 
           <div className="ml-3 flex-1 min-w-0">
             <div className="flex items-center">
               <span className="font-medium text-sm text-gray-800">
-                {item.user?.username || 'Anonymous'}
+                {item.user?.username || "Anonymous"}
               </span>
               {item.user?.isVerified && (
                 <CheckCircle size={14} className="text-primary ml-1" />
@@ -286,21 +311,31 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                 {formatTimestamp(item.createdAt)}
               </span>
             </div>
-<p className="text-sm text-gray-800 mt-1 break-words overflow-wrap-anywhere">
-  {item.content}
-</p>
+            <p className="text-sm text-gray-800 mt-1 break-words overflow-wrap-anywhere">
+              {item.content}
+            </p>
 
             {/* Comment actions */}
             <div className="flex items-center mt-2">
               <button
                 className="flex items-center mr-4 hover:bg-gray-100 p-1 rounded cursor-pointer"
-                onClick={() => isLiked ? handleUnlikeComment(item._id) : handleLikeComment(item._id)}
+                onClick={() =>
+                  isLiked
+                    ? handleUnlikeComment(item._id)
+                    : handleLikeComment(item._id)
+                }
               >
                 <Heart
                   size={12}
-                  className={isLiked ? "text-red-500 fill-current" : "text-gray-500"}
+                  className={
+                    isLiked ? "text-red-500 fill-current" : "text-gray-500"
+                  }
                 />
-                <span className={`text-xs ml-1 font-medium ${isLiked ? "text-red-500" : "text-gray-500"}`}>
+                <span
+                  className={`text-xs ml-1 font-medium ${
+                    isLiked ? "text-red-500" : "text-gray-500"
+                  }`}
+                >
                   {item.likes?.length || 0}
                 </span>
               </button>
@@ -320,19 +355,21 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
             {item.replies && item.replies.length > 0 && (
               <div className="mt-3 pl-4 border-l-2 border-gray-200">
                 {item.replies.map((reply, index) => (
-                  <div key={index} className={index < item.replies.length - 1 ? "mb-2" : ""}>
+                  <div
+                    key={index}
+                    className={index < item.replies.length - 1 ? "mb-2" : ""}
+                  >
                     <div className="flex">
-                <img
-  src={getProfilePicture(reply.user?.profilePicture)}
-  alt="Profile"
-  className="w-6 h-6 rounded-full"
-/>
-
+                      <img
+                        src={getProfilePicture(reply.user?.profilePicture)}
+                        alt="Profile"
+                        className="w-6 h-6 rounded-full"
+                      />
 
                       <div className="ml-2 flex-1">
                         <div className="flex items-center">
                           <span className="font-medium text-xs text-gray-800">
-                            {reply.user?.username || 'Anonymous'}
+                            {reply.user?.username || "Anonymous"}
                           </span>
                           <span className="text-xs text-gray-500 ml-1">
                             {formatTimestamp(reply.createdAt)}
@@ -366,10 +403,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
-      <div
-        className="absolute inset-0"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0" onClick={onClose} />
 
       <div className="bg-white rounded-2xl w-full max-w-lg mx-4 relative animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col">
         <div className="w-full flex items-center justify-center pt-4 pb-2">
@@ -378,9 +412,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
         <div className="p-4 border-b border-gray-100">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-bold text-gray-800">
-              Comments
-            </h2>
+            <h2 className="text-xl font-bold text-gray-800">Comments</h2>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
@@ -392,12 +424,11 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
           {/* Original post preview */}
           {post && (
             <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl overflow-hidden">
-             <img
-  src={getProfilePicture(post.profilePic)}
-  alt="Profile"
-  className="w-8 h-8 rounded-full"
-/>
-
+              <img
+                src={getProfilePicture(post.profilePic)}
+                alt="Profile"
+                className="w-8 h-8 rounded-full"
+              />
 
               <div className="ml-3 flex-1 min-w-0">
                 <div className="flex items-center">
@@ -408,10 +439,9 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                     {post.timestamp}
                   </span>
                 </div>
-<p className="text-sm text-gray-600 mt-1 line-clamp-2 break-words whitespace-pre-wrap overflow-hidden text-ellipsis">
-  {post.content}
-</p>
-                 
+                <p className="text-sm text-gray-600 mt-1 line-clamp-2 break-words whitespace-pre-wrap overflow-hidden text-ellipsis">
+                  {post.content}
+                </p>
               </div>
             </div>
           )}
@@ -421,7 +451,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
         <div
           className="flex-1 overflow-y-auto"
           onScroll={handleScroll}
-          style={{ maxHeight: '400px' }}
+          style={{ maxHeight: "400px" }}
         >
           {comments.length === 0 && !loadingComments ? (
             <EmptyComments />
@@ -442,8 +472,9 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
         {replyTo && (
           <div className="flex items-center justify-between bg-gray-100 px-4 py-2">
             <p className="text-xs text-gray-600">
-              Replying to <span className="font-medium text-primary">
-                @{replyTo.user?.username || 'user'}
+              Replying to{" "}
+              <span className="font-medium text-primary">
+                @{replyTo.user?.username || "user"}
               </span>
             </p>
             <button
@@ -466,15 +497,18 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
               maxLength={500}
               rows={1}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSubmitComment();
                 }
               }}
             />
             <button
-              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${commentText.trim() ? 'bg-primary hover:bg-sky-600' : 'bg-gray-300'
-                }`}
+              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${
+                commentText.trim()
+                  ? "bg-primary hover:bg-sky-600"
+                  : "bg-gray-300"
+              }`}
               onClick={handleSubmitComment}
               disabled={!commentText.trim() || loading}
             >

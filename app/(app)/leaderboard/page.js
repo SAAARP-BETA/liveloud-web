@@ -98,7 +98,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${
         isCurrentUser ? 'bg-sky-50 border-2 border-primary' : 'bg-white shadow-sm hover:shadow-md'
       }`}
-      onClick={() => onPress(item, item.username)}
+      onClick={() => onPress(item)}
     >
       {/* Rank */}
       <div className="mr-4 flex-shrink-0">
@@ -220,11 +220,7 @@ export default function LeaderboardPage() {
       }
 
       const data = await response.json();
-      const username= currentUser?.username || '';
-      console.log("username",username);
-      // console.log(data);
-      
-      
+
       if (resetData) {
         setLeaderboardData(data.leaderboard || []);
       } else {
@@ -268,14 +264,20 @@ export default function LeaderboardPage() {
     fetchMyPoints();
   };
 
-  // Navigate to user profile
-  const navigateToProfile = (userId,username) => {
-    if (!currentUser || !userId) return;
+  // Navigate to user profile - FIXED VERSION
+  const navigateToProfile = (userItem) => {
+    if (!userItem) return;
 
-    if (userId === currentUser._id) {
-      router.push('/profile');
-    } else {
+    // Check if it's the current user
+    if (currentUser && userItem.userId === currentUser._id) {
+      // Navigate to current user's profile using their username
+      const username = currentUser.username || currentUser._id;
       router.push(`/UserProfile/${username}`);
+    } else {
+      // Navigate to other user's profile
+      // Use username if available, otherwise use userId
+      const identifier = userItem.username || userItem.userId;
+      router.push(`/UserProfile/${identifier}`);
     }
   };
 

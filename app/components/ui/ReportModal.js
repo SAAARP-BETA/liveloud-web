@@ -1,12 +1,19 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import { reportReasons, handleReportPost } from '../../app/utils/postFunctions';
-import toast from 'react-hot-toast';
+"use client";
+import React, { useState, useEffect } from "react";
+import { reportReasons, handleReportPost } from "../../utils/postFunctions";
+import toast from "react-hot-toast";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 // Flag icon component to replace Feather icons
-const FlagIcon = ({ size = 20, color = '#64748B' }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+const FlagIcon = ({ size = 20, color = "#64748B" }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+  >
     <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
     <line x1="4" y1="22" x2="4" y2="15" />
   </svg>
@@ -15,20 +22,20 @@ const FlagIcon = ({ size = 20, color = '#64748B' }) => (
 const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedReason, setSelectedReason] = useState(null);
-  const [customReason, setCustomReason] = useState('');
+  const [customReason, setCustomReason] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setSelectedReason(null);
-      setCustomReason('');
+      setCustomReason("");
       setShowCustomInput(false);
     }
   }, [visible]);
 
   const handleReasonSelect = (reason) => {
     setSelectedReason(reason);
-    if (reason.text === 'Other') {
+    if (reason.text === "Other") {
       setShowCustomInput(true);
     } else {
       setShowCustomInput(false);
@@ -38,14 +45,14 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
 
   const submitReport = async (reasonText) => {
     if (!post || !token) {
-      toast.error('Unable to report post. Please try again later.');
+      toast.error("Unable to report post. Please try again later.");
       onClose();
       return;
     }
 
-    if (reasonText === 'Other') {
+    if (reasonText === "Other") {
       if (!customReason.trim()) {
-        toast.error('Please provide details for your report.');
+        toast.error("Please provide details for your report.");
         return;
       }
       reasonText = `Other: ${customReason.trim()}`;
@@ -54,7 +61,7 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
     setIsSubmitting(true);
     try {
       await handleReportPost(post.id, reasonText, token);
-      toast.success('Report submitted. Our team will review it shortly.');
+      toast.success("Report submitted. Our team will review it shortly.");
       if (onSuccess) onSuccess(post.id);
       onClose();
     } catch (error) {
@@ -82,22 +89,31 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
         </div>
 
         <div className="p-4">
-          <h2 className="text-lg text-gray-800 mb-2 cursor-pointer">Report Post</h2>
-          <p className="text-base text-gray-500 mb-4 cursor-pointer">Why are you reporting this post?</p>
+          <h2 className="text-lg text-gray-800 mb-2 cursor-pointer">
+            Report Post
+          </h2>
+          <p className="text-base text-gray-500 mb-4 cursor-pointer">
+            Why are you reporting this post?
+          </p>
 
           {post && (
             <div className="flex flex-row items-center p-3 mb-4 bg-gray-50 rounded-xl">
-             <img
-  src={getProfilePicture(post.profilePic)}
-  alt="Profile"
-  className="w-10 h-10 rounded-full"
-/>
+              <img
+                src={getProfilePicture(post.profilePic)}
+                alt="Profile"
+                className="w-10 h-10 rounded-full"
+              />
 
               <div className="ml-3 flex-1">
-                <p className="text-base text-gray-800 mb-0.5">{post.username}</p>
+                <p className="text-base text-gray-800 mb-0.5">
+                  {post.username}
+                </p>
                 <p className="text-sm text-gray-500">
-                  {post.content?.substring(0, 60) || post.text?.substring(0, 60)}
-                  {(post.content?.length > 60 || post.text?.length > 60) ? '...' : ''}
+                  {post.content?.substring(0, 60) ||
+                    post.text?.substring(0, 60)}
+                  {post.content?.length > 60 || post.text?.length > 60
+                    ? "..."
+                    : ""}
                 </p>
               </div>
             </div>
@@ -111,7 +127,9 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
           </div>
         ) : showCustomInput ? (
           <div className="p-4">
-            <label className="text-base text-gray-800 mb-2 block">Please provide details:</label>
+            <label className="text-base text-gray-800 mb-2 block">
+              Please provide details:
+            </label>
             <textarea
               className="bg-gray-100 rounded-xl p-4 min-h-[100px] text-base resize-y w-full border-none outline-none"
               placeholder="Explain why you're reporting this post..."
@@ -128,13 +146,17 @@ const ReportModal = ({ visible, onClose, post, token, onSuccess }) => {
                   setSelectedReason(null);
                 }}
               >
-                <span className="text-gray-600 text-base cursor-pointer">Back</span>
+                <span className="text-gray-600 text-base cursor-pointer">
+                  Back
+                </span>
               </button>
               <button
                 className="bg-primary rounded-xl py-3 px-5"
-                onClick={() => submitReport('Other')}
+                onClick={() => submitReport("Other")}
               >
-                <span className="text-white text-base cursor-pointer">Submit Report</span>
+                <span className="text-white text-base cursor-pointer">
+                  Submit Report
+                </span>
               </button>
             </div>
           </div>

@@ -12,7 +12,7 @@ import {
   ThumbsDown,
   CheckCircle,
 } from "lucide-react";
-import { useAuth } from "../../app/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import FilteredImage from "../common/FilteredImage";
 
 const PostCard = ({
@@ -27,7 +27,7 @@ const PostCard = ({
   setModalVisible,
   username,
   handleDislikePost,
-  handleUndislikePost
+  handleUndislikePost,
 }) => {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -95,7 +95,9 @@ const PostCard = ({
     });
 
     return (
-<p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words">        {contentWithTags}
+      <p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words">
+        {" "}
+        {contentWithTags}
       </p>
     );
   };
@@ -117,8 +119,7 @@ const PostCard = ({
 
   // Determine if we should render media
   const hasMedia = post.media && post.media.length > 0;
-  const hasSingleImage =
-    post.imageUrl || (hasMedia && post.media.length === 1);
+  const hasSingleImage = post.imageUrl || (hasMedia && post.media.length === 1);
 
   const handleProfileClick = () => {
     if (post.user === user._id) {
@@ -127,9 +128,9 @@ const PostCard = ({
       router.push(`/UserProfile/${post.username}`); // someone else's profile
     }
   };
-const handleNavigateToPost = () => {
-  router.push(`/post/${post.id}`);
-};
+  const handleNavigateToPost = () => {
+    router.push(`/post/${post.id}`);
+  };
   const handleImageClick = () => {
     router.push({
       pathname: "/media-viewer",
@@ -144,10 +145,12 @@ const handleNavigateToPost = () => {
     });
   };
 
+
   return (
     <div
-      className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-        }`}
+      className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 ${
+        isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
       ref={containerRef}
     >
       {/* Post header */}
@@ -156,10 +159,12 @@ const handleNavigateToPost = () => {
           className="flex items-center flex-1 text-left"
           onClick={handleProfileClick}
         >
-          <div className="w-10 h-10 rounded-full mr-3 relative overflow-hidden">
+          <div className="w-10 h-10 border rounded-full mr-3 relative overflow-hidden">
+            
+            
             <Image
               src={
-                isAuthenticated && post.profilePic?.trim()
+                isAuthenticated && post.profilePic
                   ? post.profilePic
                   : defaultPic
               }
@@ -177,7 +182,7 @@ const handleNavigateToPost = () => {
                 <CheckCircle size={16} className="text-primary ml-1" />
               )}
             </div>
-            <span className="font-normal text-xs text-gray-500">
+            <span className="font-normal text-md text-gray-500">
               {post.timestamp}
             </span>
           </div>
@@ -195,10 +200,10 @@ const handleNavigateToPost = () => {
       </div>
 
       {/* Post content */}
-      <div 
-            className="px-4 pb-3 cursor-pointer"
-            onClick={() => router.push(`/post/${post.id}`)}
-        >
+      <div
+        className="px-4 pb-3 cursor-pointer"
+        onClick={() => router.push(`/post/${post.id}`)}
+      >
         {renderContent()}
 
         {/* Tags */}
@@ -209,7 +214,7 @@ const handleNavigateToPost = () => {
                 key={index}
                 className="bg-gray-100 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 transition-colors"
               >
-                <span className="font-medium text-xs text-gray-700">
+                <span className="font-medium text-md text-gray-700">
                   #{tag}
                 </span>
               </button>
@@ -221,7 +226,7 @@ const handleNavigateToPost = () => {
         {post.isAmplified && post.originalPost && (
           <div className="border border-gray-200 rounded-xl p-3 mb-3">
             <div className="flex items-center mb-2">
-              <span className="font-medium text-xs text-gray-500">
+              <span className="font-medium text-md text-gray-500">
                 Amplified from
                 <span className="text-primary">
                   @{post.originalPost.user?.username || "user"}
@@ -230,35 +235,42 @@ const handleNavigateToPost = () => {
             </div>
 
             {post.quoteContent && (
-              <p className="font-normal text-sm text-gray-700 mb-2">
+              <p className="font-normal text-md text-gray-700 mb-2">
                 {post.quoteContent}
               </p>
             )}
 
             <div className="bg-gray-50 p-3 rounded-lg">
               {post.originalPost.content && (
-                <p className="font-normal text-sm text-gray-700 truncate">
+                <p className="font-normal text-md text-gray-700 truncate">
                   {post.originalPost.content}
                 </p>
               )}
 
-              {post.originalPost.media && post.originalPost.media.length > 0 && (
-                <div className="w-full relative rounded-lg mt-2 overflow-hidden">
-                  <Image
-                    src={post.originalPost.media[0]}
-                    alt="Original post media"
-                    width={400}
-                    height={300}
-                    className="w-full h-auto rounded-lg"
-                    onLoad={() =>
-                      console.log("Amplified image loaded:", post.originalPost.media[0])
-                    }
-                    onError={() =>
-                      console.error("Amplified image error:", post.originalPost.media[0])
-                    }
-                  />
-                </div>
-              )}
+              {post.originalPost.media &&
+                post.originalPost.media.length > 0 && (
+                  <div className="w-full relative rounded-lg mt-2 overflow-hidden">
+                    <Image
+                      src={post.originalPost.media[0]}
+                      alt="Original post media"
+                      width={400}
+                      height={300}
+                      className="w-full h-auto rounded-lg"
+                      onLoad={() =>
+                        console.log(
+                          "Amplified image loaded:",
+                          post.originalPost.media[0]
+                        )
+                      }
+                      onError={() =>
+                        console.error(
+                          "Amplified image error:",
+                          post.originalPost.media[0]
+                        )
+                      }
+                    />
+                  </div>
+                )}
             </div>
           </div>
         )}
@@ -299,7 +311,8 @@ const handleNavigateToPost = () => {
                   <button
                     key={index}
                     onClick={() => {
-                      const container = containerRef.current?.querySelector(".overflow-x-auto");
+                      const container =
+                        containerRef.current?.querySelector(".overflow-x-auto");
                       if (container) {
                         container.scrollLeft = index * container.clientWidth;
                         setCurrentImageIndex(index);
@@ -316,9 +329,9 @@ const handleNavigateToPost = () => {
         )}
 
         {/* Post stats */}
-        <div className="flex items-center mb-2">
+        {/* <div className="flex items-center mb-2">
           <div className="flex items-center">
-            <span className="font-medium cursor-pointer text-xs text-gray-500">
+            <span className="font-medium cursor-pointer text-md text-gray-500">
               {post.likeCount} likes
             </span>
           </div>
@@ -327,52 +340,64 @@ const handleNavigateToPost = () => {
             onClick={handleCommentsClick}
             className="hover:text-gray-700 transition-colors"
           >
-            <span className="font-medium  cursor-pointer text-xs text-gray-500">
+            <span className="font-medium  cursor-pointer text-md text-gray-500">
               {post.commentCount} comments
             </span>
           </button>
           {post.bookmarkCount > 0 && (
             <>
               <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
-              <span className="font-medium cursor-pointer text-xs text-gray-500">
+              <span className="font-medium cursor-pointer text-md text-gray-500">
                 {post.bookmarkCount} saves
               </span>
             </>
           )}
-        </div>
+        </div> */}
       </div>
 
       {/* Post actions */}
       <div className="flex items-center justify-around py-3 border-t border-gray-100">
-                {/* Like Button - Thumbs Up */}
+        {/* Like Button - Thumbs Up */}
         <button
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() => (isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id))}
+          onClick={() =>
+            isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id)
+          }
         >
           <ThumbsUp
-            size={18}
+            size={20}
             className={isLiked ? "text-primary fill-current" : " text-gray-600"}
           />
           <span
-            className={`ml-2 text-sm font-medium ${isLiked ? " text-primary" : " text-gray-600"}`}
+            className={`ml-2 text-md font-medium ${
+              isLiked ? " text-primary" : " text-gray-600"
+            }`}
           >
-            Like
+            {post.likeCount}
           </span>
         </button>
 
         {/* Dislike Button - Thumbs Down */}
         <button
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() => (isDisliked ? handleUndislikePost(post.id) : handleDislikePost(post.id))}
+          onClick={() =>
+            isDisliked
+              ? handleUndislikePost(post.id)
+              : handleDislikePost(post.id)
+          }
         >
           <ThumbsDown
-            size={18}
-            className={isDisliked ? "text-orange-500 fill-current" : "text-gray-600"}
+            size={20}
+            className={
+              isDisliked ? "text-orange-500 fill-current" : "text-gray-600"
+            }
           />
           <span
-            className={`ml-2 text-sm font-medium ${isDisliked ? "text-orange-500" : "text-gray-600"}`}
+            className={`ml-2 text-md font-medium ${
+              isDisliked ? "text-orange-500" : "text-gray-600"
+            }`}
           >
-            Dislike
+            {post.dislikeCount}
           </span>
         </button>
 
@@ -381,9 +406,9 @@ const handleNavigateToPost = () => {
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleCommentPost(post)}
         >
-          <MessageCircle size={18} className="text-gray-600" />
-          <span className="ml-2 text-sm text-gray-600 font-medium">
-            Comment
+          <MessageCircle size={20} className="text-gray-600" />
+          <span className="ml-2 text-md text-gray-600 font-medium">
+            {post.commentCount}
           </span>
         </button>
 
@@ -392,9 +417,10 @@ const handleNavigateToPost = () => {
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           onClick={() => handleAmplifyPost(post)}
         >
-          <Repeat size={18} className="text-gray-600" />
-          <span className="ml-2 text-sm text-gray-600 font-medium">
-            Amplify
+          <Repeat size={20} className="text-gray-600" />
+          <span className="ml-2 text-md text-gray-600 font-medium">
+            {post.amplifyCount}
+           
           </span>
         </button>
 
@@ -408,17 +434,17 @@ const handleNavigateToPost = () => {
           }
         >
           <Bookmark
-            size={18}
+            size={20}
             className={
               isBookmarked ? "text-primary fill-current" : "text-gray-600"
             }
           />
           <span
-            className={`ml-2 text-sm font-medium ${
+            className={`ml-2 text-md font-medium ${
               isBookmarked ? "text-primary" : "text-gray-600"
             }`}
           >
-            Save
+            {post.bookmarkCount}
           </span>
         </button>
       </div>
