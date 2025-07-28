@@ -1,5 +1,6 @@
 "use client";
 import defaultCover from "../../assets/Profilepic1.png";
+import defaultPic from "../../assets/avatar.png";
 import React, {
   useState,
   useEffect,
@@ -793,7 +794,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
       </div>
     );
   }
-
   const handleReportSuccess = (reportedPostId) => {
     const updatedPosts = getCurrentTabData().posts.filter(
       (post) => post.id !== reportedPostId
@@ -830,7 +830,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 transition={{ type: "spring", stiffness: 100 }}
               >
                 <Image
-                  src={user.profilePicture}
+                  src={user?.profilePicture || defaultPic}
                   alt="Profile"
                   className="w-full h-full rounded-full object-cover"
                   width={PROFILE_IMAGE_MAX_SIZE}
@@ -842,7 +842,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     href="/profile/edit"
                     className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
                   >
-                    <Edit2 className="text-primary text-sm" />
+                    <Edit2 className=" text-primary text-md" />
                   </Link>
                 )}
               </motion.div>
@@ -860,7 +860,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             <div className="mt-4 text-center px-4">
               <div className="flex items-center justify-center">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {user.name || user.username || "User"}
+                  
+                  {user.fullname||"User"}
                 </h2>
                 {user.isVerified && (
                   <Verified className="ml-2 text-primary text-xl" />
@@ -1129,7 +1130,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             {selectedPost && (
               <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
                 <Image
-                  src={selectedPost.profilePic || "/Profilepic1.png"}
+                  src={selectedPost.profilePic || "/avatar.png"}
                   alt="Profile"
                   className="w-10 h-10 rounded-full"
                   width={40}

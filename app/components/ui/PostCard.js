@@ -1,5 +1,5 @@
 "use client";
-import defaultPic from "../../assets/Profilepic1.png";
+import defaultPic from "../../assets/avatar.png";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -159,15 +159,11 @@ const PostCard = ({
           className="flex items-center flex-1 text-left"
           onClick={handleProfileClick}
         >
-          <div className="w-10 h-10 border rounded-full mr-3 relative overflow-hidden">
+          <div className="w-10 h-10 rounded-full mr-3 relative overflow-hidden">
             
             
             <Image
-              src={
-                isAuthenticated && post.profilePic
-                  ? post.profilePic
-                  : defaultPic
-              }
+              src={post.profilePic ? post.profilePic : defaultPic}
               alt="Profile"
               fill
               className="object-cover cursor-pointer"

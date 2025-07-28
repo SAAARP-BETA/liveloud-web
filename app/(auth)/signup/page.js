@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash, faCheck } from "@fortawesome/free-solid-svg-icons";
 import google from "@/app/assets/googleicon1.png";
 import metaMask from "@/app/assets/metamaskicon1.png";
-import Logo from "@/app/assets/LongLogo.png";
+import Logo from "@/app/assets/combinedLogo.png";
 
 export default function Signup() {
   const router = useRouter();
@@ -115,7 +115,7 @@ export default function Signup() {
           disabled={isLoading}
         />
         <button
-          className="px-2"
+          className="px-2 cursor-pointer"
           onClick={() => setShowPassword(!showPassword)}
           disabled={isLoading}
         >

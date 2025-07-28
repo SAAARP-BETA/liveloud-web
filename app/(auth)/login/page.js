@@ -6,17 +6,20 @@ import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
 import google from "@/app/assets/googleicon1.png";
 import metaMask from "@/app/assets/metamaskicon1.png";
-import Logo from "@/app/assets/LongLogo.png";
+import Logo from "@/app/assets/combinedLogo.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash, faCheck } from "@fortawesome/free-solid-svg-icons";
 
 export default function Login() {
   const router = useRouter();
-  // const [email, setEmail] = useState("test@test.com");
-  // const [password, setPassword] = useState("Azxs@123");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // const [email, setEmail] = useState("test@test.com");
+  // const [password, setPassword] = useState("Azxs@123");
   const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, error, clearError } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     clearError();
@@ -54,24 +57,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-12 ">
-      <div className="relative lg:ml-4 w-[300px] h-[70px] ">
-        <Image
-          src={Logo}
-          alt="Logo"
-          // width={150}
-          // height={60}
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
-      <h1 className="text-primary text-2xl font-bold  text-center">
-        Login to Your Account
-      </h1>
-      <p className="text-gray-500 text-center mt-1">
-        And Say It All Unfiltered
-      </p>
+    <div className="min-h-screen bg-white px-6">
+      <div className="relative lg:ml-4 w-[300px] h-[100px] ">
+          <Image 
+            src={Logo} 
+            alt="Logo" 
+            // width={150}
+            // height={60}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      <h1 className="text-primary text-2xl font-bold  text-center">Login to Your Account</h1>
+      <p className="text-gray-500 text-center mt-1">And Say It All Unfiltered</p>
 
       {error && (
         <div className="mt-4 p-3 bg-red-100 rounded-md">
@@ -96,17 +95,26 @@ export default function Login() {
 
       <div className="mt-4">
         <label className="text-base font-semibold">Password</label>
-        <input
-          className="bg-white rounded-md h-10 px-3 border border-gray-300 mt-1 w-full"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (error) clearError();
-          }}
-          type="password"
-          placeholder="Enter your password"
-          disabled={isLoading}
-        />
+        <div className="relative">
+          <input
+            className="bg-white rounded-md h-10 px-3 pr-10 border border-gray-300 mt-1 w-full"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (error) clearError();
+            }}
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            disabled={isLoading}
+          />
+          <button
+            className="absolute  cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
+                  >
+                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} size="lg" />
+                  </button>
+        </div>
       </div>
 
       <div className="flex items-center mt-2">
