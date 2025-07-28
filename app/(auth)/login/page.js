@@ -10,8 +10,10 @@ import Logo from "@/app/assets/LongLogo.png";
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState("test@test.com");
-  const [password, setPassword] = useState("Azxs@123");
+  // const [email, setEmail] = useState("test@test.com");
+  // const [password, setPassword] = useState("Azxs@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, error, clearError } = useAuth();
