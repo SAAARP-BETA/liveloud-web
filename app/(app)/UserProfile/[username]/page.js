@@ -202,7 +202,7 @@ const PointsDisplay = ({ points, loading }) => {
         </div>
       </div>
       <button
-        className="mt-3 w-full py-2 bg-primary hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
+        className="mt-3 w-full py-2 bg-primary cursor-pointer hover:bg-sky-600 rounded-lg text-white text-sm font-medium transition-colors"
         onClick={handleLeaderboardPress}
       >
         Leaderboard
@@ -1192,7 +1192,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                     <button
                       onClick={handleFollowToggle}
                       disabled={followLoading}
-                      className={`flex-1 py-2.5 rounded-full text-center font-medium transition-colors disabled:opacity-50 ${
+                      className={`flex-1 cursor-pointer py-2.5 rounded-full text-center font-medium transition-colors disabled:opacity-50 ${
                         isFollowing
                           ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
                           : "bg-primary text-white hover:bg-sky-600"

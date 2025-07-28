@@ -793,7 +793,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
       </div>
     );
   }
-
   const handleReportSuccess = (reportedPostId) => {
     const updatedPosts = getCurrentTabData().posts.filter(
       (post) => post.id !== reportedPostId
@@ -842,7 +841,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     href="/profile/edit"
                     className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
                   >
-                    <Edit2 className="text-primary text-sm" />
+                    <Edit2 className=" text-primary text-md" />
                   </Link>
                 )}
               </motion.div>
@@ -860,7 +859,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             <div className="mt-4 text-center px-4">
               <div className="flex items-center justify-center">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {user.name || user.username || "User"}
+                  
+                  {user.fullname||"User"}
                 </h2>
                 {user.isVerified && (
                   <Verified className="ml-2 text-primary text-xl" />
