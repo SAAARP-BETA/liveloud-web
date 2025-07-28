@@ -13,8 +13,10 @@ import Logo from "@/app/assets/LongLogo.png";
 export default function Signup() {
   const router = useRouter();
   const [fullName, setFullName] = useState("test");
-  const [email, setEmail] = useState("test@test.com");
-  const [password, setPassword] = useState("Azxs@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  // const [email, setEmail] = useState("test@test.com");
+  // const [password, setPassword] = useState("Azxs@123");
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
