@@ -198,12 +198,14 @@ export default function LeftSidebar() {
                   src={user?.profilePicture}
                   alt="Profile"
                   className="w-6 h-6 rounded-full border border-gray-300"
+                  onClick={handleProfileClick}
                 />
               ) : (
                 <img
                   src={defaultPic.src}
                   alt="Profile"
                   className="w-6 h-6 rounded-full border border-gray-300"
+                  onClick={handleProfileClick}
                 />
               )}
             </motion.div>

@@ -842,7 +842,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     href="/profile/edit"
                     className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
                   >
-                    <Edit2 className=" text-primary text-md" />
+                    <Edit2 className=" text-primary text-md" size={20} />
                   </Link>
                 )}
               </motion.div>
