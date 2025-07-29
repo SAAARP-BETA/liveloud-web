@@ -44,6 +44,25 @@ const CommentCard = React.memo(({ comment }) => {
   if (!comment || !comment.user) {
     return null;
   }
+  // Format timestamp
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "Just now";
+
+    const commentDate = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - commentDate;
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffSecs < 60) return `${diffSecs}s`;
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    if (diffDays < 7) return `${diffDays}d`;
+
+    return commentDate.toLocaleDateString();
+  };
   return (
     <div className="flex items-start space-x-3 p-4 border-t border-gray-100 overflow-hidden">
       <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
@@ -59,8 +78,8 @@ const CommentCard = React.memo(({ comment }) => {
           <span className="font-bold text-sm text-gray-900">
             {comment.user.username}
           </span>
-          <span className="text-xs text-gray-500">
-            {new Date(comment.createdAt).toLocaleDateString()}
+          <span className="text-xs text-gray-500 ml-2">
+            {formatTimestamp(comment.createdAt)}
           </span>
         </div>
         <p className="text-gray-800 mt-1 break-words overflow-wrap-anywhere whitespace-pre-wrap">
