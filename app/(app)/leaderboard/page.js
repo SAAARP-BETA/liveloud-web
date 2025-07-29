@@ -8,8 +8,8 @@ import { User, Heart, Pencil, Star, Trophy, Medal } from "lucide-react"
 // Fixed Tab Component
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   return (
-    <div className="bg-white border-b border-gray-100 sticky top-0 z-10" style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12 }}>
-      <div className="flex overflow-x-auto scrollbar-hide">
+    <div className="bg-white border-b border-gray-100 sticky top-4 z-10" style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12 }}>
+      <div className="flex overflow-x-auto custom-scrollbar">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -132,8 +132,8 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
             </div>
           )}
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="px-3 py-1 bg-sky-100 rounded-full">
+        <div className="flex items-center space-x-1">
+          <div className="px-2 py-1 bg-sky-100 rounded-xl ">
             <span className="text-xs text-primary font-medium">
               Level {levelInfo.level}
             </span>
@@ -313,9 +313,9 @@ export default function LeaderboardPage() {
   if (isLoading && page === 1) {
     return (
       <div className="min-h-screen w-xl bg-gray-50">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <div className="flex items-center justify-center min-h-screen mr-50 sm:mr-0 sm:px-8">
+          <div className="text-center ">
+            <div className="animate-spin rounded-full h-12 w-12 flex justify-center items-center border-b-2 border-primary mx-auto"></div>
             <p className="mt-4 text-gray-600">
               Loading leaderboard...
             </p>
@@ -325,153 +325,132 @@ export default function LeaderboardPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen w-xl bg-gray-50">
-      {/* Tabs */}
-      <LeaderboardTabs
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabPress={handleTabChange}
-      />
+ return (
+  <div className="min-h-screen w-full bg-gray-50 flex-1 overflow-y-auto h-screen custom-scrollbar">
+    {/* Tabs */}
+    <LeaderboardTabs
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabPress={handleTabChange}
+    />
 
-      {/* Main Content */}
-      <div className="pb-24">
-        {/* My Points Summary */}
-        {isAuthenticated && myPoints && (
-          <div className="mx-4 my-6 rounded-xl overflow-hidden shadow-lg">
-            <div 
-              className="p-6 bg-gradient-to-r from-sky-400 to-primary"
-              style={{
-                background: 'linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%)'
-              }}
-            >
-              <div className="flex items-center justify-center mb-4">
-                <div>
-                  <p className="text-white/80 text-sm">
-                    Your Total Points
-                  </p>
-                  <p className="text-white cursor-pointer  text-center text-2xl font-bold mt-1">
-                    {myPoints.totalPoints?.toLocaleString() || '0'}
-                  </p>
-                </div>
-                {/* <button
-                  className="bg-white/20 px-4 py-2 rounded-full hover:bg-white/30 transition-colors"
-                  onClick={() => router.push('/dashboard')}
-                >
-                  <span className="text-white text-sm font-medium">
-                    View Details
-                  </span>
-                </button> */}
+    {/* Main Content */}
+    <div className="pb-24 px-4 sm:px-6 lg:px-8">
+      {/* My Points Summary */}
+      {isAuthenticated && myPoints && (
+        <div className="my-6 rounded-xl overflow-hidden shadow-lg">
+          <div
+            className="p-6 bg-gradient-to-r from-sky-400 to-primary"
+            style={{
+              background: 'linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%)',
+            }}
+          >
+            <div className="flex flex-col items-center justify-center mb-4 sm:flex-row sm:justify-center">
+              <div>
+                <p className="text-white/80 text-sm text-center sm:text-center">
+                  Your Total Points
+                </p>
+                <p className="text-white cursor-pointer text-center sm:text-center text-2xl font-bold mt-1">
+                  {myPoints.totalPoints?.toLocaleString() || '0'}
+                </p>
               </div>
+            </div>
 
-              {/* Points Breakdown */}
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
-                <div className="text-center">
-                  <div className="cursor-pointer  w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <Pencil className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-white text-lg font-semibold">
-                    {myPoints.creatorPoints || 0}
-                  </p>
-                  <p className="text-white/80 text-xs">
-                    Creator
-                  </p>
+            {/* Points Breakdown */}
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                  <Pencil className="w-5 h-5 text-white" />
                 </div>
-                <div className="text-center">
-                  <div className="w-12 cursor-pointer h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <Heart className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-white text-lg font-semibold">
-                    {myPoints.fanPoints || 0}
-                  </p>
-                  <p className="text-white/80 text-xs">
-                    Fan
-                  </p>
+                <p className="text-white text-lg font-semibold">
+                  {myPoints.creatorPoints || 0}
+                </p>
+                <p className="text-white/80 text-xs">Creator</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                  <Heart className="w-5 h-5 text-white" />
                 </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 cursor-pointer  bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <Star className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-white text-lg font-semibold">
-                    {myPoints.bonusPoints || 0}
-                  </p>
-                  <p className="text-white/80 text-xs">
-                    Bonus
-                  </p>
+                <p className="text-white text-lg font-semibold">
+                  {myPoints.fanPoints || 0}
+                </p>
+                <p className="text-white/80 text-xs">Fan</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                  <Star className="w-5 h-5 text-white" />
                 </div>
+                <p className="text-white text-lg font-semibold">
+                  {myPoints.bonusPoints || 0}
+                </p>
+                <p className="text-white/80 text-xs">Bonus</p>
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Header Section */}
+      <div className="py-4 flex flex-row justify-between sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h2 className="text-gray-800 text-lg font-semibold">
+          🏆 Top Users
+        </h2>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="bg-primary border text-white px-4 cursor-pointer py-2 rounded-lg hover:bg-sky-600 disabled:opacity-50 transition-colors text-sm font-medium"
+        >
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+
+      {/* Leaderboard Items */}
+      <div className="pb-8">
+        {leaderboardData.map((item, index) => (
+          <LeaderboardItem
+            key={item.userId || index}
+            item={item}
+            index={index}
+            currentUserId={currentUser?._id}
+            onPress={navigateToProfile}
+          />
+        ))}
+
+        {isLoading && page > 1 && (
+          <div className="py-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          </div>
         )}
 
-        {/* Header Section */}
-        <div className="px-4 py-4 flex items-center justify-between">
-          <h2 className="text-gray-800 cursor-pointer  text-lg font-semibold">
-            🏆 Top Users
-          </h2>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="bg-primary cursor-pointer  text-white px-4 py-2 rounded-lg hover:bg-sky-600 disabled:opacity-50 transition-colors text-sm font-medium"
-          >
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
+        {!isLoading && hasMore && leaderboardData.length > 0 && (
+          <div className="py-4 text-center">
+            <button
+              onClick={loadMore}
+              className="bg-white text-primary border border-primary px-6 py-3 rounded-lg hover:bg-sky-50 transition-colors font-medium"
+            >
+              Load More
+            </button>
+          </div>
+        )}
 
-        {/* Leaderboard Items */}
-        <div className="pb-8">
-          {leaderboardData.map((item, index) => (
-            <LeaderboardItem
-              key={item.userId || index}
-              item={item}
-              index={index}
-              currentUserId={currentUser?._id}
-              onPress={navigateToProfile}
-            />
-          ))}
+        {!hasMore && leaderboardData.length > 0 && (
+          <div className="py-6 text-center">
+            <p className="text-gray-500">
+              🎉 You've reached the end of the leaderboard!
+            </p>
+          </div>
+        )}
 
-          {/* Loading Footer */}
-          {isLoading && page > 1 && (
-            <div className="py-6 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            </div>
-          )}
-
-          {/* Load More Button */}
-          {!isLoading && hasMore && leaderboardData.length > 0 && (
-            <div className="px-4 py-4 text-center">
-              <button
-                onClick={loadMore}
-                className="bg-white text-primary border border-primary px-6 py-3 rounded-lg hover:bg-sky-50 transition-colors font-medium"
-              >
-                Load More
-              </button>
-            </div>
-          )}
-
-          {/* End of List */}
-          {!hasMore && leaderboardData.length > 0 && (
-            <div className="py-6 text-center">
-              <p className="text-gray-500">
-                🎉 You've reached the end of the leaderboard!
-              </p>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!isLoading && leaderboardData.length === 0 && (
-            <div className="py-12 text-center">
-              <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">
-                No users found
-              </p>
-              <p className="text-gray-400 text-sm">
-                Be the first to earn points!
-              </p>
-            </div>
-          )}
-        </div>
+        {!isLoading && leaderboardData.length === 0 && (
+          <div className="py-12 text-center">
+            <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">No users found</p>
+            <p className="text-gray-400 text-sm">Be the first to earn points!</p>
+          </div>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
+
 }

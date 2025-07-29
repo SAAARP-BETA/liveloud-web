@@ -580,6 +580,7 @@ const EditPage = () => {
   }
 
   return (
+     <div className="flex-1 overflow-y-auto h-screen custom-scrollbar">
     <div className="min-h-screen bg-gray-50 flex justify-center md:w-xl ">
       <div className="w-full max-w-2xl bg-white">
         <header className="flex flex-row items-center justify-between py-3 px-4 bg-white border-b border-gray-100 sticky top-0 z-10">
@@ -890,6 +891,7 @@ const EditPage = () => {
         {/* Image Picker Bottom Sheet */}
         {handleCustomBottomSheet()}
       </div>
+    </div>
     </div>
   );
 };

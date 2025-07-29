@@ -548,7 +548,7 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex-1 overflow-y-auto h-screen custom-scrollbar">
       <div className="md:w-xl w-90 mx-auto">
         {/* Header */}
         <div className="px-4 pt-6 pb-4">
