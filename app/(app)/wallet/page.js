@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { API_ENDPOINTS } from '../../utils/config';
-import { ArrowDownLeft, ArrowUpRight, Plus } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { API_ENDPOINTS } from "../../utils/config";
+import { ArrowDownLeft, ArrowUpRight, Plus } from "lucide-react";
 
 export default function WalletPage() {
-  const [xpAmount, setXpAmount] = useState('');
-  const [xpRecipient, setXpRecipient] = useState('');
-  const [cryptoAmount, setCryptoAmount] = useState('');
-  const [cryptoRecipient, setCryptoRecipient] = useState('');
-  const [selectedCrypto, setSelectedCrypto] = useState('BTC');
-  const [username, setUsername] = useState('');
+  const [xpAmount, setXpAmount] = useState("");
+  const [xpRecipient, setXpRecipient] = useState("");
+  const [cryptoAmount, setCryptoAmount] = useState("");
+  const [cryptoRecipient, setCryptoRecipient] = useState("");
+  const [selectedCrypto, setSelectedCrypto] = useState("BTC");
+  const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -24,13 +24,16 @@ export default function WalletPage() {
         setError(null);
 
         const authenticatedUsername = user?.username;
-        const res = await fetch(`${API_ENDPOINTS.USER}/profiles/${authenticatedUsername}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${API_ENDPOINTS.USER}/profiles/${authenticatedUsername}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!res.ok) {
           throw new Error(await res.text());
@@ -39,7 +42,7 @@ export default function WalletPage() {
         const profile = await res.json();
         setUsername(profile.username);
       } catch (err) {
-        setError(err.message || 'Something went wrong');
+        setError(err.message || "Something went wrong");
       } finally {
         setIsLoading(false);
       }
@@ -49,17 +52,17 @@ export default function WalletPage() {
   }, [user, token]);
 
   const TransactionItem = ({ type, amount, from, to, date }) => {
-    const isReceived = type === 'Received';
-    const isSent = type === 'Sent';
+    const isReceived = type === "Received";
+    const isSent = type === "Sent";
 
     const textColor = isReceived
-      ? 'text-green-500'
+      ? "text-green-500"
       : isSent
-      ? 'text-red-500'
-      : 'text-gray-800';
+      ? "text-red-500"
+      : "text-gray-800";
 
     return (
-      <div className="flex p-4 w-xl bg-white rounded-xl mb-2 shadow-sm">
+      <div className="flex p-4 lg:w-xl bg-white rounded-xl mb-2 shadow-sm">
         <div className="w-10 h-10 rounded-full bg-gray-100 flex justify-center items-center">
           {isReceived ? (
             <ArrowDownLeft size={20} color="#4CAF50" />
@@ -76,7 +79,7 @@ export default function WalletPage() {
         </div>
         <div className="text-right">
           <div className={`text-base font-semibold mb-1 ${textColor}`}>
-            {isReceived ? '+' : isSent ? '-' : ''}
+            {isReceived ? "+" : isSent ? "-" : ""}
             {amount}
           </div>
           <div className="text-xs text-gray-400">{date}</div>
@@ -90,7 +93,9 @@ export default function WalletPage() {
       <div className="w-full max-w-md sm:max-w-full mx-auto">
         {/* Wallet Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Connected Wallets</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Connected Wallets
+          </h1>
         </div>
 
         {/* Profile Handle */}
@@ -111,7 +116,9 @@ export default function WalletPage() {
           <h2 className="text-lg font-bold text-gray-800 mb-4">XP Wallet</h2>
           <div className="flex justify-between mb-4">
             <span className="text-sm text-gray-600">Your XP balance is:</span>
-            <span className="text-base font-semibold text-gray-900">1000 XP</span>
+            <span className="text-base font-semibold text-gray-900">
+              1000 XP
+            </span>
           </div>
 
           <input
@@ -142,24 +149,30 @@ export default function WalletPage() {
 
         {/* Crypto Wallet */}
         <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Crypto Wallet</h2>
+          <h2 className="text-lg font-bold text-gray-800 mb-4">
+            Crypto Wallet
+          </h2>
           <div className="flex justify-between mb-2">
             <span className="text-sm text-gray-600">Your BTC balance is:</span>
-            <span className="text-base font-semibold text-gray-900">0.00001 BTC</span>
+            <span className="text-base font-semibold text-gray-900">
+              0.00001 BTC
+            </span>
           </div>
           <div className="flex justify-between mb-4">
             <span className="text-sm text-gray-600">Your ETH balance is:</span>
-            <span className="text-base font-semibold text-gray-900">0.0001 ETH</span>
+            <span className="text-base font-semibold text-gray-900">
+              0.0001 ETH
+            </span>
           </div>
 
           <div className="flex bg-gray-100 rounded-xl p-1 my-4 gap-2">
-            {['BTC', 'ETH'].map((type) => (
+            {["BTC", "ETH"].map((type) => (
               <button
                 key={type}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium ${
                   selectedCrypto === type
-                    ? 'bg-white shadow text-gray-800'
-                    : 'text-gray-500'
+                    ? "bg-white shadow text-gray-800"
+                    : "text-gray-500"
                 }`}
                 onClick={() => setSelectedCrypto(type)}
               >
@@ -197,12 +210,26 @@ export default function WalletPage() {
         {/* Transactions */}
         <div className="mb-30">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-gray-800">Recent Transactions</h2>
-            <button className="text-sm text-primary font-medium">View All</button>
+            <h2 className="text-lg font-bold text-gray-800">
+              Recent Transactions
+            </h2>
+            <button className="text-sm text-primary font-medium">
+              View All
+            </button>
           </div>
 
-          <TransactionItem type="Received" amount="50 XP" from="@friend" date="Today, 10:30 AM" />
-          <TransactionItem type="Sent" amount="0.00005 BTC" to="0x1a2b3c..." date="Yesterday, 2:15 PM" />
+          <TransactionItem
+            type="Received"
+            amount="50 XP"
+            from="@friend"
+            date="Today, 10:30 AM"
+          />
+          <TransactionItem
+            type="Sent"
+            amount="0.00005 BTC"
+            to="0x1a2b3c..."
+            date="Yesterday, 2:15 PM"
+          />
           <TransactionItem type="Top Up" amount="200 XP" date="Feb 25, 2025" />
         </div>
       </div>

@@ -507,7 +507,7 @@ const CreatePost = () => {
   }
 
   return (
-    <div className="min-h-screen md:w-xl sm:w-120 w-90 bg-gray-50 p-2">
+    <div className="min-h-screen md:w-xl sm:w-120 w-90 bg-gray-50 p-2 flex-1 overflow-y-auto h-screen custom-scrollbar">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
         <div className="flex items-center justify-between px-4 py-3 mt-5">
