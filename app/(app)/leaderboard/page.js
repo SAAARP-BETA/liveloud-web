@@ -95,7 +95,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
 
   return (
     <div
-      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${
+      className={`flex items-center p-5 mx-auto mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${
         isCurrentUser ? 'bg-sky-50 border-2 border-primary' : 'bg-white shadow-sm hover:shadow-md'
       }`}
       onClick={() => onPress(item)}
