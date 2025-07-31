@@ -1060,8 +1060,8 @@ const HomePage = () => {
 
   // Render tab bar
   const renderTabBar = () => (
-    <div className="sticky rounded-lg top-4 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
-      <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max">
+    <div className="sticky rounded-lg top-6 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
+      <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max mt-6">
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
           const canAccess = !feedType.requiresAuth || isAuthenticated;
@@ -1151,11 +1151,10 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar">
+    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar p-4">
       {/* --- Block 1: Create Post & Tabs --- */}
-        {renderTabBar()}
-      <div className="mt-5 min-md:w-xl/2  md:w-xl max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
-
+      {renderTabBar()}
+      <div className="min-md:w-xl/2 md:w-xl max-w-2xl w-full mx-auto bg-white rounded-xl mb-4 shadow-sm">
         {!isAuthenticated ? (
           <div className="min-h-[200px] bg-gray-50 flex items-center justify-center rounded-lg">
             <div className="text-center">
