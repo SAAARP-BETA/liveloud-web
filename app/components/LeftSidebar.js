@@ -20,9 +20,11 @@ import { API_ENDPOINTS } from "../utils/config";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import defaultPic from "../assets/avatar.png";
-import combinedLogo from "@/app/assets/combinedLogo.png";
+import combinedLogo from "@/app/assets/Liveloud.png";
 import LogoLiveloud from "@/app/assets/LongLogo.png";
 import mobileLogo from "@/app/assets/mobileLogo.png";
+// import Logo from "@/app/assets/Liveloud.png"
+
 const tabs = [
   { name: "Home", href: "/home", icon: Home },
   { name: "Explore", href: "/explore", icon: Search },
@@ -336,16 +338,15 @@ export default function LeftSidebar() {
   // };
 
   const Logo = () => (
-    <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px]">
+    <div className="flex justify-center w-[340px] h-[40px] items-center mb-[-10] lg:w-[280px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px]">
       <Link href="/home">
         <Image
           src={combinedLogo}
-          // src={LogoLiveloud}
-          // src={mobileLogo}
+          // src={Logo}
           alt="Logo"
-          width={280}
-          // height={20}
-          className="object-contain mr-26 md:mr-18 sm:mr-10"
+          width={250}
+          height={20}
+          className="object-contain ml-[-18] mr-26 md:mr-18 sm:mr-10"
           priority
         /></Link>
     </div>

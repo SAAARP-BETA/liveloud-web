@@ -860,8 +860,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             <div className="mt-4 text-center px-4">
               <div className="flex items-center justify-center">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  
-                  {user.fullname||"User"}
+                  {user.fullname || "User"}
                 </h2>
                 {user.isVerified && (
                   <Verified className="ml-2 text-primary text-xl" />
