@@ -17,8 +17,8 @@ import { debounce } from "lodash";
 import { API_ENDPOINTS } from "../../utils/config";
 import defaultPic from "../../assets/avatar.png";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 
 const fonts = {
   Regular: "Inter, sans-serif",
@@ -250,7 +250,7 @@ export default function SearchPage() {
   const handleNavigateToPost = () => {
     router.push(`/post/${post.id}`);
   };
-   const { user, token } = useAuth();
+  const { user, token } = useAuth();
 
   // States
   const [searchQuery, setSearchQuery] = useState("");
@@ -548,7 +548,7 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex-1 overflow-y-auto h-screen custom-scrollbar">
+    <div className="min-h-screen bg-gray-50 px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
       <div className="md:w-xl w-90 mx-auto">
         {/* Header */}
         <div className="px-4 pt-6 pb-4">

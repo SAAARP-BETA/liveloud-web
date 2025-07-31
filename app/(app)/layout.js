@@ -83,7 +83,7 @@ export default function AppLayout({ children }) {
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
+      setIsMobile(window.innerWidth < 640); // md breakpoint
     };
 
     checkScreenSize();

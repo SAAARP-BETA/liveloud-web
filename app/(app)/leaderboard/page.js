@@ -426,7 +426,7 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 flex-1 overflow-y-auto h-screen custom-scrollbar">
+    <div className="min-h-screen w-full bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
       {/* Tabs */}
       <LeaderboardTabs
         tabs={tabs}

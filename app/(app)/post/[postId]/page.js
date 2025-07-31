@@ -64,7 +64,7 @@ const CommentCard = React.memo(({ comment }) => {
     return commentDate.toLocaleDateString();
   };
   return (
-    <div className="flex items-start space-x-3 p-4 border-t border-gray-100 overflow-hidden">
+    <div className="flex items-start space-x-4 p-4 border-t border-gray-100 overflow-hidden">
       <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
         <Image
           src={comment.user.profilePicture || "/path/to/default/pic.png"}
@@ -307,7 +307,7 @@ const PostPage = () => {
   // --- Render Logic ---
   if (loading) {
     return (
-      <div className="w-xl flex flex-col items-center justify-center p-16">
+      <div className="sm:max-w-lg md:min-w-lg/3 lg:w-xl flex flex-col items-center justify-center p-16">
         <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
         <p className="text-lg text-gray-600">Loading post...</p>
       </div>
@@ -323,7 +323,8 @@ const PostPage = () => {
 
   return (
     <>
-      <div className="container mx-auto w-xl py-4">
+      <div className="mx-auto p-2 sm:p-4 w-full sm:max-w-lg md:max-w-lg lg:min-w-xl/2 lg:w-xl">
+        {/* <div className="mx-auto p-2 sm:p-4 w-full sm:max-w-lg md:max-w-lg lg:w-xl"> */}
         <PostCard
           post={post}
           handleLikePost={postHandlers.handleLikePost}
@@ -343,20 +344,20 @@ const PostPage = () => {
         <div className="p-4 border-t border-gray-200 bg-white rounded-b-xl">
           <form
             onSubmit={handleCommentSubmit}
-            className="flex items-center space-x-3"
+            className="flex items-center space-x-2 sm:space-x-3"
           >
             <textarea
               id="comment-input"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
-              className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none"
+              className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none text-sm sm:text-base"
               rows="1"
               disabled={isSubmittingComment}
             />
             <button
               type="submit"
-              className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+              className="bg-primary text-white font-bold py-2 px-3 sm:px-4 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center text-sm sm:text-base"
               disabled={
                 !newComment.trim() || !isAuthenticated || isSubmittingComment
               }
@@ -379,7 +380,7 @@ const PostPage = () => {
         </div>
 
         {/* Comments Section */}
-        <div className="bg-white rounded-xl mt-4">
+        <div className="bg-white rounded-xl mt-4 mx-1 sm:mx-0">
           <h2 className="text-lg font-bold p-4 border-b border-gray-100">
             Comments ({post.commentCount || post.comments?.length || 0})
           </h2>
