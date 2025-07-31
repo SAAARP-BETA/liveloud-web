@@ -19,7 +19,7 @@ const authService = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password }),
-        credentials: 'include', // ✅ cookie will be set by backend
+        credentials: 'omit', // ✅ cookie will be set by backend
       });
 
       const data = await response.json();
