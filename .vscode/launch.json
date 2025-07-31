@@ -22,7 +22,8 @@
                 "--inspect"
             ],
             "args": [
-                "dev"
+                "dev",
+                "--turbopack"
             ],
             "skipFiles": [
                 "<node_internals>/**"
