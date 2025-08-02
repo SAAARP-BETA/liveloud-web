@@ -13,6 +13,8 @@ import {
   Ban,
   Trash2,
   Heart, // ADDED: Import Heart icon for like functionality
+  MessageCircle, // ADDED: Import MessageCircle icon for reply functionality
+  X, // ADDED: Import X icon for cancel reply
 } from "lucide-react";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
 
@@ -41,10 +43,10 @@ const menuOptions = [
 
 /**
  * A simple component to display a single comment.
- * MODIFIED: Added like/unlike functionality for comments
+ * MODIFIED: Added like/unlike functionality and reply functionality for comments
  */
 const CommentCard = React.memo(
-  ({ comment, postId, token, user, onCommentUpdate }) => {
+  ({ comment, postId, token, user, onCommentUpdate, onReplyToComment }) => {
     if (!comment || !comment.user) {
       return null;
     }
@@ -122,6 +124,7 @@ const CommentCard = React.memo(
           like.user === user?._id ||
           like === user?._id
       );
+
     // Format timestamp
     const formatTimestamp = (timestamp) => {
       if (!timestamp) return "Just now";
@@ -165,10 +168,10 @@ const CommentCard = React.memo(
             {comment.content}
           </p>
 
-          {/* ADDED: Comment like/unlike button */}
+          {/* ADDED: Comment like/unlike and reply buttons */}
           <div className="flex items-center mt-2">
             <button
-              className="flex items-center hover:bg-gray-100 p-1 rounded cursor-pointer"
+              className="flex items-center mr-4 hover:bg-gray-100 p-1 rounded cursor-pointer"
               onClick={() =>
                 isLiked
                   ? handleUnlikeComment(comment._id)
@@ -189,7 +192,52 @@ const CommentCard = React.memo(
                 {comment.likes?.length || 0}
               </span>
             </button>
+
+            {/* ADDED: Reply button */}
+            <button
+              className="flex items-center hover:bg-gray-100 p-1 rounded cursor-pointer"
+              onClick={() => onReplyToComment && onReplyToComment(comment)}
+            >
+              <MessageCircle size={14} className="text-gray-500" />
+              <span className="text-xs ml-1 font-medium text-gray-500">
+                Reply
+              </span>
+            </button>
           </div>
+
+          {/* ADDED: Render replies if any */}
+          {comment.replies && comment.replies.length > 0 && (
+            <div className="mt-3 pl-4 border-l-2 border-gray-200">
+              {comment.replies.map((reply, index) => (
+                <div
+                  key={index}
+                  className={index < comment.replies.length - 1 ? "mb-2" : ""}
+                >
+                  <div className="flex">
+                    <img
+                      src={getProfilePicture(reply.user?.profilePicture)}
+                      alt="Profile"
+                      className="w-6 h-6 rounded-full"
+                    />
+
+                    <div className="ml-2 flex-1">
+                      <div className="flex items-center">
+                        <span className="font-medium text-xs text-gray-800">
+                          {reply.user?.username || "Anonymous"}
+                        </span>
+                        <span className="text-xs text-gray-500 ml-1">
+                          {formatTimestamp(reply.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-800 break-words">
+                        {reply.content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -213,6 +261,10 @@ const PostPage = () => {
   const [error, setError] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  // ADDED: Reply state management
+  const [replyTo, setReplyTo] = useState(null);
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
 
   // Modal States
   const [isModalVisible, setModalVisible] = useState(false);
@@ -282,6 +334,18 @@ const PostPage = () => {
     [user?._id]
   );
 
+  // ADDED: Handle reply to comment
+  const handleReplyToComment = useCallback((comment) => {
+    setReplyTo(comment);
+    setNewComment(`@${comment.user?.username} `);
+  }, []);
+
+  // ADDED: Cancel reply
+  const cancelReply = useCallback(() => {
+    setReplyTo(null);
+    setNewComment("");
+  }, []);
+
   // --- Data Fetching ---
   const fetchPost = useCallback(async () => {
     if (!postId) return;
@@ -348,7 +412,7 @@ const PostPage = () => {
     updatePostData
   );
 
-  // Comment submission handler - using the same endpoint as CommentModal
+  // MODIFIED: Comment submission handler to handle both comments and replies
   const handleCommentSubmit = useCallback(
     async (e) => {
       e.preventDefault();
@@ -358,47 +422,96 @@ const PostPage = () => {
         return;
       }
 
-      setIsSubmittingComment(true);
-      try {
-        const response = await fetch(
-          `${API_ENDPOINTS.SOCIAL}/posts/${postId}/comment`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              content: newComment.trim(),
-            }),
+      if (replyTo) {
+        // Handle reply submission
+        setIsSubmittingReply(true);
+        try {
+          const response = await fetch(
+            `${API_ENDPOINTS.SOCIAL}/posts/${postId}/comment/${replyTo._id}/reply`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                content: newComment.trim(),
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to post reply");
           }
-        );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to post comment");
+          const data = await response.json();
+
+          // Update the post with the new reply
+          setPost((prevPost) => ({
+            ...prevPost,
+            comments: prevPost.comments.map((comment) => {
+              if (comment._id === replyTo._id) {
+                if (!comment.replies) comment.replies = [];
+                comment.replies.push(data.reply);
+              }
+              return comment;
+            }),
+          }));
+
+          setNewComment("");
+          setReplyTo(null);
+          toast.success("Reply posted successfully!");
+        } catch (err) {
+          console.error("Error posting reply:", err);
+          toast.error(err.message || "Failed to post reply");
+        } finally {
+          setIsSubmittingReply(false);
         }
+      } else {
+        // Handle regular comment submission
+        setIsSubmittingComment(true);
+        try {
+          const response = await fetch(
+            `${API_ENDPOINTS.SOCIAL}/posts/${postId}/comment`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                content: newComment.trim(),
+              }),
+            }
+          );
 
-        const data = await response.json();
-        const newCommentData = data.comment || data;
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to post comment");
+          }
 
-        // Update the post with the new comment
-        setPost((prevPost) => ({
-          ...prevPost,
-          comments: [newCommentData, ...(prevPost.comments || [])],
-          commentCount: (prevPost.commentCount || 0) + 1,
-        }));
+          const data = await response.json();
+          const newCommentData = data.comment || data;
 
-        setNewComment("");
-        toast.success("Comment posted successfully!");
-      } catch (err) {
-        console.error("Error posting comment:", err);
-        toast.error(err.message || "Failed to post comment");
-      } finally {
-        setIsSubmittingComment(false);
+          // Update the post with the new comment
+          setPost((prevPost) => ({
+            ...prevPost,
+            comments: [newCommentData, ...(prevPost.comments || [])],
+            commentCount: (prevPost.commentCount || 0) + 1,
+          }));
+
+          setNewComment("");
+          toast.success("Comment posted successfully!");
+        } catch (err) {
+          console.error("Error posting comment:", err);
+          toast.error(err.message || "Failed to post comment");
+        } finally {
+          setIsSubmittingComment(false);
+        }
       }
     },
-    [newComment, isAuthenticated, token, postId]
+    [newComment, isAuthenticated, token, postId, replyTo]
   );
 
   // Load menu options when modal is visible - Fixed to prevent infinite loops
@@ -487,8 +600,26 @@ const PostPage = () => {
           username={user?.username}
         />
 
-        {/* Comment Submission Form */}
+        {/* MODIFIED: Comment Submission Form with reply indicator */}
         <div className="p-4 border-t border-gray-200 bg-white rounded-b-xl">
+          {/* ADDED: Reply indicator */}
+          {replyTo && (
+            <div className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg mb-3">
+              <p className="text-sm text-gray-600">
+                Replying to{" "}
+                <span className="font-medium text-primary">
+                  @{replyTo.user?.username || "user"}
+                </span>
+              </p>
+              <button
+                onClick={cancelReply}
+                className="p-1 hover:bg-gray-200 rounded cursor-pointer"
+              >
+                <X size={16} className="text-gray-600" />
+              </button>
+            </div>
+          )}
+
           <form
             onSubmit={handleCommentSubmit}
             className="flex items-center space-x-2 sm:space-x-3"
@@ -497,23 +628,28 @@ const PostPage = () => {
               id="comment-input"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment..."
+              placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
               className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none text-sm sm:text-base"
               rows="1"
-              disabled={isSubmittingComment}
+              disabled={isSubmittingComment || isSubmittingReply}
             />
             <button
               type="submit"
               className="bg-primary text-white font-bold py-2 px-3 sm:px-4 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center text-sm sm:text-base"
               disabled={
-                !newComment.trim() || !isAuthenticated || isSubmittingComment
+                !newComment.trim() ||
+                !isAuthenticated ||
+                isSubmittingComment ||
+                isSubmittingReply
               }
             >
-              {isSubmittingComment ? (
+              {isSubmittingComment || isSubmittingReply ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Posting...
+                  {replyTo ? "Replying..." : "Posting..."}
                 </>
+              ) : replyTo ? (
+                "Reply"
               ) : (
                 "Post"
               )}
@@ -540,6 +676,7 @@ const PostPage = () => {
                 token={token}
                 user={user}
                 onCommentUpdate={handleCommentUpdate}
+                onReplyToComment={handleReplyToComment}
               />
             ))
           ) : (
