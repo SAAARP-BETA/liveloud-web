@@ -31,7 +31,7 @@ import { API_ENDPOINTS } from "../../utils/config";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
-
+import toast from 'react-hot-toast';
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import PostCard from "../../components/ui/PostCard";
 import EmptyFeed from "@/app/components/Home/EmptyFeed";
@@ -40,7 +40,8 @@ import AmplifyModal from "@/app/components/ui/AmplifyModal";
 import CustomModal from "@/app/components/ui/Modal";
 import ReportModal from "@/app/components/ui/ReportModal";
 import Image from "next/image";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
+
 // import {
 //   Plus as PlusIcon,
 //   Image as PhotoIcon,
@@ -118,6 +119,8 @@ const HomePage = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showComposeButton, setShowComposeButton] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
 
   // Post composer
   const [text, setText] = useState("");
@@ -569,8 +572,8 @@ const HomePage = () => {
   const gradientColors = isOverLimit
     ? ["#FF6B6B", "#FF0000"]
     : isApproachingLimit
-    ? ["#FFD166", "#FF9F1C"]
-    : ["#06D6A0", "#1B9AAA"];
+      ? ["#FFD166", "#FF9F1C"]
+      : ["#06D6A0", "#1B9AAA"];
 
   // media upload
   const uploadMedia = async () => {
@@ -977,40 +980,56 @@ const HomePage = () => {
       ]);
     }
   };
+const [showConfirm, setShowConfirm] = useState(false);
+const [postIdToDelete, setPostIdToDelete] = useState(null);
 
-  const handleDeletePost = async (postId) => {
-    if (!isAuthenticated) {
-      toast.error("Please login to delete posts");
-      return;
-    }
+  const ConfirmModal = ({ message, onConfirm, onCancel }) => (
+<div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
 
-    if (confirm("Are you sure you want to delete this post?")) {
-      try {
-        const response = await fetch(
-          `${API_ENDPOINTS.SOCIAL}/posts/${postId}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+    <div className="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+      <p className="text-lg font-medium mb-4">{message}</p>
+      <div className="flex justify-end space-x-4">
+        <button onClick={onCancel} className="px-4 cursor-pointer py-2 bg-gray-300 rounded">
+          Cancel
+        </button>
+        <button onClick={onConfirm} className="px-4 py-2 cursor-pointer bg-red-500 text-white rounded">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
-        if (!response.ok) {
-          throw new Error("Failed to delete post");
-        }
 
-        const updatedPosts = getCurrentTabData().posts.filter(
-          (post) => post.id !== postId
-        );
-        updateTabData(activeTab, { posts: updatedPosts });
-        toast.success("Post deleted successfully");
-      } catch (error) {
-        console.error("Error deleting post:", error);
-        toast.error(`Failed to delete post: ${error.message}`);
+ const handleDeletePost = async () => {
+  try {
+    const response = await fetch(
+      `${API_ENDPOINTS.SOCIAL}/posts/${postIdToDelete}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to delete post");
     }
-  };
+
+    const updatedPosts = getCurrentTabData().posts.filter(
+      (post) => post.id !== postIdToDelete
+    );
+    updateTabData(activeTab, { posts: updatedPosts });
+    toast.success("Post deleted successfully");
+  } catch (error) {
+    toast.error(`Failed to delete post: ${error.message}`);
+  } finally {
+    setShowConfirm(false);
+    setPostIdToDelete(null);
+  }
+};
+
 
   const handleReportSuccess = (reportedPostId) => {
     const updatedPosts = getCurrentTabData().posts.filter(
@@ -1049,19 +1068,26 @@ const HomePage = () => {
         handleViewProfile(userId);
         break;
       case "Delete Post":
-        console.log("Delete post:", selectedPost.id);
-        handleDeletePost(selectedPost.id);
-        break;
-      default:
-    }
+      if (isAuthenticated) {
+        setPostIdToDelete(selectedPost.id);
+        setShowConfirm(true); // SHOW MODAL
+        console.log("Deleting post with ID:", selectedPost.id);
+        
+      } else {
+        toast.error("Please login to delete posts");
+      }
+      break;
+
+    default:
+  }
 
     setModalVisible(false);
   };
 
   // Render tab bar
   const renderTabBar = () => (
-    <div className="bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
-      <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max">
+    <div className="sticky rounded-lg top-2 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
+      <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max ">
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
           const canAccess = !feedType.requiresAuth || isAuthenticated;
@@ -1071,11 +1097,10 @@ const HomePage = () => {
               key={feedType.key}
               onClick={() => canAccess && handleTabChange(feedType.key)}
               className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors
-    ${
-      isActive
-        ? "bg-primary text-white"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-    }
+    ${isActive
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }
     ${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
     max-w-[100px] truncate overflow-hidden whitespace-nowrap`}
               disabled={!canAccess}
@@ -1151,11 +1176,22 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar">
+    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar p-4 ">
       {/* --- Block 1: Create Post & Tabs --- */}
-      <div className="min-md:w-xl/2  md:w-xl max-w-2xl w-full mx-auto p-4 bg-white rounded-xl mb-4 shadow-sm">
         {renderTabBar()}
 
+    {/* <div className="mt-4 sm:mt-2 w-full max-w-[512px] sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto px-3 sm:px-4 bg-white rounded-xl mb-4 shadow-sm min-h-[200px]"> */}
+<div className="mt-5 md:min-w-[410px] lg:w-[580px] max-w-2xl w-full mx-auto bg-white rounded-xl mb-4 shadow-sm">
+       {showConfirm && (
+  <ConfirmModal
+    message="Are you sure you want to delete this post?"
+    onConfirm={handleDeletePost}
+    onCancel={() => {
+      setShowConfirm(false);
+      setPostIdToDelete(null);
+    }}
+  />
+)}
         {!isAuthenticated ? (
           <div className="min-h-[200px] bg-gray-50 flex items-center justify-center rounded-lg">
             <div className="text-center">
@@ -1171,8 +1207,9 @@ const HomePage = () => {
             </div>
           </div>
         ) : (
-          <div className="mx-auto">
-            <div className="p-4 bg-white cursor-pointer rounded-xl relative z-10">
+         
+         <div className="mx-auto ">
+            <div className="p-4  bg-white cursor-pointer rounded-xl relative z-10">
               <div className="flex items-center mb-2 space-x-3">
                 <Image
                   src={user?.profilePicture || defaultPic}
@@ -1200,11 +1237,10 @@ const HomePage = () => {
                   <button
                     onClick={handleMediaButtonClick}
                     disabled={images.length >= MEDIA_LIMIT}
-                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
-                      images.length >= MEDIA_LIMIT
+                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${images.length >= MEDIA_LIMIT
                         ? "opacity-50 cursor-not-allowed"
                         : ""
-                    }`}
+                      }`}
                   >
                     <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600" />
                   </button>
@@ -1260,13 +1296,12 @@ const HomePage = () => {
                 >
                   <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
                     <span
-                      className={`text-xs font-medium ${
-                        isOverLimit
+                      className={`text-xs font-medium ${isOverLimit
                           ? "text-red-600"
                           : isApproachingLimit
-                          ? "text-yellow-500"
-                          : "text-cyan-600"
-                      }`}
+                            ? "text-yellow-500"
+                            : "text-cyan-600"
+                        }`}
                     >
                       {MAX_CHAR_LIMIT - charCount}
                     </span>
@@ -1310,11 +1345,10 @@ const HomePage = () => {
           </div>
         ) : (
           <div
-            className={`transition-all duration-300 ${
-              isInputFocused || images.length > 0
+            className={`transition-all duration-300 ${isInputFocused || images.length > 0
                 ? "blur-sm pointer-events-none"
                 : "pointer-events-auto"
-            }`}
+              }`}
           >
             {/* Error states */}
             {error && activeTab === "home" && (
@@ -1443,17 +1477,17 @@ const HomePage = () => {
               <button
                 key={index}
                 onClick={() => handleMenuOptionPress(option)}
-                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
-                  option.text === "Delete Post" ||
-                  option.text === "Block" ||
-                  option.text === "Report"
+                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${option.text === "Delete Post" ||
+                    option.text === "Block" ||
+                    option.text === "Report"
                     ? "hover:bg-red-50 text-red-600"
                     : "hover:bg-gray-50 text-gray-700"
-                }`}
+                  }`}
               >
                 <option.icon className="w-5 h-5 mr-3" />
                 <span className="font-medium">{option.text}</span>
               </button>
+
             ))}
           </div>
         </div>
@@ -1498,6 +1532,45 @@ const HomePage = () => {
         onSuccess={handleReportSuccess}
         token={token}
       />
+      <CustomModal
+        visible={isDeleteModalVisible}
+        onClose={() => {
+          setDeleteModalVisible(false);
+          setPostToDelete(null);
+        }}
+        title="Delete Post"
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+              <Trash2 className="w-8 h-8 text-red-600" />
+            </div>
+          </div>
+
+          <div className="text-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete this post?</h3>
+            <p className="text-gray-600 text-sm">This action cannot be undone.</p>
+          </div>
+
+          <div className="flex space-x-3 justify-center">
+            <button
+              onClick={() => {
+                setDeleteModalVisible(false);
+                setPostToDelete(null);
+              }}
+              className="px-6 py-2 text-gray-700 cursor-pointer bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleDeletePost(postToDelete)}
+              className="px-6 py-2 bg-red-600 text-white cursor-pointer rounded-lg hover:bg-red-700 transition-colors font-medium"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </CustomModal>
     </div>
   );
 };

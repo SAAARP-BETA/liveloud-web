@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useAuth } from "../../../context/AuthContext";
 // import { fonts } from "../../../utils/fonts";
 import { API_ENDPOINTS } from "../../../utils/config";
-import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 import {
   Camera,
@@ -31,14 +31,26 @@ const PROFILE_IMAGE_MAX_SIZE = 120;
 // Custom Calendar Component
 const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
   const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
-  const [viewDate, setViewDate] = useState(new Date(selectedDate || new Date()));
+  const [viewDate, setViewDate] = useState(
+    new Date(selectedDate || new Date())
+  );
 
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -49,17 +61,17 @@ const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
-    
+
     return days;
   };
 
@@ -122,7 +134,7 @@ const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
-          
+
           <div className="flex items-center space-x-2">
             <button
               onClick={() => navigateYear(-1)}
@@ -140,7 +152,7 @@ const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
               <span className="text-sm text-gray-600">→</span>
             </button>
           </div>
-          
+
           <button
             onClick={() => navigateMonth(1)}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -152,7 +164,10 @@ const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
         {/* Week Days Header */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {weekDays.map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+            <div
+              key={day}
+              className="text-center text-sm font-medium text-gray-500 py-2"
+            >
               {day}
             </div>
           ))}
@@ -163,18 +178,39 @@ const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
           {days.map((date, index) => (
             <button
               key={index}
-              onClick={() => date && !isFutureDate(date) && handleDateClick(date)}
+              onClick={() =>
+                date && !isFutureDate(date) && handleDateClick(date)
+              }
               disabled={!date || isFutureDate(date)}
               className={`
                 h-10 w-10 rounded-lg text-sm font-medium transition-colors
-                ${!date ? 'invisible' : ''}
-                ${isFutureDate(date) ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100'}
-                ${isSelectedDate(date) ? 'bg-primary text-white hover:bg-sky-600' : ''}
-                ${isToday(date) && !isSelectedDate(date) ? 'bg-gray-100 text-sky-600' : ''}
-                ${date && !isSelectedDate(date) && !isToday(date) && !isFutureDate(date) ? 'text-gray-700' : ''}
+                ${!date ? "invisible" : ""}
+                ${
+                  isFutureDate(date)
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "hover:bg-gray-100"
+                }
+                ${
+                  isSelectedDate(date)
+                    ? "bg-primary text-white hover:bg-sky-600"
+                    : ""
+                }
+                ${
+                  isToday(date) && !isSelectedDate(date)
+                    ? "bg-gray-100 text-sky-600"
+                    : ""
+                }
+                ${
+                  date &&
+                  !isSelectedDate(date) &&
+                  !isToday(date) &&
+                  !isFutureDate(date)
+                    ? "text-gray-700"
+                    : ""
+                }
               `}
             >
-              {date ? date.getDate() : ''}
+              {date ? date.getDate() : ""}
             </button>
           ))}
         </div>
@@ -213,7 +249,13 @@ const fileToBase64 = (file) =>
 
 const EditPage = () => {
   const router = useRouter();
-  const { user, token, isAuthenticated, loading: authLoading, updateUserInfo } = useAuth();
+  const {
+    user,
+    token,
+    isAuthenticated,
+    loading: authLoading,
+    updateUserInfo,
+  } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profileData, setProfileData] = useState(null);
@@ -228,7 +270,9 @@ const EditPage = () => {
     if (authLoading) return;
 
     if (!isAuthenticated || !user || !token) {
-      console.log("Not authenticated or missing user/token, redirecting to login");
+      console.log(
+        "Not authenticated or missing user/token, redirecting to login"
+      );
       toast.error("Not Authorized, please login to edit your profile");
       router.push("/login");
       return;
@@ -304,7 +348,9 @@ const EditPage = () => {
       setCoverImage(data.coverPicture || null);
     } catch (error) {
       console.error("Error loading profile:", error);
-      toast.error("Error: Failed to load profile information. " + error.message);
+      toast.error(
+        "Error: Failed to load profile information. " + error.message
+      );
       router.push("/login");
     } finally {
       setLoading(false);
@@ -341,9 +387,10 @@ const EditPage = () => {
     try {
       // Basic validation
       const errors = {};
-      if (!profileData.username) errors.username = 'Username is required';
-      if (!profileData.fullname) errors.fullname = 'Name is required';
-      if (profileData.bio && profileData.bio.length > 250) errors.bio = 'Bio must be 250 characters or less';
+      if (!profileData.username) errors.username = "Username is required";
+      if (!profileData.fullname) errors.fullname = "Name is required";
+      if (profileData.bio && profileData.bio.length > 250)
+        errors.bio = "Bio must be 250 characters or less";
 
       if (Object.keys(errors).length > 0) {
         setProfileErrors(errors);
@@ -355,11 +402,15 @@ const EditPage = () => {
 
       // Prepare form data for image upload
       const formData = new FormData();
-      Object.keys(profileData).forEach(key => {
-        if (key !== 'profilePicture' && key !== 'coverPhoto' && profileData[key] !== null) {
-          if (key === 'dob') {
+      Object.keys(profileData).forEach((key) => {
+        if (
+          key !== "profilePicture" &&
+          key !== "coverPhoto" &&
+          profileData[key] !== null
+        ) {
+          if (key === "dob") {
             formData.append(key, profileData[key].toISOString());
-          } else if (key === 'interests' && Array.isArray(profileData[key])) {
+          } else if (key === "interests" && Array.isArray(profileData[key])) {
             formData.append(key, JSON.stringify(profileData[key]));
           } else {
             formData.append(key, profileData[key]);
@@ -372,50 +423,54 @@ const EditPage = () => {
         try {
           // For web, profileImage would be a File object or blob URL
           if (profileImage instanceof File) {
-            console.log(`Adding profile picture: ${profileImage.name} (${profileImage.type})`);
-            formData.append('profilePicture', profileImage);
+            console.log(
+              `Adding profile picture: ${profileImage.name} (${profileImage.type})`
+            );
+            formData.append("profilePicture", profileImage);
           } else {
             // Handle blob URL case
             const response = await fetch(profileImage);
             const blob = await response.blob();
-            const fileName = `profile.${blob.type.split('/')[1] || 'jpeg'}`;
+            const fileName = `profile.${blob.type.split("/")[1] || "jpeg"}`;
             console.log(`Adding profile picture: ${fileName} (${blob.type})`);
-            formData.append('profilePicture', blob, fileName);
+            formData.append("profilePicture", blob, fileName);
           }
         } catch (error) {
-          console.error('Error preparing profile image:', error);
-          toast.error('Failed to prepare profile image for upload');
+          console.error("Error preparing profile image:", error);
+          toast.error("Failed to prepare profile image for upload");
         }
       }
-      
+
       // Add cover image if changed
       if (coverImage && coverImage !== profileData.coverPhoto) {
         try {
           // For web, coverImage would be a File object or blob URL
           if (coverImage instanceof File) {
-            console.log(`Adding cover photo: ${coverImage.name} (${coverImage.type})`);
-            formData.append('coverPhoto', coverImage);
+            console.log(
+              `Adding cover photo: ${coverImage.name} (${coverImage.type})`
+            );
+            formData.append("coverPhoto", coverImage);
           } else {
             // Handle blob URL case
             const response = await fetch(coverImage);
             const blob = await response.blob();
-            const fileName = `cover.${blob.type.split('/')[1] || 'jpeg'}`;
+            const fileName = `cover.${blob.type.split("/")[1] || "jpeg"}`;
             console.log(`Adding cover photo: ${fileName} (${blob.type})`);
-            formData.append('coverPhoto', blob, fileName);
+            formData.append("coverPhoto", blob, fileName);
           }
         } catch (error) {
-          console.error('Error preparing cover image:', error);
-          toast.error('Failed to prepare cover image for upload');
+          console.error("Error preparing cover image:", error);
+          toast.error("Failed to prepare cover image for upload");
         }
       }
-      
+
       // When sending the request, make sure you don't set any additional headers
       // that would interfere with the content-type boundary
       const response = await fetch(`${API_ENDPOINTS.USER}/profiles`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          // Do NOT set 'Content-Type' here - Browser will set it 
+          Authorization: `Bearer ${token}`,
+          // Do NOT set 'Content-Type' here - Browser will set it
           // correctly with the boundary for multipart/form-data
         },
         body: formData,
@@ -423,22 +478,26 @@ const EditPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update profile');
+        throw new Error(errorData.message || "Failed to update profile");
       }
 
       const updatedUserData = await response.json();
       // updateUserInfo(updatedUserData);
 
-      toast.success('Profile updated successfully');
-       // Update the auth context with new user data if this is the current user's profile
-      if (updatedUserData.user && user && updatedUserData.user._id === user._id) {
-        console.log('Updating auth context with new user data');
+      toast.success("Profile updated successfully");
+      // Update the auth context with new user data if this is the current user's profile
+      if (
+        updatedUserData.user &&
+        user &&
+        updatedUserData.user._id === user._id
+      ) {
+        console.log("Updating auth context with new user data");
         await updateUserInfo(updatedUserData.user);
       }
       router.back();
     } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error(error.message || 'Failed to update profile');
+      console.error("Error updating profile:", error);
+      toast.error(error.message || "Failed to update profile");
     } finally {
       setSubmitting(false);
     }
@@ -521,7 +580,7 @@ const EditPage = () => {
           </label>
 
           {(imageActionType === "profile" && profileImage) ||
-            (imageActionType === "cover" && coverImage) ? (
+          (imageActionType === "cover" && coverImage) ? (
             <button
               className="flex flex-row items-center py-3  cursor-pointer px-4 mb-3 bg-red-50 rounded-xl w-full text-left hover:bg-red-100 transition-colors"
               onClick={() => {
@@ -552,7 +611,7 @@ const EditPage = () => {
 
   const formatDate = (date) => {
     if (!date) return "";
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: "numeric", month: "long", day: "numeric" };
     return date.toLocaleDateString(undefined, options);
   };
 
@@ -560,7 +619,9 @@ const EditPage = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="flex mt-3 w-xl items-center justify-center  text-gray-600">Loading profile</p>
+        <p className="flex mt-3 w-xl items-center justify-center  text-gray-600">
+          Loading profile
+        </p>
       </div>
     );
   }
@@ -580,318 +641,357 @@ const EditPage = () => {
   }
 
   return (
-     <div className="flex-1 overflow-y-auto h-screen custom-scrollbar">
-    <div className="min-h-screen bg-gray-50 flex justify-center md:w-xl ">
-      <div className="w-full max-w-2xl bg-white">
-        <header className="flex flex-row items-center justify-between py-3 px-4 bg-white border-b border-gray-100 sticky top-0 z-10">
-          <h1 className="text-lg text-gray-900">Edit Profile</h1>
-          <button
-            className={`py-2 px-4 cursor-pointer bg-primary rounded-full hover:bg-sky-600 transition-colors ${
-              submitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-            onClick={handleUpdateProfile}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <span className="text-white cursor-pointer text-sm">Save</span>
-            )}
-          </button>
-        </header>
+    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar relative">
+      <div className="min-h-screen bg-gray-50 flex justify-center">
+        <div className="w-full sm:w-md md:max-w-lg lg:w-xl bg-white">
+          <header className="flex flex-row items-center justify-between py-2 sm:py-3 px-2 sm:px-4 border-b border-gray-100 fixed sm:sticky max-sm:top-15 top-0 left-0 right-0 sm:left-auto sm:right-auto z-50 backdrop-blur-sm bg-white/95 max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto">
+            {" "}
+            <h1 className="text-base sm:text-lg text-gray-900">Edit Profile</h1>
+            <button
+              className={`py-2 px-4 cursor-pointer bg-primary rounded-full hover:bg-sky-600 transition-colors ${
+                submitting ? "opacity-70 cursor-not-allowed" : ""
+              }`}
+              onClick={handleUpdateProfile}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <span className="text-white cursor-pointer text-sm">Save</span>
+              )}
+            </button>
+          </header>
 
-        <div className="relative w-full h-40">
-          {coverImage && typeof coverImage === "object" ? (
-            <Image
-              src={URL.createObjectURL(coverImage)}
-              alt="Cover"
-              className="w-full h-full object-cover"
-              width={800}
-              height={160}
-              onError={() => console.error("Failed to load cover image")}
-            />
-          ) : profileData.coverPicture ? (
-            <Image
-              src={profileData.coverPicture}
-              alt="Cover"
-              className="w-full h-full object-cover cursor-pointer"
-              width={800}
-              height={160}
-              onError={(e) => {
-                console.error("Failed to load cover picture");
-                e.currentTarget.src = defaultCover.src;
-              }}
-              priority
-            />
-          ) : (
-            <Image
-              src={defaultCover}
-              alt="Default Cover"
-              className="w-full h-full cursor-pointer object-cover"
-              width={800}
-              height={160}
-              priority
+          <div className="relative w-full h-32 sm:h-40 md:h-48">
+            {coverImage && typeof coverImage === "object" ? (
+              <Image
+                src={URL.createObjectURL(coverImage)}
+                alt="Cover"
+                className="w-full h-full object-cover"
+                width={800}
+                height={160}
+                onError={() => console.error("Failed to load cover image")}
+              />
+            ) : profileData.coverPicture ? (
+              <Image
+                src={profileData.coverPicture}
+                alt="Cover"
+                className="w-full h-full object-cover cursor-pointer"
+                width={800}
+                height={160}
+                onError={(e) => {
+                  console.error("Failed to load cover picture");
+                  e.currentTarget.src = defaultCover.src;
+                }}
+                priority
+              />
+            ) : (
+              <Image
+                src={defaultCover}
+                alt="Default Cover"
+                className="w-full h-full cursor-pointer object-cover"
+                width={800}
+                height={160}
+                priority
+              />
+            )}
+
+            {/* Add cover edit button */}
+            <button
+              className="absolute top-4 cursor-pointer right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+              onClick={() => openImagePicker("cover")}
+            >
+              <Camera className="text-white w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex justify-center -mt-10 sm:-mt-12 mb-4 sm:mb-6">
+            <div className="relative rounded-full border-2 sm:border-4 border-white overflow-hidden">
+              {profileImage && typeof profileImage === "object" ? (
+                <Image
+                  src={URL.createObjectURL(profileImage)}
+                  alt="Profile"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover"
+                  width={96}
+                  height={96}
+                  onError={() => console.error("Failed to load profile image")}
+                />
+              ) : profileData.profilePicture ? (
+                <Image
+                  src={profileData.profilePicture}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover"
+                  width={96}
+                  height={96}
+                  onError={() =>
+                    console.error("Failed to load profile picture")
+                  }
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-3xl text-gray-400">
+                    {profileData.fullname
+                      ? profileData.fullname.substring(0, 2).toUpperCase()
+                      : "U"}
+                  </span>
+                </div>
+              )}
+              <button
+                className="absolute right-8 cursor-pointer bottom-8 bg-primary w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
+                onClick={() => openImagePicker("profile")}
+              >
+                <Camera className="text-white w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <form
+            className="p-2 sm:p-4 space-y-3 sm:space-y-4"
+            onSubmit={handleUpdateProfile}
+          >
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Username
+              </label>
+              <div
+                className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${
+                  profileErrors.username ? "border-red-500" : "border-gray-200"
+                }`}
+              >
+                <AtSign className="text-gray-400 w-5 h-5 ml-3" />
+                <input
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.username || ""}
+                  onChange={(e) =>
+                    handleInputChange("username", e.target.value)
+                  }
+                  placeholder="Your username"
+                  autoCapitalize="none"
+                />
+              </div>
+              {profileErrors.username && (
+                <p className="text-red-500 text-xs mt-1">
+                  {profileErrors.username}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">Name</label>
+              <div
+                className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${
+                  profileErrors.fullname ? "border-red-500" : "border-gray-200"
+                }`}
+              >
+                <User className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+                <input
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.fullname || ""}
+                  onChange={(e) =>
+                    handleInputChange("fullname", e.target.value)
+                  }
+                  placeholder="Your full name"
+                />
+              </div>
+              {profileErrors.fullname && (
+                <p className="text-red-500 text-xs mt-1">
+                  {profileErrors.fullname}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <div className="flex flex-row justify-between items-center mb-1.5">
+                <label className="text-sm text-gray-500">Bio</label>
+                <span className="text-xs text-gray-400">
+                  {profileData.bio?.length || 0}/250
+                </span>
+              </div>
+              <textarea
+                className={`bg-gray-50 border rounded-xl p-3 h-24 text-gray-800 w-full resize-none ${
+                  profileErrors.bio ? "border-red-500" : "border-gray-200"
+                }`}
+                value={profileData.bio || ""}
+                onChange={(e) => handleInputChange("bio", e.target.value)}
+                placeholder="Tell others about yourself"
+                maxLength={250}
+              />
+              {profileErrors.bio && (
+                <p className="text-red-500 text-xs mt-1">{profileErrors.bio}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Location
+              </label>
+              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <MapPin className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+                <input
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.location || ""}
+                  onChange={(e) =>
+                    handleInputChange("location", e.target.value)
+                  }
+                  placeholder="Your location"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Website
+              </label>
+              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <LinkIcon className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+                <input
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.website || ""}
+                  onChange={(e) => handleInputChange("website", e.target.value)}
+                  placeholder="Your website"
+                  autoCapitalize="none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Date of Birth
+              </label>
+              <button
+                type="button"
+                className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden w-full"
+                onClick={() => setIsCalendarVisible(true)}
+              >
+                <Calendar className="text-gray-400 w-5 h-5 ml-3" />
+                <span className="flex-1 py-3 px-2 text-gray-800 text-left">
+                  {profileData.dob
+                    ? formatDate(profileData.dob)
+                    : "Select your date of birth"}
+                </span>
+              </button>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Email
+              </label>
+              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <Mail className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+                <input
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.email || ""}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  placeholder="Your email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Phone
+              </label>
+              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <Phone className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+                <input
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.phone || ""}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
+                  placeholder="Your phone number"
+                  keyboardType="phone-pad"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Gender
+              </label>
+              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <User className="text-gray-400 w-5 h-5 ml-3" />
+                <select
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.gender || ""}
+                  onChange={(e) => handleInputChange("gender", e.target.value)}
+                >
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                  <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Occupation
+              </label>
+              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <Briefcase className="text-gray-400 w-5 h-5 ml-3" />
+                <input
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.occupation || ""}
+                  onChange={(e) =>
+                    handleInputChange("occupation", e.target.value)
+                  }
+                  placeholder="Your occupation"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Education
+              </label>
+              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <Book className="text-gray-400 w-5 h-5 ml-3" />
+                <input
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  value={profileData.education || ""}
+                  onChange={(e) =>
+                    handleInputChange("education", e.target.value)
+                  }
+                  placeholder="Your education"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 mb-1.5 block">
+                Interests
+              </label>
+              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <input
+                  className="flex-1 py-3 px-3 text-gray-800 outline-none bg-transparent"
+                  value={profileData.interests?.join(", ") || ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "interests",
+                      e.target.value.split(", ").filter(Boolean)
+                    )
+                  }
+                  placeholder="Your interests (comma separated)"
+                />
+              </div>
+            </div>
+          </form>
+
+          {/* Custom Calendar Modal */}
+          {isCalendarVisible && (
+            <CustomCalendar
+              selectedDate={profileData.dob}
+              onDateSelect={(date) => handleInputChange("dob", date)}
+              onClose={() => setIsCalendarVisible(false)}
             />
           )}
 
-          {/* Add cover edit button */}
-          <button
-            className="absolute top-4 cursor-pointer right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
-            onClick={() => openImagePicker("cover")}
-          >
-            <Camera className="text-white w-5 h-5" />
-          </button>
+          {/* Image Picker Bottom Sheet */}
+          {handleCustomBottomSheet()}
         </div>
-
-
-
-
-        <div className="flex justify-center -mt-12 mb-6">
-          <div className="relative rounded-full border-4 border-white overflow-hidden">
-            {profileImage && typeof profileImage === "object" ? (
-              <Image
-                src={URL.createObjectURL(profileImage)}
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-cover"
-                width={96}
-                height={96}
-                onError={() => console.error("Failed to load profile image")}
-              />
-            ) : profileData.profilePicture ? (
-              <Image
-                src={profileData.profilePicture}
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-cover"
-                width={96}
-                height={96}
-                onError={() => console.error("Failed to load profile picture")}
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-3xl text-gray-400">
-                  {profileData.fullname
-                    ? profileData.fullname.substring(0, 2).toUpperCase()
-                    : "U"}
-                </span>
-              </div>
-            )}
-            <button
-              className="absolute right-8 cursor-pointer bottom-8 bg-primary w-8 h-8 rounded-full flex items-center justify-center border-2 border-white hover:bg-sky-600 transition-colors"
-              onClick={() => openImagePicker("profile")}
-            >
-              <Camera className="text-white w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        <form className="p-4 space-y-4" onSubmit={handleUpdateProfile}>
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Username</label>
-            <div className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${
-              profileErrors.username ? "border-red-500" : "border-gray-200"
-            }`}>
-              <AtSign className="text-gray-400 w-5 h-5 ml-3" />
-              <input
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.username || ""}
-                onChange={(e) => handleInputChange("username", e.target.value)}
-                placeholder="Your username"
-                autoCapitalize="none"
-              />
-            </div>
-            {profileErrors.username && (
-              <p className="text-red-500 text-xs mt-1">{profileErrors.username}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              className="text-sm text-gray-500 mb-1.5 block"
-
-            >
-              Name
-            </label>
-            <div
-              className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${profileErrors.fullname ? "border-red-500" : "border-gray-200"
-                }`}
-            >
-              <User className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
-              <input
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.fullname || ""}
-                onChange={(e) => handleInputChange("fullname", e.target.value)}
-                placeholder="Your full name"
-              />
-            </div>
-            {profileErrors.fullname && (
-              <p className="text-red-500 text-xs mt-1">{profileErrors.fullname}</p>
-            )}
-          </div>
-
-          <div>
-            <div className="flex flex-row justify-between items-center mb-1.5">
-              <label className="text-sm text-gray-500">Bio</label>
-              <span className="text-xs text-gray-400">
-                {profileData.bio?.length || 0}/250
-              </span>
-            </div>
-            <textarea
-              className={`bg-gray-50 border rounded-xl p-3 h-24 text-gray-800 w-full resize-none ${
-                profileErrors.bio ? "border-red-500" : "border-gray-200"
-              }`}
-              value={profileData.bio || ""}
-              onChange={(e) => handleInputChange("bio", e.target.value)}
-              placeholder="Tell others about yourself"
-              maxLength={250}
-            />
-            {profileErrors.bio && (
-              <p className="text-red-500 text-xs mt-1">{profileErrors.bio}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Location</label>
-            <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <MapPin className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
-              <input
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.location || ""}
-                onChange={(e) => handleInputChange("location", e.target.value)}
-                placeholder="Your location"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Website</label>
-            <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <LinkIcon className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
-              <input
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.website || ""}
-                onChange={(e) => handleInputChange("website", e.target.value)}
-                placeholder="Your website"
-                autoCapitalize="none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Date of Birth</label>
-            <button
-              type="button"
-              className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden w-full"
-              onClick={() => setIsCalendarVisible(true)}
-            >
-              <Calendar className="text-gray-400 w-5 h-5 ml-3" />
-              <span className="flex-1 py-3 px-2 text-gray-800 text-left">
-                {profileData.dob ? formatDate(profileData.dob) : "Select your date of birth"}
-              </span>
-            </button>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Email</label>
-            <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Mail className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
-              <input
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.email || ""}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="Your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Phone</label>
-            <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Phone className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
-              <input
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.phone || ""}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                placeholder="Your phone number"
-                keyboardType="phone-pad"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Gender</label>
-            <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <User className="text-gray-400 w-5 h-5 ml-3" />
-              <select
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.gender || ""}
-                onChange={(e) => handleInputChange("gender", e.target.value)}
-              >
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-                <option value="prefer-not-to-say">Prefer not to say</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Occupation</label>
-            <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Briefcase className="text-gray-400 w-5 h-5 ml-3" />
-              <input
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.occupation || ""}
-                onChange={(e) => handleInputChange("occupation", e.target.value)}
-                placeholder="Your occupation"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Education</label>
-            <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <Book className="text-gray-400 w-5 h-5 ml-3" />
-              <input
-                className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
-                value={profileData.education || ""}
-                onChange={(e) => handleInputChange("education", e.target.value)}
-                placeholder="Your education"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1.5 block">Interests</label>
-            <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-              <input
-                className="flex-1 py-3 px-3 text-gray-800 outline-none bg-transparent"
-                value={profileData.interests?.join(", ") || ""}
-                onChange={(e) => handleInputChange("interests", e.target.value.split(", ").filter(Boolean))}
-                placeholder="Your interests (comma separated)"
-              />
-            </div>
-          </div>
-
-
-         
-        </form>
-
-        {/* Custom Calendar Modal */}
-        {isCalendarVisible && (
-          <CustomCalendar
-            selectedDate={profileData.dob}
-            onDateSelect={(date) => handleInputChange("dob", date)}
-            onClose={() => setIsCalendarVisible(false)}
-          />
-        )}
-
-        {/* Image Picker Bottom Sheet */}
-        {handleCustomBottomSheet()}
       </div>
-    </div>
     </div>
   );
 };

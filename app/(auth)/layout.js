@@ -121,7 +121,7 @@ export default function AuthLayout({ children }) {
 
         {/* Right Side - Auth Form */}
         <div
-          className="w-full lg:w-[50%] xl:w-[55%] flex items-center justify-center"
+          className="w-full lg:w-[50%] xl:w-[55%] flex items-center justify-center overflow-y-auto custom-scrollbar"
           style={{ backgroundColor: "#F3F4F6" }}
         >
           <div
