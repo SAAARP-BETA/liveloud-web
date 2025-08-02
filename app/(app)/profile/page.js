@@ -109,7 +109,7 @@ const PointsDisplay = ({ points, loading }) => {
   };
 
   return (
-    <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl border border-sky-100">
+    <div className="mt-4 p-4 bg-gradient-to-r  from-sky-50 to-blue-50 rounded-xl border border-sky-100">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center">
           <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -316,7 +316,7 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (FIXED)
 const ProfileSkeleton = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen  w-xl bg-white">
       {/* Use the same container structure as ProfilePage */}
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
         <div className="w-full flex flex-col items-center bg-gray-50">
@@ -869,7 +869,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen  w-xl bg-white">
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
         <div
           className="w-full  flex flex-col items-center bg-gray-50 overflow-y-auto"

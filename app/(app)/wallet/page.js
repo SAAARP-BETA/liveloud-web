@@ -62,7 +62,7 @@ export default function WalletPage() {
       : "text-gray-800";
 
     return (
-      <div className="flex p-4 lg:w-xl bg-white rounded-xl mb-2 shadow-sm">
+      <div className="flex p-4 h-screen w-xl bg-white rounded-xl mb-2 shadow-sm">
         <div className="w-10 h-10 rounded-full bg-gray-100 flex justify-center items-center">
           {isReceived ? (
             <ArrowDownLeft size={20} color="#4CAF50" />
