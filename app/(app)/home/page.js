@@ -118,6 +118,8 @@ const HomePage = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showComposeButton, setShowComposeButton] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
 
   // Post composer
   const [text, setText] = useState("");
@@ -569,8 +571,8 @@ const HomePage = () => {
   const gradientColors = isOverLimit
     ? ["#FF6B6B", "#FF0000"]
     : isApproachingLimit
-    ? ["#FFD166", "#FF9F1C"]
-    : ["#06D6A0", "#1B9AAA"];
+      ? ["#FFD166", "#FF9F1C"]
+      : ["#06D6A0", "#1B9AAA"];
 
   // media upload
   const uploadMedia = async () => {
@@ -984,33 +986,34 @@ const HomePage = () => {
       return;
     }
 
-    if (confirm("Are you sure you want to delete this post?")) {
-      try {
-        const response = await fetch(
-          `${API_ENDPOINTS.SOCIAL}/posts/${postId}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to delete post");
+    try {
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${postId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      );
 
-        const updatedPosts = getCurrentTabData().posts.filter(
-          (post) => post.id !== postId
-        );
-        updateTabData(activeTab, { posts: updatedPosts });
-        toast.success("Post deleted successfully");
-      } catch (error) {
-        console.error("Error deleting post:", error);
-        toast.error(`Failed to delete post: ${error.message}`);
+      if (!response.ok) {
+        throw new Error("Failed to delete post");
       }
+
+      const updatedPosts = getCurrentTabData().posts.filter(
+        (post) => post.id !== postId
+      );
+      updateTabData(activeTab, { posts: updatedPosts });
+      toast.success("Post deleted successfully");
+      setDeleteModalVisible(false);
+      setPostToDelete(null);
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error(`Failed to delete post: ${error.message}`);
     }
   };
+
 
   const handleReportSuccess = (reportedPostId) => {
     const updatedPosts = getCurrentTabData().posts.filter(
@@ -1049,8 +1052,9 @@ const HomePage = () => {
         handleViewProfile(userId);
         break;
       case "Delete Post":
-        console.log("Delete post:", selectedPost.id);
-        handleDeletePost(selectedPost.id);
+        setPostToDelete(selectedPost.id);
+        setDeleteModalVisible(true);
+        setModalVisible(false); // Close the menu modal
         break;
       default:
     }
@@ -1071,11 +1075,10 @@ const HomePage = () => {
               key={feedType.key}
               onClick={() => canAccess && handleTabChange(feedType.key)}
               className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors
-    ${
-      isActive
-        ? "bg-primary text-white"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-    }
+    ${isActive
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }
     ${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
     max-w-[100px] truncate overflow-hidden whitespace-nowrap`}
               disabled={!canAccess}
@@ -1199,11 +1202,10 @@ const HomePage = () => {
                   <button
                     onClick={handleMediaButtonClick}
                     disabled={images.length >= MEDIA_LIMIT}
-                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
-                      images.length >= MEDIA_LIMIT
+                    className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${images.length >= MEDIA_LIMIT
                         ? "opacity-50 cursor-not-allowed"
                         : ""
-                    }`}
+                      }`}
                   >
                     <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600" />
                   </button>
@@ -1259,13 +1261,12 @@ const HomePage = () => {
                 >
                   <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
                     <span
-                      className={`text-xs font-medium ${
-                        isOverLimit
+                      className={`text-xs font-medium ${isOverLimit
                           ? "text-red-600"
                           : isApproachingLimit
-                          ? "text-yellow-500"
-                          : "text-cyan-600"
-                      }`}
+                            ? "text-yellow-500"
+                            : "text-cyan-600"
+                        }`}
                     >
                       {MAX_CHAR_LIMIT - charCount}
                     </span>
@@ -1309,11 +1310,10 @@ const HomePage = () => {
           </div>
         ) : (
           <div
-            className={`transition-all duration-300 ${
-              isInputFocused || images.length > 0
+            className={`transition-all duration-300 ${isInputFocused || images.length > 0
                 ? "blur-sm pointer-events-none"
                 : "pointer-events-auto"
-            }`}
+              }`}
           >
             {/* Error states */}
             {error && activeTab === "home" && (
@@ -1442,13 +1442,12 @@ const HomePage = () => {
               <button
                 key={index}
                 onClick={() => handleMenuOptionPress(option)}
-                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
-                  option.text === "Delete Post" ||
-                  option.text === "Block" ||
-                  option.text === "Report"
+                className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${option.text === "Delete Post" ||
+                    option.text === "Block" ||
+                    option.text === "Report"
                     ? "hover:bg-red-50 text-red-600"
                     : "hover:bg-gray-50 text-gray-700"
-                }`}
+                  }`}
               >
                 <option.icon className="w-5 h-5 mr-3" />
                 <span className="font-medium">{option.text}</span>
@@ -1497,6 +1496,45 @@ const HomePage = () => {
         onSuccess={handleReportSuccess}
         token={token}
       />
+      <CustomModal
+        visible={isDeleteModalVisible}
+        onClose={() => {
+          setDeleteModalVisible(false);
+          setPostToDelete(null);
+        }}
+        title="Delete Post"
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+              <Trash2 className="w-8 h-8 text-red-600" />
+            </div>
+          </div>
+
+          <div className="text-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete this post?</h3>
+            <p className="text-gray-600 text-sm">This action cannot be undone.</p>
+          </div>
+
+          <div className="flex space-x-3 justify-center">
+            <button
+              onClick={() => {
+                setDeleteModalVisible(false);
+                setPostToDelete(null);
+              }}
+              className="px-6 py-2 text-gray-700 cursor-pointer bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleDeletePost(postToDelete)}
+              className="px-6 py-2 bg-red-600 text-white cursor-pointer rounded-lg hover:bg-red-700 transition-colors font-medium"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </CustomModal>
     </div>
   );
 };
