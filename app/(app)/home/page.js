@@ -1086,8 +1086,8 @@ const [postIdToDelete, setPostIdToDelete] = useState(null);
 
   // Render tab bar
   const renderTabBar = () => (
-    <div className="sticky rounded-lg top-6 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
-      <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max mt-6">
+    <div className="sticky rounded-lg top-2 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
+      <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max ">
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
           const canAccess = !feedType.requiresAuth || isAuthenticated;
@@ -1176,11 +1176,12 @@ const [postIdToDelete, setPostIdToDelete] = useState(null);
   }, []);
 
   return (
-    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar p-4">
+    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar p-4 ">
       {/* --- Block 1: Create Post & Tabs --- */}
         {renderTabBar()}
 
-     <div className="mt-4 sm:mt-5 w-full max-w-[512px] sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto px-3 sm:px-4 bg-white rounded-xl mb-4 shadow-sm">
+    {/* <div className="mt-4 sm:mt-2 w-full max-w-[512px] sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto px-3 sm:px-4 bg-white rounded-xl mb-4 shadow-sm min-h-[200px]"> */}
+<div className="mt-5 md:min-w-[410px] lg:w-[580px] max-w-2xl w-full mx-auto bg-white rounded-xl mb-4 shadow-sm">
        {showConfirm && (
   <ConfirmModal
     message="Are you sure you want to delete this post?"
