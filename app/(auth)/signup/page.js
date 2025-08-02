@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Image from "next/image";
@@ -19,8 +19,56 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordValidation, setPasswordValidation] = useState({
+    isValid: false,
+    errors: [],
+  });
 
-  const { signup, error } = useAuth();
+  const { signup, error, clearError } = useAuth();
+
+  // Password validation function
+  const validatePassword = (password) => {
+    const errors = [];
+
+    if (!password || password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      errors.push("Password must contain at least one uppercase letter");
+    }
+
+    if (!/[a-z]/.test(password)) {
+      errors.push("Password must contain at least one lowercase letter");
+    }
+
+    if (!/[0-9]/.test(password)) {
+      errors.push("Password must contain at least one number");
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.push("Password must contain at least one special character");
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  };
+
+  // Update password validation when password changes
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setPasswordValidation(validatePassword(text));
+    if (error) clearError();
+  };
+
+  // Initialize password validation on component mount
+  useEffect(() => {
+    if (password) {
+      setPasswordValidation(validatePassword(password));
+    }
+  }, []);
 
   const handleSignup = async () => {
     if (!fullName.trim() || !email.trim() || !password.trim()) {
@@ -28,8 +76,10 @@ export default function Signup() {
       return;
     }
 
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters long");
+    // Validate password strength
+    const validation = validatePassword(password);
+    if (!validation.isValid) {
+      toast.error('Please enter a strong password');
       return;
     }
 
@@ -40,16 +90,21 @@ export default function Signup() {
 
     setIsLoading(true);
     try {
-      const success = await signup({ username: fullName, email, password });
+      const success = await signup({
+        username: fullName,
+        email,
+        password,
+      });
 
       if (success) {
-        router.push("/home");
+        router.replace("/home");
       } else {
-        toast.error(error || "Signup failed. Please try again.");
+        console.error(`Signup failed with error:" ${error}`);
+        toast.error(`Signup Failed: ${error || "Please try again."}`);
       }
     } catch (err) {
-      console.error("Signup error:", err);
-      toast.error("An unexpected error occurred");
+      console.error(`Signup error: ${err}`);
+      toast.error(`Error: ${err.message || "An unexpected error occurred!"}`);
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +165,7 @@ export default function Signup() {
           placeholder="Enter your password"
           type={showPassword ? "text" : "password"}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => handlePasswordChange(e.target.value)}
           disabled={isLoading}
         />
         <button
@@ -122,9 +177,27 @@ export default function Signup() {
         </button>
       </div>
 
+      {/* Password strength indicator */}
+      {password.length > 0 && (
+        <div className="mt-2">
+          <span className={`text-sm font-medium ${passwordValidation.isValid ? 'text-green-600' : 'text-red-600'}`}>
+            Password Strength: {passwordValidation.isValid ? 'Strong' : 'Weak'}
+          </span>
+          {!passwordValidation.isValid && passwordValidation.errors.length > 0 && (
+            <div className="mt-1">
+              {passwordValidation.errors.map((error, index) => (
+                <div key={index} className="text-xs text-red-500">
+                  • {error}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex items-center mt-4">
         <button
-          className={`border-2 rounded-sm mr-2 w-6 h-6  cursor-pointer flex items-center justify-center ${
+          className={`border-2 rounded-sm mr-2 w-6 h-6 cursor-pointer flex items-center justify-center ${
             isChecked ? "border-primary bg-primary" : "border-gray-300"
           }`}
           onClick={() => setIsChecked(!isChecked)}
@@ -140,11 +213,13 @@ export default function Signup() {
       </div>
 
       <button
-        className={`bg-primary rounded-md p-3 mt-6 w-full  cursor-pointer text-white text-lg font-semibold ${
-          isLoading ? "opacity-70 cursor-not-allowed" : ""
-        }`}
+        className={` rounded-md p-3 mt-6 w-full text-white text-lg font-semibold ${
+          isLoading || !fullName.trim() || !email.trim() || !password.trim() || !isChecked || !passwordValidation.isValid
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-primary cursor-pointer'} 
+          ${isLoading ? 'opacity-70' : ''}`}
         onClick={handleSignup}
-        disabled={isLoading}
+        disabled={isLoading || !fullName.trim() || !email.trim() || !password.trim() || !isChecked || !passwordValidation.isValid}
       >
         {isLoading ? "Signing up..." : "Sign Up"}
       </button>
@@ -156,7 +231,7 @@ export default function Signup() {
       </div>
 
       <button
-        className="border-2 border-gray-300 rounded-3xl  cursor-pointer p-3 flex items-center justify-center mb-3 shadow-md w-full"
+        className="border-2 border-gray-300 rounded-3xl cursor-pointer p-3 flex items-center justify-center mb-3 shadow-md w-full"
         onClick={handleGoogleSignup}
         disabled={isLoading}
       >
@@ -171,7 +246,7 @@ export default function Signup() {
       </button>
 
       <button
-        className="border-2 border-gray-300 rounded-3xl p-3  cursor-pointer flex items-center justify-center shadow-md w-full"
+        className="border-2 border-gray-300 rounded-3xl p-3 cursor-pointer flex items-center justify-center shadow-md w-full"
         onClick={handleWalletConnect}
         disabled={isLoading}
       >
@@ -189,7 +264,7 @@ export default function Signup() {
         Already have an account?{" "}
         <button
           onClick={() => router.push("/login")}
-          className="text-primary  cursor-pointer font-semibold"
+          className="text-primary cursor-pointer font-semibold"
           disabled={isLoading}
         >
           Login
