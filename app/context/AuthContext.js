@@ -120,24 +120,34 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ------------------ SIGNUP ------------------
-  const signup = async (userData) => {
-    setError(null);
-    setAuthState((prev) => ({ ...prev, loading: true }));
-    try {
-      const response = await authService.signup(userData);
-      setAuthState({
-        user: response.user,
-        isAuthenticated: true,
-        loading: false,
-      });
-      return true;
-    } catch (err) {
-      console.error('Signup error:', err);
-      setError(err.message || 'Signup failed');
-      setAuthState((prev) => ({ ...prev, loading: false }));
-      return false;
-    }
-  };
+  // ------------------ SIGNUP ------------------
+const signup = async (userData) => {
+  setError(null);
+  setAuthState((prev) => ({ ...prev, loading: true }));
+  try {
+    const response = await authService.signup(userData);
+    
+    setAuthState({
+      user: null,              
+      token: null,           
+      isAuthenticated: false, 
+      loading: false,
+    });
+    
+    return true;
+  } catch (err) {
+    console.error('Signup error:', err);
+    setError(err.message || 'Signup failed');
+    setAuthState((prev) => ({ 
+      ...prev, 
+      loading: false,
+      user: null,
+      token: null,
+      isAuthenticated: false 
+    }));
+    return false;
+  }
+};
 
   // ------------------ LOGOUT ------------------
   const logout = async () => {

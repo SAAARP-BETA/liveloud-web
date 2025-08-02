@@ -97,7 +97,8 @@ export default function Signup() {
       });
 
       if (success) {
-        router.replace("/home");
+        router.replace("/login");
+        toast.success("Signup successful! Please log in.");
       } else {
         console.error(`Signup failed with error:" ${error}`);
         toast.error(`Signup Failed: ${error || "Please try again."}`);
