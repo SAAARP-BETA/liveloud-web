@@ -426,7 +426,7 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="min-h-screen  w-xl bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+    <div className="min-h-screen w-full bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
       {/* Tabs */}
       <LeaderboardTabs
         tabs={tabs}
@@ -435,7 +435,7 @@ export default function LeaderboardPage() {
       />
 
       {/* Main Content */}
-      <div className="pb-24 px-4 sm:px-6 lg:px-8  w-xl">
+      <div className="pb-24 px-4 sm:px-6 lg:px-8">
         {/* My Points Summary */}
         {isAuthenticated && myPoints && (
           <div className="my-6 rounded-xl overflow-hidden shadow-lg">

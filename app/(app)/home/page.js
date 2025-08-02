@@ -1176,7 +1176,7 @@ const [postIdToDelete, setPostIdToDelete] = useState(null);
   }, []);
 
   return (
-    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar p-4  ">
+    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar p-4 ">
       {/* --- Block 1: Create Post & Tabs --- */}
         {renderTabBar()}
 
