@@ -178,7 +178,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
                 onClick={() => setMode("options")}
                 className="p-2 hover:bg-gray-100 rounded-full"
               >
-                <ArrowLeft size={20} className="text-gray-600" />
+                <ArrowLeft size={20} className="text-gray-600 cursor-pointer" />
               </button>
             </div>
 
@@ -274,20 +274,21 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
                 {280 - quoteContent.length} characters left
               </span>
               <button
-                className={`px-6 py-3 rounded-full font-bold text-white ${
+                className={`px-6 py-3 rounded-full font-bold cursor-pointer text-white ${
                   quoteContent.trim()
-                    ? "bg-primary hover:bg-sky-600"
+                    ? "bg-primary hover:bg-sky-600 cursor-pointer"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
                 onClick={handleQuote}
                 disabled={!quoteContent.trim() || loading}
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5  border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   "Quote"
                 )}
               </button>
+              
             </div>
           </div>
         )}
