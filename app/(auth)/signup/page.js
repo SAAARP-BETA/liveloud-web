@@ -120,7 +120,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-8 py-10">
+    <div className="min-h-screen mt-26 bg-white px-8 py-10 ">
       <div className="relative lg:ml-4 w-[300px] h-[70px] ">
         <Image
           src={Logo}
