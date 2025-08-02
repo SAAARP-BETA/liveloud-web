@@ -12,6 +12,7 @@ import {
   Flag,
   Ban,
   Trash2,
+  Heart, // ADDED: Import Heart icon for like functionality
 } from "lucide-react";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
 
@@ -40,56 +41,160 @@ const menuOptions = [
 
 /**
  * A simple component to display a single comment.
+ * MODIFIED: Added like/unlike functionality for comments
  */
-const CommentCard = React.memo(({ comment }) => {
-  if (!comment || !comment.user) {
-    return null;
-  }
-  // Format timestamp
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return "Just now";
+const CommentCard = React.memo(
+  ({ comment, postId, token, user, onCommentUpdate }) => {
+    if (!comment || !comment.user) {
+      return null;
+    }
 
-    const commentDate = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now - commentDate;
-    const diffSecs = Math.floor(diffMs / 1000);
-    const diffMins = Math.floor(diffSecs / 60);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+    // ADDED: Like/Unlike handlers for comments
+    const handleLikeComment = async (commentId) => {
+      if (!token) {
+        toast.error("Login Required - Please login to like comments");
+        return;
+      }
 
-    if (diffSecs < 60) return `${diffSecs}s`;
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffHours < 24) return `${diffHours}h`;
-    if (diffDays < 7) return `${diffDays}d`;
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.SOCIAL}/posts/${postId}/comment/${commentId}/like`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-    return commentDate.toLocaleDateString();
-  };
-  return (
-    <div className="flex items-start space-x-4 p-4 border-t border-gray-100 overflow-hidden">
-      <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
-        <Image
-          src={comment.user.profilePicture || defaultPic}
-          alt={`${comment.user.username}'s profile`}
-          fill
-          className="object-cover"
-        />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-2">
-          <span className="font-bold text-sm text-gray-900">
-            {comment.user.username}
-          </span>
-          <span className="text-xs text-gray-500 ml-2">
-            {formatTimestamp(comment.createdAt)}
-          </span>
+        if (!response.ok) {
+          throw new Error("Failed to like comment");
+        }
+
+        // Update comment in parent component
+        if (onCommentUpdate) {
+          onCommentUpdate(commentId, "like");
+        }
+      } catch (error) {
+        console.error("Error liking comment:", error);
+        toast.error("Failed to like comment");
+      }
+    };
+
+    const handleUnlikeComment = async (commentId) => {
+      if (!token) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.SOCIAL}/posts/${postId}/comment/${commentId}/unlike`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to unlike comment");
+        }
+
+        // Update comment in parent component
+        if (onCommentUpdate) {
+          onCommentUpdate(commentId, "unlike");
+        }
+      } catch (error) {
+        console.error("Error unliking comment:", error);
+        toast.error("Failed to unlike comment");
+      }
+    };
+
+    // ADDED: Check if current user has liked the comment
+    const isLiked =
+      comment.likes &&
+      comment.likes.some(
+        (like) =>
+          like._id === user?._id ||
+          like.user === user?._id ||
+          like === user?._id
+      );
+    // Format timestamp
+    const formatTimestamp = (timestamp) => {
+      if (!timestamp) return "Just now";
+
+      const commentDate = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - commentDate;
+      const diffSecs = Math.floor(diffMs / 1000);
+      const diffMins = Math.floor(diffSecs / 60);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffSecs < 60) return `${diffSecs}s`;
+      if (diffMins < 60) return `${diffMins}m`;
+      if (diffHours < 24) return `${diffHours}h`;
+      if (diffDays < 7) return `${diffDays}d`;
+
+      return commentDate.toLocaleDateString();
+    };
+
+    return (
+      <div className="flex items-start space-x-4 p-4 border-t border-gray-100 overflow-hidden">
+        <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
+          <Image
+            src={comment.user.profilePicture || defaultPic}
+            alt={`${comment.user.username}'s profile`}
+            fill
+            className="object-cover"
+          />
         </div>
-        <p className="text-gray-800 mt-1 break-words overflow-wrap-anywhere whitespace-pre-wrap">
-          {comment.content}
-        </p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center space-x-2">
+            <span className="font-bold text-sm text-gray-900">
+              {comment.user.username}
+            </span>
+            <span className="text-xs text-gray-500 ml-2">
+              {formatTimestamp(comment.createdAt)}
+            </span>
+          </div>
+          <p className="text-gray-800 mt-1 break-words overflow-wrap-anywhere whitespace-pre-wrap">
+            {comment.content}
+          </p>
+
+          {/* ADDED: Comment like/unlike button */}
+          <div className="flex items-center mt-2">
+            <button
+              className="flex items-center hover:bg-gray-100 p-1 rounded cursor-pointer"
+              onClick={() =>
+                isLiked
+                  ? handleUnlikeComment(comment._id)
+                  : handleLikeComment(comment._id)
+              }
+            >
+              <Heart
+                size={14}
+                className={
+                  isLiked ? "text-red-500 fill-current" : "text-gray-500"
+                }
+              />
+              <span
+                className={`text-xs ml-1 font-medium ${
+                  isLiked ? "text-red-500" : "text-gray-500"
+                }`}
+              >
+                {comment.likes?.length || 0}
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 CommentCard.displayName = "CommentCard";
 
@@ -135,6 +240,47 @@ const PostPage = () => {
       setPost(updater);
     }
   }, []);
+
+  // ADDED: Handler for comment like/unlike updates
+  const handleCommentUpdate = useCallback(
+    (commentId, action) => {
+      setPost((prevPost) => {
+        if (!prevPost || !prevPost.comments) return prevPost;
+
+        return {
+          ...prevPost,
+          comments: prevPost.comments.map((comment) => {
+            if (comment._id === commentId) {
+              if (!comment.likes) comment.likes = [];
+
+              if (action === "like") {
+                // Add current user's ID to likes if not already there
+                const alreadyLiked = comment.likes.some(
+                  (like) =>
+                    like._id === user?._id ||
+                    like.user === user?._id ||
+                    like === user?._id
+                );
+                if (!alreadyLiked) {
+                  comment.likes.push({ _id: user?._id });
+                }
+              } else if (action === "unlike") {
+                // Remove current user's ID from likes
+                comment.likes = comment.likes.filter(
+                  (like) =>
+                    like._id !== user?._id &&
+                    like.user !== user?._id &&
+                    like !== user?._id
+                );
+              }
+            }
+            return { ...comment };
+          }),
+        };
+      });
+    },
+    [user?._id]
+  );
 
   // --- Data Fetching ---
   const fetchPost = useCallback(async () => {
@@ -387,7 +533,14 @@ const PostPage = () => {
           </h2>
           {post.comments && post.comments.length > 0 ? (
             post.comments.map((comment) => (
-              <CommentCard key={comment._id} comment={comment} />
+              <CommentCard
+                key={comment._id}
+                comment={comment}
+                postId={postId}
+                token={token}
+                user={user}
+                onCommentUpdate={handleCommentUpdate}
+              />
             ))
           ) : (
             <p className="px-4 pb-4 text-gray-500">
