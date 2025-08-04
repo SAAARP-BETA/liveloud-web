@@ -355,13 +355,12 @@ export default function LeftSidebar() {
     <>
       {/* Mobile Bottom Nav */}
       <motion.nav
-        className="fixed bottom-3 left-3 right-3 z-50 rounded-2xl overflow-hidden shadow-xl sm:hidden"
+        className="fixed bottom-0 left-0 right-0 z-50 rounded-2xl overflow-hidden shadow-xl sm:hidden"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
         <div className="relative bg-white/90 backdrop-blur-xl border border-white/50">
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full" />
           <div className="flex justify-around items-center px-2 py-3 safe-area-pb">
             {mobileTabs.map((tab, index) => (
               <motion.div
