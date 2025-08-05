@@ -695,7 +695,7 @@ const PostPage = () => {
       >
         <div className="p-4">
           {selectedPost && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+            <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
               <img
                 src={getProfilePicture(selectedPost?.profilePic)}
                 alt={selectedPost?.username || "Profile"}

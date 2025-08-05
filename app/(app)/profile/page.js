@@ -928,7 +928,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             >
               <div className="mt-4 text-center px-4">
                 <div className="flex items-center justify-center">
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 ml-15">
                     {user.fullname || "User"}
                   </h2>
                   {user.isVerified && (
@@ -1205,7 +1205,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         >
           <div className="bg-white p-4">
             {selectedPost && (
-              <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
                 <Image
                   src={selectedPost.profilePic || "/avatar.png"}
                   alt="Profile"

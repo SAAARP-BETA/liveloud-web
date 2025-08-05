@@ -1154,7 +1154,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
             {/* Profile Info */}
             <div className="mt-4 text-center px-4">
               <div className="flex items-center justify-center">
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-gray-900 ml-15">
                   {user.name || user.username || "User"}
                 </h2>
                 {user.isVerified && (
@@ -1303,7 +1303,9 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                   posts.map((post, index) => (
                     <div
                       key={post.id || index}
-                      ref={posts.length === index + 1 ? lastPostElementRef : null}
+                      ref={
+                        posts.length === index + 1 ? lastPostElementRef : null
+                      }
                     >
                       <PostCard
                         post={post}
@@ -1421,7 +1423,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         >
           <div className="p-4">
             {selectedPost && (
-              <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
                 <Image
                   src={getProfilePicture(selectedPost?.profilePic)}
                   alt={selectedPost?.username || "Profile"}

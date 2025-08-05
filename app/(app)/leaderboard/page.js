@@ -237,7 +237,10 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
             className={`px-2 py-1 ${levelInfo.bgColor} ${levelInfo.borderColor} rounded-xl border`}
           >
             <span className={`text-xs ${levelInfo.textColor} font-medium`}>
-              Level {levelInfo.level}
+              {/* Mobile: Show L1, L2, etc. */}
+              <span className="sm:hidden">L{levelInfo.level}</span>
+              {/* Desktop: Show Level 1, Level 2, etc. */}
+              <span className="hidden sm:inline">Level {levelInfo.level}</span>
             </span>
           </div>
           <span className={`text-xs ${levelInfo.textColor} truncate`}>

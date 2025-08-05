@@ -1516,7 +1516,7 @@ const HomePage = () => {
         >
           <div className="p-4">
             {selectedPost && (
-              <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl truncate">
                 <Image
                   src={getProfilePicture(selectedPost?.profilePic)}
                   alt={selectedPost?.username || "Profile"}
@@ -1528,7 +1528,7 @@ const HomePage = () => {
                   <p className="font-semibold text-gray-800">
                     {selectedPost.username}
                   </p>
-                  <p className="text-sm text-gray-500 truncate">
+                  <p className="text-sm text-gray-500 truncate line-clamp-2 break-words overflow-hidden">
                     {selectedPost.content}
                   </p>
                 </div>
