@@ -291,7 +291,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
                         <p className="text-sm font-medium text-gray-800">
                           {item.title}
                         </p>
-                        <p className="text-xs text-gray-500">Points earned</p>
+                        <p className="text-xs text-gray-500">Points Earned</p>
                       </div>
                     </div>
                     <div className="text-right">

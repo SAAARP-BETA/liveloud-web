@@ -61,7 +61,7 @@ const HEADER_MIN_HEIGHT = 100;
 const PROFILE_IMAGE_MAX_SIZE = 120;
 const PROFILE_IMAGE_MIN_SIZE = 40;
 const SCROLL_SENSITIVITY = 0.5;
-
+const POST_LIMIT = 10;
 // ADDED: Menu options for post interactions (same as in PostPage)
 const menuOptions = [
   { icon: UserPlus, text: "Follow" },
@@ -449,6 +449,8 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const headerRef = useRef(null);
   const resizeRef = useRef(null);
+  const [postPage, setPostPage] = useState(1);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
 
   // State
   const [user, setUser] = useState(initialUser || null);
@@ -477,8 +479,8 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   const [postToAmplify, setPostToAmplify] = useState(null);
   const [isCommentModalVisible, setCommentModalVisible] = useState(false);
   const [postToComment, setPostToComment] = useState(null);
-  const [isReportModalVisible, setReportModalVisible] = useState(false); // ADDED: Report modal state
-  const [postToReport, setPostToReport] = useState(null); // ADDED: Post to report state
+  const [isReportModalVisible, setReportModalVisible] = useState(false);
+  const [postToReport, setPostToReport] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [hasFetched, setHasFetched] = useState(false);
   const [error, setError] = useState();
@@ -495,7 +497,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
 
   const abortControllerRef = useRef(null);
 
-  // MODIFIED: Helper function to update posts array (compatible with post interactions)
+  // Helper function to update posts array (compatible with post interactions)
   const updatePostData = useCallback((updaterOrNewPosts) => {
     if (typeof updaterOrNewPosts === "function") {
       setPosts((prevPosts) => {
@@ -507,11 +509,11 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     }
   }, []);
 
-  // MODIFIED: Post handlers with proper updatePostData function
+  // Post handlers with proper updatePostData function
   const postHandlers = useMemo(
     () =>
       createPostHandlers(
-        currentUser, // CHANGED: Use currentUser instead of user for consistency
+        currentUser,
         token,
         updatePostData,
         setPostToComment,
@@ -524,9 +526,9 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     [currentUser, token, updatePostData]
   );
 
-  // ADDED: Use the post interactions hook
+  // Use the post interactions hook
   const { handleMenuOptionPress, loadPostMenuOptions } = usePostInteractions(
-    currentUser, // CHANGED: Use currentUser for consistency
+    currentUser,
     token,
     isAuthenticated,
     postHandlers,
@@ -606,31 +608,12 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     }
   }, [currentUser?.username, usernameParam]);
 
-  // Fetch user posts with rate limit handling
+  // FIXED: Fetch user posts with rate limit handling
   const fetchUserPosts = useCallback(
-    async (userId, page = 1, limit = 10) => {
-      // console.log(
-      //     "fetchUserPosts called for userId:",
-      //     userId,
-      //     "at",
-      //     new Date().toISOString()
-      // );
-      if (!userId || isPostsLoading || hasFetched) {
-        // console.log(
-        //     "Skipping fetchUserPosts: No userId, loading, or already fetched"
-        // );
+    async (userId, page = 1) => {
+      if (!userId || isPostsLoading) {
         return;
       }
-
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        console.log(
-          "Aborted previous fetch request at",
-          new Date().toISOString()
-        );
-      }
-
-      abortControllerRef.current = new AbortController();
 
       setIsPostsLoading(true);
       setError(null);
@@ -638,11 +621,8 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const response = await fetch(
-          `${API_ENDPOINTS.SOCIAL}/posts/user/${userId}?page=${page}&limit=${limit}`,
-          {
-            headers,
-            signal: abortControllerRef.current.signal,
-          }
+          `${API_ENDPOINTS.SOCIAL}/posts/user/${userId}?page=${page}&limit=${POST_LIMIT}`,
+          { headers }
         );
 
         if (!response.ok) {
@@ -658,55 +638,28 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           .map((post, index) => formatPostFromApi(post, index))
           .filter(Boolean);
 
-        setPosts((prevPosts) => {
-          if (JSON.stringify(prevPosts) === JSON.stringify(formattedPosts)) {
-            return prevPosts;
-          }
-          return formattedPosts;
-        });
-        setPostsCount(
-          postsData.totalCount || postsData.total || formattedPosts.length
-        );
+        setHasMorePosts(formattedPosts.length === POST_LIMIT);
 
-        console.log(
-          `Fetched ${formattedPosts.length} posts for user ${userId} at`,
-          new Date().toISOString()
+        setPosts((prevPosts) =>
+          page === 1 ? formattedPosts : [...prevPosts, ...formattedPosts]
         );
-        setHasFetched(true);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          if (response?.status === 429 && response.headers.get("Retry-After")) {
-            const retryAfter = parseInt(
-              response.headers.get("Retry-After"),
-              10
-            );
-            console.log(
-              `Rate limit hit. Retrying after ${retryAfter} seconds at`,
-              new Date().toISOString()
-            );
-            setTimeout(
-              () => fetchUserPosts(userId, page, limit),
-              (retryAfter + 1) * 1000
-            );
-          } else {
-            console.error(
-              "Error fetching user posts:",
-              error,
-              "at",
-              new Date().toISOString()
-            );
-            setError("Failed to load posts. Please try again later.");
-          }
+        setPostPage(page);
+        if (page === 1) {
+          setPostsCount(
+            postsData.totalCount || postsData.total || formattedPosts.length
+          );
         }
+      } catch (error) {
+        console.error("Error fetching user posts:", error);
+        setError("Failed to load posts. Please try again later.");
       } finally {
         setIsPostsLoading(false);
-        abortControllerRef.current = null;
       }
     },
-    [token, isPostsLoading, hasFetched] // ADDED: Missing dependencies
+    [token]
   );
 
-  // Fetch user points
+  // FIXED: Fetch user points
   const fetchUserPoints = useCallback(
     async (userId) => {
       if (!userId || isPointsLoading || pointsLoaded) return;
@@ -752,15 +705,17 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         setIsPointsLoading(false);
       }
     },
-    [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded] // ADDED: Missing dependencies
+    [token, isAuthenticated, isMyProfile]
   );
 
-  // Fetch user profile
+  // FIXED: Fetch user profile - removed problematic dependencies
   const fetchUserProfile = useCallback(async () => {
     if (isProfileLoading) return;
-
     setIsProfileLoading(true);
-    setError(null); // Clear previous errors
+    setPosts([]);
+    setPostPage(1);
+    setHasMorePosts(true);
+    setError(null);
 
     try {
       if (isMyProfile && currentUser && currentUser._id) {
@@ -794,8 +749,11 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           responseRate: userData.responseRate || "94%",
         });
 
-        await fetchUserPoints(userData._id);
-        await fetchUserPosts(userData._id);
+        // Call fetch functions directly without dependencies
+        if (userData._id) {
+          fetchUserPoints(userData._id);
+          fetchUserPosts(userData._id);
+        }
         setIsLoading(false);
         setIsRefreshing(false);
         return;
@@ -818,7 +776,6 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       );
 
       if (!response.ok) {
-        // Handle specific error cases
         if (response.status === 404) {
           setErrorMessage(
             "User not found. The username may be incorrect or the user may have deactivated their account."
@@ -865,8 +822,11 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         responseRate: userData.responseRate || "94%",
       });
 
-      await fetchUserPoints(userData._id);
-      await fetchUserPosts(userData._id);
+      // Call fetch functions directly
+      if (userData._id) {
+        fetchUserPoints(userData._id);
+        fetchUserPosts(userData._id);
+      }
     } catch (error) {
       console.error("Error fetching user profile:", error);
       setErrorMessage(`Failed to load profile: ${error.message}`);
@@ -876,17 +836,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       setIsRefreshing(false);
       setIsProfileLoading(false);
     }
-  }, [
-    usernameParam,
-    currentUser?._id,
-    currentUser?.username,
-    token,
-    isAuthenticated,
-    isMyProfile,
-    isProfileLoading,
-    fetchUserPoints,
-    fetchUserPosts,
-  ]);
+  }, [usernameParam, token, isMyProfile, isProfileLoading]);
 
   const handleFollowToggle = async () => {
     if (!isAuthenticated) {
@@ -894,7 +844,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       return;
     }
 
-    if (followLoading) return; // Prevent multiple clicks
+    if (followLoading) return;
 
     const wasFollowing = isFollowing;
     setFollowLoading(true);
@@ -928,7 +878,6 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           : "User followed successfully"
       );
 
-      // Update counts from server response if available
       if (result.followersCount !== undefined) {
         setFollowersCount(result.followersCount);
       }
@@ -958,15 +907,34 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     }
   };
 
-  const handleRefresh = () => {
+  // FIXED: Handle refresh without circular dependencies
+  const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
     setPointsLoaded(false);
     setUserPoints(null);
-    setHasFetched(false); // Reset fetch state on refresh
+    setHasFetched(false);
+    setUser(null); // Reset user to trigger fresh fetch
     fetchUserProfile();
-  };
+  }, [fetchUserProfile]);
 
-  // ADDED: Load menu options when modal is visible (same as PostPage)
+  const observer = useRef();
+  const lastPostElementRef = useCallback(
+    (node) => {
+      if (isPostsLoading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMorePosts && user?._id) {
+          fetchUserPosts(user._id, postPage + 1);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isPostsLoading, hasMorePosts, user?._id, postPage, fetchUserPosts]
+  );
+
+  // Load menu options when modal is visible
   useEffect(() => {
     if (!isModalVisible || !selectedPost || isLoadingOptions) {
       return;
@@ -979,7 +947,6 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         setFilteredOptions(options);
       } catch (error) {
         console.error("Error loading menu options:", error);
-        // Fallback options
         const isOwnPost =
           isAuthenticated &&
           currentUser &&
@@ -1010,7 +977,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     loadPostMenuOptions,
   ]);
 
-  // ADDED: Handle menu option press with proper parameters (same as PostPage)
+  // Handle menu option press with proper parameters
   const handleMenuPress = useCallback(
     (option) => {
       if (!selectedPost) {
@@ -1023,18 +990,17 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     [selectedPost, handleMenuOptionPress]
   );
 
-  // ADDED: Handle comment success callback
+  // Handle comment success callback
   const handleCommentSuccess = useCallback(() => {
     setCommentModalVisible(false);
     toast.success("Comment posted successfully!");
-    // Refresh posts to show new comment
     if (user?._id) {
       setHasFetched(false);
       fetchUserPosts(user._id);
     }
   }, [user?._id, fetchUserPosts]);
 
-  // ADDED: More options for profile menu
+  // More options for profile menu
   const moreOptions = useMemo(
     () => [
       {
@@ -1071,38 +1037,19 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     []
   );
 
+  // FIXED: Main useEffect - only depends on usernameParam and isRefreshing
   useEffect(() => {
     if (!initialUser || isRefreshing) {
       fetchUserProfile();
     }
-  }, [initialUser, isRefreshing, fetchUserProfile]); // ADDED: Missing dependency
+  }, [usernameParam, isRefreshing]);
 
+  // FIXED: Simple initial load effect
   useEffect(() => {
-    if (
-      user &&
-      !isMyProfile &&
-      !userPoints &&
-      !pointsLoading &&
-      isAuthenticated &&
-      !pointsLoaded
-    ) {
-      fetchUserPoints(user._id);
+    if (usernameParam && !user && !isLoading) {
+      fetchUserProfile();
     }
-  }, [
-    user?._id,
-    isMyProfile,
-    userPoints,
-    pointsLoading,
-    isAuthenticated,
-    pointsLoaded,
-    fetchUserPoints,
-  ]);
-
-  useEffect(() => {
-    if (!initialPosts && user?._id && !isPostsLoading && !hasFetched) {
-      fetchUserPosts(user._id);
-    }
-  }, [user?._id, initialPosts, isPostsLoading, hasFetched, fetchUserPosts]);
+  }, [usernameParam]);
 
   if (isLoading && !user) {
     return <ProfileSkeleton />;
@@ -1348,23 +1295,31 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           >
             {activeTab === "posts" && (
               <>
-                {posts.length > 0 ? (
+                {isPostsLoading && posts.length === 0 ? (
+                  <div className="flex justify-center items-center py-12 w-full">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  </div>
+                ) : posts.length > 0 ? (
                   posts.map((post, index) => (
-                    <PostCard
+                    <div
                       key={post.id || index}
-                      post={post}
-                      handleLikePost={postHandlers.handleLikePost}
-                      handleUnlikePost={postHandlers.handleUnlikePost}
-                      handleDislikePost={postHandlers.handleDislikePost}
-                      handleUndislikePost={postHandlers.handleUndislikePost}
-                      handleCommentPost={postHandlers.handleCommentPost}
-                      handleAmplifyPost={postHandlers.handleAmplifyPost}
-                      handleBookmarkPost={postHandlers.handleBookmarkPost}
-                      handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                      setSelectedPost={setSelectedPost}
-                      setModalVisible={setModalVisible}
-                      username={currentUser?.username}
-                    />
+                      ref={posts.length === index + 1 ? lastPostElementRef : null}
+                    >
+                      <PostCard
+                        post={post}
+                        handleLikePost={postHandlers.handleLikePost}
+                        handleUnlikePost={postHandlers.handleUnlikePost}
+                        handleDislikePost={postHandlers.handleDislikePost}
+                        handleUndislikePost={postHandlers.handleUndislikePost}
+                        handleCommentPost={postHandlers.handleCommentPost}
+                        handleAmplifyPost={postHandlers.handleAmplifyPost}
+                        handleBookmarkPost={postHandlers.handleBookmarkPost}
+                        handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
+                        setSelectedPost={setSelectedPost}
+                        setModalVisible={setModalVisible}
+                        username={currentUser?.username}
+                      />
+                    </div>
                   ))
                 ) : (
                   <div className="flex flex-col max-w-xl items-center justify-center py-12">
@@ -1387,6 +1342,16 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                         Create First Post
                       </Link>
                     )}
+                  </div>
+                )}
+                {isPostsLoading && posts.length > 0 && (
+                  <div className="flex justify-center items-center py-6">
+                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                  </div>
+                )}
+                {!hasMorePosts && posts.length > 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    You've reached the end!
                   </div>
                 )}
               </>
@@ -1448,7 +1413,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           </div>
         </CustomModal>
 
-        {/* MODIFIED: Post Options Modal (same structure as PostPage) */}
+        {/* Post Options Modal */}
         <CustomModal
           visible={isModalVisible}
           onClose={() => setModalVisible(false)}
@@ -1502,7 +1467,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           </div>
         </CustomModal>
 
-        {/* ADDED: Comment Modal */}
+        {/* Comment Modal */}
         <CommentModal
           visible={isCommentModalVisible}
           onClose={() => setCommentModalVisible(false)}
@@ -1512,7 +1477,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           token={token}
         />
 
-        {/* ADDED: Amplify Modal */}
+        {/* Amplify Modal */}
         <AmplifyModal
           visible={isAmplifyModalVisible}
           onClose={() => setAmplifyModalVisible(false)}
@@ -1520,7 +1485,6 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           token={token}
           onSuccess={() => {
             setAmplifyModalVisible(false);
-            // Refresh posts to show amplification
             if (user?._id) {
               setHasFetched(false);
               fetchUserPosts(user._id);
@@ -1528,7 +1492,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           }}
         />
 
-        {/* ADDED: Report Modal */}
+        {/* Report Modal */}
         <ReportModal
           visible={isReportModalVisible}
           onClose={() => setReportModalVisible(false)}

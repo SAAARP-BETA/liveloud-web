@@ -251,7 +251,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
         <div className="text-lg font-semibold text-gray-900">
           {item.totalPoints.toLocaleString()}
         </div>
-        <div className="text-xs text-gray-500">points</div>
+        <div className="text-xs text-gray-500">Points</div>
       </div>
     </div>
   );
