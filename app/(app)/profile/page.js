@@ -214,7 +214,8 @@ const StreakDisplay = ({ consecutiveDays }) => {
 // Tab Bar Component (unchanged)
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   return (
-    <div className="flex w-full border justify-center border-gray-100 pt-2 px-2 sm:px-0">
+    <div className="flex w-full border justify-center gap-25 border-gray-100 pt-2">
+      {" "}
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -359,7 +360,7 @@ const ProfileSkeleton = () => {
               </div>
 
               {/* Buttons skeleton */}
-              <div className="flex justify-center mt-4 space-x-4 sm:space-x-6">
+              <div className="flex mt-4 w-full max-w-md mx-auto space-x-3">
                 <div className="flex-1 h-10 bg-gray-200 rounded-full animate-pulse" />
                 <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
               </div>
@@ -869,289 +870,300 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
-        <div
-          className="w-full  flex flex-col items-center bg-gray-50 overflow-y-auto"
-          onScroll={handleScroll}
-        >
-          <div className="w-full relative">
-            <Image
-              src={user?.coverPhoto || defaultCover}
-              alt="Cover"
-              className="w-full h-[150px] object-cover"
-              width={1200}
-              height={150}
-              priority
-            />
-
-            <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
-              <motion.div
-                className="border-4 border-white shadow-sm bg-white relative w-full"
-                animate={{
-                  height: profileImageSize,
-                  width: profileImageSize,
-                  borderRadius: profileImageSize / 2,
-                }}
-                transition={{ type: "spring", stiffness: 100 }}
-              >
-                <Image
-                  src={user?.profilePicture || defaultPic}
-                  alt="Profile"
-                  className="w-full h-full rounded-full object-cover"
-                  width={PROFILE_IMAGE_MAX_SIZE}
-                  height={PROFILE_IMAGE_MAX_SIZE}
-                  priority
-                />
-                {isMyProfile && (
-                  <Link
-                    href="/profile/edit"
-                    className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
-                  >
-                    <Edit2 className=" text-primary text-md" size={20} />
-                  </Link>
-                )}
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="h-12"></div>
-
-          <motion.div
-            className="bg-white border-b border-gray-100 w-full"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+        <div className="w-full flex flex-col items-center bg-gray-50">
+          <div
+            className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
+            style={{ width: "100%" }}
+            onScroll={handleScroll}
           >
-            <div className="mt-4 text-center px-4">
-              <div className="flex items-center justify-center">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {user.fullname || "User"}
-                </h2>
-                {user.isVerified && (
-                  <Verified className="ml-2 text-primary text-xl" />
-                )}
-                {userPoints && (
-                  <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full text-xs text-white font-bold">
-                    LV.{userPoints.levelInfo.level}
-                  </span>
-                )}
-              </div>
-              <p className="text-base text-gray-500 mt-1">
-                @{user.username || "username"}
-              </p>
-              {user.bio && (
-                <p className="text-gray-700 text-center mt-3 leading-5">
-                  {user.bio}
-                </p>
-              )}
-              <UserStats
-                followersCount={followersCount}
-                followingCount={followingCount}
-                postsCount={postsCount}
-                onPressFollowers={() =>
-                  router.push(`/profile/${user.username}/followers`)
-                }
-                onPressFollowing={() =>
-                  router.push(`/profile/${user.username}/following`)
-                }
+            <div className="w-full relative">
+              <Image
+                src={user?.coverPhoto || defaultCover}
+                alt="Cover"
+                className="w-full h-[150px] object-cover"
+                width={1200}
+                height={150}
+                priority
               />
-              <div className="flex justify-center mt-4 space-x-4 sm:space-x-6">
-                {isMyProfile ? (
-                  <>
+
+              <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
+                <motion.div
+                  className="border-4 border-white shadow-sm bg-white relative w-full"
+                  animate={{
+                    height: profileImageSize,
+                    width: profileImageSize,
+                    borderRadius: profileImageSize / 2,
+                  }}
+                  transition={{ type: "spring", stiffness: 100 }}
+                >
+                  <Image
+                    src={user?.profilePicture || defaultPic}
+                    alt="Profile"
+                    className="w-full h-full rounded-full object-cover"
+                    width={PROFILE_IMAGE_MAX_SIZE}
+                    height={PROFILE_IMAGE_MAX_SIZE}
+                    priority
+                  />
+                  {isMyProfile && (
                     <Link
                       href="/profile/edit"
-                      className="flex-1 py-2.5 bg-gray-100 rounded-full text-center text-gray-900 font-medium cursor-pointer"
+                      className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
                     >
-                      Edit Profile
+                      <Edit2 className=" text-primary text-md" size={20} />
                     </Link>
-                    <button
-                      onClick={handleShareProfile}
-                      className="w-10 h-10 bg-gray-100 cursor-pointer rounded-full flex items-center justify-center"
-                    >
-                      <Share2 className="text-gray-600 text-lg" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={handleFollowToggle}
-                      className={` cursor-pointer flex-1 py-2.5 rounded-full text-center font-medium ${
-                        isFollowing
-                          ? "bg-gray-100 text-gray-900"
-                          : "bg-primary text-white"
-                      }`}
-                    >
-                      {isFollowing ? "Following" : "Follow"}
-                    </button>
-                    {user._id && (
+                  )}
+                </motion.div>
+              </div>
+            </div>
+
+            <div className="h-12"></div>
+
+            <motion.div
+              className="bg-white border-b border-gray-100 w-full"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mt-4 text-center px-4">
+                <div className="flex items-center justify-center">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {user.fullname || "User"}
+                  </h2>
+                  {user.isVerified && (
+                    <Verified className="ml-2 text-primary text-xl" />
+                  )}
+                  {userPoints && (
+                    <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full text-xs text-white font-bold">
+                      LV.{userPoints.levelInfo.level}
+                    </span>
+                  )}
+                </div>
+                <p className="text-base text-gray-500 mt-1">
+                  @{user.username || "username"}
+                </p>
+                {user.bio && (
+                  <p className="text-gray-700 text-center mt-3 leading-5">
+                    {user.bio}
+                  </p>
+                )}
+                <UserStats
+                  followersCount={followersCount}
+                  followingCount={followingCount}
+                  postsCount={postsCount}
+                  onPressFollowers={() =>
+                    router.push(`/profile/${user.username}/followers`)
+                  }
+                  onPressFollowing={() =>
+                    router.push(`/profile/${user.username}/following`)
+                  }
+                />
+                <div className="flex mt-4 w-full max-w-md mx-auto space-x-3">
+                  {isMyProfile ? (
+                    <>
                       <Link
-                        href={`/messages/chat/${user._id}`}
+                        href="/profile/edit"
                         className="flex-1 py-2.5 bg-gray-100 rounded-full text-center text-gray-900 font-medium cursor-pointer"
                       >
-                        Message
+                        Edit Profile
                       </Link>
-                    )}
-                    <button
-                      onClick={() => setIsMoreModalVisible(true)}
-                      className="w-10 h-10 bg-gray-100 rounded-full flex cursor-pointer items-center justify-center"
-                    >
-                      <MoreHorizontal className="text-gray-600 text-lg" />
-                    </button>
+                      <button
+                        onClick={handleShareProfile}
+                        className="w-10 h-10 bg-gray-100 cursor-pointer rounded-full flex items-center justify-center"
+                      >
+                        <Share2 className="text-gray-600 text-lg" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleFollowToggle}
+                        className={` cursor-pointer flex-1 py-2.5 rounded-full text-center font-medium ${
+                          isFollowing
+                            ? "bg-gray-100 text-gray-900"
+                            : "bg-primary text-white"
+                        }`}
+                      >
+                        {isFollowing ? "Following" : "Follow"}
+                      </button>
+                      {user._id && (
+                        <Link
+                          href={`/messages/chat/${user._id}`}
+                          className="flex-1 py-2.5 bg-gray-100 rounded-full text-center text-gray-900 font-medium cursor-pointer"
+                        >
+                          Message
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => setIsMoreModalVisible(true)}
+                        className="w-10 h-10 bg-gray-100 rounded-full flex cursor-pointer items-center justify-center"
+                      >
+                        <MoreHorizontal className="text-gray-600 text-lg" />
+                      </button>
+                    </>
+                  )}
+                </div>
+                {isAuthenticated && userPoints && (
+                  <>
+                    <PointsDisplay
+                      points={userPoints}
+                      loading={pointsLoading}
+                    />
+                    <StreakDisplay
+                      consecutiveDays={userPoints.consecutiveLoginDays}
+                    />
                   </>
                 )}
-              </div>
-              {isAuthenticated && userPoints && (
-                <>
-                  <PointsDisplay points={userPoints} loading={pointsLoading} />
-                  <StreakDisplay
-                    consecutiveDays={userPoints.consecutiveLoginDays}
-                  />
-                </>
-              )}
-              {profileStats && (
-                <div className="mt-5 pt-4 border-t border-gray-100">
-                  {user.location && (
-                    <div className="flex items-center mb-2 cursor-pointer">
-                      <MapPin className="text-gray-600 text-base" />
+                {profileStats && (
+                  <div className="mt-5 pt-4 border-t border-gray-100">
+                    {user.location && (
+                      <div className="flex items-center mb-2 cursor-pointer">
+                        <MapPin className="text-gray-600 text-base" />
+                        <span className="ml-2 text-gray-500">
+                          {user.location}
+                        </span>
+                      </div>
+                    )}
+                    {/* --- FIX: Made website a clickable link --- */}
+                    {user?.website && (
+                      <div className="flex items-center mb-2">
+                        <LinkIcon className="text-gray-600 text-lg" />
+                        <Link
+                          href={
+                            user.website.startsWith("http")
+                              ? user.website
+                              : `https://${user.website}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-2 text-sky-400 hover:underline transition-colors"
+                        >
+                          {user.website}
+                        </Link>
+                      </div>
+                    )}
+                    <div className="flex items-center mb-2">
+                      <Calendar className="text-gray-600 cursor-pointer text-base" />
                       <span className="ml-2 text-gray-500">
-                        {user.location}
+                        Joined {profileStats.joined}
                       </span>
                     </div>
-                  )}
-                  {/* --- FIX: Made website a clickable link --- */}
-                  {user?.website && (
-                    <div className="flex items-center mb-2">
-                      <LinkIcon className="text-gray-600 text-lg" />
-                      <Link
-                        href={
-                          user.website.startsWith("http")
-                            ? user.website
-                            : `https://${user.website}`
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            <TabBarAnimated
+              tabs={[
+                { key: "posts", title: "Posts", icon: "grid" },
+                { key: "media", title: "Media", icon: "image" },
+              ]}
+              activeTab={activeTab}
+              onTabPress={setActiveTab}
+              className="border-2 w-full flex  justify-between"
+            />
+
+            <motion.div
+              className=" pt-2 cursor-pointer w-full"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {activeTab === "posts" && (
+                <>
+                  {isPostsLoading && posts.length === 0 ? (
+                    <div className="flex cursor-pointer justify-center items-center py-12 w-full">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    </div>
+                  ) : posts.length > 0 ? (
+                    posts.map((post, index) => (
+                      <div
+                        key={post.id || index}
+                        ref={
+                          posts.length === index + 1 ? lastPostElementRef : null
                         }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-2 text-sky-400 hover:underline transition-colors"
                       >
-                        {user.website}
-                      </Link>
+                        <PostCard
+                          post={post}
+                          handleLikePost={postHandlers.handleLikePost}
+                          handleUnlikePost={postHandlers.handleUnlikePost}
+                          handleCommentPost={postHandlers.handleCommentPost}
+                          handleAmplifyPost={postHandlers.handleAmplifyPost}
+                          handleBookmarkPost={postHandlers.handleBookmarkPost}
+                          handleUnbookmarkPost={
+                            postHandlers.handleUnbookmarkPost
+                          }
+                          setSelectedPost={setSelectedPost}
+                          setModalVisible={setModalVisible}
+                          handleDislikePost={postHandlers.handleDislikePost}
+                          handleUndislikePost={postHandlers.handleUndislikePost}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex cursor-pointer flex-col items-center justify-center py-12 w-full min-h-[200px]">
+                      <ImageIcon className="cursor-pointer text-gray-300 text-5xl" />
+                      <h3 className="mt-4 text-lg font-medium text-gray-700">
+                        No posts yet
+                      </h3>
+                      <p className="mt-2 text-center text-sm text-gray-500 mx-8">
+                        {isMyProfile
+                          ? "Start sharing your thoughts, photos, and experiences with the world."
+                          : `${
+                              user.username || "This user"
+                            } hasn't posted anything yet.`}
+                      </p>
+                      {isMyProfile && (
+                        <Link
+                          href="/create-post"
+                          className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium cursor-pointer"
+                        >
+                          Create First Post
+                        </Link>
+                      )}
                     </div>
                   )}
-                  <div className="flex items-center mb-2">
-                    <Calendar className="text-gray-600 cursor-pointer text-base" />
-                    <span className="ml-2 text-gray-500">
-                      Joined {profileStats.joined}
-                    </span>
-                  </div>
-                </div>
+                  {isPostsLoading && posts.length > 0 && (
+                    <div className="flex justify-center items-center py-6">
+                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                    </div>
+                  )}
+                  {!hasMorePosts && posts.length > 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      You've reached the end!
+                    </div>
+                  )}
+                </>
               )}
-            </div>
-          </motion.div>
-
-          <TabBarAnimated
-            tabs={[
-              { key: "posts", title: "Posts", icon: "grid" },
-              { key: "media", title: "Media", icon: "image" },
-            ]}
-            activeTab={activeTab}
-            onTabPress={setActiveTab}
-            className="border-2 w-full flex  justify-between"
-          />
-
-          <motion.div
-            className="px-2 sm:px-4 pt-2 cursor-pointer w-full"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {activeTab === "posts" && (
-              <>
-                {isPostsLoading && posts.length === 0 ? (
-                  <div className="flex cursor-pointer justify-center items-center py-12 w-full">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                  </div>
-                ) : posts.length > 0 ? (
-                  posts.map((post, index) => (
-                    <div
-                      key={post.id || index}
-                      ref={
-                        posts.length === index + 1 ? lastPostElementRef : null
-                      }
-                    >
-                      <PostCard
-                        post={post}
-                        handleLikePost={postHandlers.handleLikePost}
-                        handleUnlikePost={postHandlers.handleUnlikePost}
-                        handleCommentPost={postHandlers.handleCommentPost}
-                        handleAmplifyPost={postHandlers.handleAmplifyPost}
-                        handleBookmarkPost={postHandlers.handleBookmarkPost}
-                        handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
-                        setSelectedPost={setSelectedPost}
-                        setModalVisible={setModalVisible}
-                        handleDislikePost={postHandlers.handleDislikePost}
-                        handleUndislikePost={postHandlers.handleUndislikePost}
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex cursor-pointer flex-col items-center justify-center py-12 w-full min-h-[200px]">
-                    <ImageIcon className="cursor-pointer text-gray-300 text-5xl" />
-                    <h3 className="mt-4 text-lg font-medium text-gray-700">
-                      No posts yet
-                    </h3>
-                    <p className="mt-2 text-center text-sm text-gray-500 mx-8">
-                      {isMyProfile
-                        ? "Start sharing your thoughts, photos, and experiences with the world."
-                        : `${
-                            user.username || "This user"
-                          } hasn't posted anything yet.`}
-                    </p>
-                    {isMyProfile && (
-                      <Link
-                        href="/create-post"
-                        className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium cursor-pointer"
-                      >
-                        Create First Post
-                      </Link>
+              {activeTab === "media" && (
+                <GalleryGrid
+                  media={posts
+                    .filter((post) => post.media && post.media.length > 0)
+                    .flatMap((post) =>
+                      post.media.map((uri, i) => ({
+                        id: `${post.id}-${i}`,
+                        uri,
+                      }))
                     )}
-                  </div>
-                )}
-                {isPostsLoading && posts.length > 0 && (
-                  <div className="flex justify-center items-center py-6">
-                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                  </div>
-                )}
-                {!hasMorePosts && posts.length > 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    You've reached the end!
-                  </div>
-                )}
-              </>
-            )}
-            {activeTab === "media" && (
-              <GalleryGrid
-                media={posts
-                  .filter((post) => post.media && post.media.length > 0)
-                  .flatMap((post) =>
-                    post.media.map((uri, i) => ({ id: `${post.id}-${i}`, uri }))
-                  )}
-                onMediaPress={(item) => {
-                  const post = posts.find((p) => item.id.startsWith(p.id));
-                  if (post) {
-                    router.push(`/home/post-detail?postId=${post.id}`);
+                  onMediaPress={(item) => {
+                    const post = posts.find((p) => item.id.startsWith(p.id));
+                    if (post) {
+                      router.push(`/home/post-detail?postId=${post.id}`);
+                    }
+                  }}
+                  emptyStateMessage={
+                    isMyProfile
+                      ? "Share photos and videos with your followers."
+                      : `${
+                          user.username || "This user"
+                        } hasn't posted any media yet.`
                   }
-                }}
-                emptyStateMessage={
-                  isMyProfile
-                    ? "Share photos and videos with your followers."
-                    : `${
-                        user.username || "This user"
-                      } hasn't posted any media yet.`
-                }
-              />
-            )}
-          </motion.div>
-          <div className="h-20"></div>
+                />
+              )}
+            </motion.div>
+            <div className="h-20"></div>
+          </div>
         </div>
         <CustomModal
           visible={isMoreModalVisible}
@@ -1276,7 +1288,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             fetchUserProfile();
           }}
         />
-
         {/* Comment Modal */}
         <CommentModal
           visible={isCommentModalVisible}
@@ -1286,7 +1297,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           onSuccess={handleCommentSuccess}
           token={token}
         ></CommentModal>
-
         {/* Amplify Modal */}
         <AmplifyModal
           visible={isAmplifyModalVisible}
@@ -1310,7 +1320,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             updateTabData(activeTab, { posts: updatedPosts });
           }}
         ></AmplifyModal>
-
         {/* Report Modal */}
         <ReportModal
           visible={isReportModalVisible}
