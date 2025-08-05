@@ -162,7 +162,7 @@ const PointsDisplay = ({ points, loading }) => {
               currentLevel.pointsToNext -
                 (points.totalPoints - currentLevel.minPoints)
             )}{" "}
-            pts to go
+            Pts to go
           </span>
         </div>
         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
