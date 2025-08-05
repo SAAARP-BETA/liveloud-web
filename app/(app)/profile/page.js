@@ -1108,7 +1108,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     </p>
                     {isMyProfile && (
                       <Link
-                        href="/create-post"
+                        href="/create"
                         className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium cursor-pointer"
                       >
                         Create First Post

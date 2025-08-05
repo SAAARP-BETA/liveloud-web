@@ -707,7 +707,7 @@ const PostPage = () => {
                 <p className="font-semibold text-gray-800">
                   {selectedPost.username}
                 </p>
-                <p className="text-sm text-gray-500 truncate">
+                <p className="text-sm text-gray-500 truncate break-words">
                   {selectedPost.content}
                 </p>
               </div>

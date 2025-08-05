@@ -794,7 +794,7 @@ const HomePage = () => {
 
       // Update posts in current tab to reflect new following status
       const updatedPosts = getCurrentTabData().posts.map((post) => {
-        if (post.user === userId) {
+        if (post.userId === userId) {
           return { ...post, isFollowing: false };
         }
         return post;
@@ -1466,7 +1466,7 @@ const [postIdToDelete, setPostIdToDelete] = useState(null);
                 <p className="font-semibold text-gray-800">
                   {selectedPost.username}
                 </p>
-                <p className="text-sm text-gray-500 truncate">
+                <p className="text-sm text-gray-500 truncate  ">
                   {selectedPost.content}
                 </p>
               </div>

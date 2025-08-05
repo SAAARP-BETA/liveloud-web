@@ -784,7 +784,29 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       setUser(userData);
       setFollowersCount(userData.followersCount || 0);
       setFollowingCount(userData.followingCount || 0);
-      setIsFollowing(userData.isFollowing || false);
+      
+      // Explicitly check follow status for non-profile owners
+      if (!isMyProfile && isAuthenticated) {
+        try {
+          const followStatusResponse = await fetch(
+            `${API_ENDPOINTS.SOCIAL}/followers/${userData._id}/status`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (followStatusResponse.ok) {
+            const { isFollowing: followStatus } = await followStatusResponse.json();
+            setIsFollowing(followStatus);
+          }
+        } catch (error) {
+          console.error("Error checking follow status:", error);
+          setIsFollowing(false);
+        }
+      } else {
+        setIsFollowing(false);
+      }
 
       const joined = new Date(userData.createdAt);
       const joinedDate = `${joined.toLocaleString("default", {
@@ -832,6 +854,9 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     const wasFollowing = isFollowing;
     setFollowLoading(true);
 
+    // Clear any existing error states
+    setError(null);
+    
     // Optimistic update
     setIsFollowing(!wasFollowing);
     setFollowersCount((prev) => (wasFollowing ? prev - 1 : prev + 1));
@@ -855,6 +880,22 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       }
 
       const result = await response.json();
+      
+      // Double check the follow status after the action
+      const followStatusResponse = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/followers/${user._id}/status`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (followStatusResponse.ok) {
+        const { isFollowing: currentStatus } = await followStatusResponse.json();
+        setIsFollowing(currentStatus);
+      }
+
       toast.success(
         wasFollowing
           ? "User unfollowed successfully"
@@ -1314,7 +1355,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                     </p>
                     {isMyProfile && (
                       <Link
-                        href="/create-post"
+                        href="/create"
                         className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium"
                       >
                         Create First Post
