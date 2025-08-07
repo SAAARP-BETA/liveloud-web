@@ -145,7 +145,6 @@ const PostCard = ({
     });
   };
 
-
   return (
     <div
       className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 ${
@@ -160,8 +159,6 @@ const PostCard = ({
           onClick={handleProfileClick}
         >
           <div className="w-10 h-10 rounded-full mr-3 relative overflow-hidden">
-            
-            
             <Image
               src={post.profilePic ? post.profilePic : defaultPic}
               alt="Profile"
@@ -416,7 +413,6 @@ const PostCard = ({
           <Repeat size={20} className="text-gray-600" />
           <span className="ml-2 text-md text-gray-600 font-medium">
             {post.amplifyCount}
-           
           </span>
         </button>
 

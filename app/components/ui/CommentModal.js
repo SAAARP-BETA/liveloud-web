@@ -423,7 +423,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
 
           {/* Original post preview */}
           {post && (
-            <div className="flex items-center mb-4 p-3 bg-gray-50 rounded-xl overflow-hidden">
+            <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl overflow-hidden">
               <img
                 src={getProfilePicture(post.profilePic)}
                 alt="Profile"

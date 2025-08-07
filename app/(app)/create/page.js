@@ -587,9 +587,10 @@ const CreatePost = () => {
             onClick={handleSubmit}
             disabled={isSubmitDisabled}
             className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ease-in-out
-              ${isSubmitDisabled
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed scale-100"
-                : "bg-primary text-white cursor-pointer hover:bg-primary hover:scale-105 active:scale-95"
+              ${
+                isSubmitDisabled
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed scale-100"
+                  : "bg-primary text-white cursor-pointer hover:bg-primary hover:scale-105 active:scale-95"
               }`}
           >
             Post
@@ -630,12 +631,13 @@ const CreatePost = () => {
             >
               <div className="bg-white rounded-full w-9 h-9 flex items-center justify-center">
                 <span
-                  className={`text-xs font-medium ${isOverLimit
+                  className={`text-xs font-medium ${
+                    isOverLimit
                       ? "text-red-600"
                       : isApproachingLimit
-                        ? "text-amber-600"
-                        : "text-emerald-600"
-                    }`}
+                      ? "text-amber-600"
+                      : "text-emerald-600"
+                  }`}
                 >
                   {MAX_CHAR_LIMIT - charCount}
                 </span>
@@ -816,10 +818,11 @@ const CreatePost = () => {
               className="flex flex-col items-center cursor-pointer"
             >
               <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${images.length >= MEDIA_LIMIT
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  images.length >= MEDIA_LIMIT
                     ? "bg-gray-100"
                     : "bg-red-50 hover:bg-red-100"
-                  }`}
+                }`}
               >
                 <ImageIcon
                   className={
@@ -831,10 +834,11 @@ const CreatePost = () => {
                 />
               </div>
               <span
-                className={`text-xs mt-1 ${images.length >= MEDIA_LIMIT
+                className={`text-xs mt-1 ${
+                  images.length >= MEDIA_LIMIT
                     ? "text-gray-400"
                     : "text-gray-600"
-                  }`}
+                }`}
               >
                 Media
               </span>

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
-import clsx from 'clsx';
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import clsx from "clsx";
 
 const CustomModal = ({
   visible,
@@ -10,7 +10,7 @@ const CustomModal = ({
   title,
   children,
   showHeader = true,
-  position = 'bottom', // 'bottom', 'center', 'top'
+  position = "bottom", // 'bottom', 'center', 'top'
   transparent = true,
 }) => {
   const [isVisible, setIsVisible] = useState(visible);
@@ -40,11 +40,12 @@ const CustomModal = ({
     </div>
   );
 
-  const positionClass = {
-    top: 'items-start mt-10',
-    center: 'items-center justify-center',
-    bottom: ' mb-10',
-  }[position] || ' mb-10';
+  const positionClass =
+    {
+      top: "items-start mt-10",
+      center: "items-center justify-center",
+      bottom: " mb-10",
+    }[position] || " mb-10";
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center bg-black/50 transition-all">
@@ -59,13 +60,13 @@ const CustomModal = ({
       {/* Modal Content */}
       <div
         className={clsx(
-          'relative w-full max-w-lg bg-white rounded-2xl shadow-lg z-50 overflow-hidden transition-all',
-          'max-h-[90vh] flex flex-col',
+          "relative w-full max-w-lg bg-white rounded-2xl shadow-lg z-50 overflow-hidden transition-all",
+          "max-h-[90vh] flex flex-col",
           positionClass
         )}
       >
         {/* Handle indicator (only for bottom modal) */}
-        {position === 'bottom' && (
+        {position === "bottom" && (
           <div className="w-full flex justify-center py-3">
             <div className="w-10 h-1.5 rounded-full bg-gray-300" />
           </div>

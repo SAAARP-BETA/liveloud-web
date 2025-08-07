@@ -37,9 +37,9 @@ const tabs = [
 ];
 
 // Mobile tabs - only Home, Explore, Wallet, Create
-const mobileTabs = tabs.filter(tab =>
+const mobileTabs = tabs.filter((tab) =>
   ["Home", "Explore", "Create", "Wallet"].includes(tab.name)
-)
+);
 
 export default function LeftSidebar() {
   const pathname = usePathname();
@@ -107,8 +107,9 @@ export default function LeftSidebar() {
               transition={iconTransition}
             >
               <Icon
-                className={`w-6 h-6 ${isActive ? "text-[#0EA5E9]" : "text-gray-400"
-                  }`}
+                className={`w-6 h-6 ${
+                  isActive ? "text-[#0EA5E9]" : "text-gray-400"
+                }`}
               />
             </motion.div>
             <motion.span
@@ -134,10 +135,11 @@ export default function LeftSidebar() {
         <div className="hidden sm:block">
           <Link
             href={tab.href}
-            className={`group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
+            className={`group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
+              isActive
                 ? "bg-[rgba(14,165,233,0.1)] text-[#0EA5E9] font-semibold shadow-sm"
                 : "text-gray-600 hover:bg-gray-100"
-              }`}
+            }`}
           >
             <motion.div
               className="flex items-center justify-center"
@@ -147,10 +149,11 @@ export default function LeftSidebar() {
               transition={iconTransition}
             >
               <Icon
-                className={`w-6 h-6 ${isActive
+                className={`w-6 h-6 ${
+                  isActive
                     ? "text-[#0EA5E9]"
                     : "text-gray-500 group-hover:text-[#0EA5E9]"
-                  }`}
+                }`}
               />
             </motion.div>
             <motion.span
@@ -175,7 +178,6 @@ export default function LeftSidebar() {
   };
 
   const handleProfileClick = () => {
-
     router.push("/profile"); // own profile
   };
 
@@ -226,19 +228,14 @@ export default function LeftSidebar() {
             </motion.span>
           </button>
         </div>
-        
 
         {/* Desktop Profile */}
         <div className="hidden sm:block relative">
-          <button
-            
-            className="group  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 w-full"
-          >
+          <button className="group  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 w-full">
             <motion.div
               className="flex items-center cursor-pointer justify-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              
             >
               {user?.profilePicture ? (
                 <img
@@ -252,7 +249,7 @@ export default function LeftSidebar() {
                   src={defaultPic.src}
                   alt="Profile"
                   className="w-10 h-10 rounded-full border-2 border-gray-200"
-                  onClick={handleProfileClick}  // Also added missing onClick
+                  onClick={handleProfileClick} // Also added missing onClick
                 />
               )}
             </motion.div>
@@ -267,7 +264,8 @@ export default function LeftSidebar() {
             </div>
 
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-              <MoreHorizontal className="w-5  h-5 cursor-pointer text-gray-400 group-hover:text-gray-600"
+              <MoreHorizontal
+                className="w-5  h-5 cursor-pointer text-gray-400 group-hover:text-gray-600"
                 onClick={() => setShowLogoutMenu(!showLogoutMenu)}
               />
             </motion.div>
@@ -348,20 +346,20 @@ export default function LeftSidebar() {
           height={20}
           className="object-contain ml-[-18] mr-26 md:mr-18 sm:mr-10"
           priority
-        /></Link>
+        />
+      </Link>
     </div>
   );
   return (
     <>
       {/* Mobile Bottom Nav */}
       <motion.nav
-        className="fixed bottom-3 left-3 right-3 z-50 rounded-2xl overflow-hidden shadow-xl sm:hidden"
+        className="fixed bottom-0 left-0 right-0 z-50 rounded-2xl overflow-hidden shadow-xl sm:hidden"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
         <div className="relative bg-white/90 backdrop-blur-xl border border-white/50">
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full" />
           <div className="flex justify-around items-center px-2 py-3 safe-area-pb">
             {mobileTabs.map((tab, index) => (
               <motion.div

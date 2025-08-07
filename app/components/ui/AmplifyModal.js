@@ -288,7 +288,6 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
                   "Quote"
                 )}
               </button>
-              
             </div>
           </div>
         )}
