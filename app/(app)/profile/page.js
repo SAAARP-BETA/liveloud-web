@@ -44,6 +44,7 @@ import {
   Edit2,
   CheckCircle as Verified,
   Loader2,
+  PenLineIcon,
 } from "lucide-react";
 import ReportModal from "@/app/components/ui/ReportModal";
 
@@ -159,7 +160,7 @@ const PointsDisplay = ({ points, loading }) => {
       <div className="flex justify-between">
         <div className="flex-1 text-center">
           <div className="w-12 cursor-pointer h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-1">
-            <Edit2 size={16} className="text-primary" />
+            <PenLineIcon size={16} className="text-primary" />
           </div>
           <p className="text-base font-bold text-gray-900">
             {points.creatorPoints || 0}

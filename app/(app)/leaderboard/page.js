@@ -3,7 +3,20 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { API_ENDPOINTS } from "../../utils/config";
-import { User, Heart, Pencil, Star, Trophy, Medal } from "lucide-react";
+import {
+  User,
+  Heart,
+  Pencil,
+  Star,
+  Trophy,
+  Medal,
+  SquarePen,
+  Users,
+  PenLine,
+  Crown,
+} from "lucide-react";
+import Image from "next/image";
+import { getProfilePicture } from "@/app/utils/fallbackImage";
 
 // Fixed Tab Component
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
@@ -57,7 +70,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
 
 // Fixed Leaderboard Item Component
 const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
-  const isCurrentUser = item.userId === currentUserId;
+  const isCurrentUser = String(item.userId) === String(currentUserId);
   const rank = index + 1;
 
   const getRankIcon = () => {
@@ -65,7 +78,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       case 1:
         return (
           <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-            <Trophy className="w-4 h-4 cursor-pointer text-white" />
+            <Crown className="w-4 h-4 cursor-pointer text-white" />
           </div>
         );
       case 2:
@@ -206,16 +219,14 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       <div className="mr-4 flex-shrink-0">{getRankIcon()}</div>
 
       {/* Profile Picture */}
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0">
-        {item.profilePicture ? (
-          <img
-            src={item.profilePicture}
-            alt="Profile"
-            className="w-full h-full rounded-full object-cover"
-          />
-        ) : (
-          <User className="w-6 h-6 text-primary" />
-        )}
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0 relative overflow-hidden">
+        <Image
+          src={getProfilePicture(item.profilePicture)}
+          alt={item.username || "Profile"}
+          width={48}
+          height={48}
+          className="rounded-full object-cover w-12 h-12"
+        />
       </div>
 
       {/* User Info */}
@@ -277,9 +288,9 @@ export default function LeaderboardPage() {
 
   const tabs = [
     { key: "total", title: "Overall", icon: Trophy },
-    { key: "creators", title: "Creators", icon: Pencil },
+    { key: "creators", title: "Creators", icon: SquarePen },
     { key: "fans", title: "Fans", icon: Heart },
-    { key: "followers", title: "Followers", icon: User },
+    { key: "followers", title: "Followers", icon: Users },
   ];
 
   // Fetch user's points
@@ -463,7 +474,7 @@ export default function LeaderboardPage() {
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <Pencil className="w-5 h-5 text-white" />
+                    <PenLine className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-white text-lg font-semibold">
                     {myPoints.creatorPoints || 0}
@@ -495,7 +506,9 @@ export default function LeaderboardPage() {
 
         {/* Header Section */}
         <div className="py-4 flex flex-row justify-between sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-gray-800 text-lg font-semibold">🏆 Top Users</h2>
+          <h2 className="text-gray-800 text-lg font-semibold">
+            🏆 Top Users - Overall
+          </h2>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
