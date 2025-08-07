@@ -3,26 +3,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { API_ENDPOINTS } from "../../utils/config";
-import {
-  User,
-  Heart,
-  Pencil,
-  Star,
-  Trophy,
-  Medal,
-  SquarePen,
-  Users,
-  PenLine,
-  Crown,
-} from "lucide-react";
-import Image from "next/image";
-import { getProfilePicture } from "@/app/utils/fallbackImage";
+import { User, Heart, Pencil, Star, Trophy, Medal } from "lucide-react";
 
-// Fixed Tab Component
+// Fixed Tab Component - Icons only on mobile, text on desktop
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   return (
     <div
-      className="bg-white border-b border-gray-100 sticky top-4 z-10"
+      className="bg-white border-b border-gray-100 sticky top-4 z-10 flex justify-center"
       style={{
         paddingLeft: 16,
         paddingRight: 16,
@@ -30,7 +17,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
         paddingBottom: 12,
       }}
     >
-      <div className="flex overflow-x-auto custom-scrollbar">
+      <div className="flex flex-wrap gap-3">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -38,7 +25,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
           return (
             <button
               key={tab.key}
-              className={` cursor-pointer mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${
+              className={`cursor-pointer py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${
                 isActive
                   ? "bg-primary text-white"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200"
@@ -56,7 +43,8 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
                     isActive ? "text-white" : "text-black"
                   }`}
                 />
-                <span className={`${isActive ? "text-white" : "text-black"}`}>
+                {/* Show text only on sm screens and larger (hidden on mobile) */}
+                <span className={`hidden sm:inline ${isActive ? "text-white" : "text-black"}`}>
                   {tab.title}
                 </span>
               </div>
@@ -70,7 +58,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
 
 // Fixed Leaderboard Item Component
 const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
-  const isCurrentUser = String(item.userId) === String(currentUserId);
+  const isCurrentUser = item.userId === currentUserId;
   const rank = index + 1;
 
   const getRankIcon = () => {
@@ -78,7 +66,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       case 1:
         return (
           <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-            <Crown className="w-4 h-4 cursor-pointer text-white" />
+            <Trophy className="w-4 h-4 cursor-pointer text-white" />
           </div>
         );
       case 2:
@@ -103,19 +91,6 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
   };
 
   const getLevelInfo = (points) => {
-    // const levels = [
-    //   { level: 1, title: 'Newcomer', minPoints: 0 },
-    //   { level: 2, title: 'Active Member', minPoints: 100 },
-    //   { level: 3, title: 'Contributor', minPoints: 500 },
-    //   { level: 4, title: 'Influencer', minPoints: 1000 },
-    //   { level: 5, title: 'Star', minPoints: 2500 },
-    //   { level: 6, title: 'Superstar', minPoints: 5000 },
-    //   { level: 7, title: 'Icon', minPoints: 10000 },
-    //   { level: 8, title: 'Legend', minPoints: 25000 },
-    //   { level: 9, title: 'Master', minPoints: 50000 },
-    //   { level: 10, title: 'Grandmaster', minPoints: 100000 },
-    // ];
-
     const levels = [
       {
         level: 1,
@@ -219,14 +194,16 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       <div className="mr-4 flex-shrink-0">{getRankIcon()}</div>
 
       {/* Profile Picture */}
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0 relative overflow-hidden">
-        <Image
-          src={getProfilePicture(item.profilePicture)}
-          alt={item.username || "Profile"}
-          width={48}
-          height={48}
-          className="rounded-full object-cover w-12 h-12"
-        />
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0">
+        {item.profilePicture ? (
+          <img
+            src={item.profilePicture}
+            alt="Profile"
+            className="w-full h-full rounded-full object-cover"
+          />
+        ) : (
+          <User className="w-6 h-6 text-primary" />
+        )}
       </div>
 
       {/* User Info */}
@@ -248,10 +225,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
             className={`px-2 py-1 ${levelInfo.bgColor} ${levelInfo.borderColor} rounded-xl border`}
           >
             <span className={`text-xs ${levelInfo.textColor} font-medium`}>
-              {/* Mobile: Show L1, L2, etc. */}
-              <span className="sm:hidden">L{levelInfo.level}</span>
-              {/* Desktop: Show Level 1, Level 2, etc. */}
-              <span className="hidden sm:inline">Level {levelInfo.level}</span>
+              Level {levelInfo.level}
             </span>
           </div>
           <span className={`text-xs ${levelInfo.textColor} truncate`}>
@@ -288,9 +262,9 @@ export default function LeaderboardPage() {
 
   const tabs = [
     { key: "total", title: "Overall", icon: Trophy },
-    { key: "creators", title: "Creators", icon: SquarePen },
+    { key: "creators", title: "Creators", icon: Pencil },
     { key: "fans", title: "Fans", icon: Heart },
-    { key: "followers", title: "Followers", icon: Users },
+    { key: "followers", title: "Followers", icon: User },
   ];
 
   // Fetch user's points
@@ -404,14 +378,6 @@ export default function LeaderboardPage() {
     fetchLeaderboard(true);
   };
 
-  // Scroll handler for infinite scroll
-  const handleScroll = (e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    if (scrollHeight - scrollTop <= clientHeight * 1.5) {
-      loadMore();
-    }
-  };
-
   // Initial load
   useEffect(() => {
     fetchLeaderboard(true);
@@ -425,31 +391,90 @@ export default function LeaderboardPage() {
     }
   }, [page]);
 
-  // Render loading state
-  if (isLoading && page === 1) {
-    return (
-      <div className="min-h-screen w-xl bg-gray-50">
-        <div className="flex items-center justify-center min-h-screen mr-50 sm:mr-0 sm:px-8">
-          <div className="text-center ">
-            <div className="animate-spin rounded-full h-12 w-12 flex justify-center items-center border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading leaderboard...</p>
+  // Skeleton Loading Component
+  const SkeletonLoader = () => (
+    <div className="bg-gray-50 min-h-screen py-6 px-4 max-w-4xl mx-auto w-full">
+      <div className="w-full max-w-md sm:max-w-full mx-auto">
+        {/* Skeleton Tabs */}
+        <div className="bg-white border-b border-gray-100 sticky top-4 z-10 p-4 mb-6">
+          <div className="flex flex-wrap gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-12 w-24 bg-gray-200 rounded-full animate-pulse"></div>
+            ))}
           </div>
         </div>
+
+        {/* Skeleton Points Summary */}
+        <div className="my-6 rounded-xl overflow-hidden shadow-lg">
+          <div className="p-6 bg-gradient-to-r from-sky-400 to-primary">
+            <div className="flex flex-col items-center justify-center mb-4">
+              <div className="h-4 w-32 bg-white/20 rounded animate-pulse mb-2"></div>
+              <div className="h-8 w-16 bg-white/30 rounded animate-pulse"></div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="text-center">
+                  <div className="w-12 h-12 bg-white/20 rounded-full animate-pulse mb-2 mx-auto"></div>
+                  <div className="h-4 w-8 bg-white/20 rounded animate-pulse mb-1 mx-auto"></div>
+                  <div className="h-3 w-12 bg-white/20 rounded animate-pulse mx-auto"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Skeleton Header */}
+        <div className="py-4 flex flex-row justify-between items-center gap-4 mb-4">
+          <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-10 w-20 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+
+        {/* Skeleton Leaderboard Items */}
+        <div className="pb-8">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="flex items-center p-5 mx-4 mb-4 bg-white rounded-xl shadow-sm">
+              {/* Skeleton Rank */}
+              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mr-4 flex-shrink-0"></div>
+              
+              {/* Skeleton Profile Picture */}
+              <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse flex-shrink-0"></div>
+              
+              {/* Skeleton User Info */}
+              <div className="flex-1 ml-4 min-w-0">
+                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
+                <div className="flex items-center space-x-2">
+                  <div className="h-6 w-16 bg-gray-200 rounded-xl animate-pulse"></div>
+                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+              
+              {/* Skeleton Points */}
+              <div className="text-right flex-shrink-0 ml-4">
+                <div className="h-6 w-16 bg-gray-200 rounded animate-pulse mb-1"></div>
+                <div className="h-3 w-12 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    );
+    </div>
+  );
+
+  // Render loading state
+  if (isLoading && leaderboardData.length === 0) {
+    return <SkeletonLoader />;
   }
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
-      {/* Tabs */}
-      <LeaderboardTabs
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabPress={handleTabChange}
-      />
+    <div className="bg-gray-50 min-h-screen py-6 px-4 max-w-4xl mx-auto w-full">
+      <div className="w-full max-w-md sm:max-w-full mx-auto">
+        {/* Tabs */}
+        <LeaderboardTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabPress={handleTabChange}
+        />
 
-      {/* Main Content */}
-      <div className="pb-24 px-4 sm:px-6 lg:px-8">
         {/* My Points Summary */}
         {isAuthenticated && myPoints && (
           <div className="my-6 rounded-xl overflow-hidden shadow-lg">
@@ -474,7 +499,7 @@ export default function LeaderboardPage() {
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <PenLine className="w-5 h-5 text-white" />
+                    <Pencil className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-white text-lg font-semibold">
                     {myPoints.creatorPoints || 0}
@@ -506,9 +531,7 @@ export default function LeaderboardPage() {
 
         {/* Header Section */}
         <div className="py-4 flex flex-row justify-between sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-gray-800 text-lg font-semibold">
-            🏆 Top Users - Overall
-          </h2>
+          <h2 className="text-gray-800 text-lg font-semibold">🏆 Top Users</h2>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
