@@ -1217,6 +1217,13 @@ const HomePage = () => {
     router.push("/leaderboard"); // Adjust path as needed
   };
 
+  const handleProfileClick = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to view your profile");
+      return;
+    }
+    router.push(`profile`); // Navigate to user's profile
+  };
   return (
     <div className="flex-1 h-screen">
       {/* --- Block 1: Create Post & Tabs --- */}
@@ -1253,16 +1260,17 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="mx-auto ">
-              <div className="p-4  bg-white cursor-pointer rounded-xl relative z-10">
+              <div className="p-4  bg-white  rounded-xl relative z-10">
                 <div className="flex items-center mb-2 space-x-3">
                   <Image
                     src={user?.profilePicture || defaultPic}
                     alt="Profile"
                     width={40}
                     height={40}
-                    className="rounded-full w-[40] h-[40]"
+                    className="rounded-full w-[40] h-[40] cursor-pointer"
+                    onClick={handleProfileClick}
                   />
-                  <span className="text-gray-700 cursor-pointer">
+                  <span className="text-gray-700">
                     @{user.username}
                   </span>
                 </div>
@@ -1516,7 +1524,7 @@ const HomePage = () => {
         >
           <div className="p-4">
             {selectedPost && (
-              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl truncate">
+              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl ">
                 <Image
                   src={getProfilePicture(selectedPost?.profilePic)}
                   alt={selectedPost?.username || "Profile"}
