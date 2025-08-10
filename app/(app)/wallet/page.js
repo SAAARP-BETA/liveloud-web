@@ -16,6 +16,7 @@ export default function WalletPage() {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState("wallet"); // 'wallet' or 'transfer'
   const [currentView, setCurrentView] = useState("main"); // 'main', 'crypto-details', 'transaction-history'
+  const [isTransferMode, setIsTransferMode] = useState(false); // Track if transfer mode is active
 
   const { user, token, isAuthenticated } = useAuth();
   const scrollPositionRef = useRef(0);
@@ -28,11 +29,13 @@ export default function WalletPage() {
   // Handle transfer button click
   const handleTransferClick = () => {
     setActiveSection("transfer");
+    setIsTransferMode(true);
   };
 
-  // Handle top up button click
-  const handleTopUpClick = () => {
+  // Handle send XP button click
+  const handleSendXPClick = () => {
     setActiveSection("wallet");
+    setIsTransferMode(false);
   };
 
   // Handle view navigation
@@ -89,7 +92,7 @@ export default function WalletPage() {
     const isSent = type === "Sent";
     
     return (
-      <div className="flex p-4 lg:w-full bg-white rounded-xl mb-2 shadow-sm">
+      <div className="flex p-4 bg-white rounded-xl mb-2 shadow-sm">
         <div className="w-10 h-10 rounded-full bg-gray-100 flex justify-center items-center mr-3">
           {isReceived ? (
             <ArrowDownLeft size={20} color="#4CAF50" />
@@ -122,7 +125,7 @@ export default function WalletPage() {
 
   // Crypto Details View Component
   const CryptoDetailsView = () => (
-    <div className="flex-1 lg:max-w-xl">
+    <div className="w-xl max-w-full">
       <div className="px-4 py-3 bg-white border-b border-gray-100 flex justify-between items-center">
         <button 
           className="flex items-center text-gray-700 font-medium hover:text-gray-900 transition-colors"
@@ -235,7 +238,7 @@ export default function WalletPage() {
 
   // Transaction History View Component
   const TransactionHistoryView = () => (
-    <div className="flex-1 lg:max-w-xl">
+    <div className="w-xl max-w-full">
       <div className="px-4 py-3 bg-white border-b border-gray-100 flex justify-between items-center">
         <button 
           className="flex items-center cursor-pointer text-gray-700 font-medium hover:text-gray-900 transition-colors"
@@ -286,79 +289,78 @@ export default function WalletPage() {
 
   // Main Wallet View Component
   const MainWalletView = () => (
-    <div className="pb-20 lg:max-w-xl">
+    <div className="pb-20 w-xl max-w-full">
       {/* User Handle Section */}
-      <div className="flex justify-between items-center px-5 py-4">
+      <div className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center mb-6">
         <div>
-          <div className="text-base text-gray-700">Your handle</div>
+          <div className="text-sm text-gray-500">Your handle</div>
           {isLoading ? (
             <div className="text-lg text-gray-600 mt-1">Loading...</div>
           ) : error ? (
             <div>
-              <div className="text-lg text-gray-600 mt-1">@{username}</div>
+              <div className="text-lg font-semibold text-gray-800">@{user.username}</div>
               <div className="text-xs text-red-500 mt-1">Error: {error}</div>
             </div>
           ) : (
-            <div className="text-lg text-gray-600 mt-1">@{username}</div>
+            <div className="text-lg font-semibold text-gray-800">@{user.username}</div>
           )}
         </div>
-        <button className="bg-gray-100 hover:bg-gray-200 py-2 px-6 rounded-full transition-colors">
-          <span className="text-base text-gray-700 font-medium">Link</span>
+        <button className="bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-700 font-medium">
+          Link
         </button>
       </div>
       
-      {/* Divider */}
-      <div className="h-2 bg-gray-200 my-1" />
-      
       {/* XP Wallet Section */}
-      <div className="px-5 py-4">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">XP Wallet</h2>
+      <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
+        <h2 className="text-lg font-bold text-gray-800 mb-4">XP Wallet</h2>
         
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-base text-gray-600">Your XP balance is:</span>
-          <span className="text-lg text-gray-800 font-semibold">1000 XP</span>
+        <div className="flex justify-between mb-4">
+          <span className="text-sm text-gray-600">Your XP balance is:</span>
+          <span className="text-base font-semibold text-gray-900">1000 XP</span>
         </div>
-        
-        <div className="text-base text-gray-700 mt-5 mb-2">
-          {activeSection === "transfer" ? "Transfer" : "Send"}
-        </div>
-        <div className="bg-gray-100 rounded-xl mb-4">
+
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {isTransferMode ? "Transfer" : "Send"}
+          </label>
           <input
-            className="w-full px-4 py-4 text-base text-gray-800 bg-transparent outline-none rounded-xl"
-            placeholder={activeSection === "transfer" ? "Transfer Amount" : "Amount"}
+            type="number"
+            placeholder={isTransferMode ? "Transfer Amount" : "Amount"}
+            className="w-full bg-gray-100 p-3 rounded-lg text-sm text-gray-800"
             value={xpAmount}
             onChange={(e) => setXpAmount(e.target.value)}
-            type="number"
           />
         </div>
-        
-        <div className="text-base text-gray-700 mb-2">To</div>
-        <div className="bg-gray-100 rounded-xl mb-4">
+
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            To
+          </label>
           <input
-            className="w-full px-4 py-4 text-base text-gray-800 bg-transparent outline-none rounded-xl"
-            placeholder={activeSection === "transfer" ? "Transfer to" : "Recipient"}
+            type="text"
+            placeholder={isTransferMode ? "Transfer To" : "Recipient"}
+            className="w-full bg-gray-100 p-3 rounded-lg text-sm text-gray-800"
             value={xpRecipient}
             onChange={(e) => setXpRecipient(e.target.value)}
           />
         </div>
         
-        <div className="flex gap-2 mt-2">
+        <div className="flex flex-row gap-3">
           <button 
-            className={`flex-1 h-12 rounded-xl font-semibold text-base transition-all ${
-              activeSection === "wallet" 
-                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md" 
-                : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+            className={`flex-1 rounded-xl h-12 font-semibold ${
+              !isTransferMode 
+                ? "bg-gradient-to-r from-sky-600 to-primary text-white" 
+                : "bg-gray-100 text-gray-800"
             }`}
-            onClick={handleTopUpClick}
+            onClick={handleSendXPClick}
           >
             Send XP
           </button>
-          
           <button 
-            className={`flex-1 h-12 rounded-xl font-semibold text-base transition-all ${
-              activeSection === "transfer" 
-                ? "bg-blue-500 text-white shadow-md" 
-                : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+            className={`flex-1 rounded-xl h-12 font-semibold ${
+              isTransferMode 
+                ? "bg-gradient-to-r from-sky-600 to-primary text-white" 
+                : "bg-gray-100 text-gray-800"
             }`}
             onClick={handleTransferClick}
           >
@@ -367,60 +369,54 @@ export default function WalletPage() {
         </div>
       </div>
       
-      {/* Divider */}
-      <div className="h-2 bg-gray-200 my-1" />
-      
       {/* Crypto Wallet Section */}
-      <div className="px-5 py-4">
+      <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Crypto Wallet</h2>
+          <h2 className="text-lg font-bold text-gray-800">Crypto Wallet</h2>
           <button 
-            className="text-sm text-blue-500 cursor-pointer font-medium hover:text-blue-600 transition-colors"
+            className="text-sm text-primary cursor-pointer font-medium hover:text-blue-600 transition-colors"
             onClick={() => handleViewChange("crypto-details")}
           >
             View Details
           </button>
         </div>
         
-        {/* Dynamic Balance Display */}
-        {selectedCrypto === "BTC" ? (
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-base text-gray-600">Your BTC balance is:</span>
-            <span className="text-lg text-gray-800 font-semibold">0.00001 BTC</span>
-          </div>
-        ) : (
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-base text-gray-600">Your ETH balance is:</span>
-            <span className="text-lg text-gray-800 font-semibold">0.0001 ETH</span>
-          </div>
-        )}
-        
-        <div className="flex bg-gray-100 rounded-xl p-1 my-4">
-          <button 
-            className={`flex-1 py-2 text-center rounded-lg transition-all ${
-              selectedCrypto === "BTC" ? "bg-white shadow text-gray-800 font-semibold" : "text-gray-500"
-            }`}
-            onClick={() => handleCryptoSelection("BTC")}
-          >
-            BTC
-          </button>
-          <button 
-            className={`flex-1 py-2 text-center rounded-lg transition-all ${
-              selectedCrypto === "ETH" ? "bg-white shadow text-gray-800 font-semibold" : "text-gray-500"
-            }`}
-            onClick={() => handleCryptoSelection("ETH")}
-          >
-            ETH
-          </button>
+        <div className="flex justify-between mb-4">
+          <span className="text-sm text-gray-600">
+            Your {selectedCrypto} balance is:
+          </span>
+          <span className="text-base font-semibold text-gray-900">
+            {selectedCrypto === "BTC" ? "0.00001 BTC" : "0.0001 ETH"}
+          </span>
         </div>
+
+        <div className="flex bg-gray-100 rounded-xl p-1 my-4 gap-2">
+          {["BTC", "ETH"].map((type) => (
+            <button
+              key={type}
+              className={`flex-1 py-2 rounded-lg text-sm font-medium ${
+                selectedCrypto === type
+                  ? "bg-white shadow text-gray-800"
+                  : "text-gray-500"
+              }`}
+              onClick={() => setSelectedCrypto(type)}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+
+       
+
+       
       </div>
       
       {/* Transaction History Section */}
-      <div className="px-5 py-4">
+      <div className="bg-white p-4 rounded-xl shadow-sm mb-6 lg:max-w-xl mx-auto max-w-full">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Recent Transactions</h2>
+          <h2 className="text-lg font-bold text-gray-800">Recent Transactions</h2>
           <button 
-            className="text-sm cursor-pointer text-blue-500 font-medium hover:text-blue-600 transition-colors"
+            className="text-sm cursor-pointer text-primary font-medium"
             onClick={() => handleViewChange("transaction-history")}
           >
             View All
@@ -464,14 +460,16 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:w-xl">
-      {/* Header */}
-      <div className="px-5 py-4 bg-gray-50 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">Connected Wallets</h1>
-      </div>
-      
-      {/* Main Content */}
-      <div className="max-w-xl mx-auto">
+    <div className="bg-gray-50 min-h-screen py-6 px-4 sm:py-10 max-w-4xl mx-auto w-full">
+      <div className="w-full max-w-md sm:max-w-full mx-auto">
+        {/* Wallet Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Connected Wallets
+          </h1>
+        </div>
+        
+        {/* Main Content */}
         {renderCurrentView()}
       </div>
     </div>
