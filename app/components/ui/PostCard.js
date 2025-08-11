@@ -11,6 +11,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   CheckCircle,
+  ArrowUpRightFromSquare,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import FilteredImage from "../common/FilteredImage";
@@ -265,6 +266,22 @@ const PostCard = ({
                   </div>
                 )}
             </div>
+
+            {/* View original post */}
+            <button
+              className="w-full mt-3 bg-primary text-white py-2 px-4 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent parent click handlers
+                router.push(
+                  `/post/${post.originalPost.id || post.originalPost._id}`
+                );
+              }}
+            >
+              <span className="mr-2">
+                <ArrowUpRightFromSquare />
+              </span>
+              View Original Post
+            </button>
           </div>
         )}
 
