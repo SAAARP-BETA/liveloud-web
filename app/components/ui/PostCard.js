@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import FilteredImage from "../common/FilteredImage";
+import { MdLocationOn, MdMood, MdPeople } from 'react-icons/md';
+import { fonts } from "@/app/utils/fonts";
 
 const PostCard = ({
   post,
@@ -215,6 +217,48 @@ const PostCard = ({
             ))}
           </div>
         )}
+        {/* //tagged People */}
+        {post.taggedUsers && post.taggedUsers.length > 0 && (
+  <div className="flex flex-row flex-wrap items-center mb-3 bg-blue-50 rounded-lg p-3">
+    {/* People icon */}
+    <MdPeople style={{ fontSize: 16, color: '#3B82F6' }} />
+
+    {/* "With" label */}
+    <span
+      className={`text-blue-600 ml-2 mr-1 ${fonts?.Medium || ''}`}
+    >
+      With
+    </span>
+
+    {/* Tagged users list */}
+    {post.taggedUsers.map((taggedUser, index) => {
+      const isCurrentUser =
+        taggedUser._id === user._id || taggedUser.id === user._id;
+      const identifier =
+        taggedUser.username || taggedUser._id || taggedUser.id;
+      // {console.log("Tagged user:", taggedUser, "Identifier:", identifier);}
+      console.log("Navigating to:", `/UserProfile/${identifier}`);
+      return (
+        <button
+          key={taggedUser._id || taggedUser.id}
+          onClick={() =>
+            router.push(
+              isCurrentUser
+                ? '/profile'
+                : `/UserProfile/${identifier}`
+            )
+          }
+          
+          className={`text-blue-600 hover:underline focus:outline-none ${fonts?.Medium || ''} cursor-pointer`}
+        >
+          @{taggedUser.username}
+          {index < post.taggedUsers.length - 1 && ', '}
+        </button>
+      );
+    })}
+  </div>
+)}
+        
 
         {/* Amplified post */}
         {post.isAmplified && post.originalPost && (
@@ -363,6 +407,28 @@ const PostCard = ({
             </>
           )}
         </div> */}
+        {/* Location */}
+      {post.location &&
+        (post.location.name || post.location.coordinates) &&
+        post.location.source === 'user_input' && (
+          <div className="flex flex-row items-center mb-3 bg-green-50 rounded-lg p-3">
+            <MdLocationOn size={16} className="text-green-500" />
+            <span className="text-green-600 ml-2 font-medium">
+              At {post.location.name || 'Location'}
+            </span>
+          </div>
+        )}
+
+      {/* Feeling */}
+      {post.feeling && (
+        <div className="flex flex-row items-center mb-3 bg-amber-50 rounded-lg p-3">
+          <MdMood size={16} className="text-amber-500" />
+          <span className="text-amber-600 ml-2 font-medium">
+            Feeling {post.feeling}
+          </span>
+        </div>
+      )}
+
       </div>
 
       {/* Post actions */}
@@ -421,7 +487,7 @@ const PostCard = ({
             {post.commentCount}
           </span>
         </button>
-
+        
         {/* Amplify Button */}
         <button
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
