@@ -45,6 +45,7 @@ import {
   CheckCircle as Verified,
   Loader2,
   PenLineIcon,
+  Award,
 } from "lucide-react";
 import ReportModal from "@/app/components/ui/ReportModal";
 
@@ -1005,6 +1006,23 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                     </>
                   )}
                 </div>
+
+                {/* Premium Button for User's Own Profile */}
+                {isMyProfile && (
+                  <button
+                    onClick={() => router.push("/premium")}
+                    className="mt-3 w-full py-3 rounded-full flex items-center justify-center bg-sky-500 hover:bg-sky-600 active:bg-sky-700 transition-colors duration-200 shadow-md hover:shadow-lg active:shadow-sm cursor-pointer"
+                    style={{
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    <Award size={18} className="text-white" />
+                    <span className="text-white ml-2 font-medium">
+                      Upgrade to Premium
+                    </span>
+                  </button>
+                )}
+
                 {isAuthenticated && userPoints && (
                   <>
                     <PointsDisplay

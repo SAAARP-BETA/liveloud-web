@@ -11,9 +11,12 @@ import {
   ThumbsUp,
   ThumbsDown,
   CheckCircle,
+  ArrowUpRightFromSquare,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import FilteredImage from "../common/FilteredImage";
+import { MdLocationOn, MdMood, MdPeople } from 'react-icons/md';
+import { fonts } from "@/app/utils/fonts";
 
 const PostCard = ({
   post,
@@ -194,159 +197,200 @@ const PostCard = ({
 
       {/* Post content */}
       <div
-        className="px-4 pb-3 cursor-pointer"
-        onClick={() => router.push(`/post/${post.id}`)}
-      >
-        {renderContent()}
+  className="px-4 pb-3 cursor-pointer"
+  onClick={() => router.push(`/post/${post.id}`)}
+>
+  {renderContent()}
 
-        {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap mb-3">
-            {post.tags.map((tag, index) => (
-              <button
-                key={index}
-                className="bg-gray-100 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 transition-colors"
-              >
-                <span className="font-medium text-md text-gray-700">
-                  #{tag}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+  {/* Tags */}
+  {post.tags?.length > 0 && (
+    <div className="flex flex-wrap mb-3">
+      {post.tags.map((tag, index) => (
+        <button
+          key={index}
+          onClick={(e) => {
+            e.stopPropagation(); // prevent navigating to post
+            router.push(`/tags/${tag}`);
+          }}
+          className="bg-gray-100 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 transition-colors"
+        >
+          <span className="font-medium text-md text-gray-700">
+            #{tag}
+          </span>
+        </button>
+      ))}
+    </div>
+  )}
 
-        {/* Amplified post */}
-        {post.isAmplified && post.originalPost && (
-          <div className="border border-gray-200 rounded-xl p-3 mb-3">
-            <div className="flex items-center mb-2">
-              <span className="font-medium text-md text-gray-500">
-                Amplified from
-                <span className="text-primary">
-                  @{post.originalPost.user?.username || "user"}
-                </span>
-              </span>
-            </div>
+  {/* Tagged People */}
+  {post.taggedUsers?.length > 0 && (
+    <div className="flex flex-row flex-wrap items-center mb-3 bg-blue-50 rounded-lg p-3">
+      <MdPeople style={{ fontSize: 16, color: '#3B82F6' }} />
+      <span className={`text-blue-600 ml-2 mr-1 ${fonts?.Medium || ''}`}>
+        With
+      </span>
 
-            {post.quoteContent && (
-              <p className="font-normal text-md text-gray-700 mb-2">
-                {post.quoteContent}
-              </p>
-            )}
+      {post.taggedUsers.map((taggedUser, index) => {
+        const isCurrentUser =
+          taggedUser._id === user._id || taggedUser.id === user._id;
+        const identifier =
+          taggedUser.username || taggedUser._id || taggedUser.id;
 
-            <div className="bg-gray-50 p-3 rounded-lg">
-              {post.originalPost.content && (
-                <p className="font-normal text-md text-gray-700 truncate">
-                  {post.originalPost.content}
-                </p>
-              )}
-
-              {post.originalPost.media &&
-                post.originalPost.media.length > 0 && (
-                  <div className="w-full relative rounded-lg mt-2 overflow-hidden">
-                    <Image
-                      src={post.originalPost.media[0]}
-                      alt="Original post media"
-                      width={400}
-                      height={300}
-                      className="w-full h-auto rounded-lg"
-                      onLoad={() =>
-                        console.log(
-                          "Amplified image loaded:",
-                          post.originalPost.media[0]
-                        )
-                      }
-                      onError={() =>
-                        console.error(
-                          "Amplified image error:",
-                          post.originalPost.media[0]
-                        )
-                      }
-                    />
-                  </div>
-                )}
-            </div>
-          </div>
-        )}
-
-        {/* Multiple images carousel */}
-        {hasMedia && (
-          <div className="mb-3">
-            <div
-              className="flex cursor-pointer overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-              onScroll={handleImageScroll}
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              {post.media.map((item, index) => (
-                <button
-                  key={`media-${post.id}-${index}`}
-                  className="flex-shrink-0 w-full snap-start"
-                  onClick={handleImageClick}
-                >
-                  <div
-                    className="w-full h-80 rounded-lg"
-                    style={{ position: "relative", minHeight: "320px" }}
-                  >
-                    <FilteredImage
-                      src={item}
-                      alt={`Post media ${index + 1}`}
-                      style={{ height: "320px" }}
-                      imageStyle="object-cover"
-                    />
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Image counter dots */}
-            {post.media.length > 1 && (
-              <div className="flex cursor-pointer justify-center mt-3">
-                {post.media.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      const container =
-                        containerRef.current?.querySelector(".overflow-x-auto");
-                      if (container) {
-                        container.scrollLeft = index * container.clientWidth;
-                        setCurrentImageIndex(index);
-                      }
-                    }}
-                    className={`w-2 h-2 rounded-full mx-1 transition-colors ${
-                      index === currentImageIndex ? "bg-primary" : "bg-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Post stats */}
-        {/* <div className="flex items-center mb-2">
-          <div className="flex items-center">
-            <span className="font-medium cursor-pointer text-md text-gray-500">
-              {post.likeCount} likes
-            </span>
-          </div>
-          <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
+        return (
           <button
-            onClick={handleCommentsClick}
-            className="hover:text-gray-700 transition-colors"
+            key={taggedUser._id || taggedUser.id}
+            onClick={(e) => {
+              e.stopPropagation(); // prevent parent click
+              router.push(
+                isCurrentUser
+                  ? '/profile'
+                  : `/UserProfile/${identifier}`
+              );
+            }}
+            className={`text-blue-600 hover:underline focus:outline-none ${fonts?.Medium || ''} cursor-pointer`}
           >
-            <span className="font-medium  cursor-pointer text-md text-gray-500">
-              {post.commentCount} comments
-            </span>
+            @{taggedUser.username}
+            {index < post.taggedUsers.length - 1 && ', '}
           </button>
-          {post.bookmarkCount > 0 && (
-            <>
-              <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
-              <span className="font-medium cursor-pointer text-md text-gray-500">
-                {post.bookmarkCount} saves
-              </span>
-            </>
-          )}
-        </div> */}
+        );
+      })} 
+    </div>
+  )}
+
+  {/* Amplified post */}
+  {post.isAmplified && post.originalPost && (
+    <div className="border border-gray-200 rounded-xl p-3 mb-3">
+      <div className="flex items-center mb-2">
+        <span className="font-medium text-md text-gray-500">
+          Amplified from{' '}
+          <span className="text-primary">
+            @{post.originalPost.user?.username || 'user'}
+          </span>
+        </span>
       </div>
+
+      {post.quoteContent && (
+        <p className="font-normal text-md text-gray-700 mb-2">
+          {post.quoteContent}
+        </p>
+      )}
+
+      <div className="bg-gray-50 p-3 rounded-lg">
+        {post.originalPost.content && (
+          <p className="font-normal text-md text-gray-700 truncate">
+            {post.originalPost.content}
+          </p>
+        )}
+
+        {post.originalPost.media?.length > 0 && (
+          <div className="w-full relative rounded-lg mt-2 overflow-hidden">
+            <Image
+              src={post.originalPost.media[0]}
+              alt="Original post media"
+              width={400}
+              height={300}
+              className="w-full h-auto rounded-lg"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* View original post button */}
+      <button
+        className="w-full mt-3 bg-primary text-white py-2 px-4 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center"
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(
+            `/post/${post.originalPost.id || post.originalPost._id}`
+          );
+        }}
+      >
+        <span className="mr-2">
+          <ArrowUpRightFromSquare />
+        </span>
+        View Original Post
+      </button>
+    </div>
+  )}
+
+  {/* Images */}
+  {hasMedia && (
+    <div className="mb-3">
+      <div
+        className="flex cursor-pointer overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        onScroll={handleImageScroll}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {post.media.map((item, index) => (
+          <button
+            key={`media-${post.id}-${index}`}
+            className="flex-shrink-0 w-full snap-start"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleImageClick();
+            }}
+          >
+            <div
+              className="w-full h-80 rounded-lg"
+              style={{ position: 'relative', minHeight: '320px' }}
+            >
+              <FilteredImage
+                src={item}
+                alt={`Post media ${index + 1}`}
+                style={{ height: '320px' }}
+                imageStyle="object-cover"
+              />
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Image counter dots */}
+      {post.media.length > 1 && (
+        <div className="flex cursor-pointer justify-center mt-3">
+          {post.media.map((_, index) => (
+            <button
+              key={index}
+              onClick={(e) => {
+                e.stopPropagation();
+                const container =
+                  containerRef.current?.querySelector('.overflow-x-auto');
+                if (container) {
+                  container.scrollLeft = index * container.clientWidth;
+                  setCurrentImageIndex(index);
+                }
+              }}
+              className={`w-2 h-2 rounded-full mx-1 transition-colors ${
+                index === currentImageIndex ? 'bg-primary' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )}
+
+  {/* Location */}
+  {post.location?.source === 'user_input' && (
+    <div className="flex flex-row items-center mb-3 bg-green-50 rounded-lg p-3">
+      <MdLocationOn size={16} className="text-green-500" />
+      <span className="text-green-600 ml-2 font-medium">
+        At {post.location.name || 'Location'}
+      </span>
+    </div>
+  )}
+
+  {/* Feeling */}
+  {post.feeling && (
+    <div className="flex flex-row items-center mb-3 bg-amber-50 rounded-lg p-3">
+      <MdMood size={16} className="text-amber-500" />
+      <span className="text-amber-600 ml-2 font-medium">
+        Feeling {post.feeling}
+      </span>
+    </div>
+  )}
+</div>
+
 
       {/* Post actions */}
       <div className="flex items-center justify-around py-3 border-t border-gray-100">
@@ -404,7 +448,7 @@ const PostCard = ({
             {post.commentCount}
           </span>
         </button>
-
+        
         {/* Amplify Button */}
         <button
           className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"

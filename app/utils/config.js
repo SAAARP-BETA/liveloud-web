@@ -5,7 +5,7 @@ export const UNSPLASH_ACCESS_KEY = 'ytAR3Kj5h29tNC6hZMQLFY4uRK3rp-zzLLiEnOE5RyE'
 
 export const API_ENDPOINTS = {
   AUTH: process.env.NEXT_PUBLIC_AUTH_API_URL || "https://liveloud-backend.onrender.com/api/auth",
-  USER: process.env.NEXT_PUBLIC_USER_API_URL || "https://liveloud-backend.onrender.com/api",
+  USER: process.env.NEXT_PUBLIC_USER_API_URL || "https://liveloud-backend.onrender.com/api/users",
   SOCIAL: process.env.NEXT_PUBLIC_SOCIAL_API_URL || "https://liveloud-backend.onrender.com/api/social",
   MEDIA: process.env.NEXT_PUBLIC_MEDIA_API_URL || "https://liveloud-backend.onrender.com/api/upload",
   NOTIFICATION: process.env.NEXT_PUBLIC_NOTIFICATION_API_URL || "https://liveloud-backend.onrender.com/api",
