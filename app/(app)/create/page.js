@@ -25,9 +25,10 @@ import { API_ENDPOINTS } from "../../utils/config";
 import defaultPic from "../../assets/avatar.png";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { debounce } from "lodash";
-
-// FilteredImage Component with all filter types from Expo version
+import { debounce } from "lodash"; // Added for debouncing search
+import { MdOutlineEmojiEmotions } from "react-icons/md";
+import { Icon } from "@iconify/react";
+import * as MdIcons from "react-icons/md";
 const FilteredImage = ({ src, filterType, className }) => {
   const filterStyles = {
     none: "",
@@ -58,16 +59,7 @@ const CreatePost = () => {
   const MEDIA_LIMIT = 4;
 
   // Sample feelings data - matching Expo version
-  const FEELINGS = [
-    { id: 1, name: "Happy", icon: "😊" },
-    { id: 2, name: "Sad", icon: "😢" },
-    { id: 3, name: "Excited", icon: "🎉" },
-    { id: 4, name: "Tired", icon: "😴" },
-    { id: 5, name: "Loved", icon: "❤️" },
-    { id: 6, name: "Angry", icon: "😠" },
-    { id: 7, name: "Working", icon: "💼" },
-    { id: 8, name: "Celebrating", icon: "🎊" },
-  ];
+ 
 
   // Post content state
   const [content, setContent] = useState("");
@@ -102,6 +94,14 @@ const CreatePost = () => {
   ]);
 
   // Modal visibility state
+  // const [loading, setLoading] = useState(false);
+  const [tagInput, setTagInput] = useState("");
+  const [locationSearch, setLocationSearch] = useState("");
+  const [userSearchQuery, setUserSearchQuery] = useState(""); // Replaced peopleSearch
+  const [searchedUsers, setSearchedUsers] = useState([]); // Replaced filteredPeople
+  const [randomUsers, setRandomUsers] = useState([]); // Replaced peopleSuggestions
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const [isLoadingRandomUsers, setIsLoadingRandomUsers] = useState(false);
   const [showMediaOptions, setShowMediaOptions] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showPeopleTagModal, setShowPeopleTagModal] = useState(false);
@@ -110,16 +110,16 @@ const CreatePost = () => {
   const [editingImageIndex, setEditingImageIndex] = useState(null);
 
   // User search state
-  const [userSearchQuery, setUserSearchQuery] = useState("");
-  const [searchedUsers, setSearchedUsers] = useState([]);
-  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
-  const [randomUsers, setRandomUsers] = useState([]);
-  const [isLoadingRandomUsers, setIsLoadingRandomUsers] = useState(false);
+  // const [userSearchQuery, setUserSearchQuery] = useState("");
+  // const [searchedUsers, setSearchedUsers] = useState([]);
+  // const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  // const [randomUsers, setRandomUsers] = useState([]);
+  // const [isLoadingRandomUsers, setIsLoadingRandomUsers] = useState(false);
 
   // Location state
   const [showCustomLocationInput, setShowCustomLocationInput] = useState(false);
   const [customLocationText, setCustomLocationText] = useState("");
-  const [locationSearch, setLocationSearch] = useState("");
+  // const [locationSearch, setLocationSearch] = useState("");
 
   // Auth context
   const { user, token, isAuthenticated } = useAuth();
@@ -139,6 +139,19 @@ const CreatePost = () => {
     () => loading || isOverLimit || !content.trim(),
     [loading, isOverLimit, content]
   );
+
+  const feelings = [
+  { name: 'Happy', icon: 'mdi:emoticon-happy-outline' },
+  { name: 'Sad', icon: 'mdi:emoticon-sad-outline' },
+  { name: 'Excited', icon: 'mdi:emoticon-excited-outline' },
+  { name: 'Tired', icon: 'mdi:question-mark' },
+  { name: 'Loved', icon: 'mdi:heart-outline' },
+  { name: 'Angry', icon: 'mdi:emoticon-angry-outline' },
+  { name: 'Working', icon: 'mdi:briefcase-outline' },
+  { name: 'Celebrating', icon: 'mdi:party-popper' }
+];
+
+  // const [trendyTags, setTrendyTags] = useState([]);
 
   const gradientColors = useMemo(() => {
     if (isOverLimit) return ["#FF6B6B", "#FF0000"];
@@ -732,10 +745,7 @@ const CreatePost = () => {
       // Add location data if available
       if (location) {
         postData.location = {
-          coordinates: [
-            location.coords?.longitude || 0,
-            location.coords?.latitude || 0,
-          ],
+          coordinates: [location.coords?.longitude || 0, location.coords?.latitude || 0],
           name: locationName,
         };
       }
@@ -949,19 +959,22 @@ const CreatePost = () => {
         {selectedFeeling && (
           <div className="px-4 mb-3">
             <div className="flex items-center bg-amber-50 rounded-lg p-3">
-              <span className="text-amber-600">{selectedFeeling.icon}</span>
+              <Icon
+                icon={selectedFeeling.icon}
+                width={24}
+                height={24}
+                color="orange"
+              />
               <span className="text-amber-600 ml-2 font-medium">
                 Feeling {selectedFeeling.name}
               </span>
               <button
-                onClick={() => setSelectedFeeling(null)}
-                className="ml-auto text-amber-500 hover:text-amber-700"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          </div>
-        )}
+                onClick={() => setSelectedFeeling(null)} className="ml-auto">
+        <X className="text-amber-500 cursor-pointer" size={20} />
+      </button>
+    </div>
+  </div>
+)}
 
         {/* Image Preview Section */}
         {images.length > 0 && (
@@ -1030,9 +1043,15 @@ const CreatePost = () => {
               {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="bg-blue-50 text-blue-600 rounded-full px-3 py-1.5 text-sm"
+                  className="bg-blue-50 rounded-full px-3 py-1.5 flex items-center"
                 >
-                  #{tag}
+                  <span className="text-primary text-sm">#{tag}</span>
+                  {/* <button
+                    onClick={() => removeTag(tag)}
+                    className="ml-2 text-primary hover:text-blue-700 cursor-pointer"
+                  >
+                    <X size={14} className="cursor-pointer" />
+                  </button> */}
                 </span>
               ))}
             </div>
@@ -1070,24 +1089,16 @@ const CreatePost = () => {
             >
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  images.length >= MEDIA_LIMIT ? "bg-gray-100" : "bg-red-50"
+                  images.length >= MEDIA_LIMIT ? "bg-gray-100" : "bg-red-50 hover:bg-red-100"
                 }`}
               >
                 <ImageIcon
-                  size={24}
-                  className={
-                    images.length >= MEDIA_LIMIT
-                      ? "text-gray-400"
-                      : "text-red-500"
-                  }
+                  className={images.length >= MEDIA_LIMIT ? "text-gray-400" : "text-red-500"}
+                  size={20}
                 />
               </div>
               <span
-                className={`text-xs mt-1 ${
-                  images.length >= MEDIA_LIMIT
-                    ? "text-gray-400"
-                    : "text-gray-600"
-                }`}
+                className={`text-xs mt-1 ${images.length >= MEDIA_LIMIT ? "text-gray-400" : "text-gray-600"}`}
               >
                 Media
               </span>
@@ -1128,10 +1139,9 @@ const CreatePost = () => {
         {/* Error Message for Over Limit */}
         {isOverLimit && (
           <div className="mx-4 my-3 p-3 bg-red-50 rounded-lg border border-red-200">
-            <p className="text-red-600 text-sm font-medium">
-              Your post exceeds the {MAX_CHAR_LIMIT} character limit. Please
-              shorten your text to post.
-            </p>
+            <span className="text-red-600 text-sm font-medium">
+              Your post exceeds the {MAX_CHAR_LIMIT} character limit (excluding hashtags). Please shorten your text to post.
+            </span>
           </div>
         )}
       </div>
@@ -1505,42 +1515,58 @@ const CreatePost = () => {
         </div>
       )}
 
-      {/* Feeling Modal */}
-      {showFeelingModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
-          <div className="bg-white rounded-t-3xl w-full max-w-lg p-6">
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-center mb-6">
-              How are you feeling?
-            </h3>
+     {/* Feeling Modal */}
+{showFeelingModal && (
+  <>
+    {/* Backdrop */}
+    <div
+      className="fixed inset-0 bg-black/50 z-50"
+      onClick={() => setShowFeelingModal(false)}
+    ></div>
+    <div className="relative z-60">
 
-            <div className="grid grid-cols-2 gap-3">
-              {FEELINGS.map((feeling) => (
-                <button
-                  key={feeling.id}
-                  onClick={() => {
-                    setSelectedFeeling(feeling);
-                    setShowFeelingModal(false);
-                  }}
-                  className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100"
-                >
-                  <div className="w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center mx-auto mb-2">
-                    <span className="text-2xl">{feeling.icon}</span>
-                  </div>
-                  <p className="font-medium text-gray-800">{feeling.name}</p>
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setShowFeelingModal(false)}
-              className="w-full bg-gray-100 py-4 mt-6 rounded-xl font-medium text-gray-700"
-            >
-              Cancel
-            </button>
-          </div>
+    {/* Modal Content */}
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg">
+      <div className="bg-white rounded-lg p-4 w-full max-w-2xl shadow-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg  text-center w-full">How are you feeling?</h3>
+          <button
+            onClick={() => setShowFeelingModal(false)}
+            className="text-gray-600 hover:text-gray-900 cursor-pointer"
+          >
+            <X size={24} className="cursor-pointer" />
+          </button>
         </div>
-      )}
+
+          <div className="grid grid-cols-2  gap-3">
+            {feelings.map((feeling, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setSelectedFeeling(feeling);
+                  setShowFeelingModal(false);
+                }}
+                className="flex items-center justify-center flex-col p-3 bg-gray-50 cursor-pointer rounded-lg"
+              >
+                <span className="text-2xl text-center bg-amber-100 rounded">
+                  <Icon icon={feeling.icon} width={24} height={24} color="orange" />
+                </span>
+                <span className="text-center ">{feeling.name}</span>
+
+              </button>
+            ))}
+            <button
+    onClick={() => setShowFeelingModal(false)}
+    className="col-span-2 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg mt-2"
+  >
+    Cancel
+  </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </>
+)}
 
       {/* Image Editor Modal */}
       {showImageEditor && editingImageIndex !== null && (
@@ -1601,5 +1627,4 @@ const CreatePost = () => {
     </div>
   );
 };
-
 export default CreatePost;
