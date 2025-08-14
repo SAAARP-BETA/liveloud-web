@@ -256,7 +256,7 @@ export default function LeftSidebar() {
 
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-semibold text-gray-900 truncate">
-                {user?.name || user?.username || "User"}
+                {user?.fullname || user?.username || "User"}
               </p>
               <p className="text-sm text-gray-500 truncate">
                 @{user?.username || "username"}

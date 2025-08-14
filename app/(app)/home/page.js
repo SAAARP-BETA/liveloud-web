@@ -119,6 +119,42 @@ const FEED_TYPES = [
   },
 ];
 
+const TabSkeleton = () => (
+  <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max max-sm:justify-evenly">
+    {FEED_TYPES.map((_, index) => (
+      <div
+        key={index}
+        className="px-3 py-2 rounded-full bg-gray-200 animate-pulse sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto"
+      />
+    ))}
+  </div>
+);
+
+const PostsSkeleton = () => (
+  <div className="space-y-4">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="bg-white rounded-xl p-4 shadow-sm animate-pulse">
+        <div className="flex items-center mb-3">
+          <div className="w-10 h-10 bg-gray-200 rounded-full" />
+          <div className="ml-3 flex-1">
+            <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
+            <div className="h-3 bg-gray-200 rounded w-16" />
+          </div>
+        </div>
+        <div className="space-y-2 mb-3">
+          <div className="h-4 bg-gray-200 rounded w-full" />
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+        </div>
+        <div className="flex justify-between">
+          <div className="h-8 bg-gray-200 rounded w-16" />
+          <div className="h-8 bg-gray-200 rounded w-16" />
+          <div className="h-8 bg-gray-200 rounded w-16" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const HomePage = () => {
   const router = useRouter();
   const { user, token, isAuthenticated, error, logout } = useAuth();
@@ -1116,19 +1152,18 @@ const HomePage = () => {
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
           const canAccess = !feedType.requiresAuth || isAuthenticated;
-
           return (
             <button
               key={feedType.key}
               onClick={() => canAccess && handleTabChange(feedType.key)}
               className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors flex items-center justify-center
-    ${
-      isActive
-        ? "bg-primary text-white"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-    }
-    ${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
-    sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hidden whitespace-nowrap`}
+${
+  isActive
+    ? "bg-primary text-white"
+    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+}
+${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
+sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hidden whitespace-nowrap`}
               disabled={!canAccess}
               title={feedType.title}
             >
@@ -1147,7 +1182,6 @@ const HomePage = () => {
       </div>
     </div>
   );
-
   const currentTabData = getCurrentTabData();
   const currentFeedType = FEED_TYPES.find((feed) => feed.key === activeTab);
 
@@ -1225,11 +1259,11 @@ const HomePage = () => {
     router.push(`profile`); // Navigate to user's profile
   };
   return (
-    <div className="flex-1 h-screen">
+    <div className="flex-1 h-screen max-sm:w-xl/5 min-w-full">
       {/* --- Block 1: Create Post & Tabs --- */}
       {renderTabBar()}
       <div
-        className="flex-1 overflow-y-auto h-screen custom-scrollbar p-4"
+        className="flex-1 overflow-y-auto h-screen custom-scrollbar p-4 w-full min-w-full"
         onScroll={handleScroll}
       >
         {/* <div className="mt-4 sm:mt-2 w-full max-w-[512px] sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto px-3 sm:px-4 bg-white rounded-xl mb-4 shadow-sm min-h-[200px]"> */}
@@ -1260,7 +1294,7 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="mx-auto ">
-              <div className="p-4  bg-white  rounded-xl relative z-10">
+              <div className="p-4 min-w-full bg-white  rounded-xl relative z-10">
                 <div className="flex items-center mb-2 space-x-3">
                   <Image
                     src={user?.profilePicture || defaultPic}
@@ -1270,9 +1304,7 @@ const HomePage = () => {
                     className="rounded-full w-[40] h-[40] cursor-pointer"
                     onClick={handleProfileClick}
                   />
-                  <span className="text-gray-700">
-                    @{user.username}
-                  </span>
+                  <span className="text-gray-700">@{user.username}</span>
                 </div>
                 <div className="flex items-start space-x-3">
                   <textarea
@@ -1393,10 +1425,7 @@ const HomePage = () => {
         <div className="min-md:w-xl/2 md:max-w-xl max-w-2xl w-full mx-auto">
           {/* Initial loading indicator */}
           {currentTabData.loading && currentTabData.posts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-16">
-              <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-              <p className="text-lg text-gray-600">Loading posts...</p>
-            </div>
+            <PostsSkeleton />
           ) : (
             <div
               className={`transition-all duration-300 ${

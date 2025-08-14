@@ -46,6 +46,7 @@ import {
   Loader2,
   PenLineIcon,
   Award,
+  Users,
 } from "lucide-react";
 import ReportModal from "@/app/components/ui/ReportModal";
 
@@ -450,6 +451,12 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [followingCount, setFollowingCount] = useState(
     initialUser?.followingCount || 0
   );
+  const [isFollowersModalVisible, setIsFollowersModalVisible] = useState(false);
+  const [isFollowingModalVisible, setIsFollowingModalVisible] = useState(false);
+  const [followersList, setFollowersList] = useState([]);
+  const [followingList, setFollowingList] = useState([]);
+  const [followersLoading, setFollowersLoading] = useState(false);
+  const [followingLoading, setFollowingLoading] = useState(false);
   const [postsCount, setPostsCount] = useState(initialUser?.postsCount || 0);
   const [isMyProfile, setIsMyProfile] = useState(false);
   const [isMoreModalVisible, setIsMoreModalVisible] = useState(false);
@@ -698,6 +705,120 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded]
   );
 
+  // Fetch followers list
+  const fetchFollowers = useCallback(
+    async (userId) => {
+      if (!userId || !token) return;
+
+      setFollowersLoading(true);
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.SOCIAL}/followers/${userId}/followers?limit=50`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch followers");
+        }
+
+        const data = await response.json();
+
+        // Add follow status for each follower
+        const followersWithStatus = await Promise.all(
+          data.followers.map(async (follower) => {
+            if (follower._id === currentUser?.userId) {
+              return { ...follower, isFollowing: false, isCurrentUser: true };
+            }
+
+            try {
+              const statusResponse = await fetch(
+                `${API_ENDPOINTS.SOCIAL}/followers/${follower._id}/status`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+              const statusData = await statusResponse.json();
+              return {
+                ...follower,
+                isFollowing: statusData.isFollowing,
+                isCurrentUser: false,
+              };
+            } catch (error) {
+              return { ...follower, isFollowing: false, isCurrentUser: false };
+            }
+          })
+        );
+
+        setFollowersList(followersWithStatus);
+      } catch (error) {
+        console.error("Error fetching followers:", error);
+        toast.error("Error", "Failed to load followers");
+      } finally {
+        setFollowersLoading(false);
+      }
+    },
+    [token, currentUser]
+  );
+
+  // Fetch following list
+  const fetchFollowing = useCallback(
+    async (userId) => {
+      if (!userId || !token) return;
+
+      setFollowingLoading(true);
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.SOCIAL}/followers/${userId}/following?limit=50`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch following");
+        }
+
+        const data = await response.json();
+
+        // Add follow status for each user being followed
+        const followingWithStatus = await Promise.all(
+          data.following.map(async (following) => {
+            if (following._id === currentUser?.userId) {
+              return { ...following, isFollowing: false, isCurrentUser: true };
+            }
+
+            try {
+              const statusResponse = await fetch(
+                `${API_ENDPOINTS.SOCIAL}/followers/${following._id}/status`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+              const statusData = await statusResponse.json();
+              return {
+                ...following,
+                isFollowing: statusData.isFollowing,
+                isCurrentUser: false,
+              };
+            } catch (error) {
+              return { ...following, isFollowing: false, isCurrentUser: false };
+            }
+          })
+        );
+
+        setFollowingList(followingWithStatus);
+      } catch (error) {
+        console.error("Error fetching following:", error);
+        toast.error("Error", "Failed to load following");
+      } finally {
+        setFollowingLoading(false);
+      }
+    },
+    [token, currentUser]
+  );
+
   const fetchUserProfile = useCallback(async () => {
     if (isProfileLoading) return;
 
@@ -799,6 +920,61 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
       setFollowersCount((prev) => (wasFollowing ? prev + 1 : prev - 1));
       console.error("Error updating follow status:", error);
       toast.error("Failed to update follow status. Please try again.");
+    }
+  };
+
+  // Follow/unfollow user in modal lists
+  const handleModalFollowToggle = async (targetUser) => {
+    if (!isAuthenticated) {
+      toast.error("Login Required", "Please login to follow users");
+      return;
+    }
+
+    try {
+      const endpoint = targetUser.isFollowing ? "unfollow" : "follow";
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/followers/${targetUser._id}/${endpoint}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update follow status");
+      }
+
+      // Update the followers list
+      setFollowersList((prev) =>
+        prev.map((user) =>
+          user._id === targetUser._id
+            ? { ...user, isFollowing: !user.isFollowing }
+            : user
+        )
+      );
+
+      // Update the following list
+      setFollowingList((prev) =>
+        prev.map((user) =>
+          user._id === targetUser._id
+            ? { ...user, isFollowing: !user.isFollowing }
+            : user
+        )
+      );
+
+      // Update profile counts if following/unfollowing the current profile user
+      if (targetUser._id === user?._id) {
+        setIsFollowing((prev) => !prev);
+        setFollowersCount((prev) =>
+          targetUser.isFollowing ? prev - 1 : prev + 1
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling follow status:", error);
+      toast.error("Error", "Failed to update follow status. Please try again.");
     }
   };
 
@@ -954,12 +1130,14 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   followersCount={followersCount}
                   followingCount={followingCount}
                   postsCount={postsCount}
-                  onPressFollowers={() =>
-                    router.push(`/profile/${user.username}/followers`)
-                  }
-                  onPressFollowing={() =>
-                    router.push(`/profile/${user.username}/following`)
-                  }
+                  onPressFollowers={() => {
+                    setIsFollowersModalVisible(true);
+                    fetchFollowers(user._id);
+                  }}
+                  onPressFollowing={() => {
+                    setIsFollowingModalVisible(true);
+                    fetchFollowing(user._id);
+                  }}
                 />
                 <div className="flex mt-4 w-full max-w-md mx-auto space-x-3">
                   {isMyProfile ? (
@@ -1226,7 +1404,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             {selectedPost && (
               <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
                 <Image
-                  src={selectedPost.profilePic || "/avatar.png"}
+                  src={selectedPost.profilePic || defaultPic}
                   alt="Profile"
                   className="w-10 h-10 rounded-full"
                   width={40}
@@ -1348,6 +1526,142 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           onSuccess={handleReportSuccess}
           token={token}
         ></ReportModal>
+
+        {/* Follower Modal */}
+        <CustomModal
+          visible={isFollowersModalVisible}
+          onClose={() => setIsFollowersModalVisible(false)}
+          title="Followers"
+          showHeader={true}
+          position="bottom"
+        >
+          {followersLoading ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent"></div>
+              <p className="mt-4 text-gray-600 text-sm">Loading following...</p>
+            </div>
+          ) : followersList.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="bg-gray-100 rounded-full p-3 mb-3">
+                <Users className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-lg font-medium text-gray-900 mb-2">
+                No followers yet
+              </p>
+              <p className="text-sm text-gray-500 text-center px-4">
+                When people follow this account, they'll appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100 p-4">
+              {followersList.map((follower) => (
+                <div
+                  key={follower._id}
+                  className="flex items-center py-4 px-1 hover:bg-gray-50"
+                >
+                  <div className="relative w-12 h-12 mr-3 flex-shrink-0">
+                    <Image
+                      src={follower.profilePicture || defaultPic}
+                      alt={`${follower.username}'s profile`}
+                      fill
+                      className="rounded-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-medium text-gray-900 truncate">
+                      {follower.username}
+                    </p>
+                    {follower.bio && (
+                      <p className="text-sm text-gray-500 mt-0.5 truncate">
+                        {follower.bio}
+                      </p>
+                    )}
+                  </div>
+                  {!follower.isCurrentUser && (
+                    <button
+                      className={`ml-3 px-4 py-2 rounded-full text-sm font-medium transition-colors flex-shrink-0 cursor-pointer ${
+                        follower.isFollowing
+                          ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                          : "bg-sky-500 text-white hover:bg-sky-600"
+                      }`}
+                      onClick={() => handleModalFollowToggle(follower)}
+                    >
+                      {follower.isFollowing ? "Following" : "Follow"}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CustomModal>
+
+        {/* Following Modal */}
+        <CustomModal
+          visible={isFollowingModalVisible}
+          onClose={() => setIsFollowingModalVisible(false)}
+          title="Following"
+          showHeader={true}
+          position="bottom"
+        >
+          {followingLoading ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent"></div>
+              <p className="mt-4 text-gray-600 text-sm">Loading following...</p>
+            </div>
+          ) : followingList.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <div className="bg-gray-100 rounded-full p-3 mb-3">
+                <Users className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-lg font-medium text-gray-900 mb-2">
+                Not following anyone yet
+              </p>
+              <p className="text-sm text-gray-500 text-center px-4">
+                When this account follows people, they'll appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100 p-4">
+              {followingList.map((following) => (
+                <div
+                  key={following._id}
+                  className="flex items-center py-4 px-1 hover:bg-gray-50"
+                >
+                  <div className="relative w-12 h-12 mr-3 flex-shrink-0">
+                    <Image
+                      src={following.profilePicture || defaultPic}
+                      alt={`${following.username}'s profile`}
+                      fill
+                      className="rounded-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-medium text-gray-900 truncate">
+                      {following.username}
+                    </p>
+                    {following.bio && (
+                      <p className="text-sm text-gray-500 mt-0.5 truncate">
+                        {following.bio}
+                      </p>
+                    )}
+                  </div>
+                  {!following.isCurrentUser && (
+                    <button
+                      className={`ml-3 px-4 py-2 rounded-full text-sm font-medium transition-colors flex-shrink-0 cursor-pointer ${
+                        following.isFollowing
+                          ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                          : "bg-sky-500 text-white hover:bg-sky-600"
+                      }`}
+                      onClick={() => handleModalFollowToggle(following)}
+                    >
+                      {following.isFollowing ? "Following" : "Follow"}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CustomModal>
       </div>
     </div>
   );
