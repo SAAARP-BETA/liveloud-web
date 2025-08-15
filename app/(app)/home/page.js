@@ -443,11 +443,54 @@ const HomePage = () => {
           error: "Please log in to view this feed",
           posts: [],
           hasMore: false,
+          loading: false
         });
         return;
       }
 
-      // NEW: Check location requirement for nearme feed
+      // Check location requirement for nearme feed
+      if (feedConfig.requiresLocation) {
+        if (locationPermission === 'denied') {
+          updateTabData(feedType, {
+            error: "Location access denied. Please enable location services to view nearby posts.",
+            posts: [],
+            hasMore: false,
+            loading: false
+          });
+          setShowLocationModal(true);
+          return;
+        }
+
+        if (!userLocation) {
+          updateTabData(feedType, {
+            error: "Getting your location...",
+            posts: [],
+            hasMore: false,
+            loading: true
+          });
+          
+          try {
+            const location = await getCurrentLocation();
+            if (!location) {
+              updateTabData(feedType, {
+                error: "Could not get your location. Please try again.",
+                posts: [],
+                hasMore: false,
+                loading: false
+              });
+              return;
+            }
+          } catch (error) {
+            updateTabData(feedType, {
+              error: error.message || "Failed to get location",
+              posts: [],
+              hasMore: false,
+              loading: false
+            });
+            return;
+          }
+        }
+      }
       if (feedConfig.requiresLocation) {
         if (locationPermission === "denied") {
           updateTabData(feedType, {

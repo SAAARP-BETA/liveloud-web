@@ -79,28 +79,40 @@ const PostCard = ({
   const renderContent = () => {
     if (!post.content) return null;
 
-    // Find and highlight hashtags and mentions
-    const contentWithTags = post.content.split(/(\s+)/).map((word, i) => {
-      if (word.startsWith("#")) {
-        return (
-          <span key={i} className="font-medium text-primary">
-            {word}
-          </span>
-        );
-      } else if (word.startsWith("@")) {
-        return (
-          <span key={i} className="font-medium text-primary">
-            {word}
-          </span>
-        );
-      }
-      return word;
+    // Split content into lines first to preserve newlines
+    const lines = post.content.split('\n');
+    
+    // Process each line to handle hashtags and mentions
+    const processedLines = lines.map((line, lineIndex) => {
+      const contentWithTags = line.split(/(\s+)/).map((word, i) => {
+        if (word.startsWith("#")) {
+          return (
+            <span key={`${lineIndex}-${i}`} className="font-medium text-primary">
+              {word}
+            </span>
+          );
+        } else if (word.startsWith("@")) {
+          return (
+            <span key={`${lineIndex}-${i}`} className="font-medium text-primary">
+              {word}
+            </span>
+          );
+        }
+        return word;
+      });
+
+      // Return each line wrapped in a fragment
+      return (
+        <React.Fragment key={`line-${lineIndex}`}>
+          {contentWithTags}
+          {lineIndex < lines.length - 1 && <br />} {/* Add line break between lines */}
+        </React.Fragment>
+      );
     });
 
     return (
-      <p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words">
-        {" "}
-        {contentWithTags}
+      <p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words whitespace-pre-line">
+        {processedLines}
       </p>
     );
   };
