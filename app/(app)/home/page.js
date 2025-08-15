@@ -26,6 +26,7 @@ import {
   Home,
   Flame,
   BarChart,
+  LocateIcon,
 } from "lucide-react";
 import { Image as PhotoIcon, X as XMarkIcon } from "lucide-react";
 import defaultPic from "../../assets/avatar.png";
@@ -117,6 +118,14 @@ const FEED_TYPES = [
     requiresAuth: false,
     icon: Users,
   },
+  {
+    key: "nearme",
+    title: "Near me",
+    endpoint: "nearme",
+    requiresAuth: false,
+    icon: LocateIcon,
+    requiresLocation: true,
+  },
 ];
 
 const TabSkeleton = () => (
@@ -173,6 +182,7 @@ const HomePage = () => {
     latest: { posts: [], page: 1, hasMore: true, loading: false, error: null },
     hot: { posts: [], page: 1, hasMore: true, loading: false, error: null },
     popular: { posts: [], page: 1, hasMore: true, loading: false, error: null },
+    nearme: { posts: [], page: 1, hasMore: true, loading: false, error: null },
   });
 
   const [refreshing, setRefreshing] = useState(false);
@@ -213,12 +223,35 @@ const HomePage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const fileInputRef = useRef(null);
 
+  // Location state
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationPermission, setLocationPermission] = useState(null); // 'granted', 'denied', 'requesting', null
+  const [showLocationModal, setShowLocationModal] = useState(false);
+
   // Helper function to update tab data
   const updateTabData = (tabKey, updates) => {
-    setTabData((prev) => ({
-      ...prev,
-      [tabKey]: { ...prev[tabKey], ...updates },
-    }));
+    setTabData((prev) => {
+      // Safety check - if tab doesn't exist, initialize it
+      if (!prev[tabKey]) {
+        console.warn(`Initializing missing tab data for '${tabKey}'`);
+        return {
+          ...prev,
+          [tabKey]: {
+            posts: [],
+            page: 1,
+            hasMore: true,
+            loading: false,
+            error: null,
+            ...updates,
+          },
+        };
+      }
+
+      return {
+        ...prev,
+        [tabKey]: { ...prev[tabKey], ...updates },
+      };
+    });
   };
 
   // Get current tab data
@@ -286,14 +319,119 @@ const HomePage = () => {
     }
   }, []);
 
-  // Fetch feed for specific tab
+  // Handle location permission changes for nearme tab
+  useEffect(() => {
+    if (
+      activeTab === "nearme" &&
+      locationPermission === "granted" &&
+      userLocation
+    ) {
+      const currentTabData = tabData[activeTab];
+      // Only fetch if we don't have posts yet
+      if (currentTabData.posts.length === 0) {
+        fetchFeed("nearme", 1, true);
+      }
+    }
+  }, [activeTab, locationPermission, userLocation]);
+
+  // Location permission handling
+  const requestLocationPermission = async () => {
+    try {
+      setLocationPermission("requesting");
+
+      if (!navigator.geolocation) {
+        setLocationPermission("denied");
+        setShowLocationModal(true);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+          };
+
+          // Validate location data
+          if (
+            !location.latitude ||
+            !location.longitude ||
+            isNaN(location.latitude) ||
+            isNaN(location.longitude) ||
+            location.latitude < -90 ||
+            location.latitude > 90 ||
+            location.longitude < -180 ||
+            location.longitude > 180
+          ) {
+            console.error("Invalid location data received:", location);
+            setLocationPermission("denied");
+            setShowLocationModal(true);
+            return;
+          }
+
+          // console.log("Valid location obtained:", location);
+          setLocationPermission("granted");
+          setUserLocation(location);
+
+          if (activeTab === "nearme") {
+            fetchFeed("nearme", 1, true);
+          }
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          setLocationPermission("denied");
+          setShowLocationModal(true);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000,
+        }
+      );
+    } catch (error) {
+      console.error("Error requesting location permission:", error);
+      setLocationPermission("denied");
+      setShowLocationModal(true);
+    }
+  };
+
+  const handleNearMeTabPress = () => {
+    if (locationPermission === "granted" && userLocation) {
+      setActiveTab("nearme");
+      fetchFeed("nearme", 1, true);
+    } else if (locationPermission === "denied") {
+      setShowLocationModal(true);
+    } else {
+      // Set the active tab first, then request permission
+      setActiveTab("nearme");
+      requestLocationPermission();
+    }
+  };
+
+  // Fixed fetchFeed function
   const fetchFeed = useCallback(
     async (feedType, pageNum = 1, refresh = false) => {
       const feedConfig = FEED_TYPES.find((feed) => feed.key === feedType);
-      if (!feedConfig) return;
 
-      // Get current state synchronously
+      if (!feedConfig) {
+        console.warn(`Feed config not found for '${feedType}'`);
+        return;
+      }
+
+      // SAFETY CHECK: Initialize tab data if it doesn't exist
       const currentTabData = tabData[feedType];
+      if (!currentTabData) {
+        console.warn(`Tab data for '${feedType}' not found, initializing...`);
+        updateTabData(feedType, {
+          posts: [],
+          page: 1,
+          hasMore: true,
+          loading: false,
+          error: null,
+        });
+        return; // Return and let the useEffect handle the retry
+      }
 
       // Validation checks
       if (currentTabData.loading) return;
@@ -301,43 +439,53 @@ const HomePage = () => {
 
       // Check authentication requirement
       if (feedConfig.requiresAuth && !isAuthenticated) {
-        setTabData((prev) => ({
-          ...prev,
-          [feedType]: {
-            ...prev[feedType],
-            error: "Please log in to view this feed",
-            posts: [],
-            hasMore: false,
-            loading: false, // Ensure loading is false
-          },
-        }));
+        updateTabData(feedType, {
+          error: "Please log in to view this feed",
+          posts: [],
+          hasMore: false,
+        });
         return;
       }
 
-      // Set loading state BEFORE async operations
-      setTabData((prev) => ({
-        ...prev,
-        [feedType]: {
-          ...prev[feedType],
-          loading: true,
-          error: refresh ? null : prev[feedType].error,
-        },
-      }));
-
-      // Move the actual fetch logic here instead of separate function
-      try {
-        // API call throttling
-        const now = Date.now();
-        const lastFetch = lastFetchTime[feedType] || 0;
-        if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
-          setTabData((prev) => ({
-            ...prev,
-            [feedType]: { ...prev[feedType], loading: false },
-          }));
+      // NEW: Check location requirement for nearme feed
+      if (feedConfig.requiresLocation) {
+        if (locationPermission === "denied") {
+          updateTabData(feedType, {
+            error: "Location permission is required to view nearby posts",
+            posts: [],
+            hasMore: false,
+            loading: false,
+          });
+          setShowLocationModal(true);
           return;
         }
 
-        setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
+        if (!userLocation) {
+          updateTabData(feedType, {
+            error: "Getting your location...",
+            posts: [],
+            hasMore: false,
+            loading: false,
+          });
+          await requestLocationPermission();
+          return;
+        }
+      }
+
+      // API call throttling
+      const now = Date.now();
+      const lastFetch = lastFetchTime[feedType] || 0;
+      if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh && pageNum === 1)
+        return;
+
+      setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
+
+      try {
+        // Set loading state
+        updateTabData(feedType, { loading: true });
+        if (refresh) {
+          updateTabData(feedType, { error: null });
+        }
 
         // Set request headers
         const headers = {
@@ -347,26 +495,42 @@ const HomePage = () => {
           headers["Authorization"] = `Bearer ${token}`;
         }
 
-        const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
+        // Build URL with location parameters for nearme feed
+        let url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=10`;
+
+        if (feedConfig.requiresLocation && userLocation) {
+          url += `&latitude=${userLocation.latitude}&longitude=${userLocation.longitude}`;
+          console.log(`Near me request with location:`, {
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
+            accuracy: userLocation.accuracy,
+          });
+        }
+
+        console.log(`Fetching ${feedType} feed from:`, url); // Debug log
+
+        // Create AbortController for timeout (instead of AbortSignal.timeout which might not be supported)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         const response = await fetch(url, {
           headers,
-          signal: AbortSignal.timeout(15000),
+          signal: controller.signal,
         });
+
+        clearTimeout(timeoutId); // Clear timeout if request succeeds
+
+        console.log(`${feedType} feed response status:`, response.status); // Debug log
 
         // Handle auth errors
         if (response.status === 401 || response.status === 403) {
           if (feedConfig.requiresAuth) {
-            setTabData((prev) => ({
-              ...prev,
-              [feedType]: {
-                ...prev[feedType],
-                error: "Your session has expired. Please log in again.",
-                posts: [],
-                hasMore: false,
-                loading: false,
-              },
-            }));
+            updateTabData(feedType, {
+              error: "Your session has expired. Please log in again.",
+              posts: [],
+              hasMore: false,
+              loading: false,
+            });
             await logout();
             return;
           }
@@ -374,27 +538,43 @@ const HomePage = () => {
 
         // Handle rate limiting
         if (response.status === 429) {
-          setTabData((prev) => ({
-            ...prev,
-            [feedType]: {
-              ...prev[feedType],
-              error: "Rate limited. Please wait a moment before refreshing.",
-              loading: false,
-            },
-          }));
+          updateTabData(feedType, {
+            error: "Rate limited. Please wait a moment before refreshing.",
+            loading: false,
+          });
           return;
         }
 
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`API Error for ${feedType}:`, {
+            status: response.status,
+            statusText: response.statusText,
+            errorText: errorText,
+          });
+
+          // Handle specific server errors
+          if (response.status === 500 && errorText.includes("Server error")) {
+            throw new Error(
+              `Server is having issues with the ${feedType} feed. Please try again later.`
+            );
+          }
+
           throw new Error(
-            `Failed to fetch ${feedType} feed: ${response.status}`
+            `Failed to fetch ${feedType} feed: ${response.status} - ${errorText}`
           );
         }
 
         const responseText = await response.text();
+        console.log(
+          `${feedType} feed response:`,
+          responseText.substring(0, 200) + "..."
+        ); // Debug log (first 200 chars)
+
         const data = JSON.parse(responseText);
 
         if (!data.posts || !Array.isArray(data.posts)) {
+          console.error(`Invalid response format for ${feedType}:`, data); // Debug log
           throw new Error("Invalid server response format");
         }
 
@@ -403,54 +583,62 @@ const HomePage = () => {
           .map((post, index) => (post ? formatPostFromApi(post, index) : null))
           .filter(Boolean);
 
-        const hasMore = formattedPosts.length === POST_LIMIT;
+        console.log(`Processed ${formattedPosts.length} posts for ${feedType}`); // Debug log
+
+        // Use server pagination info if available, otherwise fall back to length check
+        const hasMore = data.currentPage
+          ? data.currentPage < data.totalPages
+          : formattedPosts.length === 10;
 
         // Update state
-        setTabData((prev) => {
-          const prevTabData = prev[feedType];
+        if (refresh) {
+          updateTabData(feedType, {
+            posts: formattedPosts,
+            page: 1,
+            hasMore,
+            error: null,
+            loading: false,
+          });
+        } else {
+          const existingIds = new Set(currentTabData.posts.map((p) => p.id));
+          const uniqueNewPosts = formattedPosts.filter(
+            (p) => !existingIds.has(p.id)
+          );
 
-          if (refresh) {
-            return {
-              ...prev,
-              [feedType]: {
-                posts: formattedPosts,
-                page: 1,
-                hasMore,
-                error: null,
-                loading: false, // Always set loading to false
-              },
-            };
-          } else {
-            const existingIds = new Set(prevTabData.posts.map((p) => p.id));
-            const uniqueNewPosts = formattedPosts.filter(
-              (p) => !existingIds.has(p.id)
-            );
-
-            return {
-              ...prev,
-              [feedType]: {
-                ...prevTabData,
-                posts: [...prevTabData.posts, ...uniqueNewPosts],
-                page: pageNum,
-                hasMore,
-                loading: false, // Always set loading to false
-              },
-            };
-          }
-        });
+          updateTabData(feedType, {
+            posts: [...currentTabData.posts, ...uniqueNewPosts],
+            page: pageNum,
+            hasMore,
+            error: null,
+            loading: false,
+          });
+        }
       } catch (error) {
         console.error(`Error fetching ${feedType} feed:`, error);
 
-        setTabData((prev) => ({
-          ...prev,
-          [feedType]: {
-            ...prev[feedType],
-            error: `Failed to load posts: ${error.message}`,
-            posts: refresh ? [] : prev[feedType].posts,
-            loading: false, // Always set loading to false on error
-          },
-        }));
+        // Handle specific error types
+        let errorMessage = `Failed to load posts: ${error.message}`;
 
+        if (error.name === "AbortError") {
+          errorMessage =
+            "Request timed out. Please check your connection and try again.";
+        } else if (
+          error.message.includes("NetworkError") ||
+          error.message.includes("fetch")
+        ) {
+          errorMessage =
+            "Network error. Please check your connection and try again.";
+        } else if (error.message.includes("JSON")) {
+          errorMessage = "Server returned invalid data. Please try again.";
+        }
+
+        updateTabData(feedType, {
+          error: errorMessage,
+          posts: refresh ? [] : currentTabData.posts,
+          loading: false,
+        });
+
+        // Handle auth errors
         if (
           error.message &&
           (error.message.includes("unauthorized") ||
@@ -463,166 +651,171 @@ const HomePage = () => {
       } finally {
         // Ensure loading is always set to false
         setRefreshing(false);
-        setTabData((prev) => ({
-          ...prev,
-          [feedType]: {
-            ...prev[feedType],
-            loading: false,
-          },
-        }));
+        updateTabData(feedType, { loading: false });
       }
     },
-    [isAuthenticated, token, logout, tabData, lastFetchTime]
+    [
+      isAuthenticated,
+      token,
+      logout,
+      tabData,
+      lastFetchTime,
+      locationPermission,
+      userLocation,
+      requestLocationPermission,
+      updateTabData, // Make sure this is in dependencies
+    ]
   );
   // Handle tab change
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
   };
-  const performFetch = async (
-    feedType,
-    pageNum,
-    refresh,
-    feedConfig,
-    currentTabData
-  ) => {
-    // API call throttling
-    const now = Date.now();
-    const lastFetch = lastFetchTime[feedType] || 0;
-    if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
-      setTabData((prev) => ({
-        ...prev,
-        [feedType]: { ...prev[feedType], loading: false },
-      }));
-      return;
-    }
 
-    setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
+  // const performFetch = async (
+  //   feedType,
+  //   pageNum,
+  //   refresh,
+  //   feedConfig,
+  //   currentTabData
+  // ) => {
+  //   // API call throttling
+  //   const now = Date.now();
+  //   const lastFetch = lastFetchTime[feedType] || 0;
+  //   if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
+  //     setTabData((prev) => ({
+  //       ...prev,
+  //       [feedType]: { ...prev[feedType], loading: false },
+  //     }));
+  //     return;
+  //   }
 
-    try {
-      // Set request headers
-      const headers = {
-        "Content-Type": "application/json",
-      };
-      if (token && feedConfig.requiresAuth) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
+  //   setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
 
-      const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
+  //   try {
+  //     // Set request headers
+  //     const headers = {
+  //       "Content-Type": "application/json",
+  //     };
+  //     if (token && feedConfig.requiresAuth) {
+  //       headers["Authorization"] = `Bearer ${token}`;
+  //     }
 
-      const response = await fetch(url, {
-        headers,
-        signal: AbortSignal.timeout(15000),
-      });
+  //     const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
 
-      // Handle auth errors
-      if (response.status === 401 || response.status === 403) {
-        if (feedConfig.requiresAuth) {
-          setTabData((prev) => ({
-            ...prev,
-            [feedType]: {
-              ...prev[feedType],
-              error: "Your session has expired. Please log in again.",
-              posts: [],
-              hasMore: false,
-              loading: false,
-            },
-          }));
-          await logout();
-          return;
-        }
-      }
+  //     const response = await fetch(url, {
+  //       headers,
+  //       signal: AbortSignal.timeout(15000),
+  //     });
 
-      // Handle rate limiting
-      if (response.status === 429) {
-        setTabData((prev) => ({
-          ...prev,
-          [feedType]: {
-            ...prev[feedType],
-            error: "Rate limited. Please wait a moment before refreshing.",
-            loading: false,
-          },
-        }));
-        return;
-      }
+  //     // Handle auth errors
+  //     if (response.status === 401 || response.status === 403) {
+  //       if (feedConfig.requiresAuth) {
+  //         setTabData((prev) => ({
+  //           ...prev,
+  //           [feedType]: {
+  //             ...prev[feedType],
+  //             error: "Your session has expired. Please log in again.",
+  //             posts: [],
+  //             hasMore: false,
+  //             loading: false,
+  //           },
+  //         }));
+  //         await logout();
+  //         return;
+  //       }
+  //     }
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
-      }
+  //     // Handle rate limiting
+  //     if (response.status === 429) {
+  //       setTabData((prev) => ({
+  //         ...prev,
+  //         [feedType]: {
+  //           ...prev[feedType],
+  //           error: "Rate limited. Please wait a moment before refreshing.",
+  //           loading: false,
+  //         },
+  //       }));
+  //       return;
+  //     }
 
-      const responseText = await response.text();
-      const data = JSON.parse(responseText);
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
+  //     }
 
-      if (!data.posts || !Array.isArray(data.posts)) {
-        throw new Error("Invalid server response format");
-      }
+  //     const responseText = await response.text();
+  //     const data = JSON.parse(responseText);
 
-      // Process posts
-      const formattedPosts = data.posts
-        .map((post, index) => (post ? formatPostFromApi(post, index) : null))
-        .filter(Boolean);
+  //     if (!data.posts || !Array.isArray(data.posts)) {
+  //       throw new Error("Invalid server response format");
+  //     }
 
-      const hasMore = formattedPosts.length === POST_LIMIT;
+  //     // Process posts
+  //     const formattedPosts = data.posts
+  //       .map((post, index) => (post ? formatPostFromApi(post, index) : null))
+  //       .filter(Boolean);
 
-      // Update state with functional update
-      setTabData((prev) => {
-        const prevTabData = prev[feedType];
+  //     const hasMore = formattedPosts.length === POST_LIMIT;
 
-        if (refresh) {
-          return {
-            ...prev,
-            [feedType]: {
-              ...prevTabData,
-              posts: formattedPosts,
-              page: 1,
-              hasMore,
-              error: null,
-              loading: false,
-            },
-          };
-        } else {
-          const existingIds = new Set(prevTabData.posts.map((p) => p.id));
-          const uniqueNewPosts = formattedPosts.filter(
-            (p) => !existingIds.has(p.id)
-          );
+  //     // Update state with functional update
+  //     setTabData((prev) => {
+  //       const prevTabData = prev[feedType];
 
-          return {
-            ...prev,
-            [feedType]: {
-              ...prevTabData,
-              posts: [...prevTabData.posts, ...uniqueNewPosts],
-              page: pageNum,
-              hasMore,
-              loading: false,
-            },
-          };
-        }
-      });
-    } catch (error) {
-      console.error(`Error fetching ${feedType} feed:`, error);
+  //       if (refresh) {
+  //         return {
+  //           ...prev,
+  //           [feedType]: {
+  //             ...prevTabData,
+  //             posts: formattedPosts,
+  //             page: 1,
+  //             hasMore,
+  //             error: null,
+  //             loading: false,
+  //           },
+  //         };
+  //       } else {
+  //         const existingIds = new Set(prevTabData.posts.map((p) => p.id));
+  //         const uniqueNewPosts = formattedPosts.filter(
+  //           (p) => !existingIds.has(p.id)
+  //         );
 
-      setTabData((prev) => ({
-        ...prev,
-        [feedType]: {
-          ...prev[feedType],
-          error: `Failed to load posts: ${error.message}`,
-          posts: refresh ? [] : prev[feedType].posts,
-          loading: false,
-        },
-      }));
+  //         return {
+  //           ...prev,
+  //           [feedType]: {
+  //             ...prevTabData,
+  //             posts: [...prevTabData.posts, ...uniqueNewPosts],
+  //             page: pageNum,
+  //             hasMore,
+  //             loading: false,
+  //           },
+  //         };
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error(`Error fetching ${feedType} feed:`, error);
 
-      if (
-        error.message &&
-        (error.message.includes("unauthorized") ||
-          error.message.includes("forbidden") ||
-          error.message.includes("authentication")) &&
-        feedConfig.requiresAuth
-      ) {
-        await logout();
-      }
-    } finally {
-      setRefreshing(false);
-    }
-  };
+  //     setTabData((prev) => ({
+  //       ...prev,
+  //       [feedType]: {
+  //         ...prev[feedType],
+  //         error: `Failed to load posts: ${error.message}`,
+  //         posts: refresh ? [] : prev[feedType].posts,
+  //         loading: false,
+  //       },
+  //     }));
+
+  //     if (
+  //       error.message &&
+  //       (error.message.includes("unauthorized") ||
+  //         error.message.includes("forbidden") ||
+  //         error.message.includes("authentication")) &&
+  //       feedConfig.requiresAuth
+  //     ) {
+  //       await logout();
+  //     }
+  //   } finally {
+  //     setRefreshing(false);
+  //   }
+  // };
 
   // character count and media upload: create post
   const charCount = text.length;
@@ -1064,6 +1257,43 @@ const HomePage = () => {
     </div>
   );
 
+  const LocationPermissionModal = () => {
+    if (!showLocationModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <h3 className="text-lg font-semibold mb-4">
+            Location Permission Required
+          </h3>
+          <p className="text-gray-700 mb-6 text-center">
+            To show you posts from nearby locations, we need access to your
+            location.
+          </p>
+
+          <div className="flex justify-center space-x-3">
+            <button
+              onClick={() => {
+                setShowLocationModal(false);
+                requestLocationPermission();
+              }}
+              className="bg-sky-500 text-white px-6 py-3 rounded-lg hover:bg-sky-600"
+            >
+              Allow Location
+            </button>
+
+            <button
+              onClick={() => setShowLocationModal(false)}
+              className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const handleDeletePost = async () => {
     try {
       const response = await fetch(
@@ -1152,10 +1382,17 @@ const HomePage = () => {
         {FEED_TYPES.map((feedType) => {
           const isActive = activeTab === feedType.key;
           const canAccess = !feedType.requiresAuth || isAuthenticated;
+          const isNearMe = feedType.key === "nearme";
           return (
             <button
               key={feedType.key}
-              onClick={() => canAccess && handleTabChange(feedType.key)}
+              onClick={() => {
+                if (isNearMe) {
+                  handleNearMeTabPress();
+                } else if (canAccess) {
+                  handleTabChange(feedType.key);
+                }
+              }}
               className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors flex items-center justify-center
 ${
   isActive
@@ -1175,6 +1412,7 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
               <span className="hidden sm:block truncate">
                 {feedType.title}
                 {feedType.requiresAuth && !isAuthenticated && " 🔒"}
+                {isNearMe && locationPermission === "denied" && " 📍"}
               </span>
             </button>
           );
@@ -1447,6 +1685,32 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                   <p className="text-yellow-700 font-medium">
                     {currentTabData.error}
                   </p>
+                  {activeTab === "nearme" &&
+                    locationPermission === "denied" && (
+                      <button
+                        onClick={() => setShowLocationModal(true)}
+                        className="mt-2 text-sky-600 hover:text-sky-800 underline"
+                      >
+                        Grant location permission
+                      </button>
+                    )}
+                  {activeTab === "nearme" &&
+                    currentTabData.error.includes(
+                      "temporarily unavailable"
+                    ) && (
+                      <div className="mt-3 text-sm text-gray-600">
+                        <p>
+                          Try switching to another feed like "Trending" or
+                          "Latest" while we fix this.
+                        </p>
+                        <button
+                          onClick={() => setActiveTab("trending")}
+                          className="mt-2 text-sky-600 hover:text-sky-800 underline cursor-pointer"
+                        >
+                          Switch to Trending
+                        </button>
+                      </div>
+                    )}
                 </div>
               )}
 
@@ -1670,6 +1934,47 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                 className="px-6 py-2 bg-red-600 text-white cursor-pointer rounded-lg hover:bg-red-700 transition-colors font-medium"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </CustomModal>
+        <CustomModal
+          visible={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          title="Location Permission Required"
+        >
+          <div className="p-6">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <MapPin className="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Location Access Needed
+              </h3>
+              <p className="text-gray-600 text-sm">
+                To show you posts from nearby locations, we need access to your
+                location.
+              </p>
+            </div>
+
+            <div className="flex space-x-3 justify-center">
+              <button
+                onClick={() => setShowLocationModal(false)}
+                className="px-6 py-2 text-gray-700 cursor-pointer bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLocationModal(false);
+                  requestLocationPermission();
+                }}
+                className="px-6 py-2 bg-sky-500 text-white cursor-pointer rounded-lg hover:bg-sky-600 transition-colors font-medium"
+              >
+                Allow Location
               </button>
             </div>
           </div>
