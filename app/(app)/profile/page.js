@@ -1631,11 +1631,15 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 p-4">
+            <div className="divide-y divide-gray-100 p-4 ">
               {followingList.map((following) => (
                 <div
                   key={following._id}
-                  className="flex items-center py-4 px-1 hover:bg-gray-50"
+                  onClick={() => {
+                      router.push(`/UserProfile/${following.username}`);
+                      setIsFollowingModalVisible(false);
+                    }}
+                  className="flex items-center py-4 px-1 hover:bg-gray-50 cursor-pointer"
                 >
                   <div className="relative w-12 h-12 mr-3 flex-shrink-0">
                     <Image
