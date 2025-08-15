@@ -651,7 +651,7 @@ const CreatePost = () => {
       );
 
       // Construct the correct endpoint URL
-      const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/upload/post`;
+      const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/post`;
 
       // Send to upload service with metadata including filter info
       const response = await fetch(uploadEndpoint, {
