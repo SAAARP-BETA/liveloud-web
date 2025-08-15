@@ -651,7 +651,7 @@ const CreatePost = () => {
       );
 
       // Construct the correct endpoint URL
-      const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/upload/post`;
+      const uploadEndpoint = `${API_ENDPOINTS.MEDIA}/post`;
 
       // Send to upload service with metadata including filter info
       const response = await fetch(uploadEndpoint, {
@@ -817,7 +817,7 @@ const CreatePost = () => {
         <div className="flex items-center justify-between px-4 py-3 mt-5">
           <button
             className="text-gray-600 transition-transform duration-200 cursor-pointer ease-in-out hover:rotate-180"
-            onClick={() => router.back()}
+            onClick={() => setContent("")}
           >
             <RefreshCw size={24} />
           </button>
@@ -1088,7 +1088,7 @@ const CreatePost = () => {
               className="flex flex-col items-center justify-center disabled:opacity-50"
             >
               <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                className={`w-12 h-12 rounded-full cursor-pointer flex items-center justify-center ${
                   images.length >= MEDIA_LIMIT ? "bg-gray-100" : "bg-red-50 hover:bg-red-100"
                 }`}
               >
@@ -1108,7 +1108,7 @@ const CreatePost = () => {
               onClick={() => setShowLocationModal(true)}
               className="flex flex-col items-center justify-center"
             >
-              <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
+              <div className="w-12 h-12 cursor-pointer rounded-full bg-green-50 hover:bg-green-100 flex items-center justify-center">
                 <MapPin size={24} className="text-green-500" />
               </div>
               <span className="text-xs mt-1 text-gray-600">Location</span>
@@ -1118,7 +1118,7 @@ const CreatePost = () => {
               onClick={() => setShowPeopleTagModal(true)}
               className="flex flex-col items-center justify-center"
             >
-              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-blue-50 cursor-pointer hover:bg-blue-100 flex items-center justify-center">
                 <Users size={24} className="text-blue-500" />
               </div>
               <span className="text-xs mt-1 text-gray-600">Tag People</span>
@@ -1126,10 +1126,10 @@ const CreatePost = () => {
 
             <button
               onClick={() => setShowFeelingModal(true)}
-              className="flex flex-col items-center justify-center"
+              className="flex flex-col cursor-pointer items-center justify-center"
             >
-              <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
-                <Smile size={24} className="text-indigo-500" />
+              <div className="w-12 h-12 rounded-full bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center">
+                <Smile size={24} className="text-indigo-500 " />
               </div>
               <span className="text-xs mt-1 text-gray-600">Feeling</span>
             </button>
@@ -1319,7 +1319,7 @@ const CreatePost = () => {
                   onClick={() => setShowPeopleTagModal(false)}
                   className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
                 >
-                  <X size={20} className="text-gray-600" />
+                  <X size={20} className="text-gray-600 cursor-pointer" />
                 </button>
               </div>
 
@@ -1390,9 +1390,9 @@ const CreatePost = () => {
                     {!isLoadingRandomUsers && (
                       <button
                         onClick={fetchRandomUsers}
-                        className="flex items-center text-gray-600"
+                        className="flex items-center  text-gray-600"
                       >
-                        <RefreshCw size={20} />
+                        <RefreshCw size={20} className="cursor-pointer" />
                         <span className="text-xs ml-1">Refresh</span>
                       </button>
                     )}

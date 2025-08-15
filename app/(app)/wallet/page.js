@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef , useCallback} from "react";
 import { ArrowDownLeft, ArrowUpRight, Plus, ArrowLeft, Minus, ArrowUp, ArrowDown } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { API_ENDPOINTS } from "../../utils/config";
@@ -17,10 +17,10 @@ export default function WalletPage() {
   const [activeSection, setActiveSection] = useState("wallet"); // 'wallet' or 'transfer'
   const [currentView, setCurrentView] = useState("main"); // 'main', 'crypto-details', 'transaction-history'
   const [isTransferMode, setIsTransferMode] = useState(false); // Track if transfer mode is active
-
-  const { user, token, isAuthenticated } = useAuth();
+  const [myPoints, setMyPoints] = useState(null);
+  const {user, user: currentUser, token, isAuthenticated } = useAuth();
   const scrollPositionRef = useRef(0);
-
+  // console.log("isAuthenticated:", isAuthenticated, "currentUser:", currentUser);
   // Handle crypto selection
   const handleCryptoSelection = (crypto) => {
     setSelectedCrypto(crypto);
@@ -86,6 +86,31 @@ export default function WalletPage() {
       fetchUserProfile();
     }
   }, [user, token]);
+  
+
+  const fetchMyPoints = useCallback(async () => {
+    if (!isAuthenticated || !currentUser) return;
+
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const response = await fetch(`${API_ENDPOINTS.POINTS}/my-summary`, {
+        headers,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // console.log("data", data);
+        setMyPoints(data);
+        
+      }
+    } catch (error) {
+      console.error("Error fetching my points:", error);
+    }
+  }, [isAuthenticated, currentUser, token]);
+  useEffect(() => {
+  fetchMyPoints();
+}, [fetchMyPoints]);
+
 
   const TransactionItem = ({ type, amount, from, to, date }) => {
     const isReceived = type === "Received";
@@ -316,7 +341,7 @@ export default function WalletPage() {
         
         <div className="flex justify-between mb-4">
           <span className="text-sm text-gray-600">Your XP balance is:</span>
-          <span className="text-base font-semibold text-gray-900">1000 XP</span>
+          <span className="text-base font-semibold text-gray-900">{myPoints?.totalPoints?.toLocaleString() || "0"} XP</span>
         </div>
 
         <div className="mb-3">

@@ -351,22 +351,11 @@ export default function SearchPage() {
 
   const fetchTrendingSearches = async () => {
     try {
-      setTrendingSearches([
-        { type: "tag", tag: "photography", count: 2500 },
-        { type: "tag", tag: "travel", count: 1800 },
-        { type: "tag", tag: "fitness", count: 1200 },
-        {
-          type: "user",
-          username: "travelgram",
-          profilePicture: "https://randomuser.me/api/portraits/women/42.jpg",
-          isVerified: true,
-        },
-        {
-          type: "user",
-          username: "foodiehub",
-          profilePicture: "https://randomuser.me/api/portraits/men/32.jpg",
-        },
-      ]);
+      const response = await fetch(`${API_ENDPOINTS.SEARCH}/trending-searches`);
+      if (response.ok) {
+        const data = await response.json();
+        setTrendingSearches(data.trending || []);
+      }
     } catch (error) {
       console.error("Error fetching trending searches:", error);
     }
@@ -430,54 +419,142 @@ export default function SearchPage() {
     }
   };
 
-  // Recent searches functionality
-  const loadRecentSearches = () => {
-    setRecentSearches([
-      {
-        type: "user",
-        username: "designhub",
-        profilePicture: "https://randomuser.me/api/portraits/women/22.jpg",
-      },
-      { type: "tag", tag: "uidesign", count: 450 },
-      { type: "query", query: "mobile app development" },
-    ]);
-  };
+  // Recent searches functionality with API and localStorage backup
+  const STORAGE_KEY = 'liveloud_recent_searches';
+  const MAX_RECENT_SEARCHES = 10;
 
-  const saveRecentSearch = (item) => {
-    const exists = recentSearches.some((search) => {
-      if (search.type === "query" && item.type === "query") {
-        return search.query === item.query;
-      } else if (search.type === "user" && item.type === "user") {
-        return search.username === item.username;
-      } else if (search.type === "tag" && item.type === "tag") {
-        return search.tag === item.tag;
+  const loadRecentSearches = async () => {
+    try {
+      // Try to get from API first
+      const response = await fetch(`${API_ENDPOINTS.SEARCH}/recent-searches`);
+      if (response.ok) {
+        const data = await response.json();
+        const searches = data.searches || [];
+        setRecentSearches(searches);
+        // Update localStorage with API data
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(searches));
+        return;
       }
-      return false;
-    });
+    } catch (error) {
+      console.error("Error loading recent searches from API:", error);
+    }
 
-    if (!exists) {
-      const updatedSearches = [item, ...recentSearches].slice(0, 10);
-      setRecentSearches(updatedSearches);
+    // Fallback to localStorage if API fails
+    try {
+      const storedSearches = localStorage.getItem(STORAGE_KEY);
+      if (storedSearches) {
+        setRecentSearches(JSON.parse(storedSearches));
+      }
+    } catch (error) {
+      console.error("Error loading from localStorage:", error);
+      setRecentSearches([]);
     }
   };
 
-  const removeRecentSearch = (item) => {
-    const updatedSearches = recentSearches.filter((search) => {
-      if (search.type === "query" && item.type === "query") {
-        return search.query !== item.query;
-      } else if (search.type === "user" && item.type === "user") {
-        return search.username !== item.username;
-      } else if (search.type === "tag" && item.type === "tag") {
-        return search.tag !== item.tag;
-      }
-      return true;
-    });
+  const saveRecentSearch = async (item) => {
+    try {
+      // Try to save to API first
+      const response = await fetch(`${API_ENDPOINTS.SEARCH}/recent-searches`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(item)
+      });
 
-    setRecentSearches(updatedSearches);
+      if (response.ok) {
+        await loadRecentSearches(); // Reload from API
+        return;
+      }
+    } catch (error) {
+      console.error("Error saving to API:", error);
+    }
+
+    // Fallback to localStorage if API fails
+    try {
+      const currentSearches = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      
+      // Check for duplicates
+      const exists = currentSearches.some(search => {
+        if (search.type === item.type) {
+          if (search.type === 'query') return search.query === item.query;
+          if (search.type === 'user') return search.username === item.username;
+          if (search.type === 'tag') return search.tag === item.tag;
+        }
+        return false;
+      });
+
+      if (!exists) {
+        const updatedSearches = [item, ...currentSearches].slice(0, MAX_RECENT_SEARCHES);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSearches));
+        setRecentSearches(updatedSearches);
+      }
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+    }
   };
 
-  const clearAllRecentSearches = () => {
-    setRecentSearches([]);
+  const removeRecentSearch = async (item) => {
+    try {
+      // Try to remove from API first
+      let searchId;
+      if (item.type === "query") searchId = item.query;
+      else if (item.type === "user") searchId = item.username;
+      else if (item.type === "tag") searchId = item.tag;
+
+      const response = await fetch(`${API_ENDPOINTS.SEARCH}/recent-searches/${searchId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        await loadRecentSearches(); // Reload from API
+        return;
+      }
+    } catch (error) {
+      console.error("Error removing from API:", error);
+    }
+
+    // Fallback to localStorage if API fails
+    try {
+      const currentSearches = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const updatedSearches = currentSearches.filter(search => {
+        if (search.type !== item.type) return true;
+        if (search.type === 'query') return search.query !== item.query;
+        if (search.type === 'user') return search.username !== item.username;
+        if (search.type === 'tag') return search.tag !== item.tag;
+        return true;
+      });
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSearches));
+      setRecentSearches(updatedSearches);
+    } catch (error) {
+      console.error("Error removing from localStorage:", error);
+    }
+  };
+
+  const clearAllRecentSearches = async () => {
+    try {
+      // Try to clear from API first
+      const response = await fetch(`${API_ENDPOINTS.SEARCH}/recent-searches`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setRecentSearches([]);
+        localStorage.removeItem(STORAGE_KEY);
+        return;
+      }
+    } catch (error) {
+      console.error("Error clearing from API:", error);
+    }
+
+    // Fallback to clearing localStorage if API fails
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      setRecentSearches([]);
+    } catch (error) {
+      console.error("Error clearing localStorage:", error);
+    }
   };
 
   // Handlers for tapping on items
