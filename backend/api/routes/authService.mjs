@@ -123,6 +123,11 @@ const authService = {
   getProfile: async () => {
     try {
       const token = getAuthToken();
+      console.log('authService.getProfile: Token check:', { 
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenStart: token?.substring(0, 20) + '...'
+      });
       
       if (!token) {
         throw new AuthenticationError(
@@ -131,6 +136,7 @@ const authService = {
         );
       }
 
+      console.log('authService.getProfile: Making request to:', `${API_ENDPOINTS.AUTH}/profile`);
       const response = await fetch(`${API_ENDPOINTS.AUTH}/profile`, {
         method: 'GET',
         headers: {
@@ -140,8 +146,15 @@ const authService = {
       });
 
       const data = await response.json();
+      console.log('authService.getProfile: Response:', { 
+        status: response.status,
+        ok: response.ok,
+        hasData: !!data,
+        dataKeys: Object.keys(data || {})
+      });
 
       if (!response.ok) {
+        console.error('authService.getProfile: Error response:', data);
         throw new AuthenticationError(
           data.message || 'Profile fetch failed',
           data.code || 'PROFILE_FETCH_FAILED'
@@ -210,6 +223,60 @@ const authService = {
     } catch (error) {
       console.warn('Logout error:', error);
       return { message: "Logged out successfully" };
+    }
+  },
+
+  // ----------------- GOOGLE OAUTH -----------------
+  googleAuth: async (tokenId) => {
+    try {
+      if (!tokenId) {
+        throw new AuthenticationError('Google token is required', 'INVALID_INPUT');
+      }
+
+      const response = await fetch(`${API_ENDPOINTS.AUTH}/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tokenId }),
+        timeout: 10000,
+        credentials: 'omit',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new AuthenticationError(
+          data.message || 'Google authentication failed',
+          data.code || 'GOOGLE_AUTH_FAILED'
+        );
+      }
+
+      await storeAuthData(data.token, data.user);
+
+      return {
+        user: data.user,
+        token: data.token,
+        message: data.message
+      };
+    } catch (error) {
+      console.error('Google auth error:', error);
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new AuthenticationError(
+          'Unable to connect to the server',
+          'NETWORK_ERROR'
+        );
+      }
+
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
+      throw new AuthenticationError(
+        error.message || 'Google authentication failed',
+        'GOOGLE_AUTH_FAILED'
+      );
     }
   },
 };
