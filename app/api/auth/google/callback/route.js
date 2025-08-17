@@ -11,6 +11,38 @@ export async function POST(request) {
       );
     }
 
+    // Get the origin from the request headers to build the correct redirect URI
+    const origin = request.headers.get('origin');
+    const host = request.headers.get('host');
+    const referer = request.headers.get('referer');
+    
+    console.log('Request headers debug:', {
+      origin,
+      host,
+      referer,
+      NEXTAUTH_URL: process.env.NEXTAUTH_URL
+    });
+
+    // Determine the correct redirect URI
+    let redirectUri;
+    if (origin) {
+      redirectUri = `${origin}/auth/google/callback`;
+    } else if (host) {
+      // If host is present, check if it's localhost and add http/https accordingly
+      const protocol = host.includes('localhost') || host.includes('127.0.0.1') ? 'http' : 'https';
+      redirectUri = `${protocol}://${host}/auth/google/callback`;
+    } else if (referer) {
+      // Extract origin from referer as fallback
+      const refererUrl = new URL(referer);
+      redirectUri = `${refererUrl.origin}/auth/google/callback`;
+    } else {
+      // Final fallback to environment variable or localhost
+      const fallbackOrigin = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      redirectUri = `${fallbackOrigin}/auth/google/callback`;
+    }
+
+    console.log('Token exchange with redirect URI:', redirectUri);
+
     // Exchange authorization code for access token
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -22,16 +54,22 @@ export async function POST(request) {
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
         code,
         grant_type: 'authorization_code',
-        redirect_uri: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/google/callback`,
+        redirect_uri: redirectUri,
       }),
     });
 
     const tokenData = await tokenResponse.json();
 
     if (!tokenResponse.ok) {
-      console.error('Token exchange failed:', tokenData);
+      console.error('Token exchange failed:', {
+        status: tokenResponse.status,
+        statusText: tokenResponse.statusText,
+        error: tokenData,
+        redirectUri: redirectUri,
+        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+      });
       return NextResponse.json(
-        { message: 'Failed to exchange authorization code' },
+        { message: 'Failed to exchange authorization code', debug: tokenData },
         { status: 400 }
       );
     }
