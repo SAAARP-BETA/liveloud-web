@@ -72,7 +72,7 @@ const authService = {
       if (!email || !password) {
         throw new AuthenticationError('Email and password are required', 'INVALID_INPUT');
       }
-      console.log('API_URL: ');
+      console.log('API_URL:', API_ENDPOINTS.AUTH);
       const response = await fetch(`${API_ENDPOINTS.AUTH}/login`, {
         method: 'POST',
         headers: {

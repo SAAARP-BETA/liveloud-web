@@ -53,6 +53,11 @@ export async function POST(request) {
       );
     }
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009/api';
+    console.log('Environment variables:', {
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+      fallback: 'http://localhost:3009/api',
+      resolved: apiUrl
+    });
     console.log('Calling backend at:', `${apiUrl}/auth/google`);
     console.log('Sending data:', { 
       hasTokenId: !!tokenData.id_token, 
@@ -60,24 +65,42 @@ export async function POST(request) {
       userEmail: userInfo.email 
     });
     
-    const backendResponse = await fetch(`${apiUrl}/auth/google`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        tokenId: tokenData.id_token || tokenData.access_token, // Use ID token if available, otherwise access token
-        userInfo, // Fallback user info
-      }),
-    });
+    // Create AbortController for longer timeout (10 minutes for cold start)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutes
+    
+    let backendResponse, backendData;
+    
+    try {
+      backendResponse = await fetch(`${apiUrl}/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tokenId: tokenData.id_token || tokenData.access_token, // Use ID token if available, otherwise access token
+          userInfo, // Fallback user info
+        }),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
 
-    const backendData = await backendResponse.json();
+      backendData = await backendResponse.json();
 
-    if (!backendResponse.ok) {
-      console.error('Backend authentication failed:', backendData);
+      if (!backendResponse.ok) {
+        console.error('Backend authentication failed:', backendData);
+        return NextResponse.json(
+          { message: backendData.message || 'Authentication failed' },
+          { status: backendResponse.status }
+        );
+      }
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      console.error('Backend fetch failed:', fetchError);
       return NextResponse.json(
-        { message: backendData.message || 'Authentication failed' },
-        { status: backendResponse.status }
+        { message: 'Backend service unavailable. Please try again.' },
+        { status: 503 }
       );
     }
 
