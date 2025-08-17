@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
 
-export default function GoogleCallback() {
+function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setAuthData } = useAuth();
@@ -160,5 +160,29 @@ export default function GoogleCallback() {
         )}
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center px-6">
+      <div className="max-w-md w-full text-center">
+        <div className="mb-8">
+          <div className="mx-auto w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Loading...</h1>
+          <p className="text-gray-600">Preparing authentication...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function GoogleCallback() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <GoogleCallbackContent />
+    </Suspense>
   );
 }
