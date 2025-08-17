@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { X, Heart, MessageCircle, Send, CheckCircle } from "lucide-react";
 import { API_ENDPOINTS } from "../../utils/config";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
+import toast from "react-hot-toast";
 
 // const API_URL = "http://192.168.1.13:3002/api/";
 

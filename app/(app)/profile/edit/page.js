@@ -125,7 +125,6 @@ const CustomCalendar = ({ selectedDate, onDateSelect, onClose }) => {
             <X className="w-5 h-5 text-gray-600" />
           </button>
         </div>
-
         {/* Month/Year Navigation */}
         <div className="flex justify-between items-center mb-4">
           <button
@@ -301,24 +300,24 @@ const EditPage = () => {
         if (response.status === 404) {
           console.log("Profile not found, setting default profile");
           setProfileData({
-            username: user?.username || "",
-            fullname: user?.fullname || "",
-            bio: user?.bio || "",
-            location: "",
-            website: "",
-            dob: new Date(1990, 0, 1),
-            email: user?.email || "",
-            phone: "",
-            gender: "",
-            isPrivate: false,
-            interests: [],
-            occupation: "",
-            education: "",
-            profilePicture: user?.profilePicture || null,
-            coverPicture: user?.coverPicture || null,
-          });
-          setProfileImage(user?.profilePicture || null);
-          setCoverImage(null);
+  username: data.username || user?.username || "",
+  fullname: data.fullname || "",
+  bio: data.bio || "",
+  location: data.location || "",
+  website: data.website || "",
+  dob: data.dob ? new Date(data.dob) : new Date(1990, 0, 1),
+  email: data.email || user?.email || "",
+  phone: data.phone || "",
+  gender: data.gender || "",
+  isPrivate: data.isPrivate || false,
+  interests: data.interests || [],
+  occupation: data.occupation || "",
+  education: data.education || "",
+  profilePicture: data.profilePicture || null,
+  coverPhoto: data.coverPhoto || null,
+});
+          setProfileImage(data.profilePicture || null);
+          setCoverImage(data.coverPhoto || null);
           return;
         }
         throw new Error(`Failed to fetch profile: ${response.status}`);
@@ -341,11 +340,11 @@ const EditPage = () => {
         interests: data.interests || [],
         occupation: data.occupation || "",
         education: data.education || "",
-        profilePicture: data.profilePicture || null,
-        coverPicture: data.coverPicture || null,
+        profilePicture: user?.profilePicture || null,
+        coverPicture: user?.coverPhoto || null,
       });
-      setProfileImage(data.profilePicture || null);
-      setCoverImage(data.coverPicture || null);
+      setProfileImage(user?.profilePicture || null);
+      setCoverImage(user?.coverPhoto || null);
     } catch (error) {
       console.error("Error loading profile:", error);
       toast.error(
