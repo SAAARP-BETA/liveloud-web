@@ -1048,7 +1048,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="bg-gray-50 min-h-screen py-6 px-4 sm:py-10 max-w-4xl mx-auto w-full">
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
         <div className="w-full flex flex-col items-center bg-gray-50">
           <div

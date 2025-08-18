@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
-
+import defaultPic from "../../assets/avatar.png";
 // Fixed Tab Component
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   return (
@@ -38,11 +38,10 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
           return (
             <button
               key={tab.key}
-              className={` cursor-pointer mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${
-                isActive
+              className={` cursor-pointer mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive
                   ? "bg-primary text-white"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-              }`}
+                }`}
               onClick={() => onTabPress(tab.key)}
               style={{
                 boxShadow: isActive
@@ -52,9 +51,8 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
             >
               <div className="flex items-center space-x-2">
                 <Icon
-                  className={`w-4 h-4 ${
-                    isActive ? "text-white" : "text-black"
-                  }`}
+                  className={`w-4 h-4 ${isActive ? "text-white" : "text-black"
+                    }`}
                 />
                 <span className={`${isActive ? "text-white" : "text-black"}`}>
                   {tab.title}
@@ -68,11 +66,29 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   );
 };
 
-// Fixed Leaderboard Item Component
-const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
+const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => {
   const isCurrentUser = String(item.userId) === String(currentUserId);
   const rank = index + 1;
-
+   const userData = item.user?._id ? item.user : null;
+  const userId = userData?._id || item.user;
+  const username = userData?.username || `User #${String(userId).slice(-6)}`;
+  const profilePicture = userData?.profilePicture;
+  const getPointsForTab = (item, tab) => {
+    switch (tab) {
+      case 'total':
+        return item.totalPoints || 0;
+      case 'creators':
+        return item.creatorPoints || 0;
+      case 'fans':
+        return item.fanPoints || 0;
+      case 'followers':
+        return item.stats?.totalFollowers || 0;
+      default:
+        return item.totalPoints || 0;
+    }
+  };
+  const displayPoints = getPointsForTab(item, activeTab);
+  const pointsLabel = activeTab === 'followers' ? 'followers' : 'points';
   const getRankIcon = () => {
     switch (rank) {
       case 1:
@@ -208,11 +224,10 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
 
   return (
     <div
-      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${
-        isCurrentUser
+      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${isCurrentUser
           ? "bg-sky-50 border-2 border-primary"
           : "bg-white shadow-sm hover:shadow-md"
-      }`}
+        }`}
       onClick={() => onPress(item)}
     >
       {/* Rank */}
@@ -221,8 +236,8 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       {/* Profile Picture */}
       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0 relative overflow-hidden">
         <Image
-          src={getProfilePicture(item.profilePicture)}
-          alt={item.username || "Profile"}
+          src={profilePicture || defaultPic}
+          alt={username|| "Profile"}
           width={48}
           height={48}
           className="rounded-full object-cover w-12 h-12"
@@ -263,9 +278,9 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       {/* Points */}
       <div className="text-right flex-shrink-0 ml-4">
         <div className="text-lg font-semibold text-gray-900">
-          {item.totalPoints.toLocaleString()}
-        </div>
-        <div className="text-xs text-gray-500">Points</div>
+  {displayPoints.toLocaleString()}
+</div>
+        <div className="text-xs text-gray-500">{pointsLabel}</div>
       </div>
     </div>
   );
@@ -507,7 +522,8 @@ export default function LeaderboardPage() {
         {/* Header Section */}
         <div className="py-4 flex flex-row justify-between sm:flex-row sm:items-center sm:justify-between gap-4">
           <h2 className="text-gray-800 text-lg font-semibold">
-            🏆 Top Users - Overall
+            🏆 Top Users - {tabs.find(tab => tab.key === activeTab)?.title}
+
           </h2>
           <button
             onClick={handleRefresh}
@@ -527,6 +543,7 @@ export default function LeaderboardPage() {
               index={index}
               currentUserId={currentUser?._id}
               onPress={navigateToProfile}
+              activeTab={activeTab}
             />
           ))}
 
