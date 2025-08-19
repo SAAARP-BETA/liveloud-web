@@ -441,21 +441,24 @@ export default function LeaderboardPage() {
   }, [page]);
 
   // Render loading state
-  if (isLoading && page === 1) {
-    return (
-      <div className="min-h-screen w-xl bg-gray-50">
-        <div className="flex items-center justify-center min-h-screen mr-50 sm:mr-0 sm:px-8">
-          <div className="text-center ">
-            <div className="animate-spin rounded-full h-12 w-12 flex justify-center items-center border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading leaderboard...</p>
-          </div>
+  
+if (isLoading && page === 1) {
+  return (
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4">
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 flex justify-center items-center border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading leaderboard...</p>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+  // console.log("leaderboardData:", leaderboardData);
+
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl   bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
       {/* Tabs */}
       <LeaderboardTabs
         tabs={tabs}
@@ -536,19 +539,20 @@ export default function LeaderboardPage() {
 
         {/* Leaderboard Items */}
         <div className="pb-8">
-          {leaderboardData.map((item, index) => (
-            <LeaderboardItem
-              key={item.userId || index}
-              item={item}
-              index={index}
-              currentUserId={currentUser?._id}
-              onPress={navigateToProfile}
+          {leaderboardData
+              ?.filter(item => item && item.totalPoints !== undefined) 
+              .map((item, index) => (
+          <LeaderboardItem
+            key={item?.userId || index}
+            item={item}
+            index={index}
+            currentUserId={currentUser?._id}
+            onPress={navigateToProfile}
               activeTab={activeTab}
-            />
-          ))}
-
+          />
+))}
           {isLoading && page > 1 && (
-            <div className="py-6 text-center">
+            <div className="py-6 text-center ">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             </div>
           )}

@@ -167,7 +167,7 @@ const Premium = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-6 px-4  sm:py-10  max-w-xl mx-auto w-full">
+    <div className="bg-gray-50 min-h-screen py-6 px-4 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl  sm:py-10   mx-auto">
       {/* Custom Header */}
       <div className="bg-white px-4 py-3 flex items-center border-b border-gray-100">
         <button

@@ -811,7 +811,7 @@ const CreatePost = () => {
   }
 
   return (
-    <div className="min-h-screen md:w-xl sm:w-120 w-90 bg-gray-50 p-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
+   <div className="min-h-screen bg-gray-50 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
         <div className="flex items-center justify-between px-4 py-3 mt-5">
@@ -1177,7 +1177,7 @@ const CreatePost = () => {
 
             <button
               onClick={() => setShowMediaOptions(false)}
-              className="w-full bg-gray-100 py-4 mt-6 rounded-xl font-medium text-gray-700"
+              className="w-full bg-gray-100 py-4 cursor-pointer mt-6 rounded-xl font-medium text-gray-700"
             >
               Cancel
             </button>
@@ -1247,7 +1247,7 @@ const CreatePost = () => {
                         setShowCustomLocationInput(false);
                         setCustomLocationText("");
                       }}
-                      className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium"
+                      className="px-4 py-2 cursor-pointer rounded-lg bg-gray-200 text-gray-700 font-medium"
                     >
                       Cancel
                     </button>
@@ -1299,7 +1299,7 @@ const CreatePost = () => {
                 setShowCustomLocationInput(false);
                 setCustomLocationText("");
               }}
-              className="w-full bg-gray-100 py-4 mt-6 rounded-xl font-medium text-gray-700"
+              className="w-full bg-gray-100 cursor-pointer py-4 mt-6 rounded-xl font-medium text-gray-700"
             >
               Cancel
             </button>
@@ -1557,7 +1557,7 @@ const CreatePost = () => {
             ))}
             <button
     onClick={() => setShowFeelingModal(false)}
-    className="col-span-2 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg mt-2"
+    className="col-span-2 cursor-pointer  bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg mt-2"
   >
     Cancel
   </button>
