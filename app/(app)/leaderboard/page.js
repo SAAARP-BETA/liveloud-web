@@ -278,8 +278,8 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
       {/* Points */}
       <div className="text-right flex-shrink-0 ml-4">
         <div className="text-lg font-semibold text-gray-900">
-  {displayPoints.toLocaleString()}
-</div>
+          {displayPoints.toLocaleString() || "0"}
+        </div>
         <div className="text-xs text-gray-500">{pointsLabel}</div>
       </div>
     </div>
@@ -548,7 +548,7 @@ if (isLoading && page === 1) {
             index={index}
             currentUserId={currentUser?._id}
             onPress={navigateToProfile}
-              activeTab={activeTab}
+            activeTab={activeTab}
           />
 ))}
           {isLoading && page > 1 && (
