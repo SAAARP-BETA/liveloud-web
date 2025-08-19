@@ -1391,13 +1391,13 @@ const HomePage = () => {
         handleUnfollowUser(userId);
         break;
       case "Report":
-        postHandlers.handleInitiateReport(selectedPost);
+        // postHandlers.handleInitiateReport(selectedPost);
         break;
       case "Hide":
         handleHidePost(selectedPost.id);
         break;
       case "Block":
-        handleBlockUser(userId);
+        // handleBlockUser(userId);
         break;
       case "About this account":
         handleViewProfile(userId);
@@ -1887,7 +1887,7 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                     option.text === "Delete Post" ||
                     option.text === "Block" ||
                     option.text === "Report"
-                      ? "hover:bg-red-50 text-red-600"
+                      ? "hover:bg-red-50 text-gray-600"
                       : "hover:bg-gray-50 text-gray-700"
                   }`}
                 >
