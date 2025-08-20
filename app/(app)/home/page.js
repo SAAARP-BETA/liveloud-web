@@ -44,29 +44,6 @@ import AmplifyModal from "@/app/components/ui/AmplifyModal";
 import CustomModal from "@/app/components/ui/Modal";
 import ReportModal from "@/app/components/ui/ReportModal";
 import Image from "next/image";
-// import toast from "react-hot-toast";
-
-// import {
-//   Plus as PlusIcon,
-//   Image as PhotoIcon,
-//   MessageCircle as ChatBubbleOvalLeftIcon,
-//   RefreshCcw as ArrowPathIcon,
-//   Bookmark as BookmarkIcon,
-//   MoreHorizontal as EllipsisHorizontalIcon,
-//   UserPlus as UserPlusIcon,
-//   UserMinus as UserMinusIcon,
-//   Info as InformationCircleIcon,
-//   Flag as FlagIcon,
-//   EyeOff as EyeSlashIcon,
-//   X as XMarkIcon,
-//   Trash2 as TrashIcon,
-//   Link as LinkIcon
-// } from 'lucide-react';
-
-// import {
-//   Heart as HeartIconSolid,
-//   Bookmark as BookmarkIconSolid
-// } from 'lucide-react';
 import {
   createPostHandlers,
   formatPostFromApi,
@@ -74,7 +51,6 @@ import {
 
 const MAX_CHAR_LIMIT = 1000;
 const MEDIA_LIMIT = 4;
-// --- FIX: Define the page limit as a constant ---
 const POST_LIMIT = 10;
 
 // Constants
@@ -190,6 +166,7 @@ const HomePage = () => {
   const [progress, setProgress] = useState(0);
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
+  const [lastLocationUpdate, setLastLocationUpdate] = useState(0);
 
   // Post composer
   const [text, setText] = useState("");
@@ -275,12 +252,158 @@ const HomePage = () => {
     setPostToReport,
     setReportModalVisible
   );
+  const getCurrentLocation = () => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation is not supported by this browser"));
+      return;
+    }
 
-  // Load menu options when modal is visible
-  useEffect(() => {
-    const loadOptions = async () => {
-      if (isModalVisible && selectedPost) {
-        await loadMenuOptions();
+    // Check if we're in a secure context (HTTPS or localhost)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      reject(new Error("Geolocation requires HTTPS or localhost"));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        };
+
+        // Validate location data
+        if (
+          !location.latitude ||
+          !location.longitude ||
+          isNaN(location.latitude) ||
+          isNaN(location.longitude) ||
+          location.latitude < -90 ||
+          location.latitude > 90 ||
+          location.longitude < -180 ||
+          location.longitude > 180
+        ) {
+          reject(new Error("Invalid location data received"));
+          return;
+        }
+
+        resolve(location);
+      },
+      (error) => {
+        let errorMessage = "Failed to get location: ";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied. Please enable location permissions in your browser settings.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable. This may be due to poor GPS signal, network issues, or browser restrictions.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out. Please try again.";
+            break;
+          default:
+            errorMessage = `Unknown location error (code: ${error.code}): ${error.message || 'No additional details'}`;
+            break;
+        }
+        console.error('Geolocation error:', error);
+        reject(new Error(errorMessage));
+      },
+      {
+        enableHighAccuracy: false, 
+        timeout: 15000, 
+        maximumAge: 600000,
+      }
+    );
+  });
+};
+
+
+// Request location permission and get location
+const requestLocationPermission = async () => {
+  try {
+    setLocationPermission('requesting');
+
+    // Check for geolocation support
+    if (!navigator.geolocation) {
+      setLocationPermission('denied');
+      setShowLocationModal(true);
+      toast.error("Geolocation is not supported by this browser");
+      return;
+    }
+
+    // Check for secure context
+    if (
+      window.location.protocol !== 'https:' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      setLocationPermission('denied');
+      setShowLocationModal(true);
+      toast.error("Location services require a secure connection (HTTPS)");
+      return;
+    }
+
+    // Request permission and get location
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const now = Date.now();
+        if (now - lastLocationUpdate < 30000) {
+          setLocationPermission('granted');
+          return;
+        }
+
+        const roundedLat = Math.round(position.coords.latitude * 10000) / 10000;
+        const roundedLng = Math.round(position.coords.longitude * 10000) / 10000;
+        const newLocation = {
+          latitude: roundedLat,
+          longitude: roundedLng,
+          accuracy: position.coords.accuracy,
+        };
+
+        setUserLocation(newLocation);
+        setLocationPermission('granted');
+        setLastLocationUpdate(now);
+        toast.success("Location access granted!");
+      },
+      (error) => {
+        let errorMessage = "Failed to get location: ";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied. Please enable location permissions in your browser settings.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable. This may be due to poor GPS signal, network issues, or browser restrictions.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out. Please try again.";
+            break;
+          default:
+            errorMessage = `Unknown location error (code: ${error.code}): ${error.message || 'No additional details'}`;
+            break;
+        }
+        setLocationPermission('denied');
+        setShowLocationModal(true);
+        toast.error(errorMessage);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 15000,
+        maximumAge: 600000,
+      }
+    );
+  } catch (error) {
+    setLocationPermission('denied');
+    setShowLocationModal(true);
+    toast.error(`Location error: ${error.message}`);
+  }
+};
+
+// Load menu options when modal is visible
+useEffect(() => {
+  const loadOptions = async () => {
+    if (isModalVisible && selectedPost) {
+      await loadMenuOptions();
       }
     };
 
@@ -334,67 +457,7 @@ const HomePage = () => {
     }
   }, [activeTab, locationPermission, userLocation]);
 
-  // Location permission handling
-  const requestLocationPermission = async () => {
-    try {
-      setLocationPermission("requesting");
-
-      if (!navigator.geolocation) {
-        setLocationPermission("denied");
-        setShowLocationModal(true);
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-          };
-
-          // Validate location data
-          if (
-            !location.latitude ||
-            !location.longitude ||
-            isNaN(location.latitude) ||
-            isNaN(location.longitude) ||
-            location.latitude < -90 ||
-            location.latitude > 90 ||
-            location.longitude < -180 ||
-            location.longitude > 180
-          ) {
-            console.error("Invalid location data received:", location);
-            setLocationPermission("denied");
-            setShowLocationModal(true);
-            return;
-          }
-
-          // console.log("Valid location obtained:", location);
-          setLocationPermission("granted");
-          setUserLocation(location);
-
-          if (activeTab === "nearme") {
-            fetchFeed("nearme", 1, true);
-          }
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-          setLocationPermission("denied");
-          setShowLocationModal(true);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000,
-        }
-      );
-    } catch (error) {
-      console.error("Error requesting location permission:", error);
-      setLocationPermission("denied");
-      setShowLocationModal(true);
-    }
-  };
+  
 
   const handleNearMeTabPress = () => {
     if (locationPermission === "granted" && userLocation) {
@@ -411,36 +474,59 @@ const HomePage = () => {
 
   // Fixed fetchFeed function
   const fetchFeed = useCallback(
-    async (feedType, pageNum = 1, refresh = false) => {
-      const feedConfig = FEED_TYPES.find((feed) => feed.key === feedType);
+  async (feedType, pageNum = 1, refresh = false) => {
+    const feedConfig = FEED_TYPES.find((feed) => feed.key === feedType);
 
-      if (!feedConfig) {
-        console.warn(`Feed config not found for '${feedType}'`);
+    if (!feedConfig) {
+      console.warn(`Feed config not found for '${feedType}'`);
+      return;
+    }
+
+    // SAFETY CHECK: Initialize tab data if it doesn't exist
+    const currentTabData = tabData[feedType];
+    if (!currentTabData) {
+      console.warn(`Tab data for '${feedType}' not found, initializing...`);
+      updateTabData(feedType, {
+        posts: [],
+        page: 1,
+        hasMore: true,
+        loading: false,
+        error: null,
+      });
+      return;
+    }
+
+    // Validation checks
+    if (currentTabData.loading) return;
+    if (!currentTabData.hasMore && !refresh && pageNum > 1) return;
+
+    // Check authentication requirement
+    if (feedConfig.requiresAuth && !isAuthenticated) {
+      updateTabData(feedType, {
+        error: "Please log in to view this feed",
+        posts: [],
+        hasMore: false,
+        loading: false
+      });
+      return;
+    }
+
+    // IMPROVED LOCATION REQUIREMENT HANDLING
+    if (feedConfig.requiresLocation) {
+      if (locationPermission === 'denied') {
+        updateTabData(feedType, {
+          error: "Location access denied. Please enable location services to view nearby posts.",
+          posts: [],
+          hasMore: false,
+          loading: false
+        });
+        setShowLocationModal(true);
         return;
       }
 
-      // SAFETY CHECK: Initialize tab data if it doesn't exist
-      const currentTabData = tabData[feedType];
-      if (!currentTabData) {
-        console.warn(`Tab data for '${feedType}' not found, initializing...`);
+      if (locationPermission === 'requesting') {
         updateTabData(feedType, {
-          posts: [],
-          page: 1,
-          hasMore: true,
-          loading: false,
-          error: null,
-        });
-        return; // Return and let the useEffect handle the retry
-      }
-
-      // Validation checks
-      if (currentTabData.loading) return;
-      if (!currentTabData.hasMore && !refresh && pageNum > 1) return;
-
-      // Check authentication requirement
-      if (feedConfig.requiresAuth && !isAuthenticated) {
-        updateTabData(feedType, {
-          error: "Please log in to view this feed",
+          error: "Requesting location permission...",
           posts: [],
           hasMore: false,
           loading: false
@@ -448,267 +534,242 @@ const HomePage = () => {
         return;
       }
 
-      // Check location requirement for nearme feed
-      if (feedConfig.requiresLocation) {
-        if (locationPermission === 'denied') {
+      if (!userLocation) {
+        updateTabData(feedType, {
+          error: "Getting your location...",
+          posts: [],
+          hasMore: false,
+          loading: true
+        });
+        
+        try {
+          await requestLocationPermission();
+          // After getting location, retry the fetch
+          if (locationPermission === 'granted' && userLocation) {
+            // Recursive call to retry with location
+            setTimeout(() => fetchFeed(feedType, pageNum, refresh), 100);
+          }
+          return;
+        } catch (error) {
           updateTabData(feedType, {
-            error: "Location access denied. Please enable location services to view nearby posts.",
+            error: error.message || "Failed to get location",
             posts: [],
             hasMore: false,
             loading: false
           });
-          setShowLocationModal(true);
-          return;
-        }
-
-        if (!userLocation) {
-          updateTabData(feedType, {
-            error: "Getting your location...",
-            posts: [],
-            hasMore: false,
-            loading: true
-          });
-          
-          try {
-            const location = await getCurrentLocation();
-            if (!location) {
-              updateTabData(feedType, {
-                error: "Could not get your location. Please try again.",
-                posts: [],
-                hasMore: false,
-                loading: false
-              });
-              return;
-            }
-          } catch (error) {
-            updateTabData(feedType, {
-              error: error.message || "Failed to get location",
-              posts: [],
-              hasMore: false,
-              loading: false
-            });
-            return;
-          }
-        }
-      }
-      if (feedConfig.requiresLocation) {
-        if (locationPermission === "denied") {
-          updateTabData(feedType, {
-            error: "Location permission is required to view nearby posts",
-            posts: [],
-            hasMore: false,
-            loading: false,
-          });
-          setShowLocationModal(true);
-          return;
-        }
-
-        if (!userLocation) {
-          updateTabData(feedType, {
-            error: "Getting your location...",
-            posts: [],
-            hasMore: false,
-            loading: false,
-          });
-          await requestLocationPermission();
           return;
         }
       }
 
-      // API call throttling
-      const now = Date.now();
-      const lastFetch = lastFetchTime[feedType] || 0;
-      if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh && pageNum === 1)
-        return;
-
-      setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
-
-      try {
-        // Set loading state
-        updateTabData(feedType, { loading: true });
-        if (refresh) {
-          updateTabData(feedType, { error: null });
-        }
-
-        // Set request headers
-        const headers = {
-          "Content-Type": "application/json",
-        };
-        if (token && feedConfig.requiresAuth) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-
-        // Build URL with location parameters for nearme feed
-        let url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=10`;
-
-        if (feedConfig.requiresLocation && userLocation) {
-          url += `&latitude=${userLocation.latitude}&longitude=${userLocation.longitude}`;
-          console.log(`Near me request with location:`, {
-            latitude: userLocation.latitude,
-            longitude: userLocation.longitude,
-            accuracy: userLocation.accuracy,
-          });
-        }
-
-        console.log(`Fetching ${feedType} feed from:`, url); // Debug log
-
-        // Create AbortController for timeout (instead of AbortSignal.timeout which might not be supported)
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-        const response = await fetch(url, {
-          headers,
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId); // Clear timeout if request succeeds
-
-        console.log(`${feedType} feed response status:`, response.status); // Debug log
-
-        // Handle auth errors
-        if (response.status === 401 || response.status === 403) {
-          if (feedConfig.requiresAuth) {
-            updateTabData(feedType, {
-              error: "Your session has expired. Please log in again.",
-              posts: [],
-              hasMore: false,
-              loading: false,
-            });
-            await logout();
-            return;
-          }
-        }
-
-        // Handle rate limiting
-        if (response.status === 429) {
-          updateTabData(feedType, {
-            error: "Rate limited. Please wait a moment before refreshing.",
-            loading: false,
-          });
-          return;
-        }
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`API Error for ${feedType}:`, {
-            status: response.status,
-            statusText: response.statusText,
-            errorText: errorText,
-          });
-
-          // Handle specific server errors
-          if (response.status === 500 && errorText.includes("Server error")) {
-            throw new Error(
-              `Server is having issues with the ${feedType} feed. Please try again later.`
-            );
-          }
-
-          throw new Error(
-            `Failed to fetch ${feedType} feed: ${response.status} - ${errorText}`
-          );
-        }
-
-        const responseText = await response.text();
-        console.log(
-          `${feedType} feed response:`,
-          responseText.substring(0, 200) + "..."
-        ); // Debug log (first 200 chars)
-
-        const data = JSON.parse(responseText);
-
-        if (!data.posts || !Array.isArray(data.posts)) {
-          console.error(`Invalid response format for ${feedType}:`, data); // Debug log
-          throw new Error("Invalid server response format");
-        }
-
-        // Process posts
-        const formattedPosts = data.posts
-          .map((post, index) => (post ? formatPostFromApi(post, index) : null))
-          .filter(Boolean);
-
-        console.log(`Processed ${formattedPosts.length} posts for ${feedType}`); // Debug log
-
-        // Use server pagination info if available, otherwise fall back to length check
-        const hasMore = data.currentPage
-          ? data.currentPage < data.totalPages
-          : formattedPosts.length === 10;
-
-        // Update state
-        if (refresh) {
-          updateTabData(feedType, {
-            posts: formattedPosts,
-            page: 1,
-            hasMore,
-            error: null,
-            loading: false,
-          });
-        } else {
-          const existingIds = new Set(currentTabData.posts.map((p) => p.id));
-          const uniqueNewPosts = formattedPosts.filter(
-            (p) => !existingIds.has(p.id)
-          );
-
-          updateTabData(feedType, {
-            posts: [...currentTabData.posts, ...uniqueNewPosts],
-            page: pageNum,
-            hasMore,
-            error: null,
-            loading: false,
-          });
-        }
-      } catch (error) {
-        console.error(`Error fetching ${feedType} feed:`, error);
-
-        // Handle specific error types
-        let errorMessage = `Failed to load posts: ${error.message}`;
-
-        if (error.name === "AbortError") {
-          errorMessage =
-            "Request timed out. Please check your connection and try again.";
-        } else if (
-          error.message.includes("NetworkError") ||
-          error.message.includes("fetch")
-        ) {
-          errorMessage =
-            "Network error. Please check your connection and try again.";
-        } else if (error.message.includes("JSON")) {
-          errorMessage = "Server returned invalid data. Please try again.";
-        }
-
+      // Validate location coordinates before using
+      const lat = parseFloat(userLocation.latitude);
+      const lng = parseFloat(userLocation.longitude);
+      
+      if (isNaN(lat) || isNaN(lng)) {
         updateTabData(feedType, {
-          error: errorMessage,
-          posts: refresh ? [] : currentTabData.posts,
+          error: 'Invalid location coordinates',
+          posts: [],
+          hasMore: false,
+          loading: false
+        });
+        return;
+      }
+      
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        updateTabData(feedType, {
+          error: 'Location coordinates out of valid range',
+          posts: [],
+          hasMore: false,
+          loading: false
+        });
+        return;
+      }
+    }
+
+    // API call throttling - More aggressive for nearme feed
+    const throttleInterval = feedType === 'nearme' ? 30000 : MIN_FETCH_INTERVAL; // 30 seconds for nearme
+    const now = Date.now();
+    const lastFetch = lastFetchTime[feedType] || 0;
+    if (now - lastFetch < throttleInterval && !refresh && pageNum === 1) {
+      console.log(`Throttling ${feedType} feed request`);
+      return;
+    }
+
+    setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
+
+    try {
+      // Set loading state
+      updateTabData(feedType, { loading: true });
+      if (refresh) {
+        updateTabData(feedType, { error: null });
+      }
+
+      // Set request headers
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (token && feedConfig.requiresAuth) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      // Build URL with location parameters for nearme feed
+      let url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=10`;
+
+      if (feedConfig.requiresLocation && userLocation) {
+        // Validate location coordinates before adding to URL
+        const lat = parseFloat(userLocation.latitude);
+        const lng = parseFloat(userLocation.longitude);
+        
+        url += `&latitude=${lat}&longitude=${lng}`;
+        console.log(`Near me request with location:`, {
+          latitude: lat,
+          longitude: lng,
+          accuracy: userLocation.accuracy,
+        });
+      }
+
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(url, {
+        headers,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // Handle auth errors
+      if (response.status === 401 || response.status === 403) {
+        if (feedConfig.requiresAuth) {
+          updateTabData(feedType, {
+            error: "Your session has expired. Please log in again.",
+            posts: [],
+            hasMore: false,
+            loading: false,
+          });
+          await logout();
+          return;
+        }
+      }
+
+      // Handle rate limiting
+      if (response.status === 429) {
+        updateTabData(feedType, {
+          error: "Rate limited. Please wait a moment before refreshing.",
           loading: false,
         });
-
-        // Handle auth errors
-        if (
-          error.message &&
-          (error.message.includes("unauthorized") ||
-            error.message.includes("forbidden") ||
-            error.message.includes("authentication")) &&
-          feedConfig.requiresAuth
-        ) {
-          await logout();
-        }
-      } finally {
-        // Ensure loading is always set to false
-        setRefreshing(false);
-        updateTabData(feedType, { loading: false });
+        return;
       }
-    },
-    [
-      isAuthenticated,
-      token,
-      logout,
-      tabData,
-      lastFetchTime,
-      locationPermission,
-      userLocation,
-      requestLocationPermission,
-      updateTabData, // Make sure this is in dependencies
-    ]
-  );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = `Failed to fetch ${feedType} feed: ${response.status}`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.message) {
+            errorMessage += ` - ${errorData.message}`;
+          }
+          if (errorData.error) {
+            errorMessage += `: ${errorData.error}`;
+          }
+        } catch (parseError) {
+          console.warn('Could not parse error response:', errorText);
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      const responseText = await response.text();
+      const data = JSON.parse(responseText);
+
+      if (!data.posts || !Array.isArray(data.posts)) {
+        throw new Error("Invalid server response format");
+      }
+
+      // Process posts
+      const formattedPosts = data.posts
+        .map((post, index) => (post ? formatPostFromApi(post, index) : null))
+        .filter(Boolean);
+
+      // Log if any posts were filtered out
+      const filteredCount = data.posts.length - formattedPosts.length;
+      if (filteredCount > 0) {
+        console.warn(`Filtered out ${filteredCount} posts with invalid data in ${feedType} feed`);
+      }
+
+      // Update pagination info
+      const hasMore = data.currentPage ? data.currentPage < data.totalPages : formattedPosts.length === 10;
+
+      // Update state
+      if (refresh) {
+        updateTabData(feedType, {
+          posts: formattedPosts,
+          page: 1,
+          hasMore,
+          error: null,
+          loading: false,
+        });
+      } else {
+        const existingIds = new Set(currentTabData.posts.map((p) => p.id));
+        const uniqueNewPosts = formattedPosts.filter((p) => !existingIds.has(p.id));
+
+        updateTabData(feedType, {
+          posts: [...currentTabData.posts, ...uniqueNewPosts],
+          page: pageNum,
+          hasMore,
+          error: null,
+          loading: false,
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching ${feedType} feed:`, error);
+
+      // Handle specific error types
+      let errorMessage = `Failed to load posts: ${error.message}`;
+
+      if (error.name === "AbortError") {
+        errorMessage = "Request timed out. Please check your connection and try again.";
+      } else if (error.message.includes("NetworkError") || error.message.includes("fetch")) {
+        errorMessage = "Network error. Please check your connection and try again.";
+      } else if (error.message.includes("JSON")) {
+        errorMessage = "Server returned invalid data. Please try again.";
+      }
+
+      updateTabData(feedType, {
+        error: errorMessage,
+        posts: refresh ? [] : currentTabData.posts,
+        loading: false,
+      });
+
+      // Handle auth errors
+      if (
+        error.message &&
+        (error.message.includes("unauthorized") ||
+          error.message.includes("forbidden") ||
+          error.message.includes("authentication")) &&
+        feedConfig.requiresAuth
+      ) {
+        await logout();
+      }
+    } finally {
+      setRefreshing(false);
+      updateTabData(feedType, { loading: false });
+    }
+  },
+  [
+    isAuthenticated,
+    token,
+    logout,
+    tabData,
+    lastFetchTime,
+    locationPermission,
+    userLocation,
+    lastLocationUpdate,
+    updateTabData,
+  ]
+);
   // Handle tab change
   const handleTabChange = (tabKey) => {
     setActiveTab(tabKey);
@@ -1420,49 +1481,56 @@ const HomePage = () => {
 
   // Render tab bar
   const renderTabBar = () => (
-    <div className="sticky rounded-lg top-2 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
-      <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max max-sm:justify-evenly">
-        {FEED_TYPES.map((feedType) => {
-          const isActive = activeTab === feedType.key;
-          const canAccess = !feedType.requiresAuth || isAuthenticated;
-          const isNearMe = feedType.key === "nearme";
-          return (
-            <button
-              key={feedType.key}
-              onClick={() => {
-                if (isNearMe) {
-                  handleNearMeTabPress();
-                } else if (canAccess) {
-                  handleTabChange(feedType.key);
-                }
-              }}
-              className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors flex items-center justify-center
-${
-  isActive
-    ? "bg-primary text-white"
-    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-}
+  <div className="sticky rounded-lg top-2 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
+    <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max max-sm:justify-evenly">
+      {FEED_TYPES.map((feedType) => {
+        const isActive = activeTab === feedType.key;
+        const canAccess = !feedType.requiresAuth || isAuthenticated;
+        const isNearMe = feedType.key === "nearme";
+        
+        // Show different states for nearme tab
+        const getDisplayText = () => {
+          if (!isNearMe) return feedType.title;
+          
+          if (locationPermission === 'requesting') return 'Near me ';
+          if (locationPermission === 'denied') return 'Near me ';
+          if (locationPermission === 'granted') return 'Near me ';
+          return 'Near me ';
+        };
+        
+        return (
+          <button
+            key={feedType.key}
+            onClick={() => {
+              if (isNearMe) {
+                handleNearMeTabPress();
+              } else if (canAccess) {
+                handleTabChange(feedType.key);
+              }
+            }}
+            className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors flex items-center justify-center
+${isActive ? "bg-primary text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
 ${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
+${isNearMe && locationPermission === 'denied' ? "opacity-70" : ""}
 sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hidden whitespace-nowrap`}
-              disabled={!canAccess}
-              title={feedType.title}
-            >
-              {/* Mobile: Show only icon */}
-              <span className="sm:hidden">
-                <feedType.icon className="w-5 h-5" />
-              </span>
-              {/* Desktop: Show text */}
-              <span className="hidden sm:block truncate">
-                {feedType.title}
-                {feedType.requiresAuth && !isAuthenticated && " 🔒"}
-                {isNearMe && locationPermission === "denied" && " 📍"}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+            disabled={!canAccess}
+            title={getDisplayText()}
+          >
+            {/* Mobile: Show only icon */}
+            <span className="sm:hidden">
+              <feedType.icon className="w-5 h-5" />
+            </span>
+            {/* Desktop: Show text with status */}
+            <span className="hidden sm:block truncate">
+              {getDisplayText()}
+              {feedType.requiresAuth && !isAuthenticated && " 🔒"}
+            </span>
+          </button>
+        );
+      })}
     </div>
-  );
+  </div>
+);
   const currentTabData = getCurrentTabData();
   const currentFeedType = FEED_TYPES.find((feed) => feed.key === activeTab);
 
