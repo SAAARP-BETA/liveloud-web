@@ -67,9 +67,10 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
 };
 
 const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => {
-  const isCurrentUser = String(item.userId) === String(currentUserId);
+  // Check if this is the current user - more robust comparison
+  const isCurrentUser = String(item.userId) === String(currentUserId) || String(item.user?._id) === String(currentUserId) || String(item._id) === String(currentUserId);
   const rank = index + 1;
-   const userData = item.user?._id ? item.user : null;
+  const userData = item.user?._id ? item.user : null;
   const userId = userData?._id || item.user;
   const username = userData?.username || `User #${String(userId).slice(-6)}`;
   const profilePicture = userData?.profilePicture;
