@@ -249,7 +249,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
       <div className="flex-1 ml-4 min-w-0">
         <div className="flex items-center mb-1">
           <span className="text-gray-900 text-base font-medium truncate">
-            {item.username ||
+            {username ||
               item.fullname ||
               `User #${item?.userId?.slice(-6)}`}
           </span>
@@ -408,7 +408,7 @@ export default function LeaderboardPage() {
     } else {
       // Navigate to other user's profile
       // Use username if available, otherwise use userId
-      const identifier = userItem.username || userItem.userId;
+      const identifier = userItem.user.username || userItem.userId;
       router.push(`/UserProfile/${identifier}`);
     }
   };
