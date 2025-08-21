@@ -563,6 +563,5 @@ if (isLoading && page === 1) {
           )}
         </div>
       </div>
-    </div>
   );
 }
