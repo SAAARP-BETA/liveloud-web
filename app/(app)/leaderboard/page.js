@@ -3,9 +3,22 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { API_ENDPOINTS } from "../../utils/config";
-import { User, Heart, Pencil, Star, Trophy, Medal } from "lucide-react";
-
-// Fixed Tab Component - Icons only on mobile, text on desktop
+import {
+  User,
+  Heart,
+  Pencil,
+  Star,
+  Trophy,
+  Medal,
+  SquarePen,
+  Users,
+  PenLine,
+  Crown,
+} from "lucide-react";
+import Image from "next/image";
+import { getProfilePicture } from "@/app/utils/fallbackImage";
+import defaultPic from "../../assets/avatar.png";
+// Fixed Tab Component
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   return (
     <div
@@ -25,11 +38,10 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
           return (
             <button
               key={tab.key}
-              className={`cursor-pointer py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${
-                isActive
+              className={` cursor-pointer mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive
                   ? "bg-primary text-white"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-              }`}
+                }`}
               onClick={() => onTabPress(tab.key)}
               style={{
                 boxShadow: isActive
@@ -39,9 +51,8 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
             >
               <div className="flex items-center space-x-2">
                 <Icon
-                  className={`w-4 h-4 ${
-                    isActive ? "text-white" : "text-black"
-                  }`}
+                  className={`w-4 h-4 ${isActive ? "text-white" : "text-black"
+                    }`}
                 />
                 {/* Show text only on sm screens and larger (hidden on mobile) */}
                 <span className={`hidden sm:inline ${isActive ? "text-white" : "text-black"}`}>
@@ -56,11 +67,30 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   );
 };
 
-// Fixed Leaderboard Item Component
-const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
-  const isCurrentUser = item.userId === currentUserId;
+const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => {
+  // Check if this is the current user - more robust comparison
+  const isCurrentUser = String(item.userId) === String(currentUserId) || String(item.user?._id) === String(currentUserId) || String(item._id) === String(currentUserId);
   const rank = index + 1;
-
+  const userData = item.user?._id ? item.user : null;
+  const userId = userData?._id || item.user;
+  const username = userData?.username || `User #${String(userId).slice(-6)}`;
+  const profilePicture = userData?.profilePicture;
+  const getPointsForTab = (item, tab) => {
+    switch (tab) {
+      case 'total':
+        return item.totalPoints || 0;
+      case 'creators':
+        return item.creatorPoints || 0;
+      case 'fans':
+        return item.fanPoints || 0;
+      case 'followers':
+        return item.stats?.totalFollowers || 0;
+      default:
+        return item.totalPoints || 0;
+    }
+  };
+  const displayPoints = getPointsForTab(item, activeTab);
+  const pointsLabel = activeTab === 'followers' ? 'followers' : 'points';
   const getRankIcon = () => {
     switch (rank) {
       case 1:
@@ -183,34 +213,31 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
 
   return (
     <div
-      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${
-        isCurrentUser
+      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${isCurrentUser
           ? "bg-sky-50 border-2 border-primary"
           : "bg-white shadow-sm hover:shadow-md"
-      }`}
+        }`}
       onClick={() => onPress(item)}
     >
       {/* Rank */}
       <div className="mr-4 flex-shrink-0">{getRankIcon()}</div>
 
       {/* Profile Picture */}
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0">
-        {item.profilePicture ? (
-          <img
-            src={item.profilePicture}
-            alt="Profile"
-            className="w-full h-full rounded-full object-cover"
-          />
-        ) : (
-          <User className="w-6 h-6 text-primary" />
-        )}
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0 relative overflow-hidden">
+        <Image
+          src={profilePicture || defaultPic}
+          alt={username|| "Profile"}
+          width={48}
+          height={48}
+          className="rounded-full object-cover w-12 h-12"
+        />
       </div>
 
       {/* User Info */}
       <div className="flex-1 ml-4 min-w-0">
         <div className="flex items-center mb-1">
           <span className="text-gray-900 text-base font-medium truncate">
-            {item.username ||
+            {username ||
               item.fullname ||
               `User #${item?.userId?.slice(-6)}`}
           </span>
@@ -237,9 +264,9 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress }) => {
       {/* Points */}
       <div className="text-right flex-shrink-0 ml-4">
         <div className="text-lg font-semibold text-gray-900">
-          {item.totalPoints.toLocaleString()}
+          {displayPoints.toLocaleString() || "0"}
         </div>
-        <div className="text-xs text-gray-500">Points</div>
+        <div className="text-xs text-gray-500">{pointsLabel}</div>
       </div>
     </div>
   );
@@ -366,7 +393,7 @@ export default function LeaderboardPage() {
     } else {
       // Navigate to other user's profile
       // Use username if available, otherwise use userId
-      const identifier = userItem.username || userItem.userId;
+      const identifier = userItem.user.username || userItem.userId;
       router.push(`/UserProfile/${identifier}`);
     }
   };
@@ -391,89 +418,31 @@ export default function LeaderboardPage() {
     }
   }, [page]);
 
-  // Skeleton Loading Component
-  const SkeletonLoader = () => (
-    <div className="bg-gray-50 min-h-screen py-6 px-4 max-w-4xl mx-auto w-full">
-      <div className="w-full max-w-md sm:max-w-full mx-auto">
-        {/* Skeleton Tabs */}
-        <div className="bg-white border-b border-gray-100 sticky top-4 z-10 p-4 mb-6">
-          <div className="flex flex-wrap gap-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-12 w-24 bg-gray-200 rounded-full animate-pulse"></div>
-            ))}
-          </div>
-        </div>
-
-        {/* Skeleton Points Summary */}
-        <div className="my-6 rounded-xl overflow-hidden shadow-lg">
-          <div className="p-6 bg-gradient-to-r from-sky-400 to-primary">
-            <div className="flex flex-col items-center justify-center mb-4">
-              <div className="h-4 w-32 bg-white/20 rounded animate-pulse mb-2"></div>
-              <div className="h-8 w-16 bg-white/30 rounded animate-pulse"></div>
-            </div>
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="text-center">
-                  <div className="w-12 h-12 bg-white/20 rounded-full animate-pulse mb-2 mx-auto"></div>
-                  <div className="h-4 w-8 bg-white/20 rounded animate-pulse mb-1 mx-auto"></div>
-                  <div className="h-3 w-12 bg-white/20 rounded animate-pulse mx-auto"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Skeleton Header */}
-        <div className="py-4 flex flex-row justify-between items-center gap-4 mb-4">
-          <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-10 w-20 bg-gray-200 rounded-lg animate-pulse"></div>
-        </div>
-
-        {/* Skeleton Leaderboard Items */}
-        <div className="pb-8">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="flex items-center p-5 mx-4 mb-4 bg-white rounded-xl shadow-sm">
-              {/* Skeleton Rank */}
-              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse mr-4 flex-shrink-0"></div>
-              
-              {/* Skeleton Profile Picture */}
-              <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse flex-shrink-0"></div>
-              
-              {/* Skeleton User Info */}
-              <div className="flex-1 ml-4 min-w-0">
-                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mb-2"></div>
-                <div className="flex items-center space-x-2">
-                  <div className="h-6 w-16 bg-gray-200 rounded-xl animate-pulse"></div>
-                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse"></div>
-                </div>
-              </div>
-              
-              {/* Skeleton Points */}
-              <div className="text-right flex-shrink-0 ml-4">
-                <div className="h-6 w-16 bg-gray-200 rounded animate-pulse mb-1"></div>
-                <div className="h-3 w-12 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-            </div>
-          ))}
+  // Render loading state
+  
+if (isLoading && page === 1) {
+  return (
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4">
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 flex justify-center items-center border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading leaderboard...</p>
         </div>
       </div>
     </div>
   );
+}
+  // console.log("leaderboardData:", leaderboardData);
 
-  // Render loading state
-  if (isLoading && leaderboardData.length === 0) {
-    return <SkeletonLoader />;
-  }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-6 px-4 max-w-4xl mx-auto w-full">
-      <div className="w-full max-w-md sm:max-w-full mx-auto">
-        {/* Tabs */}
-        <LeaderboardTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabPress={handleTabChange}
-        />
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl   bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+      {/* Tabs */}
+      <LeaderboardTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabPress={handleTabChange}
+      />
 
         {/* My Points Summary */}
         {isAuthenticated && myPoints && (
@@ -531,7 +500,10 @@ export default function LeaderboardPage() {
 
         {/* Header Section */}
         <div className="py-4 flex flex-row justify-between sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-gray-800 text-lg font-semibold">🏆 Top Users</h2>
+          <h2 className="text-gray-800 text-lg font-semibold">
+            🏆 Top Users - {tabs.find(tab => tab.key === activeTab)?.title}
+
+          </h2>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -543,18 +515,20 @@ export default function LeaderboardPage() {
 
         {/* Leaderboard Items */}
         <div className="pb-8">
-          {leaderboardData.map((item, index) => (
-            <LeaderboardItem
-              key={item.userId || index}
-              item={item}
-              index={index}
-              currentUserId={currentUser?._id}
-              onPress={navigateToProfile}
-            />
-          ))}
-
+          {leaderboardData
+              ?.filter(item => item && item.totalPoints !== undefined) 
+              .map((item, index) => (
+          <LeaderboardItem
+            key={item?.userId || index}
+            item={item}
+            index={index}
+            currentUserId={currentUser?._id}
+            onPress={navigateToProfile}
+            activeTab={activeTab}
+          />
+))}
           {isLoading && page > 1 && (
-            <div className="py-6 text-center">
+            <div className="py-6 text-center ">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             </div>
           )}

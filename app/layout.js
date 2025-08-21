@@ -4,6 +4,10 @@ import { ModalProvider } from '@/app/context/ModalContext';
 import { Toaster } from 'react-hot-toast';
 import './globals.css';
 
+export const metadata = {
+  title: 'LiveLoud'
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

@@ -321,7 +321,7 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (FIXED)
 const ProfileSkeleton = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4">
       {/* Use the same container structure as ProfilePage */}
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
         <div className="w-full flex flex-col items-center bg-gray-50">
@@ -339,7 +339,7 @@ const ProfileSkeleton = () => {
 
           {/* Content skeleton matching the real component structure */}
           <div className="bg-white border-b border-gray-100 w-full">
-            <div className="mt-4 text-center px-4">
+            <div className="mt-4 text-center px-4 space-y-3">
               {/* Name skeleton */}
               <div className="w-32 h-6 bg-gray-200 rounded-md mx-auto animate-pulse" />
               {/* Username skeleton */}
@@ -1049,8 +1049,8 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
+    <div className="min-h-screen bg-white flex justify-center">
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
         <div className="w-full flex flex-col items-center bg-gray-50">
           <div
             className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
@@ -1058,14 +1058,14 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
             onScroll={handleScroll}
           >
             <div className="w-full relative">
-              <Image
-                src={user?.coverPhoto || defaultCover}
-                alt="Cover"
-                className="w-full h-[150px] object-cover"
-                width={1200}
-                height={150}
-                priority
-              />
+        <Image
+          src={user?.coverPhoto || defaultCover}
+          alt="Cover"
+          className="w-full h-[150px] object-cover"
+          width={1200}
+          height={150}
+          priority
+        />
 
               <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
                 <motion.div

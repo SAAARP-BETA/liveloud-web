@@ -9,7 +9,7 @@ import metaMask from "@/app/assets/metamaskicon1.png";
 import Logo from "@/app/assets/combinedLogo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash, faCheck } from "@fortawesome/free-solid-svg-icons";
-
+import toast from "react-hot-toast";
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");

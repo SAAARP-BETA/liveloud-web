@@ -1698,7 +1698,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                 disabled={option.loading}
                 className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                   option.danger
-                    ? "hover:bg-red-50 text-red-600"
+                    ? "hover:bg-red-50 text-gray-600"
                     : "hover:bg-gray-50 text-gray-700"
                 }`}
               >

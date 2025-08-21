@@ -485,7 +485,7 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-6 px-4 sm:py-10 max-w-4xl mx-auto w-full">
+    <div className="bg-gray-50 min-h-screen w-full md:min-w-[410px] lg:w-[610px] max-w-2xl py-6 px-4 sm:py-10  mx-auto ">
       <div className="w-full max-w-md sm:max-w-full mx-auto">
         {/* Wallet Header */}
         <div className="mb-6">
