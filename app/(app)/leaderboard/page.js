@@ -30,7 +30,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
         paddingBottom: 12,
       }}
     >
-      <div className="flex flex-wrap gap-3">
+      <div className="flex gap-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
