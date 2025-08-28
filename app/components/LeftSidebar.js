@@ -62,7 +62,7 @@ export default function LeftSidebar() {
       console.error("Logout error:", error);
     } finally {
       await logout();
-      router.replace("/(auth)/login");
+      router.replace("/login");
     }
   };
 
