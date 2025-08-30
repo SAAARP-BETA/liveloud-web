@@ -364,13 +364,13 @@ const PostPage = () => {
       }
       const data = await response.json();
       const formattedPost = {
-        ...data,
-        id: data._id,
-        username: data.user.username,
-        profilePic: data.user.profilePicture,
-        user: data.user._id || data.user.id,
-        userId: data.user._id || data.user.id,
-      };
+  ...data,
+  id: data._id,
+  username: data.user ? data.user.username || "Unknown User" : "Unknown User",
+  profilePic: data.user ? data.user.profilePicture || defaultPic : defaultPic,
+  user: data.user?._id || data.user?.id || "unknown",
+  userId: data.user?._id || data.user?.id,
+};
       setPost(formattedPost);
       setSelectedPost(formattedPost);
     } catch (err) {
@@ -597,7 +597,7 @@ const PostPage = () => {
           handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
           setSelectedPost={setSelectedPost}
           setModalVisible={setModalVisible}
-          username={user?.username}
+          username={user?.username || "Unknown User"}
         />
 
         {/* MODIFIED: Comment Submission Form with reply indicator */}
@@ -705,7 +705,7 @@ const PostPage = () => {
               />
               <div className="ml-3">
                 <p className="font-semibold text-gray-800">
-                  {selectedPost.username}
+                  {selectedPost.username || "Unknown User"}
                 </p>
                 <p className="text-sm text-gray-500 truncate">
                   {selectedPost.content}

@@ -1647,9 +1647,7 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                 <div className="flex items-center mb-2 space-x-3">
                   <Image
                     src={
-                      user?.isActivated === false
-                        ? defaultPic
-                        : user?.profilePicture || defaultPic
+                         user?.profilePicture || defaultPic
                     }
                     alt="Profile"
                     width={40}
@@ -1658,7 +1656,7 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                     onClick={handleProfileClick}
                   />
                   <span className="text-gray-700">
-                    {user?.isActivated === false ? "Unknown User" : `@${user.username}`}
+                    {`@${user.username}`|| "Unknown User" }
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
