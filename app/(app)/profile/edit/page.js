@@ -393,7 +393,7 @@ const EditPage = () => {
     try {
       setSubmitting(true);
       const response = await fetch(`${API_ENDPOINTS.AUTH}/deactivate`, {
-        method: "DELETE",
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
         },
