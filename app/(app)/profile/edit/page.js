@@ -967,7 +967,7 @@ const EditPage = () => {
               <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
                 <User className="text-gray-400 w-5 h-5 ml-3" />
                 <select
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent cursor-pointer"
                   value={profileData.gender || ""}
                   onChange={(e) => handleInputChange("gender", e.target.value)}
                 >
@@ -1018,10 +1018,10 @@ const EditPage = () => {
   <label className="text-sm text-gray-500 mb-1.5 block">
     Who can tag you in posts
   </label>
-  <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+  <div className="flex flex-row items-center bg-gray-50 border border-gray-200  rounded-xl overflow-hidden">
     <Shield className="text-gray-400 w-5 h-5 ml-3" />
     <select
-      className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+      className="flex-1 py-3 px-2 text-gray-800 cursor-pointer outline-none bg-transparent "
       value={profileData.allowTagsFrom || "everyone"}
       onChange={(e) => handleInputChange("allowTagsFrom", e.target.value)}
     >
