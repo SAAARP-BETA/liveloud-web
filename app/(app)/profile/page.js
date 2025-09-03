@@ -48,6 +48,7 @@ import {
   Users,
   Settings,
   Shield,
+  Archive,
 } from "lucide-react";
 import ReportModal from "@/app/components/ui/ReportModal";
 
@@ -219,7 +220,6 @@ const StreakDisplay = ({ consecutiveDays }) => {
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   return (
     <div className="flex w-full border justify-center gap-25 border-gray-100 pt-2">
-      {" "}
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -245,12 +245,20 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
                 }
               />
             )}
+            {tab.key === "archived" && (
+              <Archive
+                size={18}
+                className={
+                  activeTab === tab.key ? "text-primary" : "text-gray-500"
+                }
+              />
+            )}
             <span
               className={`ml-1 text-sm font-medium ${
                 activeTab === tab.key ? "text-primary" : "text-gray-500"
               }`}
             >
-              {tab.label}
+              {tab.title}
             </span>
           </div>
         </button>
@@ -414,7 +422,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const usernameParam = searchParams.get("username");
-  const { user: currentUser, token, isAuthenticated,logout } = useAuth();
+  const { user: currentUser, token, isAuthenticated, logout } = useAuth();
 
   // State for resizable header
   const [headerHeight, setHeaderHeight] = useState(HEADER_MAX_HEIGHT);
@@ -471,6 +479,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
   const [deleteUserDataOption, setDeleteUserDataOption] = useState(false);
+  const [archivedPosts, setArchivedPosts] = useState([]);
+  const [isArchivedLoading, setIsArchivedLoading] = useState(false);
 
   const abortControllerRef = useRef(null);
   const hasFetchedProfile = useRef(false); // New ref to track initial fetch
@@ -521,6 +531,106 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     [isMyProfile, user?.username]
   );
 
+  // Fetch archived posts
+  // Fetch archived posts
+const fetchArchivedPosts = useCallback(
+  async (userId) => {
+    if (!userId || !token || !isMyProfile) return;
+
+    setIsArchivedLoading(true);
+    try {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/archived`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch archived posts: ${response.status}`);
+      }
+
+      const postsData = await response.json();
+      // console.log('Debug: Archived posts response:', postsData); // Debug log
+      const postsArray = postsData.posts || postsData.data || postsData || [];
+      const formattedPosts = postsArray
+        .map((post, index) => formatPostFromApi(post, index, currentUser?._id))
+        .filter(Boolean);
+
+      // console.log('Debug: Formatted archived posts:', formattedPosts); // Debug log
+      setArchivedPosts(formattedPosts);
+    } catch (error) {
+      console.error("Error fetching archived posts:", error);
+      toast.error("Failed to load archived posts.");
+    } finally {
+      setIsArchivedLoading(false);
+    }
+  },
+  [token, isMyProfile, currentUser?._id]
+);
+
+  // Archive Post handler
+  const handleArchivePost = async (postId) => {
+    // console.log("Debug: Attempting to archive post with ID:", postId);
+    try {
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${postId}/archive`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Server returned an error" }));
+        throw new Error(errorData.message || "Failed to archive post");
+      }
+      // Remove post from main posts and add to archivedPosts
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      setPostsCount((prev) => prev - 1);
+      const postToArchive = posts.find((p) => p.id === postId);
+      if (postToArchive) {
+        setArchivedPosts((prev) => [
+          { ...postToArchive, isArchived: true },
+          ...prev,
+        ]);
+      }
+      toast.success("Post archived successfully.");
+      // console.log("Debug: Post archived successfully, postId:", postId);
+    } catch (error) {
+      console.error("Error archiving post:", error);
+      toast.error(`Failed to archive post: ${error.message}`);
+    }
+  };
+  // Unarchive Post handler
+const handleUnarchivePost = async (postId) => {
+  // console.log("Debug: Attempting to unarchive post with ID:", postId);
+  try {
+    const response = await fetch(
+      `${API_ENDPOINTS.SOCIAL}/posts/${postId}/unarchive`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to unarchive post");
+    }
+    // Move post from archivedPosts to posts
+    const postToUnarchive = archivedPosts.find((p) => p.id === postId);
+    if (postToUnarchive) {
+      setArchivedPosts((prev) => prev.filter((p) => p.id !== postId));
+      setPosts((prev) => [{ ...postToUnarchive, isArchived: false }, ...prev]);
+      setPostsCount((prev) => prev + 1);
+    }
+    toast.success("Post restored to your profile.");
+    // console.log("Debug: Post unarchived successfully, postId:", postId);
+  } catch (error) {
+    console.error("Error unarchiving post:", error);
+    toast.error("Failed to unarchive post.");
+  }
+};
   // Scroll handler with debouncing
   const handleScroll = useCallback(
     (e) => {
@@ -643,52 +753,52 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     },
     [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded]
   );
-  // Delete Account 
-    const handleDeleteAccount = async () => {
-      try {
-        setSubmitting(true);
-        const response = await fetch(`${API_ENDPOINTS.AUTH}/delete`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ deleteUserData: deleteUserDataOption }),
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Failed to delete account");
-        router.push("/login");
-        toast.success(data.message);
-        
-      } catch (error) {
-        toast.error(error.message || "Failed to delete account");
-      } finally {
-        setSubmitting(false);
-        setShowDeleteDialog(false);
-      }
-    };
-    const handleDeactivateAccount = async () => {
-      try {
-        setSubmitting(true);
-        const response = await fetch(`${API_ENDPOINTS.AUTH}/deactivate`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Failed to deactivate account");
-        toast.success(data.message);
-        await logout();
-        router.push("/login");
-      } catch (error) {
-        toast.error(error.message || "Failed to deactivate account");
-      } finally {
-        setSubmitting(false);
-        setShowDeactivateDialog(false);
-      }
-    };
-  
+  // Delete Account
+  const handleDeleteAccount = async () => {
+    try {
+      setSubmitting(true);
+      const response = await fetch(`${API_ENDPOINTS.AUTH}/delete`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ deleteUserData: deleteUserDataOption }),
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to delete account");
+      router.push("/login");
+      toast.success(data.message);
+    } catch (error) {
+      toast.error(error.message || "Failed to delete account");
+    } finally {
+      setSubmitting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+  const handleDeactivateAccount = async () => {
+    try {
+      setSubmitting(true);
+      const response = await fetch(`${API_ENDPOINTS.AUTH}/deactivate`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to deactivate account");
+      toast.success(data.message);
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      toast.error(error.message || "Failed to deactivate account");
+    } finally {
+      setSubmitting(false);
+      setShowDeactivateDialog(false);
+    }
+  };
 
   // Fetch user posts
   const fetchUserPosts = useCallback(
@@ -804,7 +914,13 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
       setIsProfileLoading(false);
       hasFetchedProfile.current = true; // Mark initial fetch as complete
     }
-  }, [usernameParam, currentUser?.username, token, fetchUserPoints, fetchUserPosts]);
+  }, [
+    usernameParam,
+    currentUser?.username,
+    token,
+    fetchUserPoints,
+    fetchUserPosts,
+  ]);
 
   // Fetch followers list
   const fetchFollowers = useCallback(
@@ -1080,6 +1196,12 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     }
   };
 
+  useEffect(() => {
+  if (user?._id && isMyProfile) {
+    // console.log('Debug: Fetching archived posts for user:', user._id); // Debug log
+    fetchArchivedPosts(user._id);
+  }
+}, [user?._id, isMyProfile, fetchArchivedPosts]);
   // Trigger initial profile fetch
   useEffect(() => {
     if (!hasFetchedProfile.current) {
@@ -1116,7 +1238,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     );
   }
 
-const handleReportSuccess = (reportedPostId) => {
+  const handleReportSuccess = (reportedPostId) => {
     const updatedPosts = getCurrentTabData().posts.filter(
       (post) => post.id !== reportedPostId
     );
@@ -1334,6 +1456,9 @@ const handleReportSuccess = (reportedPostId) => {
               tabs={[
                 { key: "posts", title: "Posts", icon: "grid" },
                 { key: "media", title: "Media", icon: "image" },
+                ...(isMyProfile
+                  ? [{ key: "archived", title: "Archived", icon: "archive" }]
+                  : []),
               ]}
               activeTab={activeTab}
               onTabPress={setActiveTab}
@@ -1370,11 +1495,14 @@ const handleReportSuccess = (reportedPostId) => {
                           handleUnbookmarkPost={
                             postHandlers.handleUnbookmarkPost
                           }
+                          handleArchivePost={handleArchivePost}
+                          handleUnarchivePost={handleUnarchivePost}
                           setSelectedPost={setSelectedPost}
                           setModalVisible={setModalVisible}
                           handleDislikePost={postHandlers.handleDislikePost}
                           handleUndislikePost={postHandlers.handleUndislikePost}
-                        />
+                          allowArchivedOptions={false}
+                          />
                       </div>
                     ))
                   ) : (
@@ -1399,6 +1527,7 @@ const handleReportSuccess = (reportedPostId) => {
                         </Link>
                       )}
                     </div>
+                            // console.log('Debug: PostCard props:', { post, allowArchivedOptions });
                   )}
                   {isPostsLoading && posts.length > 0 && (
                     <div className="flex justify-center items-center py-6">
@@ -1437,12 +1566,66 @@ const handleReportSuccess = (reportedPostId) => {
                   }
                 />
               )}
+              {activeTab === "archived" && isMyProfile && (
+                <>
+                  {isArchivedLoading ? (
+                    <div className="flex justify-center items-center py-12 w-full">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    </div>
+                  ) : archivedPosts.length > 0 ? (
+                    archivedPosts.map((post, index) => (
+                      <div key={post.id || index}>
+                        <PostCard
+                          post={post}
+                          handleLikePost={postHandlers.handleLikePost}
+                          handleUnlikePost={postHandlers.handleUnlikePost}
+                          handleCommentPost={postHandlers.handleCommentPost}
+                          handleAmplifyPost={postHandlers.handleAmplifyPost}
+                          handleBookmarkPost={postHandlers.handleBookmarkPost}
+                          handleUnbookmarkPost={
+                          postHandlers.handleUnbookmarkPost
+                          }
+                          handleDislikePost={postHandlers.handleDislikePost}
+                          handleUndislikePost={postHandlers.handleUndislikePost}
+                          handleArchivePost={handleArchivePost}
+                          handleUnarchivePost={handleUnarchivePost}
+                          setSelectedPost={setSelectedPost}
+                          setModalVisible={setModalVisible}
+                          allowArchivedOptions={true}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 w-full min-h-[200px]">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9V7a5 5 0 0110 0v2m-1 4v4m-6-4v4"
+                        />
+                      </svg>
+                      <h3 className="mt-4 text-lg font-medium text-gray-700">
+                        No archived posts
+                      </h3>
+                      <p className="mt-2 text-center text-sm text-gray-500 mx-8">
+                        Only you can see your archived posts. Use the post
+                        options menu to archive something.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </motion.div>
             <div className="h-20"></div>
           </div>
         </div>
-
-      
         <CustomModal
           visible={isMoreModalVisible}
           onClose={() => setIsMoreModalVisible(false)}
@@ -1476,218 +1659,279 @@ const handleReportSuccess = (reportedPostId) => {
             </button>
           </div>
         </CustomModal>
-
-       
-
-<CustomModal
-  visible={isSettingsModalVisible}
-  onClose={() => setIsSettingsModalVisible(false)}
-  title="Profile Settings"
-  position="bottom"
-  className="sm:items-center"
->
-  <div className="bg-white p-6 rounded-t-3xl sm:rounded-3xl">
-    <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6 sm:hidden" />
-    <div className="mb-6">
-      <label className="text-base text-gray-600 mb-2 block font-medium">
-        Who can tag you in posts
-      </label>
-      <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-        <Shield className="text-gray-400 w-5 h-5 ml-4" />
-        <select
-          className="flex-1 py-3 px-3 text-gray-800 cursor-pointer outline-none bg-transparent text-base"
-          value={profileData.allowTagsFrom || "everyone"}
-          onChange={(e) => handleInputChange("allowTagsFrom", e.target.value)}
-        >
-          <option value="everyone">Everyone</option>
-          <option value="followers">Only followers</option>
-        </select>
-      </div>
-    </div>
-
-    <div className="flex justify-end space-x-3 mb-8">
-      <button
-        onClick={() => setIsSettingsModalVisible(false)}
-        className="px-4 py-2 rounded bg-gray-100 text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition text-base"
-      >
-        Cancel
-      </button>
-      <button
-        onClick={handleUpdateAllowTagsFrom}
-        className={`px-4 py-2 rounded bg-blue-400 text-white font-semibold cursor-pointer hover:bg-blue-500 transition text-base ${
-          submitting ? "opacity-70 cursor-not-allowed" : ""
-        }`}
-        disabled={submitting}
-      >
-        {submitting ? "Saving..." : "Save"}
-      </button>
-    </div>
-
-    <div className="mt-2 flex flex-col gap-3">
-      <button
-        className="w-full py-3 flex items-center justify-center gap-2 bg-white text-gray-900 rounded-lg font-semibold transition-colors cursor-pointer shadow-sm hover:bg-rose-100 hover:text-rose-700"
-        onClick={() => setShowDeleteDialog(true)}
-        style={{ border: "none" }}
-      >
-        <Trash2 className="w-5 h-5 text-gray-400 group-hover:text-rose-700" />
-        Delete Account
-      </button>
-      <button
-        className="w-full py-3 flex items-center justify-center gap-2 bg-white text-gray-900 rounded-lg font-semibold transition-colors cursor-pointer shadow-sm hover:bg-amber-100 hover:text-amber-700"
-        onClick={() => setShowDeactivateDialog(true)}
-        style={{ border: "none" }}
-      >
-        <Settings className="w-5 h-5 text-gray-400 group-hover:text-amber-700" />
-        Deactivate Account
-      </button>
-    </div>
-  </div>
-</CustomModal>
-
-// ...existing code...
-
-{/* Delete Account Modal */}
-<CustomModal
-  visible={showDeleteDialog}
-  onClose={() => setShowDeleteDialog(false)}
-  title="Delete Account"
->
-  <div className="py-4 px-6">
-    <div className="flex items-center mb-4">
-      <span className="text-lg font-semibold text-rose-500">Delete Account</span>
-    </div>
-    <p className="mb-4 text-gray-700">
-      Are you sure you want to{" "}
-      <span className="font-bold text-rose-400">delete</span> your account? This
-      action <span className="font-bold">cannot be undone</span>.
-    </p>
-    <div className="mb-4">
-      <label className="flex items-center space-x-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={deleteUserDataOption}
-          onChange={(e) => setDeleteUserDataOption(e.target.checked)}
-          className="cursor-pointer"
-        />
-        <span className="text-gray-700">Also delete my data</span>
-      </label>
-    </div>
-    <div className="flex justify-end space-x-3 mt-6">
-      <button
-        className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition"
-        onClick={() => setShowDeleteDialog(false)}
-      >
-        Cancel
-      </button>
-      <button
-        className="px-4 py-2 rounded bg-rose-400 text-white font-semibold cursor-pointer hover:bg-rose-500 transition"
-        onClick={handleDeleteAccount}
-        disabled={submitting}
-      >
-        {submitting ? "Deleting..." : "Delete"}
-      </button>
-    </div>
-  </div>
-</CustomModal>
-
-{/* Deactivate Account Modal */}
-<CustomModal
-  visible={showDeactivateDialog}
-  onClose={() => setShowDeactivateDialog(false)}
-  title="Deactivate Account"
->
-  <div className="py-4 px-6">
-    <div className="flex items-center mb-4">
-      <span className="text-lg font-semibold text-amber-500">Deactivate Account</span>
-    </div>
-    <p className="mb-4 text-gray-700">
-      Are you sure you want to{" "}
-      <span className="font-bold text-amber-400">deactivate</span> your account?
-      You can reactivate it by logging in again.
-    </p>
-    <div className="flex justify-end space-x-3 mt-6">
-      <button
-        className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition"
-        onClick={() => setShowDeactivateDialog(false)}
-      >
-        Cancel
-      </button>
-      <button
-        className="px-4 py-2 rounded bg-amber-200 text-gray-900 font-semibold cursor-pointer hover:bg-amber-300 transition"
-        onClick={handleDeactivateAccount}
-        disabled={submitting}
-      >
-        {submitting ? "Deactivating..." : "Deactivate"}
-      </button>
-    </div>
-  </div>
-</CustomModal>
-
         <CustomModal
-          visible={isModalVisible}
-          onClose={() => setModalVisible(false)}
-          title="Post Options"
+          visible={isSettingsModalVisible}
+          onClose={() => setIsSettingsModalVisible(false)}
+          title="Profile Settings"
+          position="bottom"
+          className="sm:items-center"
         >
-          <div className="bg-white p-4">
-            {selectedPost && (
-              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
-                <Image
-                  src={selectedPost.profilePic || defaultPic}
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full"
-                  width={40}
-                  height={40}
-                />
-                <div className="ml-3">
-                  <h3 className="text-base font-medium text-gray-800">
-                    {selectedPost.username}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    {selectedPost.timestamp}
-                  </p>
-                </div>
+          <div className="bg-white p-6 rounded-t-3xl sm:rounded-3xl">
+            <div className="mb-6">
+              <label className="text-base text-gray-700 mb-2 block font-medium">
+                Who can tag you in posts
+              </label>
+              <div className="w-full">
+                <select
+                  className="w-full py-2 px-3 border border-gray-300 rounded-md text-gray-800 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
+                  value={profileData.allowTagsFrom || "everyone"}
+                  onChange={(e) =>
+                    handleInputChange("allowTagsFrom", e.target.value)
+                  }
+                >
+                  <option value="everyone">Everyone</option>
+                  <option value="followers">Only followers</option>
+                </select>
               </div>
-            )}
-            <button
-              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-              onClick={() => {
-                setModalVisible(false);
-                if (selectedPost) {
-                  postHandlers.handleBookmarkPost(selectedPost.id);
-                }
-              }}
-            >
-              <div className="w-8">
-                <Bookmark className="text-gray-600 text-xl" />
-              </div>
-              <span className="text-base text-gray-800 font-medium">
-                Save Post
-              </span>
-            </button>
-            <button
-              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-              onClick={() => {
-                setModalVisible(false);
-                postHandlers.handleCommentPost(selectedPost.id);
-              }}
-            >
-              <div className="w-8">
-                <MessageCircle className="text-gray-600 text-xl" />
-              </div>
-              <span className="text-base text-gray-800 font-medium">
-                View Comments
-              </span>
-            </button>
-            <button
-              onClick={() => setModalVisible(false)}
-              className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
-            >
-              Cancel
-            </button>
+            </div>
+
+            <div className="flex flex-col gap-3 mb-4">
+              <button
+                className="w-full py-2  cursor-pointer rounded bg-rose-100 text-rose-700 font-semibold hover:bg-rose-200 transition"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                Delete Account
+              </button>
+              <button
+                className="w-full py-2 rounded cursor-pointer bg-amber-100 text-amber-700 font-semibold hover:bg-amber-200 transition"
+                onClick={() => setShowDeactivateDialog(true)}
+              >
+                Deactivate Account
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={() => setIsSettingsModalVisible(false)}
+                className="w-full py-2 rounded bg-gray-100 cursor-pointer text-gray-700 font-semibold hover:bg-gray-200 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateAllowTagsFrom}
+                className={`w-full py-2 rounded bg-primary cursor-pointer text-white font-semibold hover:bg-sky-600 transition ${
+                  submitting ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+                disabled={submitting}
+              >
+                {submitting ? "Saving..." : "Save"}
+              </button>
+            </div>
           </div>
         </CustomModal>
-
-      
+        {/* // ...existing code... */}
+        {/* Delete Account Modal */}
+        <CustomModal
+          visible={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          title="Delete Account"
+        >
+          <div className="py-4 px-6">
+            <div className="flex items-center mb-4">
+              <span className="text-lg font-semibold text-rose-500">
+                Delete Account
+              </span>
+            </div>
+            <p className="mb-4 text-gray-700">
+              Are you sure you want to{" "}
+              <span className="font-bold text-rose-400">delete</span> your
+              account? This action{" "}
+              <span className="font-bold">cannot be undone</span>.
+            </p>
+            <div className="mb-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={deleteUserDataOption}
+                  onChange={(e) => setDeleteUserDataOption(e.target.checked)}
+                  className="cursor-pointer"
+                />
+                <span className="text-gray-700">Also delete my data</span>
+              </label>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition"
+                onClick={() => setShowDeleteDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-rose-400 text-white font-semibold cursor-pointer hover:bg-rose-500 transition"
+                onClick={handleDeleteAccount}
+                disabled={submitting}
+              >
+                {submitting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </CustomModal>
+        {/* Deactivate Account Modal */}
+        <CustomModal
+          visible={showDeactivateDialog}
+          onClose={() => setShowDeactivateDialog(false)}
+          title="Deactivate Account"
+        >
+          <div className="py-4 px-6">
+            <div className="flex items-center mb-4">
+              <span className="text-lg font-semibold text-amber-500">
+                Deactivate Account
+              </span>
+            </div>
+            <p className="mb-4 text-gray-700">
+              Are you sure you want to{" "}
+              <span className="font-bold text-amber-400">deactivate</span> your
+              account? You can reactivate it by logging in again.
+            </p>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition"
+                onClick={() => setShowDeactivateDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-amber-200 text-gray-900 font-semibold cursor-pointer hover:bg-amber-300 transition"
+                onClick={handleDeactivateAccount}
+                disabled={submitting}
+              >
+                {submitting ? "Deactivating..." : "Deactivate"}
+              </button>
+            </div>
+          </div>
+        </CustomModal>
+<CustomModal
+  visible={isModalVisible}
+  onClose={() => {
+    console.log('Debug: Closing Post Options modal');
+    setModalVisible(false);
+  }}
+  title="Post Options"
+>
+  <div className="bg-white p-4">
+    {selectedPost && (
+      <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
+        <Image
+          src={selectedPost.profilePic || defaultPic}
+          alt="Profile"
+          className="w-10 h-10 rounded-full"
+          width={40}
+          height={40}
+        />
+        <div className="ml-3">
+          <h3 className="text-base font-medium text-gray-800">
+            {selectedPost.username}
+          </h3>
+          <p className="text-xs text-gray-500">
+            {selectedPost.timestamp}
+          </p>
+        </div>
+      </div>
+    )}
+    {selectedPost && (
+      <>
+        <button
+          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          onClick={() => {
+            // console.log('Debug: Save Post clicked, postId:', selectedPost.id);
+            setModalVisible(false);
+            postHandlers.handleBookmarkPost(selectedPost.id);
+          }}
+        >
+          <div className="w-8">
+            <Bookmark className="text-gray-600 text-xl" />
+          </div>
+          <span className="text-base text-gray-800 font-medium">
+            Save Post
+          </span>
+        </button>
+        <button
+          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          onClick={() => {
+            // console.log('Debug: View Comments clicked, postId:', selectedPost.id);
+            setModalVisible(false);
+            postHandlers.handleCommentPost(selectedPost.id);
+          }}
+        >
+          <div className="w-8">
+            <MessageCircle className="text-gray-600 text-xl" />
+          </div>
+          <span className="text-base text-gray-800 font-medium">
+            View Comments
+          </span>
+        </button>
+        {isMyProfile && (
+  <button
+    className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+    onClick={() => {
+      console.log(
+        `Debug: ${selectedPost.isArchived ? "Unarchive" : "Archive"} Post clicked, postId:`,
+        selectedPost.id
+      );
+      setModalVisible(false);
+      if (selectedPost.isArchived) {
+        handleUnarchivePost(selectedPost.id);
+      } else {
+        handleArchivePost(selectedPost.id);
+      }
+    }}
+  >
+    <div className="w-8">
+      <Archive className="text-gray-600 text-xl" />
+    </div>
+    <span className="text-base text-gray-800 font-medium">
+      {selectedPost.isArchived ? "Unarchive Post" : "Archive Post"}
+    </span>
+  </button>
+)}
+        <button
+          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          onClick={() => {
+            // console.log('Debug: Report Post clicked, postId:', selectedPost.id);
+            setModalVisible(false);
+            setPostToReport(selectedPost);
+            setReportModalVisible(true);
+          }}
+        >
+          <div className="w-8">
+            <Flag className="text-red-500 text-xl" />
+          </div>
+          <span className="text-base text-red-500 font-medium">
+            Report Post
+          </span>
+        </button>
+        {isMyProfile && (
+          <button
+            className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+            onClick={() => {
+              // console.log('Debug: Delete Post clicked, postId:', selectedPost.id);
+              setModalVisible(false);
+              if (confirm('Are you sure you want to delete this post?')) {
+                postHandlers.handleDeletePost(selectedPost.id);
+              }
+            }}
+          >
+            <div className="w-8">
+              <Trash2 className="text-red-500 text-xl" />
+            </div>
+            <span className="text-base text-red-500 font-medium">
+              Delete Post
+            </span>
+          </button>
+        )}
+        <button
+          onClick={() => {
+            console.log('Debug: Cancel clicked in Post Options modal');
+            setModalVisible(false);
+          }}
+          className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
+        >
+          Cancel
+        </button>
+      </>
+    )}
+  </div>
+</CustomModal>
         <AmplifyModal
           isVisible={isAmplifyModalVisible}
           onClose={() => setAmplifyModalVisible(false)}
@@ -1698,8 +1942,6 @@ const handleReportSuccess = (reportedPostId) => {
             fetchUserProfile();
           }}
         />
-
-        
         <CommentModal
           visible={isCommentModalVisible}
           onClose={() => setCommentModalVisible(false)}
@@ -1708,8 +1950,7 @@ const handleReportSuccess = (reportedPostId) => {
           onSuccess={handleCommentSuccess}
           token={token}
         />
-
-          {/* Amplify Modal */}
+        {/* Amplify Modal */}
         <AmplifyModal
           visible={isAmplifyModalVisible}
           onClose={() => setAmplifyModalVisible(false)}
@@ -1732,7 +1973,7 @@ const handleReportSuccess = (reportedPostId) => {
             updateTabData(activeTab, { posts: updatedPosts });
           }}
         ></AmplifyModal>
-      {/* Report Modal */}
+        {/* Report Modal */}
         <ReportModal
           visible={isReportModalVisible}
           onClose={() => setReportModalVisible(false)}
@@ -1741,8 +1982,7 @@ const handleReportSuccess = (reportedPostId) => {
           onSuccess={handleReportSuccess}
           token={token}
         />
-
-         {/* Follower Modal */}
+        {/* Follower Modal */}
         <CustomModal
           visible={isFollowersModalVisible}
           onClose={() => setIsFollowersModalVisible(false)}
@@ -1809,8 +2049,7 @@ const handleReportSuccess = (reportedPostId) => {
             </div>
           )}
         </CustomModal>
-
-       {/* Following Modal */}
+        {/* Following Modal */}
         <CustomModal
           visible={isFollowingModalVisible}
           onClose={() => setIsFollowingModalVisible(false)}

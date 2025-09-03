@@ -449,8 +449,15 @@ export const formatTimestamp = (timestamp) => {
  * @param {number} index - Index of the post in the list
  * @returns {object} - Formatted post object
  */
-export const formatPostFromApi = (post, index) => {
-
+/**
+ * Format post data from API response
+ * @param {object} post - Raw post data from API
+ * @param {number} index - Index of the post in the list
+ * @param {string} currentUserId - Current user's ID for interaction checks
+ * @returns {object} - Formatted post object
+ */
+export const formatPostFromApi = (post, index, currentUserId) => {
+  // console.log('Debug: Raw post data:', post); // Debug log
   if (!post || typeof post !== "object") {
     console.warn(`Post at index ${index} is invalid:`, post);
     return null;
@@ -466,9 +473,9 @@ export const formatPostFromApi = (post, index) => {
   }
 
   // Create the formatted post object with all required fields
-  return {
+  const formattedPost = {
     id: post._id,
-    user: post.user._id || {},
+    user: post.user || {}, // Keep full user object for flexibility
     content: post.content || "",
     media: post.media || [],
     imageUrl: post.media && post.media.length > 0 ? post.media[0] : null,
@@ -485,15 +492,20 @@ export const formatPostFromApi = (post, index) => {
     location: post.location || null,
     feeling: post.feeling || null,
     isAmplified: Boolean(post.isAmplified),
-    originalPost: post.originalPost,
-    quoteContent: post.quoteContent,
+    originalPost: post.originalPost || null,
+    quoteContent: post.quoteContent || "",
     likeCount: post.likeCount || post.likes?.length || 0,
     dislikeCount: post.dislikeCount || post.dislikes?.length || 0,
     commentCount: post.commentCount || post.comments?.length || 0,
     bookmarkCount: post.bookmarkCount || post.bookmarks?.length || 0,
+    hasLiked: currentUserId ? post.likes?.includes(currentUserId) : false,
+    hasDisliked: currentUserId ? post.dislikes?.includes(currentUserId) : false,
+    hasBookmarked: currentUserId ? post.bookmarks?.includes(currentUserId) : false,
+    isArchived: post.archived || false,
   };
+  // console.log('Debug: Formatted post:', formattedPost); // Debug log
+  return formattedPost;
 };
-
 /**
  * Report a post with a specific reason
  * @param {string} postId - The ID of the post to report
@@ -554,7 +566,9 @@ export const createPostHandlers = (
   setPostToAmplify,
   setAmplifyModalVisible,
   setPostToReport,
-  setReportModalVisible
+  setReportModalVisible,
+  setArchivedPosts,
+  setPostsCount
 ) => {
   return {
     handleLikePost: (postId) => handleLikePost(postId, user, token, setPosts),
@@ -576,6 +590,8 @@ export const createPostHandlers = (
       setPostToAmplify(post);
       setAmplifyModalVisible(true);
     },
+    handleUnarchivePost: (postId) =>
+    handleUnarchivePost(postId, token, setPosts, setArchivedPosts, setPostsCount),
     // Add new function to initiate report process
     handleInitiateReport: (post) => {
       setPostToReport(post);
