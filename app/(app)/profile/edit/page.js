@@ -320,7 +320,7 @@ const EditPage = () => {
   education: data.education || "",
   profilePicture: data.profilePicture || null,
   coverPhoto: data.coverPhoto || null,
-  allowTagsFrom: data.allowTagsFrom || "everyone",
+  
 });
           setProfileImage(data.profilePicture || null);
           setCoverImage(data.coverPhoto || null);
@@ -348,7 +348,7 @@ const EditPage = () => {
         education: data.education || "",
         profilePicture: user?.profilePicture || null,
         coverPicture: user?.coverPhoto || null,
-        allowTagsFrom: data.allowTagsFrom || "everyone",
+        
       });
       setProfileImage(user?.profilePicture || null);
       setCoverImage(user?.coverPhoto || null);
@@ -1014,22 +1014,7 @@ const EditPage = () => {
               </div>
             </div>
 
-            <div>
-  <label className="text-sm text-gray-500 mb-1.5 block">
-    Who can tag you in posts
-  </label>
-  <div className="flex flex-row items-center bg-gray-50 border border-gray-200  rounded-xl overflow-hidden">
-    <Shield className="text-gray-400 w-5 h-5 ml-3" />
-    <select
-      className="flex-1 py-3 px-2 text-gray-800 cursor-pointer outline-none bg-transparent "
-      value={profileData.allowTagsFrom || "everyone"}
-      onChange={(e) => handleInputChange("allowTagsFrom", e.target.value)}
-    >
-      <option value="everyone">Everyone</option>
-      <option value="followers">Only followers</option>
-    </select>
-  </div>
-</div>
+            
             
             <div>
               <label className="text-sm text-gray-500 mb-1.5 block">

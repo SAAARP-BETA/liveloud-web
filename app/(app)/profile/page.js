@@ -14,7 +14,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
-// import { fonts } from "../../utils/fonts";
 import CustomModal from "../../components/ui/Modal";
 import AmplifyModal from "../../components/ui/AmplifyModal";
 import CommentModal from "../../components/ui/CommentModal";
@@ -24,7 +23,6 @@ import {
 } from "../../utils/postFunctions";
 import PostCard from "../../components/ui/PostCard";
 import { API_ENDPOINTS } from "../../utils/config";
-
 import {
   ArrowLeft,
   MoreHorizontal,
@@ -47,6 +45,8 @@ import {
   PenLineIcon,
   Award,
   Users,
+  Settings,
+  Shield,
 } from "lucide-react";
 import ReportModal from "@/app/components/ui/ReportModal";
 
@@ -249,7 +249,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
                 activeTab === tab.key ? "text-primary" : "text-gray-500"
               }`}
             >
-              {tab.title}
+              {tab.label}
             </span>
           </div>
         </button>
@@ -258,7 +258,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   );
 };
 
-// --- FIX: Added cursor-pointer to clickable stat buttons ---
+// User Stats Component (unchanged)
 const UserStats = ({
   followersCount,
   followingCount,
@@ -317,26 +317,19 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
   );
 };
 
-// Profile Skeleton Component (FIXED)
+// Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
     <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4">
-      {/* Use the same container structure as ProfilePage */}
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
         <div className="w-full flex flex-col items-center bg-gray-50">
           <div className="w-full relative">
-            {/* Cover photo skeleton */}
             <div className="w-full h-[150px] bg-gray-200 animate-pulse" />
-
-            {/* Profile image skeleton - positioned like the real component */}
             <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
               <div className="w-24 h-24 rounded-full bg-gray-300 border-4 border-white animate-pulse" />
             </div>
           </div>
-
           <div className="h-12"></div>
-
-          {/* Content skeleton matching the real component structure */}
           <div className="bg-white border-b border-gray-100 w-full">
             <div className="mt-4 text-center px-4 space-y-3">
               {/* Name skeleton */}
@@ -345,7 +338,6 @@ const ProfileSkeleton = () => {
               <div className="w-24 h-4 bg-gray-200 rounded-md mt-2 mx-auto animate-pulse" />
               {/* Bio skeleton */}
               <div className="w-48 h-4 bg-gray-200 rounded-md mt-4 mx-auto animate-pulse" />
-
               {/* Stats skeleton */}
               <div className="flex justify-center mt-4 space-x-6">
                 <div className="flex flex-col items-center">
@@ -361,19 +353,15 @@ const ProfileSkeleton = () => {
                   <div className="w-14 h-4 bg-gray-200 rounded-md mt-1 animate-pulse" />
                 </div>
               </div>
-
               {/* Buttons skeleton */}
               <div className="flex mt-4 w-full max-w-md mx-auto space-x-3">
                 <div className="flex-1 h-10 bg-gray-200 rounded-full animate-pulse" />
                 <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
               </div>
-
               {/* Points skeleton */}
               <div className="mt-4 w-full h-32 bg-gray-200 rounded-xl animate-pulse" />
-
               {/* Streak skeleton */}
               <div className="mt-3 w-32 h-8 bg-gray-200 rounded-full mx-auto animate-pulse" />
-
               {/* Profile stats skeleton */}
               <div className="mt-5 pt-4 border-t border-gray-100">
                 <div className="w-40 h-4 bg-gray-200 rounded-md mb-2 animate-pulse" />
@@ -382,7 +370,6 @@ const ProfileSkeleton = () => {
               </div>
             </div>
           </div>
-
           {/* Tab bar skeleton */}
           <div className="flex w-full border justify-center border-gray-100 pt-2 px-2 sm:px-0">
             <div className="flex-1 flex items-center justify-center pb-2">
@@ -392,8 +379,6 @@ const ProfileSkeleton = () => {
               <div className="w-16 h-6 bg-gray-200 rounded-md animate-pulse" />
             </div>
           </div>
-
-          {/* Content area skeleton - FIXED to maintain full width */}
           <div className="px-2 sm:px-4 pt-2 w-full">
             {/* Post skeletons */}
             {[1, 2, 3].map((i) => (
@@ -417,7 +402,6 @@ const ProfileSkeleton = () => {
               </div>
             ))}
           </div>
-
           <div className="h-20"></div>
         </div>
       </div>
@@ -460,6 +444,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [postsCount, setPostsCount] = useState(initialUser?.postsCount || 0);
   const [isMyProfile, setIsMyProfile] = useState(false);
   const [isMoreModalVisible, setIsMoreModalVisible] = useState(false);
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [profileStats, setProfileStats] = useState(null);
   const [scrollY, setScrollY] = useState(0);
   const [userPoints, setUserPoints] = useState(initialPoints || null);
@@ -472,20 +457,19 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [isCommentModalVisible, setCommentModalVisible] = useState(false);
   const [postToComment, setPostToComment] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  // Report modal
-  const [isReportModalVisible, setReportModalVisible] = useState(false);
   const [postToReport, setPostToReport] = useState(null);
-
+  const [isReportModalVisible, setReportModalVisible] = useState(false);
   const [postPage, setPostPage] = useState(1);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [isPostsLoading, setIsPostsLoading] = useState(false);
   const [error, setError] = useState();
-
-  // Loading guards
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isPointsLoading, setIsPointsLoading] = useState(false);
+  const [profileData, setProfileData] = useState({ allowTagsFrom: "everyone" });
+  const [submitting, setSubmitting] = useState(false);
 
   const abortControllerRef = useRef(null);
+  const hasFetchedProfile = useRef(false); // New ref to track initial fetch
 
   // Post handlers
   const postHandlers = useMemo(
@@ -607,6 +591,56 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     }
   }, [currentUser?.username, usernameParam]);
 
+  // Fetch user points
+  const fetchUserPoints = useCallback(
+    async (userId) => {
+      if (!userId || isPointsLoading || pointsLoaded) return;
+
+      setIsPointsLoading(true);
+      setPointsLoading(true);
+
+      try {
+        setErrorMessage("");
+        if (!token || !isAuthenticated) {
+          setErrorMessage("Authentication required to fetch points.");
+          return;
+        }
+
+        const headers = { Authorization: `Bearer ${token}` };
+        const endpoint = isMyProfile
+          ? `${API_ENDPOINTS.POINTS}/my-summary`
+          : `${API_ENDPOINTS.POINTS}/summary/${userId}`;
+
+        const response = await fetch(endpoint, { headers });
+
+        if (!response.ok) {
+          console.error(`Failed to fetch points: ${response.status}`);
+          setErrorMessage(`Failed to fetch points: ${response.status}`);
+          return;
+        }
+
+        const pointsData = await response.json();
+        const levelInfo = {
+          level: pointsData.level,
+          title: pointsData.rank,
+          minPoints: null,
+          pointsToNext: isMyProfile ? pointsData.pointsToNextLevel : null,
+        };
+
+        setUserPoints({ ...pointsData, levelInfo });
+      } catch (error) {
+        setErrorMessage(`Failed to load points data: ${error.message}`);
+        console.error("Error fetching points:", error);
+      } finally {
+        setPointsLoading(false);
+        setPointsLoaded(true);
+        setIsPointsLoading(false);
+      }
+    },
+    [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded]
+  );
+
+  // Fetch user posts
   const fetchUserPosts = useCallback(
     async (userId, page) => {
       if (!userId || isPostsLoading) {
@@ -657,53 +691,70 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     [token, isPostsLoading]
   );
 
-  const fetchUserPoints = useCallback(
-    async (userId) => {
-      if (!userId || isPointsLoading || pointsLoaded) return;
+  // Fetch user profile
+  const fetchUserProfile = useCallback(async () => {
+    if (isProfileLoading || hasFetchedProfile.current) return;
 
-      setIsPointsLoading(true);
-      setPointsLoading(true);
+    setIsProfileLoading(true);
+    setPosts([]);
+    setPostPage(1);
+    setHasMorePosts(true);
 
-      try {
-        setErrorMessage("");
-        if (!token || !isAuthenticated) {
-          setErrorMessage("Authentication required to fetch points.");
-          return;
-        }
-
-        const headers = { Authorization: `Bearer ${token}` };
-        const endpoint = isMyProfile
-          ? `${API_ENDPOINTS.POINTS}/my-summary`
-          : `${API_ENDPOINTS.POINTS}/summary/${userId}`;
-
-        const response = await fetch(endpoint, { headers });
-
-        if (!response.ok) {
-          console.error(`Failed to fetch points: ${response.status}`);
-          setErrorMessage(`Failed to fetch points: ${response.status}`);
-          return;
-        }
-
-        const pointsData = await response.json();
-        const levelInfo = {
-          level: pointsData.level,
-          title: pointsData.rank,
-          minPoints: null,
-          pointsToNext: isMyProfile ? pointsData.pointsToNextLevel : null,
-        };
-
-        setUserPoints({ ...pointsData, levelInfo });
-      } catch (error) {
-        setErrorMessage(`Failed to load points data: ${error.message}`);
-        console.error("Error fetching points:", error);
-      } finally {
-        setPointsLoading(false);
-        setPointsLoaded(true);
-        setIsPointsLoading(false);
+    try {
+      const targetUsername =
+        usernameParam || (currentUser && currentUser.username) || "";
+      if (!targetUsername) {
+        setErrorMessage("No username provided.");
+        setIsLoading(false);
+        return;
       }
-    },
-    [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded]
-  );
+
+      setIsLoading(true);
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await fetch(
+        `${API_ENDPOINTS.USER}/profiles/${targetUsername}`,
+        { headers }
+      );
+
+      if (!response.ok)
+        throw new Error(`Failed to fetch profile: ${response.status}`);
+
+      const userData = await response.json();
+      if (!userData || !userData._id) {
+        throw new Error("Invalid user data received from API");
+      }
+
+      setUser(userData);
+      setFollowersCount(userData.followersCount || 0);
+      setFollowingCount(userData.followingCount || 0);
+      setIsFollowing(userData.isFollowing || false);
+      setProfileData({ allowTagsFrom: userData.allowTagsFrom || "everyone" });
+
+      const joined = new Date(userData.createdAt);
+      const joinedDate = `${joined.toLocaleString("default", {
+        month: "long",
+      })} ${joined.getFullYear()}`;
+      setProfileStats({
+        joined: joinedDate,
+        location: userData.location,
+        website: userData.website,
+        engagement: userData.engagement || "89%",
+        responseRate: userData.responseRate || "94%",
+      });
+
+      fetchUserPoints(userData._id);
+      fetchUserPosts(userData._id, 1);
+    } catch (error) {
+      setErrorMessage(`Failed to load profile: ${error.message}`);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+      setIsProfileLoading(false);
+      hasFetchedProfile.current = true; // Mark initial fetch as complete
+    }
+  }, [usernameParam, currentUser?.username, token, fetchUserPoints, fetchUserPosts]);
 
   // Fetch followers list
   const fetchFollowers = useCallback(
@@ -725,7 +776,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
 
         const data = await response.json();
 
-        // Add follow status for each follower
         const followersWithStatus = await Promise.all(
           data.followers.map(async (follower) => {
             if (follower._id === currentUser?.userId) {
@@ -782,7 +832,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
 
         const data = await response.json();
 
-        // Add follow status for each user being followed
         const followingWithStatus = await Promise.all(
           data.following.map(async (following) => {
             if (following._id === currentUser?.userId) {
@@ -819,75 +868,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     [token, currentUser]
   );
 
-  const fetchUserProfile = useCallback(async () => {
-    if (isProfileLoading) return;
-
-    setIsProfileLoading(true);
-    setPosts([]);
-    setPostPage(1);
-    setHasMorePosts(true);
-
-    try {
-      const targetUsername =
-        usernameParam || (currentUser && currentUser.username) || "";
-      if (!targetUsername) {
-        setErrorMessage("No username provided.");
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await fetch(
-        `${API_ENDPOINTS.USER}/profiles/${targetUsername}`,
-        { headers }
-      );
-
-      if (!response.ok)
-        throw new Error(`Failed to fetch profile: ${response.status}`);
-
-      const userData = await response.json();
-      if (!userData || !userData._id) {
-        throw new Error("Invalid user data received from API");
-      }
-
-      setUser(userData);
-      setFollowersCount(userData.followersCount || 0);
-      setFollowingCount(userData.followingCount || 0);
-      setIsFollowing(userData.isFollowing || false);
-
-      const joined = new Date(userData.createdAt);
-      const joinedDate = `${joined.toLocaleString("default", {
-        month: "long",
-      })} ${joined.getFullYear()}`;
-      setProfileStats({
-        joined: joinedDate,
-        location: userData.location,
-        website: userData.website,
-        engagement: userData.engagement || "89%",
-        responseRate: userData.responseRate || "94%",
-      });
-
-      fetchUserPoints(userData._id);
-      fetchUserPosts(userData._id, 1);
-    } catch (error) {
-      setErrorMessage(`Failed to load profile: ${error.message}`);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-      setIsProfileLoading(false);
-    }
-  }, [
-    usernameParam,
-    currentUser?.username,
-    token,
-    isProfileLoading,
-    fetchUserPoints,
-    fetchUserPosts,
-  ]);
-
+  // Handle follow toggle
   const handleFollowToggle = async () => {
     if (!isAuthenticated) {
       toast.error("Please login to follow users");
@@ -923,7 +904,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     }
   };
 
-  // Follow/unfollow user in modal lists
+  // Handle modal follow toggle
   const handleModalFollowToggle = async (targetUser) => {
     if (!isAuthenticated) {
       toast.error("Login Required", "Please login to follow users");
@@ -947,7 +928,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         throw new Error("Failed to update follow status");
       }
 
-      // Update the followers list
       setFollowersList((prev) =>
         prev.map((user) =>
           user._id === targetUser._id
@@ -956,7 +936,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         )
       );
 
-      // Update the following list
       setFollowingList((prev) =>
         prev.map((user) =>
           user._id === targetUser._id
@@ -965,7 +944,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         )
       );
 
-      // Update profile counts if following/unfollowing the current profile user
       if (targetUser._id === user?._id) {
         setIsFollowing((prev) => !prev);
         setFollowersCount((prev) =>
@@ -978,6 +956,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     }
   };
 
+  // Handle share profile
   const handleShareProfile = async () => {
     try {
       toast.error(
@@ -988,13 +967,56 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     }
   };
 
+  // Handle input change for allowTagsFrom
+  const handleInputChange = (field, value) => {
+    setProfileData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Handle update allowTagsFrom
+  const handleUpdateAllowTagsFrom = async () => {
+    if (!isAuthenticated || !token) {
+      toast.error("Please login to update settings");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const formData = new FormData();
+      formData.append("allowTagsFrom", profileData.allowTagsFrom);
+
+      const response = await fetch(`${API_ENDPOINTS.USER}/profiles`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update settings");
+      }
+
+      toast.success("Settings updated successfully");
+      setIsSettingsModalVisible(false);
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      toast.error(error.message || "Failed to update settings");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle refresh
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
     setPointsLoaded(false);
     setUserPoints(null);
+    hasFetchedProfile.current = false; // Allow fetch on refresh
     fetchUserProfile();
   }, [fetchUserProfile]);
 
+  // Handle comment success
   const handleCommentSuccess = () => {
     if (postToComment) {
       setPosts((prev) =>
@@ -1008,9 +1030,12 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     }
   };
 
+  // Trigger initial profile fetch
   useEffect(() => {
-    fetchUserProfile();
-  }, [usernameParam]);
+    if (!hasFetchedProfile.current) {
+      fetchUserProfile();
+    }
+  }, [usernameParam, currentUser?.username, token, fetchUserProfile]);
 
   const observer = useRef();
   const lastPostElementRef = useCallback(
@@ -1040,7 +1065,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
       </div>
     );
   }
-  const handleReportSuccess = (reportedPostId) => {
+
+const handleReportSuccess = (reportedPostId) => {
     const updatedPosts = getCurrentTabData().posts.filter(
       (post) => post.id !== reportedPostId
     );
@@ -1049,7 +1075,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
 
   return (
     <div className="min-h-screen bg-white flex justify-center">
-    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+      <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
         <div className="w-full flex flex-col items-center bg-gray-50">
           <div
             className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
@@ -1057,15 +1083,14 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             onScroll={handleScroll}
           >
             <div className="w-full relative">
-        <Image
-          src={user?.coverPhoto || defaultCover}
-          alt="Cover"
-          className="w-full h-[150px] object-cover"
-          width={1200}
-          height={150}
-          priority
-        />
-
+              <Image
+                src={user?.coverPhoto || defaultCover}
+                alt="Cover"
+                className="w-full h-[150px] object-cover"
+                width={1200}
+                height={150}
+                priority
+              />
               <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
                 <motion.div
                   className="border-4 border-white shadow-sm bg-white relative w-full"
@@ -1089,7 +1114,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                       href="/profile/edit"
                       className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
                     >
-                      <Edit2 className=" text-primary text-md" size={20} />
+                      <Edit2 className="text-primary text-md" size={20} />
                     </Link>
                   )}
                 </motion.div>
@@ -1149,6 +1174,12 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         Edit Profile
                       </Link>
                       <button
+                        onClick={() => setIsSettingsModalVisible(true)}
+                        className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer"
+                      >
+                        <Settings className="text-gray-600 text-lg" />
+                      </button>
+                      <button
                         onClick={handleShareProfile}
                         className="w-10 h-10 bg-gray-100 cursor-pointer rounded-full flex items-center justify-center"
                       >
@@ -1185,7 +1216,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   )}
                 </div>
 
-                {/* Premium Button for User's Own Profile */}
                 {isMyProfile && (
                   <button
                     onClick={() => router.push("/premium")}
@@ -1222,7 +1252,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         </span>
                       </div>
                     )}
-                    {/* --- FIX: Made website a clickable link --- */}
                     {user?.website && (
                       <div className="flex items-center mb-2">
                         <LinkIcon className="text-gray-600 text-lg" />
@@ -1258,11 +1287,11 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               ]}
               activeTab={activeTab}
               onTabPress={setActiveTab}
-              className="border-2 w-full flex  justify-between"
+              className="border-2 w-full flex justify-between"
             />
 
             <motion.div
-              className=" pt-2 cursor-pointer w-full"
+              className="pt-2 cursor-pointer w-full"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -1362,6 +1391,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             <div className="h-20"></div>
           </div>
         </div>
+
+      
         <CustomModal
           visible={isMoreModalVisible}
           onClose={() => setIsMoreModalVisible(false)}
@@ -1395,6 +1426,54 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             </button>
           </div>
         </CustomModal>
+
+       
+      
+<CustomModal
+  visible={isSettingsModalVisible}
+  onClose={() => setIsSettingsModalVisible(false)}
+  title="Profile Settings"
+  position="bottom"
+  className="sm:items-center"
+>
+  <div className="bg-white p-4 sm:p-6 rounded-t-3xl sm:rounded-3xl">
+    <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4 sm:hidden" />
+    <div>
+      <label className="text-sm sm:text-base text-gray-500 mb-1.5 block">
+        Who can tag you in posts
+      </label>
+      <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+        <Shield className="text-gray-400 w-5 h-5 ml-3 sm:ml-4" />
+        <select
+          className="flex-1 py-2 sm:py-3 px-2 sm:px-3 text-gray-800 cursor-pointer outline-none bg-transparent text-sm sm:text-base"
+          value={profileData.allowTagsFrom || "everyone"}
+          onChange={(e) => handleInputChange("allowTagsFrom", e.target.value)}
+        >
+          <option value="everyone">Everyone</option>
+          <option value="followers">Only followers</option>
+        </select>
+      </div>
+    </div>
+    <div className="flex justify-end space-x-3 mt-4 sm:mt-6">
+      <button
+        onClick={() => setIsSettingsModalVisible(false)}
+        className="px-3 sm:px-4 py-1.5 sm:py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition text-sm sm:text-base"
+      >
+        Cancel
+      </button>
+      <button
+        onClick={handleUpdateAllowTagsFrom}
+        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded bg-primary text-white font-semibold cursor-pointer hover:bg-sky-600 transition text-sm sm:text-base ${
+          submitting ? "opacity-70 cursor-not-allowed" : ""
+        }`}
+        disabled={submitting}
+      >
+        {submitting ? "Saving..." : "Save"}
+      </button>
+    </div>
+  </div>
+</CustomModal>
+       
         <CustomModal
           visible={isModalVisible}
           onClose={() => setModalVisible(false)}
@@ -1437,7 +1516,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               </span>
             </button>
             <button
-              // href={`/home/post-detail?postId=${selectedPost?.id}`}
               className="flex items-center py-4 border-b border-gray-100 w-full text-left"
               onClick={() => {
                 setModalVisible(false);
@@ -1451,22 +1529,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 View Comments
               </span>
             </button>
-            {/* <button
-              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-              onClick={() => {
-                setModalVisible(false);
-                if (confirm("Are you sure you want to report this post?")) {
-                  toast.success("Thank you for your report.");
-                }
-              }}
-            >
-              <div className="w-8">
-                <Flag className="text-gray-600 text-xl" />
-              </div>
-              <span className="text-base text-red-500 font-medium">
-                Report Post
-              </span>
-            </button> */}
             <button
               onClick={() => setModalVisible(false)}
               className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
@@ -1475,6 +1537,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             </button>
           </div>
         </CustomModal>
+
+      
         <AmplifyModal
           isVisible={isAmplifyModalVisible}
           onClose={() => setAmplifyModalVisible(false)}
@@ -1485,7 +1549,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             fetchUserProfile();
           }}
         />
-        {/* Comment Modal */}
+
+        
         <CommentModal
           visible={isCommentModalVisible}
           onClose={() => setCommentModalVisible(false)}
@@ -1493,8 +1558,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           post={postToComment}
           onSuccess={handleCommentSuccess}
           token={token}
-        ></CommentModal>
-        {/* Amplify Modal */}
+        />
+
+          {/* Amplify Modal */}
         <AmplifyModal
           visible={isAmplifyModalVisible}
           onClose={() => setAmplifyModalVisible(false)}
@@ -1517,7 +1583,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             updateTabData(activeTab, { posts: updatedPosts });
           }}
         ></AmplifyModal>
-        {/* Report Modal */}
+      {/* Report Modal */}
         <ReportModal
           visible={isReportModalVisible}
           onClose={() => setReportModalVisible(false)}
@@ -1525,9 +1591,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           post={postToReport}
           onSuccess={handleReportSuccess}
           token={token}
-        ></ReportModal>
+        />
 
-        {/* Follower Modal */}
+         {/* Follower Modal */}
         <CustomModal
           visible={isFollowersModalVisible}
           onClose={() => setIsFollowersModalVisible(false)}
@@ -1538,7 +1604,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           {followersLoading ? (
             <div className="flex flex-col items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent"></div>
-              <p className="mt-4 text-gray-600 text-sm">Loading following...</p>
+              <p className="mt-4 text-gray-600 text-sm">Loading followers...</p>
             </div>
           ) : followersList.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
@@ -1595,7 +1661,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           )}
         </CustomModal>
 
-        {/* Following Modal */}
+       {/* Following Modal */}
         <CustomModal
           visible={isFollowingModalVisible}
           onClose={() => setIsFollowingModalVisible(false)}
