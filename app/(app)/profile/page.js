@@ -467,6 +467,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [isPointsLoading, setIsPointsLoading] = useState(false);
   const [profileData, setProfileData] = useState({ allowTagsFrom: "everyone" });
   const [submitting, setSubmitting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
+  const [deleteUserDataOption, setDeleteUserDataOption] = useState(false);
 
   const abortControllerRef = useRef(null);
   const hasFetchedProfile = useRef(false); // New ref to track initial fetch
@@ -639,6 +642,52 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     },
     [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded]
   );
+  // Delete Account 
+    const handleDeleteAccount = async () => {
+      try {
+        setSubmitting(true);
+        const response = await fetch(`${API_ENDPOINTS.AUTH}/delete`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ deleteUserData: deleteUserDataOption }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Failed to delete account");
+        router.push("/login");
+        toast.success(data.message);
+        
+      } catch (error) {
+        toast.error(error.message || "Failed to delete account");
+      } finally {
+        setSubmitting(false);
+        setShowDeleteDialog(false);
+      }
+    };
+    const handleDeactivateAccount = async () => {
+      try {
+        setSubmitting(true);
+        const response = await fetch(`${API_ENDPOINTS.AUTH}/deactivate`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Failed to deactivate account");
+        toast.success(data.message);
+        await logout();
+        router.push("/login");
+      } catch (error) {
+        toast.error(error.message || "Failed to deactivate account");
+      } finally {
+        setSubmitting(false);
+        setShowDeactivateDialog(false);
+      }
+    };
+  
 
   // Fetch user posts
   const fetchUserPosts = useCallback(
@@ -1454,6 +1503,7 @@ const handleReportSuccess = (reportedPostId) => {
         </select>
       </div>
     </div>
+
     <div className="flex justify-end space-x-3 mt-4 sm:mt-6">
       <button
         onClick={() => setIsSettingsModalVisible(false)}
@@ -1470,10 +1520,102 @@ const handleReportSuccess = (reportedPostId) => {
       >
         {submitting ? "Saving..." : "Save"}
       </button>
+      
+    </div>
+        <div className="mt-8 flex flex-col gap-4">
+      <button
+        className="w-full py-3 flex items-center justify-center gap-2 bg-amber-200 text-gray-900 rounded-lg font-semibold hover:bg-amber-300 transition-colors cursor-pointer"
+        onClick={() => setShowDeactivateDialog(true)}
+      >
+        Deactivate Account
+      </button>
+      <button
+        className="w-full py-3 flex items-center justify-center gap-2 bg-rose-400 text-white rounded-lg font-semibold hover:bg-rose-500 transition-colors cursor-pointer"
+        onClick={() => setShowDeleteDialog(true)}
+      >
+        Delete Account
+      </button>
     </div>
   </div>
 </CustomModal>
-       
+
+{/* Delete Account Modal */}
+<CustomModal
+  visible={showDeleteDialog}
+  onClose={() => setShowDeleteDialog(false)}
+  title="Delete Account"
+>
+  <div className="py-4 px-6">
+    <div className="flex items-center mb-4">
+      <span className="text-lg font-semibold text-rose-500">Delete Account</span>
+    </div>
+    <p className="mb-4 text-gray-700">
+      Are you sure you want to{" "}
+      <span className="font-bold text-rose-400">delete</span> your account? This
+      action <span className="font-bold">cannot be undone</span>.
+    </p>
+    <div className="mb-4">
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={deleteUserDataOption}
+          onChange={(e) => setDeleteUserDataOption(e.target.checked)}
+          className="cursor-pointer"
+        />
+        <span className="text-gray-700">Also delete my data</span>
+      </label>
+    </div>
+    <div className="flex justify-end space-x-3 mt-6">
+      <button
+        className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition"
+        onClick={() => setShowDeleteDialog(false)}
+      >
+        Cancel
+      </button>
+      <button
+        className="px-4 py-2 rounded bg-rose-400 text-white font-semibold cursor-pointer hover:bg-rose-500 transition"
+        onClick={handleDeleteAccount}
+        disabled={submitting}
+      >
+        {submitting ? "Deleting..." : "Delete"}
+      </button>
+    </div>
+  </div>
+</CustomModal>
+
+{/* Deactivate Account Modal */}
+<CustomModal
+  visible={showDeactivateDialog}
+  onClose={() => setShowDeactivateDialog(false)}
+  title="Deactivate Account"
+>
+  <div className="py-4 px-6">
+    <div className="flex items-center mb-4">
+      <span className="text-lg font-semibold text-amber-500">Deactivate Account</span>
+    </div>
+    <p className="mb-4 text-gray-700">
+      Are you sure you want to{" "}
+      <span className="font-bold text-amber-400">deactivate</span> your account?
+      You can reactivate it by logging in again.
+    </p>
+    <div className="flex justify-end space-x-3 mt-6">
+      <button
+        className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition"
+        onClick={() => setShowDeactivateDialog(false)}
+      >
+        Cancel
+      </button>
+      <button
+        className="px-4 py-2 rounded bg-amber-200 text-gray-900 font-semibold cursor-pointer hover:bg-amber-300 transition"
+        onClick={handleDeactivateAccount}
+        disabled={submitting}
+      >
+        {submitting ? "Deactivating..." : "Deactivate"}
+      </button>
+    </div>
+  </div>
+</CustomModal>
+
         <CustomModal
           visible={isModalVisible}
           onClose={() => setModalVisible(false)}

@@ -365,51 +365,6 @@ const EditPage = () => {
       setLoading(false);
     }
   };
-    // Delete account handler
-  const handleDeleteAccount = async () => {
-    try {
-      setSubmitting(true);
-      const response = await fetch(`${API_ENDPOINTS.AUTH}/delete`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ deleteUserData: deleteUserDataOption }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to delete account");
-      router.push("/login");
-      toast.success(data.message);
-      
-    } catch (error) {
-      toast.error(error.message || "Failed to delete account");
-    } finally {
-      setSubmitting(false);
-      setShowDeleteDialog(false);
-    }
-  };
-  const handleDeactivateAccount = async () => {
-    try {
-      setSubmitting(true);
-      const response = await fetch(`${API_ENDPOINTS.AUTH}/deactivate`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to deactivate account");
-      toast.success(data.message);
-      await logout();
-      router.push("/login");
-    } catch (error) {
-      toast.error(error.message || "Failed to deactivate account");
-    } finally {
-      setSubmitting(false);
-      setShowDeactivateDialog(false);
-    }
-  };
 
   const uploadImage = async (file, type) => {
     try {
