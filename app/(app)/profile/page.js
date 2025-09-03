@@ -28,6 +28,7 @@ import {
   MoreHorizontal,
   Image as ImageIcon,
   Share2,
+  Trash2,
   MessageCircle,
   Bookmark,
   Flag,
@@ -413,7 +414,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const usernameParam = searchParams.get("username");
-  const { user: currentUser, token, isAuthenticated } = useAuth();
+  const { user: currentUser, token, isAuthenticated,logout } = useAuth();
 
   // State for resizable header
   const [headerHeight, setHeaderHeight] = useState(HEADER_MAX_HEIGHT);
@@ -1477,7 +1478,7 @@ const handleReportSuccess = (reportedPostId) => {
         </CustomModal>
 
        
-      
+
 <CustomModal
   visible={isSettingsModalVisible}
   onClose={() => setIsSettingsModalVisible(false)}
@@ -1485,16 +1486,16 @@ const handleReportSuccess = (reportedPostId) => {
   position="bottom"
   className="sm:items-center"
 >
-  <div className="bg-white p-4 sm:p-6 rounded-t-3xl sm:rounded-3xl">
-    <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4 sm:hidden" />
-    <div>
-      <label className="text-sm sm:text-base text-gray-500 mb-1.5 block">
+  <div className="bg-white p-6 rounded-t-3xl sm:rounded-3xl">
+    <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6 sm:hidden" />
+    <div className="mb-6">
+      <label className="text-base text-gray-600 mb-2 block font-medium">
         Who can tag you in posts
       </label>
       <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-        <Shield className="text-gray-400 w-5 h-5 ml-3 sm:ml-4" />
+        <Shield className="text-gray-400 w-5 h-5 ml-4" />
         <select
-          className="flex-1 py-2 sm:py-3 px-2 sm:px-3 text-gray-800 cursor-pointer outline-none bg-transparent text-sm sm:text-base"
+          className="flex-1 py-3 px-3 text-gray-800 cursor-pointer outline-none bg-transparent text-base"
           value={profileData.allowTagsFrom || "everyone"}
           onChange={(e) => handleInputChange("allowTagsFrom", e.target.value)}
         >
@@ -1504,40 +1505,46 @@ const handleReportSuccess = (reportedPostId) => {
       </div>
     </div>
 
-    <div className="flex justify-end space-x-3 mt-4 sm:mt-6">
+    <div className="flex justify-end space-x-3 mb-8">
       <button
         onClick={() => setIsSettingsModalVisible(false)}
-        className="px-3 sm:px-4 py-1.5 sm:py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition text-sm sm:text-base"
+        className="px-4 py-2 rounded bg-gray-100 text-gray-700 font-medium cursor-pointer hover:bg-gray-200 transition text-base"
       >
         Cancel
       </button>
       <button
         onClick={handleUpdateAllowTagsFrom}
-        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded bg-primary text-white font-semibold cursor-pointer hover:bg-sky-600 transition text-sm sm:text-base ${
+        className={`px-4 py-2 rounded bg-blue-400 text-white font-semibold cursor-pointer hover:bg-blue-500 transition text-base ${
           submitting ? "opacity-70 cursor-not-allowed" : ""
         }`}
         disabled={submitting}
       >
         {submitting ? "Saving..." : "Save"}
       </button>
-      
     </div>
-        <div className="mt-8 flex flex-col gap-4">
+
+    <div className="mt-2 flex flex-col gap-3">
       <button
-        className="w-full py-3 flex items-center justify-center gap-2 bg-amber-200 text-gray-900 rounded-lg font-semibold hover:bg-amber-300 transition-colors cursor-pointer"
-        onClick={() => setShowDeactivateDialog(true)}
+        className="w-full py-3 flex items-center justify-center gap-2 bg-white text-gray-900 rounded-lg font-semibold transition-colors cursor-pointer shadow-sm hover:bg-rose-100 hover:text-rose-700"
+        onClick={() => setShowDeleteDialog(true)}
+        style={{ border: "none" }}
       >
-        Deactivate Account
+        <Trash2 className="w-5 h-5 text-gray-400 group-hover:text-rose-700" />
+        Delete Account
       </button>
       <button
-        className="w-full py-3 flex items-center justify-center gap-2 bg-rose-400 text-white rounded-lg font-semibold hover:bg-rose-500 transition-colors cursor-pointer"
-        onClick={() => setShowDeleteDialog(true)}
+        className="w-full py-3 flex items-center justify-center gap-2 bg-white text-gray-900 rounded-lg font-semibold transition-colors cursor-pointer shadow-sm hover:bg-amber-100 hover:text-amber-700"
+        onClick={() => setShowDeactivateDialog(true)}
+        style={{ border: "none" }}
       >
-        Delete Account
+        <Settings className="w-5 h-5 text-gray-400 group-hover:text-amber-700" />
+        Deactivate Account
       </button>
     </div>
   </div>
 </CustomModal>
+
+// ...existing code...
 
 {/* Delete Account Modal */}
 <CustomModal
