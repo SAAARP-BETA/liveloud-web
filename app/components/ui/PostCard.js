@@ -12,10 +12,13 @@ import {
   ThumbsDown,
   CheckCircle,
   ArrowUpRightFromSquare,
+  Archive,
+  Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import FilteredImage from "../common/FilteredImage";
-import { MdLocationOn, MdMood, MdPeople } from 'react-icons/md';
+import { MdLocationOn, MdMood, MdPeople, MdTranslate, MdVerified } from 'react-icons/md';
 import { fonts } from "@/app/utils/fonts";
 
 const PostCard = ({
@@ -31,12 +34,24 @@ const PostCard = ({
   username,
   handleDislikePost,
   handleUndislikePost,
+  handleTranslatePost, // ADDED: Translation handler
+  isTranslating, // ADDED: Translation loading state
+  allowArchivedOptions = false, // ADDED: Allow options for archived posts
 }) => {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageDimensions, setImageDimensions] = useState({});
   const containerRef = useRef(null);
+
+  // ADDED: Translation states from post props
+  const translatedContent = post.translatedContent;
+  const showTranslation = post.showTranslation || false;
+  const detectedLanguage = post.detectedLanguage;
+
+  // ADDED: Check if post is archived
+  const isArchived = post.isArchived || post.archived || false;
 
   useEffect(() => {
     setIsVisible(true);
@@ -75,12 +90,90 @@ const PostCard = ({
     setCurrentImageIndex(imageIndex);
   };
 
-  // Extract hashtags from content
+  // ADDED: Get image height calculation (from mobile)
+  const getImageHeight = (imageUri, index) => {
+    const key = `${post.id}-${index}`;
+    
+    if (imageDimensions[key]) {
+      const { width: imgWidth, height: imgHeight } = imageDimensions[key];
+      const containerWidth = 400; // approximate container width for web
+      const aspectRatio = imgHeight / imgWidth;
+      const calculatedHeight = containerWidth * aspectRatio;
+      
+      // Set reasonable min and max heights
+      const minHeight = 200;
+      const maxHeight = 500;
+      
+      return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
+    }
+    
+    // Default height while loading
+    return 320;
+  };
+
+  // ADDED: Load image dimensions (from mobile)
+  const loadImageDimensions = (imageUri, index) => {
+    const key = `${post.id}-${index}`;
+    
+    if (!imageDimensions[key]) {
+      const img = new window.Image();
+      img.onload = () => {
+        setImageDimensions(prev => ({
+          ...prev,
+          [key]: { width: img.width, height: img.height }
+        }));
+      };
+      img.onerror = () => {
+        console.warn('Failed to get image dimensions:', imageUri);
+        setImageDimensions(prev => ({
+          ...prev,
+          [key]: { width: 400, height: 300 }
+        }));
+      };
+      img.src = imageUri;
+    }
+  };
+
+  // ADDED: Load dimensions for all images when component mounts
+  useEffect(() => {
+    if (hasMedia && post.media) {
+      post.media.forEach((imageUri, index) => {
+        loadImageDimensions(imageUri, index);
+      });
+    }
+  }, [post.media]);
+
+  // ADDED: Translation handler
+  const handleTranslatePostLocal = () => {
+    if (handleTranslatePost) {
+      handleTranslatePost(post);
+    }
+  };
+
+  // ADDED: Toggle between original and translated content
+  const toggleTranslation = () => {
+    if (handleTranslatePost) {
+      handleTranslatePost(post);
+    }
+  };
+
+  // ADDED: Check if text is likely in English
+  const isLikelyEnglish = (text) => {
+    if (!text) return true;
+    const asciiRatio = text.replace(/[^\x00-\x7F]/g, '').length / text.length;
+    return asciiRatio > 0.8;
+  };
+
+  const shouldShowTranslateButton = !isLikelyEnglish(post.content);
+
+  // MODIFIED: Extract hashtags from content with translation support
   const renderContent = () => {
-    if (!post.content) return null;
+    const contentToRender = post.showTranslation && post.translatedContent ? post.translatedContent : post.content;
+    
+    if (!contentToRender) return null;
 
     // Split content into lines first to preserve newlines
-    const lines = post.content.split('\n');
+    const lines = contentToRender.split('\n');
     
     // Process each line to handle hashtags and mentions
     const processedLines = lines.map((line, lineIndex) => {
@@ -101,19 +194,54 @@ const PostCard = ({
         return word;
       });
 
-      // Return each line wrapped in a fragment
       return (
         <React.Fragment key={`line-${lineIndex}`}>
           {contentWithTags}
-          {lineIndex < lines.length - 1 && <br />} {/* Add line break between lines */}
+          {lineIndex < lines.length - 1 && <br />}
         </React.Fragment>
       );
     });
 
     return (
-      <p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words whitespace-pre-line">
-        {processedLines}
-      </p>
+      <div>
+        <p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words whitespace-pre-line">
+          {showTranslation && translatedContent ? translatedContent : processedLines}
+        </p>
+        
+        {/* ADDED: Translation indicator */}
+        {showTranslation && translatedContent && (
+          <div className="flex items-center justify-between mb-2 bg-green-50 p-2 rounded-lg">
+            <div className="flex items-center">
+              <MdTranslate size={14} className="text-green-600" />
+              <span className="text-xs text-green-600 ml-1 font-normal">
+                {detectedLanguage && detectedLanguage !== 'auto' ? 
+                  `Translated from ${detectedLanguage.toUpperCase()} to English` : 
+                  'Translated to English'
+                }
+              </span>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleTranslation();
+              }}
+              className="px-2 py-1 text-xs text-blue-500 font-medium hover:underline"
+            >
+              Show original
+            </button>
+          </div>
+        )}
+        
+        {/* ADDED: Loading indicator for translation */}
+        {isTranslating && (
+          <div className="flex items-center mb-2 bg-blue-50 p-2 rounded-lg">
+            <Loader2 size={14} className="text-blue-600 animate-spin" />
+            <span className="text-xs text-blue-600 ml-2 font-normal">
+              Translating...
+            </span>
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -167,6 +295,18 @@ const PostCard = ({
       }`}
       ref={containerRef}
     >
+      {/* ADDED: Archived indicator */}
+      {isArchived && (
+        <div className="bg-gray-500 px-4 py-2">
+          <div className="flex items-center">
+            <Archive size={16} className="text-white" />
+            <span className="text-white ml-2 text-sm font-medium">
+              {/* This post has been archived */}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Post header */}
       <div className="p-4 flex items-center justify-between">
         <button
@@ -186,316 +326,374 @@ const PostCard = ({
               <span className="font-medium cursor-pointer text-base text-gray-800">
                 {post.username}
               </span>
+              {/* MODIFIED: Better verification badge */}
               {post.isVerified && (
-                <CheckCircle size={16} className="text-primary ml-1" />
+                <MdVerified size={16} className="text-blue-500 ml-1" />
               )}
             </div>
-            <span className="font-normal text-md text-gray-500">
+            <span className="font-normal text-sm text-gray-500">
               {post.timestamp}
             </span>
           </div>
         </button>
 
-        <button
-          className="p-2 cursor-pointer hover:bg-gray-50 rounded-full transition-colors"
-          onClick={() => {
-            setSelectedPost(post);
-            setModalVisible(true);
-          }}
-        >
-          <MoreHorizontal size={20} className="text-gray-600 cursor-pointer" />
-        </button>
+        {/* MODIFIED: Show menu button based on archive status and permissions */}
+        {(!isArchived || allowArchivedOptions) && (
+          <button
+            className="p-2 cursor-pointer hover:bg-gray-50 rounded-full transition-colors"
+            onClick={() => {
+              setSelectedPost(post);
+              setModalVisible(true);
+            }}
+          >
+            <MoreHorizontal size={20} className="text-gray-600 cursor-pointer" />
+          </button>
+        )}
       </div>
 
       {/* Post content */}
       <div
-  className="px-4 pb-3 cursor-pointer"
-  onClick={() => router.push(`/post/${post.id}`)}
->
-  {renderContent()}
+        className="px-4 pb-3 cursor-pointer"
+        onClick={() => router.push(`/post/${post.id}`)}
+      >
+        {renderContent()}
 
-  {/* Tags */}
-  {post.tags?.length > 0 && (
-    <div className="flex flex-wrap mb-3">
-      {post.tags.map((tag, index) => (
-        <button
-          key={index}
-          onClick={(e) => {
-            e.stopPropagation(); // prevent navigating to post
-            router.push(`/tags/${tag}`);
-          }}
-          className="bg-gray-100 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 transition-colors"
-        >
-          <span className="font-medium text-md text-gray-700">
-            #{tag}
-          </span>
-        </button>
-      ))}
-    </div>
-  )}
-
-  {/* Tagged People */}
-  {post.taggedUsers?.length > 0 && (
-    <div className="flex flex-row flex-wrap items-center mb-3 bg-blue-50 rounded-lg p-3">
-      <MdPeople style={{ fontSize: 16, color: '#3B82F6' }} />
-      <span className={`text-blue-600 ml-2 mr-1 ${fonts?.Medium || ''}`}>
-        With
-      </span>
-
-      {post.taggedUsers.map((taggedUser, index) => {
-        const isCurrentUser =
-          taggedUser._id === user._id || taggedUser.id === user._id;
-        const identifier =
-          taggedUser.username || taggedUser._id || taggedUser.id;
-
-        return (
-          <button
-            key={taggedUser._id || taggedUser.id}
-            onClick={(e) => {
-              e.stopPropagation(); // prevent parent click
-              router.push(
-                isCurrentUser
-                  ? '/profile'
-                  : `/UserProfile/${identifier}`
-              );
-            }}
-            className={`text-blue-600 hover:underline focus:outline-none ${fonts?.Medium || ''} cursor-pointer`}
-          >
-            @{taggedUser.username}
-            {index < post.taggedUsers.length - 1 && ', '}
-          </button>
-        );
-      })} 
-    </div>
-  )}
-
-  {/* Amplified post */}
-  {post.isAmplified && post.originalPost && (
-    <div className="border border-gray-200 rounded-xl p-3 mb-3">
-      <div className="flex items-center mb-2">
-        <span className="font-medium text-md text-gray-500">
-          Amplified from{' '}
-          <span className="text-primary">
-            @{post.originalPost.user?.username || 'user'}
-          </span>
-        </span>
-      </div>
-
-      {post.quoteContent && (
-        <p className="font-normal text-md text-gray-700 mb-2">
-          {post.quoteContent}
-        </p>
-      )}
-
-      <div className="bg-gray-50 p-3 rounded-lg">
-        {post.originalPost.content && (
-          <p className="font-normal text-md text-gray-700 truncate">
-            {post.originalPost.content}
-          </p>
-        )}
-
-        {post.originalPost.media?.length > 0 && (
-          <div className="w-full relative rounded-lg mt-2 overflow-hidden">
-            <Image
-              src={post.originalPost.media[0]}
-              alt="Original post media"
-              width={400}
-              height={300}
-              className="w-full h-auto rounded-lg"
-            />
+        {/* Tags */}
+        {post.tags?.length > 0 && (
+          <div className="flex flex-wrap mb-3">
+            {post.tags.map((tag, index) => (
+              <button
+                key={index}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/tags/${tag}`);
+                }}
+                className="bg-gray-100 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 transition-colors"
+              >
+                <span className="font-medium text-xs text-gray-700">
+                  #{tag}
+                </span>
+              </button>
+            ))}
           </div>
         )}
-      </div>
 
-      {/* View original post button */}
-      <button
-        className="w-full mt-3 bg-primary text-white py-2 px-4 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center"
-        onClick={(e) => {
-          e.stopPropagation();
-          router.push(
-            `/post/${post.originalPost.id || post.originalPost._id}`
-          );
-        }}
-      >
-        <span className="mr-2">
-          <ArrowUpRightFromSquare />
-        </span>
-        View Original Post
-      </button>
-    </div>
-  )}
+        {/* Tagged People */}
+        {post.taggedUsers?.length > 0 && (
+          <div className="flex flex-row flex-wrap items-center mb-3 bg-blue-50 rounded-lg p-3">
+            <MdPeople size={16} className="text-blue-600" />
+            <span className="text-blue-600 ml-2 mr-1 font-medium">
+              With
+            </span>
+            {post.taggedUsers.map((taggedUser, index) => {
+              const isCurrentUser =
+                taggedUser._id === user._id || taggedUser.id === user._id;
+              const identifier =
+                taggedUser.username || taggedUser._id || taggedUser.id;
 
-  {/* Images */}
-  {hasMedia && (
-    <div className="mb-3">
-      <div
-        className="flex cursor-pointer overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-        onScroll={handleImageScroll}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {post.media.map((item, index) => (
-          <button
-            key={`media-${post.id}-${index}`}
-            className="flex-shrink-0 w-full snap-start"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleImageClick();
-            }}
-          >
-            <div
-              className="w-full h-80 rounded-lg"
-              style={{ position: 'relative', minHeight: '320px' }}
-            >
-              <FilteredImage
-                src={item}
-                alt={`Post media ${index + 1}`}
-                style={{ height: '320px' }}
-                imageStyle="object-cover"
-              />
+              return (
+                <button
+                  key={taggedUser._id || taggedUser.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(
+                      isCurrentUser
+                        ? '/profile'
+                        : `/UserProfile/${identifier}`
+                    );
+                  }}
+                  className="text-blue-600 hover:underline focus:outline-none font-medium cursor-pointer"
+                >
+                  @{taggedUser.username}
+                  {index < post.taggedUsers.length - 1 && ', '}
+                </button>
+              );
+            })} 
+          </div>
+        )}
+
+        {/* ADDED: Location */}
+        {post.location?.source === 'user_input' && (post.location.name || post.location.coordinates) && (
+          <div className="flex flex-row items-center mb-3 bg-green-50 rounded-lg p-3">
+            <MdLocationOn size={16} className="text-green-600" />
+            <span className="text-green-600 ml-2 font-medium">
+              At {post.location.name || 'Location'}
+            </span>
+          </div>
+        )}
+
+        {/* ADDED: Feeling */}
+        {post.feeling && (
+          <div className="flex flex-row items-center mb-3 bg-amber-50 rounded-lg p-3">
+            <MdMood size={16} className="text-amber-600" />
+            <span className="text-amber-600 ml-2 font-medium">
+              Feeling {post.feeling}
+            </span>
+          </div>
+        )}
+
+        {/* MODIFIED: Amplified post with archive handling */}
+        {post.isAmplified && post.originalPost && (
+          <div className="border border-gray-200 rounded-xl p-3 mb-3">
+            <div className="flex items-center mb-2">
+              <span className="font-medium text-xs text-gray-500">
+                Amplified from{' '}
+                <span className="text-primary">
+                  @{post.originalPost.user?.username || 'user'}
+                </span>
+              </span>
             </div>
-          </button>
-        ))}
+
+            {post.quoteContent && (
+              <p className="font-normal text-sm text-gray-700 mb-2">
+                {post.quoteContent}
+              </p>
+            )}
+
+            {/* Check if original post is archived */}
+            {post.originalPost.isArchived || post.originalPost.archived ? (
+              <div className="bg-gray-100 p-3 rounded-lg flex items-center justify-center">
+                <Archive size={16} className="text-gray-600" />
+                <span className="text-sm text-gray-600 ml-2 font-medium">
+                  This post has been archived.
+                </span>
+              </div>
+            ) : (
+              <div className="bg-gray-50 p-3 rounded-lg">
+                {post.originalPost.content && (
+                  <p className="font-normal text-sm text-gray-700">
+                    {post.originalPost.content}
+                  </p>
+                )}
+
+                {post.originalPost.media?.length > 0 && (
+                  <div 
+                    className="w-full relative rounded-lg mt-2 overflow-hidden"
+                    style={{ height: Math.min(200, Math.max(120, 160)) }}
+                  >
+                    <Image
+                      src={post.originalPost.media[0]}
+                      alt="Original post media"
+                      fill
+                      className="object-contain rounded-lg"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* View original post button - only if not archived */}
+            {!(post.originalPost.isArchived || post.originalPost.archived) && (
+              <button
+                className="w-full mt-3 bg-primary text-white py-2 px-4 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const originalPostId = typeof post.originalPost === 'string' 
+                    ? post.originalPost 
+                    : (post.originalPost?._id || post.originalPost?.id);
+                  
+                  if (originalPostId) {
+                    router.push(`/post/${originalPostId}`);
+                  }
+                }}
+              >
+                <ExternalLink size={16} className="mr-2" />
+                View Original Post
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Images */}
+        {hasMedia && (
+          <div className="mb-3">
+            {post.media.length === 1 ? (
+              // Single image
+              <button
+                className="w-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleImageClick();
+                }}
+              >
+                <div
+                  className="w-full rounded-lg overflow-hidden"
+                  style={{ height: `${getImageHeight(post.media[0], 0)}px` }}
+                >
+                  <FilteredImage
+                    src={post.media[0]}
+                    alt="Post media"
+                    style={{ height: '100%' }}
+                    imageStyle="object-contain"
+                    filterType={post.mediaMetadata && post.mediaMetadata[0]?.filter}
+                  />
+                </div>
+              </button>
+            ) : (
+              // Multiple images carousel
+              <>
+                <div
+                  className="flex cursor-pointer overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+                  onScroll={handleImageScroll}
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {post.media.map((item, index) => (
+                    <button
+                      key={`media-${post.id}-${index}`}
+                      className="flex-shrink-0 w-full snap-start"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageClick();
+                      }}
+                    >
+                      <div
+                        className="w-full rounded-lg overflow-hidden"
+                        style={{ height: `${getImageHeight(item, index)}px` }}
+                      >
+                        <FilteredImage
+                          src={item}
+                          alt={`Post media ${index + 1}`}
+                          style={{ height: '100%' }}
+                          imageStyle="object-contain"
+                          filterType={post.mediaMetadata && post.mediaMetadata[index]?.filter}
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Image counter dots */}
+                <div className="flex cursor-pointer justify-center mt-3">
+                  {post.media.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const container =
+                          containerRef.current?.querySelector('.overflow-x-auto');
+                        if (container) {
+                          container.scrollLeft = index * container.clientWidth;
+                          setCurrentImageIndex(index);
+                        }
+                      }}
+                      className={`w-2 h-2 rounded-full mx-1 transition-colors ${
+                        index === currentImageIndex ? 'bg-primary' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ADDED: Post stats */}
+        <div className="flex items-center mb-2">
+          {post.bookmarkCount > 0 && (
+            <>
+              <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
+              <span className="text-xs text-gray-500 font-medium">
+                {post.bookmarkCount} saves
+              </span>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Image counter dots */}
-      {post.media.length > 1 && (
-        <div className="flex cursor-pointer justify-center mt-3">
-          {post.media.map((_, index) => (
-            <button
-              key={index}
-              onClick={(e) => {
-                e.stopPropagation();
-                const container =
-                  containerRef.current?.querySelector('.overflow-x-auto');
-                if (container) {
-                  container.scrollLeft = index * container.clientWidth;
-                  setCurrentImageIndex(index);
-                }
-              }}
-              className={`w-2 h-2 rounded-full mx-1 transition-colors ${
-                index === currentImageIndex ? 'bg-primary' : 'bg-gray-300'
-              }`}
+      {/* MODIFIED: Post actions - Hide for archived posts */}
+      {!isArchived && (
+        <div className="flex items-center justify-around py-3 border-t border-gray-100">
+          {/* Like Button - Thumbs Up */}
+          <button
+            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            onClick={() =>
+              isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id)
+            }
+          >
+            <ThumbsUp
+              size={20}
+              className={isLiked ? "text-primary fill-current" : " text-gray-600"}
             />
-          ))}
+            <span
+              className={`ml-2 text-md font-medium ${
+                isLiked ? " text-primary" : " text-gray-600"
+              }`}
+            >
+              {post.likeCount || 0}
+            </span>
+          </button>
+
+          {/* Dislike Button - Thumbs Down */}
+          <button
+            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            onClick={() =>
+              isDisliked
+                ? handleUndislikePost(post.id)
+                : handleDislikePost(post.id)
+            }
+          >
+            <ThumbsDown
+              size={20}
+              className={
+                isDisliked ? "text-orange-500 fill-current" : "text-gray-600"
+              }
+            />
+            <span
+              className={`ml-2 text-md font-medium ${
+                isDisliked ? "text-orange-500" : "text-gray-600"
+              }`}
+            >
+              {post.dislikeCount || 0}
+            </span>
+          </button>
+
+          {/* Comment Button */}
+          <button
+            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            onClick={() => handleCommentPost(post)}
+          >
+            <MessageCircle size={20} className="text-gray-600" />
+            <span className="ml-2 text-md text-gray-600 font-medium">
+              {post.commentCount || 0}
+            </span>
+          </button>
+          
+          {/* Amplify Button */}
+          <button
+            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            onClick={() => handleAmplifyPost(post)}
+          >
+            <Repeat size={20} className="text-gray-600" />
+            <span className="ml-2 text-md text-gray-600 font-medium">
+              {post.amplifyCount || 0}
+            </span>
+          </button>
+
+          {/* Bookmark Button */}
+          <button
+            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            onClick={() =>
+              isBookmarked
+                ? handleUnbookmarkPost(post.id)
+                : handleBookmarkPost(post.id)
+            }
+          >
+            <Bookmark
+              size={20}
+              className={
+                isBookmarked ? "text-primary fill-current" : "text-gray-600"
+              }
+            />
+            <span
+              className={`ml-2 text-md font-medium ${
+                isBookmarked ? "text-primary" : "text-gray-600"
+              }`}
+            >
+              {post.bookmarkCount || 0}
+            </span>
+          </button>
         </div>
       )}
-    </div>
-  )}
-
-  {/* Location */}
-  {post.location?.source === 'user_input' && (
-    <div className="flex flex-row items-center mb-3 bg-green-50 rounded-lg p-3">
-      <MdLocationOn size={16} className="text-green-500" />
-      <span className="text-green-600 ml-2 font-medium">
-        At {post.location.name || 'Location'}
-      </span>
-    </div>
-  )}
-
-  {/* Feeling */}
-  {post.feeling && (
-    <div className="flex flex-row items-center mb-3 bg-amber-50 rounded-lg p-3">
-      <MdMood size={16} className="text-amber-500" />
-      <span className="text-amber-600 ml-2 font-medium">
-        Feeling {post.feeling}
-      </span>
-    </div>
-  )}
-</div>
-
-
-      {/* Post actions */}
-      <div className="flex items-center justify-around py-3 border-t border-gray-100">
-        {/* Like Button - Thumbs Up */}
-        <button
-          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() =>
-            isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id)
-          }
-        >
-          <ThumbsUp
-            size={20}
-            className={isLiked ? "text-primary fill-current" : " text-gray-600"}
-          />
-          <span
-            className={`ml-2 text-md font-medium ${
-              isLiked ? " text-primary" : " text-gray-600"
-            }`}
-          >
-            {post.likeCount}
-          </span>
-        </button>
-
-        {/* Dislike Button - Thumbs Down */}
-        <button
-          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() =>
-            isDisliked
-              ? handleUndislikePost(post.id)
-              : handleDislikePost(post.id)
-          }
-        >
-          <ThumbsDown
-            size={20}
-            className={
-              isDisliked ? "text-orange-500 fill-current" : "text-gray-600"
-            }
-          />
-          <span
-            className={`ml-2 text-md font-medium ${
-              isDisliked ? "text-orange-500" : "text-gray-600"
-            }`}
-          >
-            {post.dislikeCount}
-          </span>
-        </button>
-
-        {/* Comment Button */}
-        <button
-          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() => handleCommentPost(post)}
-        >
-          <MessageCircle size={20} className="text-gray-600" />
-          <span className="ml-2 text-md text-gray-600 font-medium">
-            {post.commentCount}
-          </span>
-        </button>
-        
-        {/* Amplify Button */}
-        <button
-          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() => handleAmplifyPost(post)}
-        >
-          <Repeat size={20} className="text-gray-600" />
-          <span className="ml-2 text-md text-gray-600 font-medium">
-            {post.amplifyCount}
-          </span>
-        </button>
-
-        {/* Bookmark Button */}
-        <button
-          className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
-          onClick={() =>
-            isBookmarked
-              ? handleUnbookmarkPost(post.id)
-              : handleBookmarkPost(post.id)
-          }
-        >
-          <Bookmark
-            size={20}
-            className={
-              isBookmarked ? "text-primary fill-current" : "text-gray-600"
-            }
-          />
-          <span
-            className={`ml-2 text-md font-medium ${
-              isBookmarked ? "text-primary" : "text-gray-600"
-            }`}
-          >
-            {post.bookmarkCount}
-          </span>
-        </button>
-      </div>
     </div>
   );
 };

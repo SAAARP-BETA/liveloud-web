@@ -8,7 +8,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { API_ENDPOINTS } from "../../../utils/config";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-
+import CustomModal from "../../../components/ui/Modal";
 import {
   Camera,
   AtSign,
@@ -23,6 +23,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Shield,
 } from "lucide-react";
 import defaultCover from "../../../assets/Profilepic1.png";
 import defaultPic from "../../../assets/avatar.png";
@@ -251,6 +252,7 @@ const EditPage = () => {
   const {
     user,
     token,
+    logout,
     isAuthenticated,
     loading: authLoading,
     updateUserInfo,
@@ -264,7 +266,6 @@ const EditPage = () => {
   const [imageActionType, setImageActionType] = useState(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-
   useEffect(() => {
     if (authLoading) return;
 
@@ -315,6 +316,7 @@ const EditPage = () => {
   education: data.education || "",
   profilePicture: data.profilePicture || null,
   coverPhoto: data.coverPhoto || null,
+  
 });
           setProfileImage(data.profilePicture || null);
           setCoverImage(data.coverPhoto || null);
@@ -324,7 +326,7 @@ const EditPage = () => {
       }
 
       const data = await response.json();
-      console.log("Profile data loaded:", data);
+      // console.log("Profile data loaded:", data);
 
       setProfileData({
         username: data.username || user?.username || "",
@@ -342,9 +344,13 @@ const EditPage = () => {
         education: data.education || "",
         profilePicture: user?.profilePicture || null,
         coverPicture: user?.coverPhoto || null,
+        
       });
       setProfileImage(user?.profilePicture || null);
       setCoverImage(user?.coverPhoto || null);
+
+      // console.log('Profile data being sent:', profileData);
+// console.log('allowTagsFrom value:', profileData.allowTagsFrom);
     } catch (error) {
       console.error("Error loading profile:", error);
       toast.error(
@@ -482,7 +488,8 @@ const EditPage = () => {
 
       const updatedUserData = await response.json();
       // updateUserInfo(updatedUserData);
-
+      // console.log('Profile data being sent:', profileData);
+      // console.log('allowTagsFrom value:', profileData.allowTagsFrom);
       toast.success("Profile updated successfully");
       // Update the auth context with new user data if this is the current user's profile
       if (
@@ -911,7 +918,7 @@ const EditPage = () => {
               <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
                 <User className="text-gray-400 w-5 h-5 ml-3" />
                 <select
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent cursor-pointer"
                   value={profileData.gender || ""}
                   onChange={(e) => handleInputChange("gender", e.target.value)}
                 >
@@ -958,6 +965,8 @@ const EditPage = () => {
               </div>
             </div>
 
+            
+            
             <div>
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Interests
@@ -989,7 +998,9 @@ const EditPage = () => {
 
           {/* Image Picker Bottom Sheet */}
           {handleCustomBottomSheet()}
-        </div>
+           
+          </div>
+
       </div>
     </div>
   );

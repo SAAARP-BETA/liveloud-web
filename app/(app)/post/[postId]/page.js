@@ -15,6 +15,7 @@ import {
   Heart, // ADDED: Import Heart icon for like functionality
   MessageCircle, // ADDED: Import MessageCircle icon for reply functionality
   X, // ADDED: Import X icon for cancel reply
+  Archive, // ADDED: Import Archive icon for archive functionality
 } from "lucide-react";
 import { getProfilePicture } from "@/app/utils/fallbackImage";
 
@@ -31,13 +32,14 @@ import ReportModal from "@/app/components/ui/ReportModal";
 import { API_ENDPOINTS } from "../../../utils/config";
 import { createPostHandlers } from "../../../utils/postFunctions";
 
-// Move menu options outside component to prevent re-creation
+// MODIFIED: Move menu options outside component to prevent re-creation - Added Archive option
 const menuOptions = [
   { icon: UserPlus, text: "Follow" },
   { icon: UserMinus, text: "Unfollow" },
   { icon: Info, text: "About this account" },
   { icon: Flag, text: "Report" },
   { icon: Ban, text: "Block" },
+  { icon: Archive, text: "Archive Post" }, // ADDED: Archive option
   { icon: Trash2, text: "Delete Post" },
 ];
 
@@ -146,7 +148,7 @@ const CommentCard = React.memo(
     };
 
     return (
-      <div className="flex items-start space-x-4 p-4 border-t border-gray-100 overflow-hidden">
+      <div className="flex items-start space-x-4 p-4 border-t border-red-500 overflow-hidden">
         <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
           <Image
             src={comment.user.profilePicture || defaultPic}
@@ -278,6 +280,47 @@ const PostPage = () => {
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
+  // ADDED: Archive state
+  const [isArchiving, setIsArchiving] = useState(false);
+
+  // ADDED: Archive handler
+  const handleArchivePost = useCallback(async () => {
+    if (!selectedPost || !token) {
+      toast.error("Unable to archive post");
+      return;
+    }
+
+    setIsArchiving(true);
+    try {
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${selectedPost.id}/archive`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Server returned an error" }));
+        throw new Error(errorData.message || "Failed to archive post");
+      }
+
+      toast.success("Post archived successfully");
+      setModalVisible(false);
+      
+      // Navigate back to previous page
+      router.back();
+    } catch (error) {
+      console.error("Error archiving post:", error);
+      toast.error(`Could not archive the post: ${error.message}`);
+    } finally {
+      setIsArchiving(false);
+    }
+  }, [selectedPost, token, router]);
+
   // Helper function to update the single post - make it compatible with post interactions
   const updatePostData = useCallback((updater) => {
     if (typeof updater === "function") {
@@ -364,13 +407,13 @@ const PostPage = () => {
       }
       const data = await response.json();
       const formattedPost = {
-        ...data,
-        id: data._id,
-        username: data.user.username,
-        profilePic: data.user.profilePicture,
-        user: data.user._id || data.user.id,
-        userId: data.user._id || data.user.id,
-      };
+  ...data,
+  id: data._id,
+  username: data.user ? data.user.username || "Unknown User" : "Unknown User",
+  profilePic: data.user ? data.user.profilePicture || defaultPic : defaultPic,
+  user: data.user?._id || data.user?.id || "unknown",
+  userId: data.user?._id || data.user?.id,
+};
       setPost(formattedPost);
       setSelectedPost(formattedPost);
     } catch (err) {
@@ -520,38 +563,43 @@ const PostPage = () => {
       return;
     }
 
-    const loadOptions = async () => {
-      setIsLoadingOptions(true);
-      try {
-        const options = await loadPostMenuOptions(selectedPost);
-        setFilteredOptions(options);
-      } catch (error) {
-        console.error("Error loading menu options:", error);
-        // Fallback options
-        const isOwnPost =
-          isAuthenticated &&
-          user &&
-          (selectedPost.user === user._id || selectedPost.userId === user._id);
-        const fallbackOptions = menuOptions.filter((option) => {
-          if (option.text === "Delete Post") return isOwnPost;
-          if (
-            option.text === "Follow" ||
-            option.text === "Unfollow" ||
-            option.text === "Block"
-          )
-            return !isOwnPost;
-          return true;
-        });
-        setFilteredOptions(fallbackOptions);
-      } finally {
-        setIsLoadingOptions(false);
-      }
-    };
+    // DEBUG: Log user and selectedPost for troubleshooting menu filtering
+    console.log('DEBUG menu filtering:', {
+      user,
+      userId: user?._id,
+      selectedPost,
+      selectedPostUser: selectedPost.user,
+      selectedPostUserId: selectedPost.userId,
+    });
 
-    loadOptions();
+    // FORCE: Always use fallback menu logic for testing
+    setIsLoadingOptions(true);
+    try {
+      // throw new Error('Force fallback'); // Optionally force error
+      // const options = await loadPostMenuOptions(selectedPost);
+      // setFilteredOptions(options);
+      // Instead, always use fallback:
+      const isOwnPost =
+        isAuthenticated &&
+        user &&
+        (selectedPost.user === user._id || selectedPost.userId === user._id);
+      const fallbackOptions = menuOptions.filter((option) => {
+        if (option.text === "Delete Post" || option.text === "Archive Post") return isOwnPost;
+        if (
+          option.text === "Follow" ||
+          option.text === "Unfollow" ||
+          option.text === "Block"
+        )
+          return !isOwnPost;
+        return true;
+      });
+      setFilteredOptions(fallbackOptions);
+    } finally {
+      setIsLoadingOptions(false);
+    }
   }, [isModalVisible, selectedPost?.id, isAuthenticated, user?._id]);
 
-  // Handle menu option press with proper parameters
+  // MODIFIED: Handle menu option press with proper parameters - Added archive handling
   const handleMenuPress = useCallback(
     (option) => {
       if (!selectedPost) {
@@ -559,10 +607,19 @@ const PostPage = () => {
         return;
       }
 
+      // Handle archive option: no confirmation, just archive (toast will be shown in handler)
+      if (option.text === "Archive Post") {
+        handleArchivePost();
+        return;
+      }
+
       handleMenuOptionPress(option, selectedPost, setModalVisible);
     },
-    [selectedPost, handleMenuOptionPress]
+    [selectedPost, handleMenuOptionPress, handleArchivePost]
   );
+
+  // ADDED: Check if post is archived
+  const isArchived = post?.isArchived || post?.archived || false;
 
   // --- Render Logic ---
   if (loading) {
@@ -597,70 +654,72 @@ const PostPage = () => {
           handleUnbookmarkPost={postHandlers.handleUnbookmarkPost}
           setSelectedPost={setSelectedPost}
           setModalVisible={setModalVisible}
-          username={user?.username}
+          username={user?.username || "Unknown User"}
         />
 
-        {/* MODIFIED: Comment Submission Form with reply indicator */}
-        <div className="p-4 border-t border-gray-200 bg-white rounded-b-xl">
-          {/* ADDED: Reply indicator */}
-          {replyTo && (
-            <div className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg mb-3">
-              <p className="text-sm text-gray-600">
-                Replying to{" "}
-                <span className="font-medium text-primary">
-                  @{replyTo.user?.username || "user"}
-                </span>
-              </p>
-              <button
-                onClick={cancelReply}
-                className="p-1 hover:bg-gray-200 rounded cursor-pointer"
-              >
-                <X size={16} className="text-gray-600" />
-              </button>
-            </div>
-          )}
+        {/* MODIFIED: Comment Submission Form with reply indicator - Don't show for archived posts */}
+        {!isArchived && (
+          <div className="p-4 border-t border-gray-200 bg-white rounded-b-xl">
+            {/* ADDED: Reply indicator */}
+            {replyTo && (
+              <div className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg mb-3">
+                <p className="text-sm text-gray-600">
+                  Replying to{" "}
+                  <span className="font-medium text-primary">
+                    @{replyTo.user?.username || "user"}
+                  </span>
+                </p>
+                <button
+                  onClick={cancelReply}
+                  className="p-1 hover:bg-gray-200 rounded cursor-pointer"
+                >
+                  <X size={16} className="text-gray-600" />
+                </button>
+              </div>
+            )}
 
-          <form
-            onSubmit={handleCommentSubmit}
-            className="flex items-center space-x-2 sm:space-x-3"
-          >
-            <textarea
-              id="comment-input"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
-              className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none text-sm sm:text-base"
-              rows="1"
-              disabled={isSubmittingComment || isSubmittingReply}
-            />
-            <button
-              type="submit"
-              className="bg-primary text-white font-bold py-2 px-3 sm:px-4 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center text-sm sm:text-base"
-              disabled={
-                !newComment.trim() ||
-                !isAuthenticated ||
-                isSubmittingComment ||
-                isSubmittingReply
-              }
+            <form
+              onSubmit={handleCommentSubmit}
+              className="flex items-center space-x-2 sm:space-x-3"
             >
-              {isSubmittingComment || isSubmittingReply ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  {replyTo ? "Replying..." : "Posting..."}
-                </>
-              ) : replyTo ? (
-                "Reply"
-              ) : (
-                "Post"
-              )}
-            </button>
-          </form>
-          {!isAuthenticated && (
-            <p className="text-sm text-gray-500 mt-2">
-              Please log in to post a comment.
-            </p>
-          )}
-        </div>
+              <textarea
+                id="comment-input"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
+                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none text-sm sm:text-base"
+                rows="1"
+                disabled={isSubmittingComment || isSubmittingReply}
+              />
+              <button
+                type="submit"
+                className="bg-primary text-white font-bold py-2 px-3 sm:px-4 rounded-lg hover:bg-sky-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center text-sm sm:text-base"
+                disabled={
+                  !newComment.trim() ||
+                  !isAuthenticated ||
+                  isSubmittingComment ||
+                  isSubmittingReply
+                }
+              >
+                {isSubmittingComment || isSubmittingReply ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    {replyTo ? "Replying..." : "Posting..."}
+                  </>
+                ) : replyTo ? (
+                  "Reply"
+                ) : (
+                  "Post"
+                )}
+              </button>
+            </form>
+            {!isAuthenticated && (
+              <p className="text-sm text-gray-500 mt-2">
+                Please log in to post a comment.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Comments Section */}
         <div className="bg-white rounded-xl mt-4 mx-1 sm:mx-0">
@@ -687,59 +746,72 @@ const PostPage = () => {
         </div>
       </div>
 
-      {/* --- Modals --- */}
-      <CustomModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Post Options"
-      >
-        <div className="p-4">
-          {selectedPost && (
-            <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
-              <img
-                src={getProfilePicture(selectedPost?.profilePic)}
-                alt={selectedPost?.username || "Profile"}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="ml-3">
-                <p className="font-semibold text-gray-800">
-                  {selectedPost.username}
-                </p>
-                <p className="text-sm text-gray-500 truncate break-words">
-                  {selectedPost.content}
-                </p>
+      {/* --- Modals --- Don't show for archived posts */}
+      {!isArchived && (
+        <CustomModal
+          visible={isModalVisible}
+          onClose={() => setModalVisible(false)}
+          title="Post Options"
+        >
+          <div className="p-4">
+            {selectedPost && (
+              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
+                <img
+                  src={getProfilePicture(selectedPost?.profilePic)}
+                  alt={selectedPost?.username || "Profile"}
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+                <div className="ml-3">
+                  <p className="font-semibold text-gray-800">
+                    {selectedPost.username || "Unknown User"}
+                  </p>
+                  <p className="text-sm text-gray-500 truncate">
+                    {selectedPost.content}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-          <div className="space-y-2">
-            {isLoadingOptions ? (
-              <div className="flex items-center justify-center p-4">
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                <span>Loading options...</span>
-              </div>
-            ) : (
-              filteredOptions.map((option, index) => (
-                <button
-                  key={`${option.text}-${index}`}
-                  onClick={() => handleMenuPress(option)}
-                  className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
-                    option.text === "Delete Post" ||
-                    option.text === "Block" ||
-                    option.text === "Report"
-                      ? "hover:bg-red-50 text-red-600"
-                      : "hover:bg-gray-50 text-gray-700"
-                  }`}
-                >
-                  <option.icon className="w-5 h-5 mr-3" />
-                  <span className="font-medium">{option.text}</span>
-                </button>
-              ))
             )}
+            <div className="space-y-2">
+              {isLoadingOptions ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  <span>Loading options...</span>
+                </div>
+              ) : (
+                filteredOptions.map((option, index) => (
+                  <button
+                    key={`${option.text}-${index}`}
+                    onClick={() => handleMenuPress(option)}
+                    className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
+                      option.text === "Delete Post" ||
+                      option.text === "Block" ||
+                      option.text === "Report"
+                        ? "hover:bg-red-50 text-red-600"
+                        : option.text === "Archive Post"
+                        ? "hover:bg-orange-50 text-orange-600"
+                        : "hover:bg-gray-50 text-gray-700"
+                    } ${isArchiving && option.text === "Archive Post" ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={isArchiving && option.text === "Archive Post"}
+                  >
+                    {isArchiving && option.text === "Archive Post" ? (
+                      <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                    ) : (
+                      <option.icon className="w-5 h-5 mr-3" />
+                    )}
+                    <span className="font-medium">
+                      {isArchiving && option.text === "Archive Post" 
+                        ? "Archiving..." 
+                        : option.text}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-        </div>
-      </CustomModal>
+        </CustomModal>
+      )}
 
       <CommentModal
         visible={isCommentModalVisible}

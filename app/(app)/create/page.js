@@ -226,98 +226,80 @@ const CreatePost = () => {
     }
   }, [token]);
 
-  // User search functions
-  const fetchRandomUsers = useCallback(async () => {
-    console.log("Fetching random users...");
-    setIsLoadingRandomUsers(true);
 
-    try {
-      const currentUserId = user?.id || user?._id;
-      const excludeUserParam = currentUserId
-        ? `&excludeUserId=${currentUserId}`
-        : "";
-      const response = await fetch(
-        `${API_ENDPOINTS.SEARCH}/profiles/random?limit=50${excludeUserParam}`
-      );
+// User search functions
+const fetchRandomUsers = useCallback(async () => {
+  console.log("Fetching random users...");
+  setIsLoadingRandomUsers(true);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+  try {
+    const currentUserId = user?.id || user?._id;
 
-      const data = await response.json();
-      const users = data?.users || [];
-      console.log("Received users from API:", users.length);
+    const response = await fetch(
+      `${API_ENDPOINTS.SEARCH}/profiles/random?${
+        currentUserId ? `userId=${currentUserId}` : ""
+      }`
+    );
 
-      // Filter out already tagged users and current user
-      const filteredUsers = users.filter((randomUser) => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    // console.log("API data:", data);
+    // console.log("count", data.count);
+
+    // Separate lists from backend
+    let followerSuggestions = data?.followerUsers || [];
+    let everyoneSuggestions = data?.everyoneUsers || [];
+
+    // Filter each list separately (remove already tagged + current user)
+    const filterList = (list) =>
+      list.filter((randomUser) => {
         const randomUserId = randomUser.id || randomUser._id;
-        const currentUserId = user?.id || user?._id;
 
         return (
           !taggedPeople.some(
             (taggedUser) =>
               taggedUser.id === randomUserId ||
-              taggedUser.id === randomUser._id ||
-              taggedUser._id === randomUserId ||
-              taggedUser._id === randomUser._id
+              taggedUser._id === randomUserId
           ) && randomUserId !== currentUserId
         );
       });
 
-      console.log(
-        "Filtered users after removing tagged and current user:",
-        filteredUsers.length
-      );
+    followerSuggestions = filterList(followerSuggestions);
+    everyoneSuggestions = filterList(everyoneSuggestions);
 
-      // Take first 6 (they're already randomized by the backend)
-      const finalUsers = filteredUsers.slice(0, 6);
-      console.log("Setting random users:", finalUsers.length);
-      setRandomUsers(finalUsers);
-    } catch (error) { 
-      console.error("Error fetching random users:", error);
-      // Fallback to the old method if the new endpoint fails
-      try {
-        const commonSearchTerms = ["a", "e", "i", "o", "u", "s", "t", "n", "r"];
-        const randomTerm =
-          commonSearchTerms[Math.floor(Math.random() * commonSearchTerms.length)];
+    // Shuffle both lists
+    followerSuggestions = followerSuggestions.sort(() => 0.5 - Math.random());
+    everyoneSuggestions = everyoneSuggestions.sort(() => 0.5 - Math.random());
 
-        const fallbackResponse = await fetch(
-          `${API_ENDPOINTS.SEARCH}/profiles/search?query=${randomTerm}&limit=20`
-        );
+    // Slice (optional: limit number to 6 each or combined)
+    followerSuggestions = followerSuggestions.slice(0, 6);
+    everyoneSuggestions = everyoneSuggestions.slice(0, 6);
 
-        if (fallbackResponse.ok) {
-          const fallbackData = await fallbackResponse.json();
-          const fallbackUsers = fallbackData?.users || [];
+    // Store separately in state (or combine if needed)
+    
+    const merged = [...followerSuggestions, ...everyoneSuggestions];
+const uniqueUsers = Array.from(new Map(merged.map(u => [u._id, u])).values());
 
-          const filteredFallbackUsers = fallbackUsers.filter((randomUser) => {
-            const randomUserId = randomUser.id || randomUser._id;
-            const currentUserId = user?.id || user?._id;
+setRandomUsers(uniqueUsers);
 
-            return (
-              !taggedPeople.some(
-                (taggedUser) =>
-                  taggedUser.id === randomUserId ||
-                  taggedUser.id === randomUser._id ||
-                  taggedUser._id === randomUserId ||
-                  taggedUser._id === randomUser._id
-              ) && randomUserId !== currentUserId
-            );
-          });
 
-          const shuffled = filteredFallbackUsers.sort(() => 0.5 - Math.random());
-          setRandomUsers(shuffled.slice(0, 6));
-        } else {
-          setRandomUsers([]);
-        }
-      } catch (fallbackError) {
-        console.error("Fallback method also failed:", fallbackError);
-        setRandomUsers([]);
-      }
-    } finally {
-      setIsLoadingRandomUsers(false);
-    }
-  }, [taggedPeople, user?.id, user?._id]);
 
+
+    // console.log("Follower suggestions:", followerSuggestions);   
+    // console.log("Everyone suggestions:", everyoneSuggestions);
+  } catch (error) {
+    console.error("Error fetching random users:", error);
+    setRandomUsers({ followers: [], everyone: [] });
+  } finally {
+    setIsLoadingRandomUsers(false);
+  }
+}, [taggedPeople, user?.id, user?._id]);
+
+
+//search user 
   const searchUsers = useCallback(
     async (query) => {
       if (!query.trim()) {
@@ -344,20 +326,39 @@ const CreatePost = () => {
 
         // Filter out already tagged users and current user
         const filteredUsers = users.filter((searchUser) => {
-          const searchUserId = searchUser.id || searchUser._id;
-          const currentUserId = user?.id || user?._id;
+        const searchUserId = searchUser.id || searchUser._id;
+        const currentUserId = user?.id || user?._id;
 
-          return (
-            !taggedPeople.some(
-              (taggedUser) =>
-                taggedUser.id === searchUserId ||
-                taggedUser.id === searchUser._id ||
-                taggedUser._id === searchUserId ||
-                taggedUser._id === searchUser._id
-            ) && searchUserId !== currentUserId
-          );
-        });
+      // Skip already tagged users and self
+      if (
+        taggedPeople.some(
+          (taggedUser) =>
+            taggedUser.id === searchUserId ||
+            taggedUser._id === searchUserId
+        ) ||
+        searchUserId === currentUserId
+      ) {
+        return false;
+      }
 
+      //  allowTagsFrom
+      if (searchUser.allowTagsFrom === "everyone") {
+        return true;
+      }
+
+      if (searchUser.allowTagsFrom === "followers") {
+        // Check if currentUser is in searchUser's followers
+        return searchUser.followersCount &&
+          Array.isArray(searchUser.followers) &&
+          searchUser.followers.includes(currentUserId);
+      }
+
+      if (searchUser.allowTagsFrom === "none") {
+        return false;
+      }
+
+      return true; // fallback
+});
         setSearchedUsers(filteredUsers);
       } catch (error) {
         console.error("Error searching users:", error);
@@ -1423,7 +1424,7 @@ const CreatePost = () => {
                         >
                           <Image
                             src={user.profilePicture || defaultPic}
-                            alt={user.username}
+                            alt={user.username || "unknown user"}
                             width={64}
                             height={64}
                             className="rounded-full mx-auto mb-3"

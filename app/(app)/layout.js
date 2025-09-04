@@ -77,7 +77,7 @@ export default function AppLayout({ children }) {
       console.error("Logout error:", error);
     } finally {
       await logout();
-      router.replace("/(auth)/login");
+      router.replace("/login");
     }
   };
 

@@ -15,7 +15,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
-// import { fonts } from "../../utils/fonts";
 import CustomModal from "../../components/ui/Modal";
 import AmplifyModal from "../../components/ui/AmplifyModal";
 import CommentModal from "../../components/ui/CommentModal";
@@ -25,12 +24,12 @@ import {
 } from "../../utils/postFunctions";
 import PostCard from "../../components/ui/PostCard";
 import { API_ENDPOINTS } from "../../utils/config";
-
 import {
   ArrowLeft,
   MoreHorizontal,
   Image as ImageIcon,
   Share2,
+  Trash2,
   MessageCircle,
   Bookmark,
   Flag,
@@ -48,6 +47,9 @@ import {
   PenLineIcon,
   Award,
   Users,
+  Settings,
+  Shield,
+  Archive,
 } from "lucide-react";
 import ReportModal from "@/app/components/ui/ReportModal";
 
@@ -219,7 +221,6 @@ const StreakDisplay = ({ consecutiveDays }) => {
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   return (
     <div className="flex w-full border justify-center gap-25 border-gray-100 pt-2">
-      {" "}
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -245,6 +246,14 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
                 }
               />
             )}
+            {tab.key === "archived" && (
+              <Archive
+                size={18}
+                className={
+                  activeTab === tab.key ? "text-primary" : "text-gray-500"
+                }
+              />
+            )}
             <span
               className={`ml-1 text-sm font-medium ${
                 activeTab === tab.key ? "text-primary" : "text-gray-500"
@@ -259,7 +268,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   );
 };
 
-// --- FIX: Added cursor-pointer to clickable stat buttons ---
+// User Stats Component (unchanged)
 const UserStats = ({
   followersCount,
   followingCount,
@@ -318,26 +327,19 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
   );
 };
 
-// Profile Skeleton Component (FIXED)
+// Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
     <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4">
-      {/* Use the same container structure as ProfilePage */}
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
         <div className="w-full flex flex-col items-center bg-gray-50">
           <div className="w-full relative">
-            {/* Cover photo skeleton */}
             <div className="w-full h-[150px] bg-gray-200 animate-pulse" />
-
-            {/* Profile image skeleton - positioned like the real component */}
             <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
               <div className="w-24 h-24 rounded-full bg-gray-300 border-4 border-white animate-pulse" />
             </div>
           </div>
-
           <div className="h-12"></div>
-
-          {/* Content skeleton matching the real component structure */}
           <div className="bg-white border-b border-gray-100 w-full">
             <div className="mt-4 text-center px-4 space-y-3">
               {/* Name skeleton */}
@@ -346,7 +348,6 @@ const ProfileSkeleton = () => {
               <div className="w-24 h-4 bg-gray-200 rounded-md mt-2 mx-auto animate-pulse" />
               {/* Bio skeleton */}
               <div className="w-48 h-4 bg-gray-200 rounded-md mt-4 mx-auto animate-pulse" />
-
               {/* Stats skeleton */}
               <div className="flex justify-center mt-4 space-x-6">
                 <div className="flex flex-col items-center">
@@ -362,19 +363,15 @@ const ProfileSkeleton = () => {
                   <div className="w-14 h-4 bg-gray-200 rounded-md mt-1 animate-pulse" />
                 </div>
               </div>
-
               {/* Buttons skeleton */}
               <div className="flex mt-4 w-full max-w-md mx-auto space-x-3">
                 <div className="flex-1 h-10 bg-gray-200 rounded-full animate-pulse" />
                 <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
               </div>
-
               {/* Points skeleton */}
               <div className="mt-4 w-full h-32 bg-gray-200 rounded-xl animate-pulse" />
-
               {/* Streak skeleton */}
               <div className="mt-3 w-32 h-8 bg-gray-200 rounded-full mx-auto animate-pulse" />
-
               {/* Profile stats skeleton */}
               <div className="mt-5 pt-4 border-t border-gray-100">
                 <div className="w-40 h-4 bg-gray-200 rounded-md mb-2 animate-pulse" />
@@ -383,7 +380,6 @@ const ProfileSkeleton = () => {
               </div>
             </div>
           </div>
-
           {/* Tab bar skeleton */}
           <div className="flex w-full border justify-center border-gray-100 pt-2 px-2 sm:px-0">
             <div className="flex-1 flex items-center justify-center pb-2">
@@ -393,8 +389,6 @@ const ProfileSkeleton = () => {
               <div className="w-16 h-6 bg-gray-200 rounded-md animate-pulse" />
             </div>
           </div>
-
-          {/* Content area skeleton - FIXED to maintain full width */}
           <div className="px-2 sm:px-4 pt-2 w-full">
             {/* Post skeletons */}
             {[1, 2, 3].map((i) => (
@@ -418,7 +412,6 @@ const ProfileSkeleton = () => {
               </div>
             ))}
           </div>
-
           <div className="h-20"></div>
         </div>
       </div>
@@ -430,7 +423,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const usernameParam = searchParams.get("username");
-  const { user: currentUser, token, isAuthenticated } = useAuth();
+  const { user: currentUser, token, isAuthenticated, logout } = useAuth();
 
   // State for resizable header
   const [headerHeight, setHeaderHeight] = useState(HEADER_MAX_HEIGHT);
@@ -461,6 +454,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
   const [postsCount, setPostsCount] = useState(initialUser?.postsCount || 0);
   const [isMyProfile, setIsMyProfile] = useState(false);
   const [isMoreModalVisible, setIsMoreModalVisible] = useState(false);
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [profileStats, setProfileStats] = useState(null);
   const [scrollY, setScrollY] = useState(0);
   const [userPoints, setUserPoints] = useState(initialPoints || null);
@@ -473,20 +467,24 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
   const [isCommentModalVisible, setCommentModalVisible] = useState(false);
   const [postToComment, setPostToComment] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  // Report modal
-  const [isReportModalVisible, setReportModalVisible] = useState(false);
   const [postToReport, setPostToReport] = useState(null);
-
+  const [isReportModalVisible, setReportModalVisible] = useState(false);
   const [postPage, setPostPage] = useState(1);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [isPostsLoading, setIsPostsLoading] = useState(false);
   const [error, setError] = useState();
-
-  // Loading guards
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isPointsLoading, setIsPointsLoading] = useState(false);
+  const [profileData, setProfileData] = useState({ allowTagsFrom: "everyone" });
+  const [submitting, setSubmitting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
+  const [deleteUserDataOption, setDeleteUserDataOption] = useState(false);
+  const [archivedPosts, setArchivedPosts] = useState([]);
+  const [isArchivedLoading, setIsArchivedLoading] = useState(false);
 
   const abortControllerRef = useRef(null);
+  const hasFetchedProfile = useRef(false); // New ref to track initial fetch
 
   // Post handlers
   const postHandlers = useMemo(
@@ -534,6 +532,106 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
     [isMyProfile, user?.username]
   );
 
+  // Fetch archived posts
+  // Fetch archived posts
+const fetchArchivedPosts = useCallback(
+  async (userId) => {
+    if (!userId || !token || !isMyProfile) return;
+
+    setIsArchivedLoading(true);
+    try {
+      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/archived`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch archived posts: ${response.status}`);
+      }
+
+      const postsData = await response.json();
+      // console.log('Debug: Archived posts response:', postsData); // Debug log
+      const postsArray = postsData.posts || postsData.data || postsData || [];
+      const formattedPosts = postsArray
+        .map((post, index) => formatPostFromApi(post, index, currentUser?._id))
+        .filter(Boolean);
+
+      // console.log('Debug: Formatted archived posts:', formattedPosts); // Debug log
+      setArchivedPosts(formattedPosts);
+    } catch (error) {
+      console.error("Error fetching archived posts:", error);
+      toast.error("Failed to load archived posts.");
+    } finally {
+      setIsArchivedLoading(false);
+    }
+  },
+  [token, isMyProfile, currentUser?._id]
+);
+
+  // Archive Post handler
+  const handleArchivePost = async (postId) => {
+    // console.log("Debug: Attempting to archive post with ID:", postId);
+    try {
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${postId}/archive`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Server returned an error" }));
+        throw new Error(errorData.message || "Failed to archive post");
+      }
+      // Remove post from main posts and add to archivedPosts
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      setPostsCount((prev) => prev - 1);
+      const postToArchive = posts.find((p) => p.id === postId);
+      if (postToArchive) {
+        setArchivedPosts((prev) => [
+          { ...postToArchive, isArchived: true },
+          ...prev,
+        ]);
+      }
+      toast.success("Post archived successfully.");
+      // console.log("Debug: Post archived successfully, postId:", postId);
+    } catch (error) {
+      console.error("Error archiving post:", error);
+      toast.error(`Failed to archive post: ${error.message}`);
+    }
+  };
+  // Unarchive Post handler
+const handleUnarchivePost = async (postId) => {
+  // console.log("Debug: Attempting to unarchive post with ID:", postId);
+  try {
+    const response = await fetch(
+      `${API_ENDPOINTS.SOCIAL}/posts/${postId}/unarchive`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to unarchive post");
+    }
+    // Move post from archivedPosts to posts
+    const postToUnarchive = archivedPosts.find((p) => p.id === postId);
+    if (postToUnarchive) {
+      setArchivedPosts((prev) => prev.filter((p) => p.id !== postId));
+      setPosts((prev) => [{ ...postToUnarchive, isArchived: false }, ...prev]);
+      setPostsCount((prev) => prev + 1);
+    }
+    toast.success("Post restored to your profile.");
+    // console.log("Debug: Post unarchived successfully, postId:", postId);
+  } catch (error) {
+    console.error("Error unarchiving post:", error);
+    toast.error("Failed to unarchive post.");
+  }
+};
   // Scroll handler with debouncing
   const handleScroll = useCallback(
     (e) => {
@@ -608,6 +706,102 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
     }
   }, [currentUser?.username, usernameParam]);
 
+  // Fetch user points
+  const fetchUserPoints = useCallback(
+    async (userId) => {
+      if (!userId || isPointsLoading || pointsLoaded) return;
+
+      setIsPointsLoading(true);
+      setPointsLoading(true);
+
+      try {
+        setErrorMessage("");
+        if (!token || !isAuthenticated) {
+          setErrorMessage("Authentication required to fetch points.");
+          return;
+        }
+
+        const headers = { Authorization: `Bearer ${token}` };
+        const endpoint = isMyProfile
+          ? `${API_ENDPOINTS.POINTS}/my-summary`
+          : `${API_ENDPOINTS.POINTS}/summary/${userId}`;
+
+        const response = await fetch(endpoint, { headers });
+
+        if (!response.ok) {
+          console.error(`Failed to fetch points: ${response.status}`);
+          setErrorMessage(`Failed to fetch points: ${response.status}`);
+          return;
+        }
+
+        const pointsData = await response.json();
+        const levelInfo = {
+          level: pointsData.level,
+          title: pointsData.rank,
+          minPoints: null,
+          pointsToNext: isMyProfile ? pointsData.pointsToNextLevel : null,
+        };
+
+        setUserPoints({ ...pointsData, levelInfo });
+      } catch (error) {
+        setErrorMessage(`Failed to load points data: ${error.message}`);
+        console.error("Error fetching points:", error);
+      } finally {
+        setPointsLoading(false);
+        setPointsLoaded(true);
+        setIsPointsLoading(false);
+      }
+    },
+    [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded]
+  );
+  // Delete Account
+  const handleDeleteAccount = async () => {
+    try {
+      setSubmitting(true);
+      const response = await fetch(`${API_ENDPOINTS.AUTH}/delete`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ deleteUserData: deleteUserDataOption }),
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to delete account");
+      router.push("/login");
+      toast.success(data.message);
+    } catch (error) {
+      toast.error(error.message || "Failed to delete account");
+    } finally {
+      setSubmitting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+  const handleDeactivateAccount = async () => {
+    try {
+      setSubmitting(true);
+      const response = await fetch(`${API_ENDPOINTS.AUTH}/deactivate`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to deactivate account");
+      toast.success(data.message);
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      toast.error(error.message || "Failed to deactivate account");
+    } finally {
+      setSubmitting(false);
+      setShowDeactivateDialog(false);
+    }
+  };
+
+  // Fetch user posts
   const fetchUserPosts = useCallback(
     async (userId, page) => {
       if (!userId || isPostsLoading) {
@@ -658,53 +852,76 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
     [token, isPostsLoading]
   );
 
-  const fetchUserPoints = useCallback(
-    async (userId) => {
-      if (!userId || isPointsLoading || pointsLoaded) return;
+  // Fetch user profile
+  const fetchUserProfile = useCallback(async () => {
+    if (isProfileLoading || hasFetchedProfile.current) return;
 
-      setIsPointsLoading(true);
-      setPointsLoading(true);
+    setIsProfileLoading(true);
+    setPosts([]);
+    setPostPage(1);
+    setHasMorePosts(true);
 
-      try {
-        setErrorMessage("");
-        if (!token || !isAuthenticated) {
-          setErrorMessage("Authentication required to fetch points.");
-          return;
-        }
-
-        const headers = { Authorization: `Bearer ${token}` };
-        const endpoint = isMyProfile
-          ? `${API_ENDPOINTS.POINTS}/my-summary`
-          : `${API_ENDPOINTS.POINTS}/summary/${userId}`;
-
-        const response = await fetch(endpoint, { headers });
-
-        if (!response.ok) {
-          console.error(`Failed to fetch points: ${response.status}`);
-          setErrorMessage(`Failed to fetch points: ${response.status}`);
-          return;
-        }
-
-        const pointsData = await response.json();
-        const levelInfo = {
-          level: pointsData.level,
-          title: pointsData.rank,
-          minPoints: null,
-          pointsToNext: isMyProfile ? pointsData.pointsToNextLevel : null,
-        };
-
-        setUserPoints({ ...pointsData, levelInfo });
-      } catch (error) {
-        setErrorMessage(`Failed to load points data: ${error.message}`);
-        console.error("Error fetching points:", error);
-      } finally {
-        setPointsLoading(false);
-        setPointsLoaded(true);
-        setIsPointsLoading(false);
+    try {
+      const targetUsername =
+        usernameParam || (currentUser && currentUser.username) || "";
+      if (!targetUsername) {
+        setErrorMessage("No username provided.");
+        setIsLoading(false);
+        return;
       }
-    },
-    [token, isAuthenticated, isMyProfile, isPointsLoading, pointsLoaded]
-  );
+
+      setIsLoading(true);
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await fetch(
+        `${API_ENDPOINTS.USER}/profiles/${targetUsername}`,
+        { headers }
+      );
+
+      if (!response.ok)
+        throw new Error(`Failed to fetch profile: ${response.status}`);
+
+      const userData = await response.json();
+      if (!userData || !userData._id) {
+        throw new Error("Invalid user data received from API");
+      }
+
+      setUser(userData);
+      setFollowersCount(userData.followersCount || 0);
+      setFollowingCount(userData.followingCount || 0);
+      setIsFollowing(userData.isFollowing || false);
+      setProfileData({ allowTagsFrom: userData.allowTagsFrom || "everyone" });
+
+      const joined = new Date(userData.createdAt);
+      const joinedDate = `${joined.toLocaleString("default", {
+        month: "long",
+      })} ${joined.getFullYear()}`;
+      setProfileStats({
+        joined: joinedDate,
+        location: userData.location,
+        website: userData.website,
+        engagement: userData.engagement || "89%",
+        responseRate: userData.responseRate || "94%",
+      });
+
+      fetchUserPoints(userData._id);
+      fetchUserPosts(userData._id, 1);
+    } catch (error) {
+      setErrorMessage(`Failed to load profile: ${error.message}`);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+      setIsProfileLoading(false);
+      hasFetchedProfile.current = true; // Mark initial fetch as complete
+    }
+  }, [
+    usernameParam,
+    currentUser?.username,
+    token,
+    fetchUserPoints,
+    fetchUserPosts,
+  ]);
 
   // Fetch followers list
   const fetchFollowers = useCallback(
@@ -726,7 +943,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
 
         const data = await response.json();
 
-        // Add follow status for each follower
         const followersWithStatus = await Promise.all(
           data.followers.map(async (follower) => {
             if (follower._id === currentUser?.userId) {
@@ -783,7 +999,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
 
         const data = await response.json();
 
-        // Add follow status for each user being followed
         const followingWithStatus = await Promise.all(
           data.following.map(async (following) => {
             if (following._id === currentUser?.userId) {
@@ -820,75 +1035,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
     [token, currentUser]
   );
 
-  const fetchUserProfile = useCallback(async () => {
-    if (isProfileLoading) return;
-
-    setIsProfileLoading(true);
-    setPosts([]);
-    setPostPage(1);
-    setHasMorePosts(true);
-
-    try {
-      const targetUsername =
-        usernameParam || (currentUser && currentUser.username) || "";
-      if (!targetUsername) {
-        setErrorMessage("No username provided.");
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await fetch(
-        `${API_ENDPOINTS.USER}/profiles/${targetUsername}`,
-        { headers }
-      );
-
-      if (!response.ok)
-        throw new Error(`Failed to fetch profile: ${response.status}`);
-
-      const userData = await response.json();
-      if (!userData || !userData._id) {
-        throw new Error("Invalid user data received from API");
-      }
-
-      setUser(userData);
-      setFollowersCount(userData.followersCount || 0);
-      setFollowingCount(userData.followingCount || 0);
-      setIsFollowing(userData.isFollowing || false);
-
-      const joined = new Date(userData.createdAt);
-      const joinedDate = `${joined.toLocaleString("default", {
-        month: "long",
-      })} ${joined.getFullYear()}`;
-      setProfileStats({
-        joined: joinedDate,
-        location: userData.location,
-        website: userData.website,
-        engagement: userData.engagement || "89%",
-        responseRate: userData.responseRate || "94%",
-      });
-
-      fetchUserPoints(userData._id);
-      fetchUserPosts(userData._id, 1);
-    } catch (error) {
-      setErrorMessage(`Failed to load profile: ${error.message}`);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-      setIsProfileLoading(false);
-    }
-  }, [
-    usernameParam,
-    currentUser?.username,
-    token,
-    isProfileLoading,
-    fetchUserPoints,
-    fetchUserPosts,
-  ]);
-
+  // Handle follow toggle
   const handleFollowToggle = async () => {
     if (!isAuthenticated) {
       toast.error("Please login to follow users");
@@ -924,7 +1071,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
     }
   };
 
-  // Follow/unfollow user in modal lists
+  // Handle modal follow toggle
   const handleModalFollowToggle = async (targetUser) => {
     if (!isAuthenticated) {
       toast.error("Login Required", "Please login to follow users");
@@ -948,7 +1095,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
         throw new Error("Failed to update follow status");
       }
 
-      // Update the followers list
       setFollowersList((prev) =>
         prev.map((user) =>
           user._id === targetUser._id
@@ -957,7 +1103,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
         )
       );
 
-      // Update the following list
       setFollowingList((prev) =>
         prev.map((user) =>
           user._id === targetUser._id
@@ -966,7 +1111,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
         )
       );
 
-      // Update profile counts if following/unfollowing the current profile user
       if (targetUser._id === user?._id) {
         setIsFollowing((prev) => !prev);
         setFollowersCount((prev) =>
@@ -979,6 +1123,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
     }
   };
 
+  // Handle share profile
   const handleShareProfile = async () => {
     try {
       toast.error(
@@ -989,13 +1134,56 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
     }
   };
 
+  // Handle input change for allowTagsFrom
+  const handleInputChange = (field, value) => {
+    setProfileData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Handle update allowTagsFrom
+  const handleUpdateAllowTagsFrom = async () => {
+    if (!isAuthenticated || !token) {
+      toast.error("Please login to update settings");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const formData = new FormData();
+      formData.append("allowTagsFrom", profileData.allowTagsFrom);
+
+      const response = await fetch(`${API_ENDPOINTS.USER}/profiles`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update settings");
+      }
+
+      toast.success("Settings updated successfully");
+      setIsSettingsModalVisible(false);
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      toast.error(error.message || "Failed to update settings");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle refresh
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
     setPointsLoaded(false);
     setUserPoints(null);
+    hasFetchedProfile.current = false; // Allow fetch on refresh
     fetchUserProfile();
   }, [fetchUserProfile]);
 
+  // Handle comment success
   const handleCommentSuccess = () => {
     if (postToComment) {
       setPosts((prev) =>
@@ -1010,8 +1198,17 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
   };
 
   useEffect(() => {
-    fetchUserProfile();
-  }, [usernameParam]);
+  if (user?._id && isMyProfile) {
+    // console.log('Debug: Fetching archived posts for user:', user._id); // Debug log
+    fetchArchivedPosts(user._id);
+  }
+}, [user?._id, isMyProfile, fetchArchivedPosts]);
+  // Trigger initial profile fetch
+  useEffect(() => {
+    if (!hasFetchedProfile.current) {
+      fetchUserProfile();
+    }
+  }, [usernameParam, currentUser?.username, token, fetchUserProfile]);
 
   const observer = useRef();
   const lastPostElementRef = useCallback(
@@ -1041,6 +1238,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
       </div>
     );
   }
+
   const handleReportSuccess = (reportedPostId) => {
     const updatedPosts = getCurrentTabData().posts.filter(
       (post) => post.id !== reportedPostId
@@ -1050,7 +1248,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
 
   return (
     <div className="min-h-screen bg-white flex justify-center">
-    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+      <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
         <div className="w-full flex flex-col items-center bg-gray-50">
           <div
             className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
@@ -1058,15 +1256,14 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
             onScroll={handleScroll}
           >
             <div className="w-full relative">
-        <Image
-          src={user?.coverPhoto || defaultCover}
-          alt="Cover"
-          className="w-full h-[150px] object-cover"
-          width={1200}
-          height={150}
-          priority
-        />
-
+              <Image
+                src={user?.coverPhoto || defaultCover}
+                alt="Cover"
+                className="w-full h-[150px] object-cover"
+                width={1200}
+                height={150}
+                priority
+              />
               <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
                 <motion.div
                   className="border-4 border-white shadow-sm bg-white relative w-full"
@@ -1090,7 +1287,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
                       href="/profile/edit"
                       className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
                     >
-                      <Edit2 className=" text-primary text-md" size={20} />
+                      <Edit2 className="text-primary text-md" size={20} />
                     </Link>
                   )}
                 </motion.div>
@@ -1150,6 +1347,12 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
                         Edit Profile
                       </Link>
                       <button
+                        onClick={() => setIsSettingsModalVisible(true)}
+                        className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer"
+                      >
+                        <Settings className="text-gray-600 text-lg" />
+                      </button>
+                      <button
                         onClick={handleShareProfile}
                         className="w-10 h-10 bg-gray-100 cursor-pointer rounded-full flex items-center justify-center"
                       >
@@ -1186,7 +1389,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
                   )}
                 </div>
 
-                {/* Premium Button for User's Own Profile */}
                 {isMyProfile && (
                   <button
                     onClick={() => router.push("/premium")}
@@ -1223,7 +1425,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
                         </span>
                       </div>
                     )}
-                    {/* --- FIX: Made website a clickable link --- */}
                     {user?.website && (
                       <div className="flex items-center mb-2">
                         <LinkIcon className="text-gray-600 text-lg" />
@@ -1256,14 +1457,17 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
               tabs={[
                 { key: "posts", title: "Posts", icon: "grid" },
                 { key: "media", title: "Media", icon: "image" },
+                ...(isMyProfile
+                  ? [{ key: "archived", title: "Archived", icon: "archive" }]
+                  : []),
               ]}
               activeTab={activeTab}
               onTabPress={setActiveTab}
-              className="border-2 w-full flex  justify-between"
+              className="border-2 w-full flex justify-between"
             />
 
             <motion.div
-              className=" pt-2 cursor-pointer w-full"
+              className="pt-2 cursor-pointer w-full"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -1292,11 +1496,14 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
                           handleUnbookmarkPost={
                             postHandlers.handleUnbookmarkPost
                           }
+                          handleArchivePost={handleArchivePost}
+                          handleUnarchivePost={handleUnarchivePost}
                           setSelectedPost={setSelectedPost}
                           setModalVisible={setModalVisible}
                           handleDislikePost={postHandlers.handleDislikePost}
                           handleUndislikePost={postHandlers.handleUndislikePost}
-                        />
+                          allowArchivedOptions={false}
+                          />
                       </div>
                     ))
                   ) : (
@@ -1321,6 +1528,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
                         </Link>
                       )}
                     </div>
+                            // console.log('Debug: PostCard props:', { post, allowArchivedOptions });
                   )}
                   {isPostsLoading && posts.length > 0 && (
                     <div className="flex justify-center items-center py-6">
@@ -1358,6 +1566,62 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
                         } hasn't posted any media yet.`
                   }
                 />
+              )}
+              {activeTab === "archived" && isMyProfile && (
+                <>
+                  {isArchivedLoading ? (
+                    <div className="flex justify-center items-center py-12 w-full">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    </div>
+                  ) : archivedPosts.length > 0 ? (
+                    archivedPosts.map((post, index) => (
+                      <div key={post.id || index}>
+                        <PostCard
+                          post={post}
+                          handleLikePost={postHandlers.handleLikePost}
+                          handleUnlikePost={postHandlers.handleUnlikePost}
+                          handleCommentPost={postHandlers.handleCommentPost}
+                          handleAmplifyPost={postHandlers.handleAmplifyPost}
+                          handleBookmarkPost={postHandlers.handleBookmarkPost}
+                          handleUnbookmarkPost={
+                          postHandlers.handleUnbookmarkPost
+                          }
+                          handleDislikePost={postHandlers.handleDislikePost}
+                          handleUndislikePost={postHandlers.handleUndislikePost}
+                          handleArchivePost={handleArchivePost}
+                          handleUnarchivePost={handleUnarchivePost}
+                          setSelectedPost={setSelectedPost}
+                          setModalVisible={setModalVisible}
+                          allowArchivedOptions={true}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 w-full min-h-[200px]">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9V7a5 5 0 0110 0v2m-1 4v4m-6-4v4"
+                        />
+                      </svg>
+                      <h3 className="mt-4 text-lg font-medium text-gray-700">
+                        No archived posts
+                      </h3>
+                      <p className="mt-2 text-center text-sm text-gray-500 mx-8">
+                        Only you can see your archived posts. Use the post
+                        options menu to archive something.
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </motion.div>
             <div className="h-20"></div>
@@ -1397,85 +1661,278 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
           </div>
         </CustomModal>
         <CustomModal
-          visible={isModalVisible}
-          onClose={() => setModalVisible(false)}
-          title="Post Options"
+          visible={isSettingsModalVisible}
+          onClose={() => setIsSettingsModalVisible(false)}
+          title="Profile Settings"
+          position="bottom"
+          className="sm:items-center"
         >
-          <div className="bg-white p-4">
-            {selectedPost && (
-              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
-                <Image
-                  src={selectedPost.profilePic || defaultPic}
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full"
-                  width={40}
-                  height={40}
-                />
-                <div className="ml-3">
-                  <h3 className="text-base font-medium text-gray-800">
-                    {selectedPost.username}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    {selectedPost.timestamp}
-                  </p>
-                </div>
+          <div className="bg-white p-6 rounded-t-3xl sm:rounded-3xl">
+            <div className="mb-6">
+              <label className="text-base text-gray-700 mb-2 block font-medium">
+                Who can tag you in posts
+              </label>
+              <div className="w-full">
+                <select
+                  className="w-full py-2 px-3 border border-gray-300 rounded-md text-gray-800 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
+                  value={profileData.allowTagsFrom || "everyone"}
+                  onChange={(e) =>
+                    handleInputChange("allowTagsFrom", e.target.value)
+                  }
+                >
+                  <option value="everyone">Everyone</option>
+                  <option value="followers">Only followers</option>
+                </select>
               </div>
-            )}
-            <button
-              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-              onClick={() => {
-                setModalVisible(false);
-                if (selectedPost) {
-                  postHandlers.handleBookmarkPost(selectedPost.id);
-                }
-              }}
-            >
-              <div className="w-8">
-                <Bookmark className="text-gray-600 text-xl" />
-              </div>
-              <span className="text-base text-gray-800 font-medium">
-                Save Post
-              </span>
-            </button>
-            <button
-              // href={`/home/post-detail?postId=${selectedPost?.id}`}
-              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-              onClick={() => {
-                setModalVisible(false);
-                postHandlers.handleCommentPost(selectedPost.id);
-              }}
-            >
-              <div className="w-8">
-                <MessageCircle className="text-gray-600 text-xl" />
-              </div>
-              <span className="text-base text-gray-800 font-medium">
-                View Comments
-              </span>
-            </button>
-            {/* <button
-              className="flex items-center py-4 border-b border-gray-100 w-full text-left"
-              onClick={() => {
-                setModalVisible(false);
-                if (confirm("Are you sure you want to report this post?")) {
-                  toast.success("Thank you for your report.");
-                }
-              }}
-            >
-              <div className="w-8">
-                <Flag className="text-gray-600 text-xl" />
-              </div>
-              <span className="text-base text-red-500 font-medium">
-                Report Post
-              </span>
-            </button> */}
-            <button
-              onClick={() => setModalVisible(false)}
-              className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
-            >
-              Cancel
-            </button>
+            </div>
+
+            <div className="flex flex-col gap-3 mb-4">
+              <button
+                className="w-full py-2  cursor-pointer rounded bg-rose-100 text-rose-700 font-semibold hover:bg-rose-200 transition"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                Delete Account
+              </button>
+              <button
+                className="w-full py-2 rounded cursor-pointer bg-amber-100 text-amber-700 font-semibold hover:bg-amber-200 transition"
+                onClick={() => setShowDeactivateDialog(true)}
+              >
+                Deactivate Account
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={() => setIsSettingsModalVisible(false)}
+                className="w-full py-2 rounded bg-gray-100 cursor-pointer text-gray-700 font-semibold hover:bg-gray-200 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateAllowTagsFrom}
+                className={`w-full py-2 rounded bg-primary cursor-pointer text-white font-semibold hover:bg-sky-600 transition ${
+                  submitting ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+                disabled={submitting}
+              >
+                {submitting ? "Saving..." : "Save"}
+              </button>
+            </div>
           </div>
         </CustomModal>
+        {/* // ...existing code... */}
+        {/* Delete Account Modal */}
+        <CustomModal
+          visible={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          title="Delete Account"
+        >
+          <div className="py-4 px-6">
+            <div className="flex items-center mb-4">
+              <span className="text-lg font-semibold text-rose-500">
+                Delete Account
+              </span>
+            </div>
+            <p className="mb-4 text-gray-700">
+              Are you sure you want to{" "}
+              <span className="font-bold text-rose-400">delete</span> your
+              account? This action{" "}
+              <span className="font-bold">cannot be undone</span>.
+            </p>
+            <div className="mb-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={deleteUserDataOption}
+                  onChange={(e) => setDeleteUserDataOption(e.target.checked)}
+                  className="cursor-pointer"
+                />
+                <span className="text-gray-700">Also delete my data</span>
+              </label>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition"
+                onClick={() => setShowDeleteDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-rose-400 text-white font-semibold cursor-pointer hover:bg-rose-500 transition"
+                onClick={handleDeleteAccount}
+                disabled={submitting}
+              >
+                {submitting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </CustomModal>
+        {/* Deactivate Account Modal */}
+        <CustomModal
+          visible={showDeactivateDialog}
+          onClose={() => setShowDeactivateDialog(false)}
+          title="Deactivate Account"
+        >
+          <div className="py-4 px-6">
+            <div className="flex items-center mb-4">
+              <span className="text-lg font-semibold text-amber-500">
+                Deactivate Account
+              </span>
+            </div>
+            <p className="mb-4 text-gray-700">
+              Are you sure you want to{" "}
+              <span className="font-bold text-amber-400">deactivate</span> your
+              account? You can reactivate it by logging in again.
+            </p>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium cursor-pointer hover:bg-gray-300 transition"
+                onClick={() => setShowDeactivateDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-amber-200 text-gray-900 font-semibold cursor-pointer hover:bg-amber-300 transition"
+                onClick={handleDeactivateAccount}
+                disabled={submitting}
+              >
+                {submitting ? "Deactivating..." : "Deactivate"}
+              </button>
+            </div>
+          </div>
+        </CustomModal>
+<CustomModal
+  visible={isModalVisible}
+  onClose={() => {
+    console.log('Debug: Closing Post Options modal');
+    setModalVisible(false);
+  }}
+  title="Post Options"
+>
+  <div className="bg-white p-4">
+    {selectedPost && (
+      <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
+        <Image
+          src={selectedPost.profilePic || defaultPic}
+          alt="Profile"
+          className="w-10 h-10 rounded-full"
+          width={40}
+          height={40}
+        />
+        <div className="ml-3">
+          <h3 className="text-base font-medium text-gray-800">
+            {selectedPost.username}
+          </h3>
+          <p className="text-xs text-gray-500">
+            {selectedPost.timestamp}
+          </p>
+        </div>
+      </div>
+    )}
+    {selectedPost && (
+      <>
+        <button
+          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          onClick={() => {
+            // console.log('Debug: Save Post clicked, postId:', selectedPost.id);
+            setModalVisible(false);
+            postHandlers.handleBookmarkPost(selectedPost.id);
+          }}
+        >
+          <div className="w-8">
+            <Bookmark className="text-gray-600 text-xl" />
+          </div>
+          <span className="text-base text-gray-800 font-medium">
+            Save Post
+          </span>
+        </button>
+        <button
+          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          onClick={() => {
+            // console.log('Debug: View Comments clicked, postId:', selectedPost.id);
+            setModalVisible(false);
+            postHandlers.handleCommentPost(selectedPost.id);
+          }}
+        >
+          <div className="w-8">
+            <MessageCircle className="text-gray-600 text-xl" />
+          </div>
+          <span className="text-base text-gray-800 font-medium">
+            View Comments
+          </span>
+        </button>
+        {isMyProfile && (
+  <button
+    className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+    onClick={() => {
+      console.log(
+        `Debug: ${selectedPost.isArchived ? "Unarchive" : "Archive"} Post clicked, postId:`,
+        selectedPost.id
+      );
+      setModalVisible(false);
+      if (selectedPost.isArchived) {
+        handleUnarchivePost(selectedPost.id);
+      } else {
+        handleArchivePost(selectedPost.id);
+      }
+    }}
+  >
+    <div className="w-8">
+      <Archive className="text-gray-600 text-xl" />
+    </div>
+    <span className="text-base text-gray-800 font-medium">
+      {selectedPost.isArchived ? "Unarchive Post" : "Archive Post"}
+    </span>
+  </button>
+)}
+        <button
+          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          onClick={() => {
+            // console.log('Debug: Report Post clicked, postId:', selectedPost.id);
+            setModalVisible(false);
+            setPostToReport(selectedPost);
+            setReportModalVisible(true);
+          }}
+        >
+          <div className="w-8">
+            <Flag className="text-red-500 text-xl" />
+          </div>
+          <span className="text-base text-red-500 font-medium">
+            Report Post
+          </span>
+        </button>
+        {isMyProfile && (
+          <button
+            className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+            onClick={() => {
+              // console.log('Debug: Delete Post clicked, postId:', selectedPost.id);
+              setModalVisible(false);
+              if (confirm('Are you sure you want to delete this post?')) {
+                postHandlers.handleDeletePost(selectedPost.id);
+              }
+            }}
+          >
+            <div className="w-8">
+              <Trash2 className="text-red-500 text-xl" />
+            </div>
+            <span className="text-base text-red-500 font-medium">
+              Delete Post
+            </span>
+          </button>
+        )}
+        <button
+          onClick={() => {
+            console.log('Debug: Cancel clicked in Post Options modal');
+            setModalVisible(false);
+          }}
+          className="mt-4 py-3 bg-gray-100 rounded-full w-full text-center text-gray-700 font-medium"
+        >
+          Cancel
+        </button>
+      </>
+    )}
+  </div>
+</CustomModal>
         <AmplifyModal
           isVisible={isAmplifyModalVisible}
           onClose={() => setAmplifyModalVisible(false)}
@@ -1486,7 +1943,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
             fetchUserProfile();
           }}
         />
-        {/* Comment Modal */}
         <CommentModal
           visible={isCommentModalVisible}
           onClose={() => setCommentModalVisible(false)}
@@ -1494,7 +1950,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
           post={postToComment}
           onSuccess={handleCommentSuccess}
           token={token}
-        ></CommentModal>
+        />
         {/* Amplify Modal */}
         <AmplifyModal
           visible={isAmplifyModalVisible}
@@ -1526,8 +1982,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
           post={postToReport}
           onSuccess={handleReportSuccess}
           token={token}
-        ></ReportModal>
-
+        />
         {/* Follower Modal */}
         <CustomModal
           visible={isFollowersModalVisible}
@@ -1539,7 +1994,7 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
           {followersLoading ? (
             <div className="flex flex-col items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent"></div>
-              <p className="mt-4 text-gray-600 text-sm">Loading following...</p>
+              <p className="mt-4 text-gray-600 text-sm">Loading followers...</p>
             </div>
           ) : followersList.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
@@ -1605,7 +2060,6 @@ const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
             </div>
           )}
         </CustomModal>
-
         {/* Following Modal */}
         <CustomModal
           visible={isFollowingModalVisible}
