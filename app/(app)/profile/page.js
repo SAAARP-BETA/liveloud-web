@@ -7,7 +7,6 @@ import React, {
   useRef,
   useCallback,
   useMemo,
-  Suspense,
 } from "react";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
@@ -419,7 +418,7 @@ const ProfileSkeleton = () => {
   );
 };
 
-const ProfilePageContent = ({ initialUser, initialPosts, initialPoints }) => {
+const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const usernameParam = searchParams.get("username");
@@ -2009,21 +2008,11 @@ const handleUnarchivePost = async (postId) => {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 p-4">              {followersList
-                .sort((a, b) => {
-                  // Sort by current user first
-                  if (a.isCurrentUser && !b.isCurrentUser) return -1;
-                  if (!a.isCurrentUser && b.isCurrentUser) return 1;
-                  return 0;
-                })
-                .map((follower) => (
-                  <div
-                    key={follower._id}
-                    onClick={() => {
-                      router.push(`/UserProfile/${follower.username}`);
-                      setIsFollowersModalVisible(false);
-                    }}
-                    className="flex items-center py-4 px-1 hover:bg-gray-50 cursor-pointer"
+            <div className="divide-y divide-gray-100 p-4">
+              {followersList.map((follower) => (
+                <div
+                  key={follower._id}
+                  className="flex items-center py-4 px-1 hover:bg-gray-50"
                 >
                   <div className="relative w-12 h-12 mr-3 flex-shrink-0">
                     <Image
@@ -2086,15 +2075,11 @@ const handleUnarchivePost = async (postId) => {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 p-4 ">
+            <div className="divide-y divide-gray-100 p-4">
               {followingList.map((following) => (
                 <div
                   key={following._id}
-                  onClick={() => {
-                      router.push(`/UserProfile/${following.username}`);
-                      setIsFollowingModalVisible(false);
-                    }}
-                  className="flex items-center py-4 px-1 hover:bg-gray-50 cursor-pointer"
+                  className="flex items-center py-4 px-1 hover:bg-gray-50"
                 >
                   <div className="relative w-12 h-12 mr-3 flex-shrink-0">
                     <Image
@@ -2133,25 +2118,6 @@ const handleUnarchivePost = async (postId) => {
         </CustomModal>
       </div>
     </div>
-  );
-};
-
-function LoadingFallback() {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading profile...</p>
-      </div>
-    </div>
-  );
-}
-
-const ProfilePage = (props) => {
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <ProfilePageContent {...props} />
-    </Suspense>
   );
 };
 
