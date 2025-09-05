@@ -55,12 +55,16 @@ import { useAuth } from "../context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useActivityTracker } from "@/app/hooks/useActivityTracker";
 
 export default function AppLayout({ children }) {
   const { token, logout, isAuthenticated, user } = useAuth();
   const router = useRouter();
   const [rightSidebarVisible, setRightSidebarVisible] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Track user activity
+  useActivityTracker(token);
 
   const handleLogout = async () => {
     try {
