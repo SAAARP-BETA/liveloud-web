@@ -6,6 +6,8 @@ import LoginImage from "../assets/login-image.jpg";
 import Login2 from "../assets/login-2.jpg";
 import Login3 from "../assets/login-3.jpg";
 import { useEffect, useState } from "react";
+import { ThemeProvider } from "../context/ThemeContext";
+import ThemeToggle from "../components/common/ThemeToggle";
 
 export default function AuthLayout({ children }) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -24,8 +26,11 @@ export default function AuthLayout({ children }) {
   }, []);
 
   return (
+    <ThemeProvider>
     <AuthRoute>
       <div className="h-screen w-screen flex overflow-hidden bg-white">
+                               <ThemeToggle />
+
         {/* Left Side - Poker Style Cards */}
         <div className="hidden lg:flex w-[50%] xl:w-[45%] items-center justify-center bg-gray-100">
           <div
@@ -135,5 +140,6 @@ export default function AuthLayout({ children }) {
         </div>
       </div>
     </AuthRoute>
+    </ThemeProvider>
   );
 }
