@@ -26,13 +26,11 @@ export default function AuthLayout({ children }) {
   }, []);
 
   return (
-    <ThemeProvider>
     <AuthRoute>
-      <div className="h-screen w-screen flex overflow-hidden bg-white">
-                               <ThemeToggle />
-
+<div className="h-screen w-screen flex overflow-hidden bg-white dark:bg-gray-900">                            
+     <ThemeToggle />
         {/* Left Side - Poker Style Cards */}
-        <div className="hidden lg:flex w-[50%] xl:w-[45%] items-center justify-center bg-gray-100">
+        <div className="hidden lg:flex w-[50%] xl:w-[45%] items-center justify-center bg-gray-100 dark:bg-gray-900">
           <div
             className="relative"
             style={{
@@ -126,11 +124,10 @@ export default function AuthLayout({ children }) {
 
         {/* Right Side - Auth Form */}
         <div
-          className="w-full lg:w-[50%] xl:w-[55%] flex items-center justify-center overflow-y-auto custom-scrollbar"
-          style={{ backgroundColor: "#F3F4F6" }}
+          className="w-full lg:w-[50%] xl:w-[55%] flex items-center justify-center overflow-y-auto custom-scrollbar  bg-gray-100 dark:bg-gray-900"
         >
           <div
-            className={`w-full max-w-md bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200 transition-all duration-700 ease-out ${
+            className={`w-full max-w-md bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200 transition-all duration-700 ease-out dark:bg-gray-900 outline-0 ${
               isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
             style={{ transitionDelay: "300ms" }}
@@ -140,6 +137,5 @@ export default function AuthLayout({ children }) {
         </div>
       </div>
     </AuthRoute>
-    </ThemeProvider>
   );
 }

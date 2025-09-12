@@ -121,8 +121,7 @@ export default function Signup() {
 
   return (
     <>
-      <div className="min-h-screen mt-26 bg-white dark:bg-gray-900 text-white px-8 py-10">
-
+<div className="min-h-screen mt-26 bg-white dark:bg-gray-900 text-black dark:text-white px-8 py-10">
         <div className="relative lg:ml-4 w-[300px] h-[70px] ">
           
           <Image
@@ -145,7 +144,8 @@ export default function Signup() {
 
         <label className="text-base font-semibold">Full Name</label>
         <input
-          className="border-2 border-blue-200 rounded-xl p-3 mt-1 mb-4 w-full"
+ className="border-2 border-blue-200 dark:border-gray-600 rounded-xl p-3 mt-1 mb-4 w-full bg-white dark:bg-gray-800 text-black dark:text-white" 
+
           placeholder="Enter your full name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
