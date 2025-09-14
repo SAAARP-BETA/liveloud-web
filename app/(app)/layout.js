@@ -1,48 +1,3 @@
-// "use client";
-// import { useState, useEffect } from "react";
-// import LeftSidebar from "@/app/components/LeftSidebar";
-// import ProtectedRoute from "@/app/components/routes/ProtectedRoute";
-// import PointsSidebar from "@/app/components/PointsSidebar";
-
-// export default function AppLayout({ children }) {
-//   const [rightSidebarVisible, setRightSidebarVisible] = useState(true);
-
-//   useEffect(() => {
-//     const handleWheel = (e) => {
-//       const mainContent = document.querySelector(".main-scroll-target");
-//       if (mainContent) {
-//         mainContent.scrollTop += e.deltaY;
-//       }
-//     };
-
-//     window.addEventListener("wheel", handleWheel, { passive: true });
-//     return () => window.removeEventListener("wheel", handleWheel);
-//   }, []);
-
-//   return (
-//     <ProtectedRoute>
-//       <div className="flex h-screen bg-gray-50 overflow-hidden justify-center scroll-container">
-//         {/* Container to center the layout */}
-//         <div className="flex max-w-full">
-//           {/* Left Sidebar */}
-//           <LeftSidebar />
-
-//           {/* Main Content */}
-//           <main className="flex-1 w-full p-4 overflow-y-auto main-scroll-target custom-scrollbar">
-//             {children}
-//           </main>
-
-//           {/* Right Sidebar - Points (Hidden on mobile) */}
-//           <PointsSidebar
-//             isVisible={rightSidebarVisible}
-//             onClose={() => setRightSidebarVisible(false)}
-//           />
-//         </div>
-//       </div>
-//     </ProtectedRoute>
-//   );
-// }
-
 "use client";
 import { useState, useEffect } from "react";
 import LeftSidebar from "@/app/components/LeftSidebar";
@@ -56,6 +11,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useActivityTracker } from "@/app/hooks/useActivityTracker";
+import ThemeToggle from "../components/common/ThemeToggle";
 
 export default function AppLayout({ children }) {
   const { token, logout, isAuthenticated, user } = useAuth();
@@ -110,12 +66,13 @@ export default function AppLayout({ children }) {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+      <ThemeToggle/>
+      <div className="flex flex-col h-screen bg-gray-50 overflow-hidden dark:bg-gray-900">
         {/* Mobile Header */}
         {isMobile && (
-          <header className="flex items-center justify-between px-4 bg-white border-b border-gray-200 shadow-sm">
+          <header className="flex items-center justify-between px-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-white shadow-sm">
             {/* Logo */}
-            <div className="flex items-center">
+            <div className="flex items-center dark:bg-gray-900">
               <Link href="/home">
                 <Image
                   src={combinedLogo}

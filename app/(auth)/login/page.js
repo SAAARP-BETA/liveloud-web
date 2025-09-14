@@ -57,7 +57,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6">
+    <div className="min-h-screen bg-white px-6 dark:bg-gray-900 text-white">
       <div className="relative lg:ml-4 w-[300px] h-[100px] ">
           <Image 
             src={Logo} 
@@ -81,7 +81,7 @@ export default function Login() {
       <div className="mt-6">
         <label className="text-base font-semibold">Email Address</label>
         <input
-          className="bg-white rounded-md h-10 px-3 border border-gray-300 mt-1 w-full"
+          className="bg-white rounded-md h-10 px-3 border border-gray-300 mt-1 w-full dark:bg-gray-900 text-white"
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -97,7 +97,7 @@ export default function Login() {
         <label className="text-base font-semibold">Password</label>
         <div className="relative">
           <input
-            className="bg-white rounded-md h-10 px-3 pr-10 border border-gray-300 mt-1 w-full"
+            className="bg-white rounded-md h-10 px-3 pr-10 border border-gray-300 mt-1 w-full dark:bg-gray-900 text-white"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);

@@ -204,7 +204,7 @@ const PostCard = ({
 
     return (
       <div>
-        <p className="text-base text-gray-800 leading-6 mb-3 font-normal break-words whitespace-pre-line">
+        <p className="text-base text-gray-800 dark:text-white leading-6 mb-3 font-normal break-words whitespace-pre-line ">
           {showTranslation && translatedContent ? translatedContent : processedLines}
         </p>
         
@@ -290,14 +290,14 @@ const PostCard = ({
 
   return (
     <div
-      className={`mb-4 bg-white rounded-xl mx-4 overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 ${
+      className={`mb-4 bg-white dark:bg-gray-900 rounded-xl w-full overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 transition-all duration-300 border border-gray-100 dark:border-white ${
         isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
       }`}
       ref={containerRef}
     >
       {/* ADDED: Archived indicator */}
       {isArchived && (
-        <div className="bg-gray-500 px-4 py-2">
+        <div className="bg-gray-500 dark:bg-gray-700 px-4 py-2">
           <div className="flex items-center">
             <Archive size={16} className="text-white" />
             <span className="text-white ml-2 text-sm font-medium">
@@ -308,7 +308,7 @@ const PostCard = ({
       )}
 
       {/* Post header */}
-      <div className="p-4 flex items-center justify-between">
+  <div className="p-4 flex items-center justify-between">
         <button
           className="flex items-center flex-1 text-left"
           onClick={handleProfileClick}
@@ -323,7 +323,7 @@ const PostCard = ({
           </div>
           <div className="ml-3 flex-1">
             <div className="flex items-center">
-              <span className="font-medium cursor-pointer text-base text-gray-800">
+              <span className="font-medium cursor-pointer text-base text-gray-800 dark:text-white">
                 {post.username}
               </span>
               {/* MODIFIED: Better verification badge */}
@@ -331,7 +331,7 @@ const PostCard = ({
                 <MdVerified size={16} className="text-blue-500 ml-1" />
               )}
             </div>
-            <span className="font-normal text-sm text-gray-500">
+            <span className="font-normal text-sm text-gray-500 dark:text-gray-400">
               {post.timestamp}
             </span>
           </div>
@@ -340,23 +340,23 @@ const PostCard = ({
         {/* MODIFIED: Show menu button based on archive status and permissions */}
         {(!isArchived || allowArchivedOptions) && (
           <button
-            className="p-2 cursor-pointer hover:bg-gray-50 rounded-full transition-colors"
+            className="p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full transition-colors"
             onClick={() => {
               setSelectedPost(post);
               setModalVisible(true);
             }}
           >
-            <MoreHorizontal size={20} className="text-gray-600 cursor-pointer" />
+            <MoreHorizontal size={20} className="text-gray-600 dark:text-gray-300 cursor-pointer" />
           </button>
         )}
       </div>
 
       {/* Post content */}
       <div
-        className="px-4 pb-3 cursor-pointer"
+        className="px-4 pb-3 cursor-pointer dark:bg-gray-900 text-white"
         onClick={() => router.push(`/post/${post.id}`)}
       >
-        {renderContent()}
+  {renderContent()}
 
         {/* Tags */}
         {post.tags?.length > 0 && (
@@ -368,9 +368,9 @@ const PostCard = ({
                   e.stopPropagation();
                   router.push(`/tags/${tag}`);
                 }}
-                className="bg-gray-100 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 transition-colors"
+                className="bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1 mr-2 mb-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
-                <span className="font-medium text-xs text-gray-700">
+                <span className="font-medium text-xs text-gray-700 dark:text-white">
                   #{tag}
                 </span>
               </button>
@@ -380,9 +380,9 @@ const PostCard = ({
 
         {/* Tagged People */}
         {post.taggedUsers?.length > 0 && (
-          <div className="flex flex-row flex-wrap items-center mb-3 bg-blue-50 rounded-lg p-3">
-            <MdPeople size={16} className="text-blue-600" />
-            <span className="text-blue-600 ml-2 mr-1 font-medium">
+          <div className="flex flex-row flex-wrap items-center mb-3 bg-blue-50 dark:bg-blue-950 rounded-lg p-3">
+            <MdPeople size={16} className="text-blue-600 dark:text-blue-400" />
+            <span className="text-blue-600 dark:text-blue-400 ml-2 mr-1 font-medium">
               With
             </span>
             {post.taggedUsers.map((taggedUser, index) => {
@@ -402,7 +402,7 @@ const PostCard = ({
                         : `/UserProfile/${identifier}`
                     );
                   }}
-                  className="text-blue-600 hover:underline focus:outline-none font-medium cursor-pointer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline focus:outline-none font-medium cursor-pointer"
                 >
                   @{taggedUser.username}
                   {index < post.taggedUsers.length - 1 && ', '}
@@ -414,9 +414,9 @@ const PostCard = ({
 
         {/* ADDED: Location */}
         {post.location?.source === 'user_input' && (post.location.name || post.location.coordinates) && (
-          <div className="flex flex-row items-center mb-3 bg-green-50 rounded-lg p-3">
-            <MdLocationOn size={16} className="text-green-600" />
-            <span className="text-green-600 ml-2 font-medium">
+          <div className="flex flex-row items-center mb-3 bg-green-50 dark:bg-green-950 rounded-lg p-3">
+            <MdLocationOn size={16} className="text-green-600 dark:text-green-400" />
+            <span className="text-green-600 dark:text-green-400 ml-2 font-medium">
               At {post.location.name || 'Location'}
             </span>
           </div>
@@ -424,9 +424,9 @@ const PostCard = ({
 
         {/* ADDED: Feeling */}
         {post.feeling && (
-          <div className="flex flex-row items-center mb-3 bg-amber-50 rounded-lg p-3">
-            <MdMood size={16} className="text-amber-600" />
-            <span className="text-amber-600 ml-2 font-medium">
+          <div className="flex flex-row items-center mb-3 bg-amber-50 dark:bg-amber-950 rounded-lg p-3">
+            <MdMood size={16} className="text-amber-600 dark:text-amber-400" />
+            <span className="text-amber-600 dark:text-amber-400 ml-2 font-medium">
               Feeling {post.feeling}
             </span>
           </div>
@@ -434,9 +434,9 @@ const PostCard = ({
 
         {/* MODIFIED: Amplified post with archive handling */}
         {post.isAmplified && post.originalPost && (
-          <div className="border border-gray-200 rounded-xl p-3 mb-3">
+          <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-3 mb-3">
             <div className="flex items-center mb-2">
-              <span className="font-medium text-xs text-gray-500">
+              <span className="font-medium text-xs text-gray-500 dark:text-gray-400">
                 Amplified from{' '}
                 <span className="text-primary">
                   @{post.originalPost.user?.username || 'user'}
@@ -445,23 +445,23 @@ const PostCard = ({
             </div>
 
             {post.quoteContent && (
-              <p className="font-normal text-sm text-gray-700 mb-2">
+              <p className="font-normal text-sm text-gray-700 dark:text-white mb-2">
                 {post.quoteContent}
               </p>
             )}
 
             {/* Check if original post is archived */}
             {post.originalPost.isArchived || post.originalPost.archived ? (
-              <div className="bg-gray-100 p-3 rounded-lg flex items-center justify-center">
-                <Archive size={16} className="text-gray-600" />
-                <span className="text-sm text-gray-600 ml-2 font-medium">
+              <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg flex items-center justify-center">
+                <Archive size={16} className="text-gray-600 dark:text-gray-300" />
+                <span className="text-sm text-gray-600 dark:text-gray-300 ml-2 font-medium">
                   This post has been archived.
                 </span>
               </div>
             ) : (
-              <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
                 {post.originalPost.content && (
-                  <p className="font-normal text-sm text-gray-700">
+                  <p className="font-normal text-sm text-gray-700 dark:text-white">
                     {post.originalPost.content}
                   </p>
                 )}
@@ -577,7 +577,7 @@ const PostCard = ({
                         }
                       }}
                       className={`w-2 h-2 rounded-full mx-1 transition-colors ${
-                        index === currentImageIndex ? 'bg-primary' : 'bg-gray-300'
+                        index === currentImageIndex ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-700'
                       }`}
                     />
                   ))}
@@ -591,8 +591,8 @@ const PostCard = ({
         <div className="flex items-center mb-2">
           {post.bookmarkCount > 0 && (
             <>
-              <div className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
-              <span className="text-xs text-gray-500 font-medium">
+              <div className="w-1 h-1 bg-gray-400 dark:bg-gray-600 rounded-full mx-2" />
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                 {post.bookmarkCount} saves
               </span>
             </>
@@ -602,21 +602,21 @@ const PostCard = ({
 
       {/* MODIFIED: Post actions - Hide for archived posts */}
       {!isArchived && (
-        <div className="flex items-center justify-around py-3 border-t border-gray-100">
+        <div className="flex items-center justify-around py-3 border-t border-gray-100 dark:border-gray-800">
           {/* Like Button - Thumbs Up */}
           <button
-            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 rounded-lg transition-colors"
             onClick={() =>
               isLiked ? handleUnlikePost(post.id) : handleLikePost(post.id)
             }
           >
             <ThumbsUp
               size={20}
-              className={isLiked ? "text-primary fill-current" : " text-gray-600"}
+              className={isLiked ? "text-primary fill-current" : " text-gray-600 dark:text-gray-300"}
             />
             <span
               className={`ml-2 text-md font-medium ${
-                isLiked ? " text-primary" : " text-gray-600"
+                isLiked ? " text-primary" : " text-gray-600 dark:text-gray-300"
               }`}
             >
               {post.likeCount || 0}
@@ -625,7 +625,7 @@ const PostCard = ({
 
           {/* Dislike Button - Thumbs Down */}
           <button
-            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 rounded-lg transition-colors"
             onClick={() =>
               isDisliked
                 ? handleUndislikePost(post.id)
@@ -635,12 +635,12 @@ const PostCard = ({
             <ThumbsDown
               size={20}
               className={
-                isDisliked ? "text-orange-500 fill-current" : "text-gray-600"
+                isDisliked ? "text-orange-500 fill-current" : "text-gray-600 dark:text-gray-300"
               }
             />
             <span
               className={`ml-2 text-md font-medium ${
-                isDisliked ? "text-orange-500" : "text-gray-600"
+                isDisliked ? "text-orange-500" : "text-gray-600 dark:text-gray-300"
               }`}
             >
               {post.dislikeCount || 0}
@@ -649,29 +649,29 @@ const PostCard = ({
 
           {/* Comment Button */}
           <button
-            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 rounded-lg transition-colors"
             onClick={() => handleCommentPost(post)}
           >
-            <MessageCircle size={20} className="text-gray-600" />
-            <span className="ml-2 text-md text-gray-600 font-medium">
+            <MessageCircle size={20} className="text-gray-600 dark:text-gray-300" />
+            <span className="ml-2 text-md text-gray-600 dark:text-gray-300 font-medium">
               {post.commentCount || 0}
             </span>
           </button>
           
           {/* Amplify Button */}
           <button
-            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 rounded-lg transition-colors"
             onClick={() => handleAmplifyPost(post)}
           >
-            <Repeat size={20} className="text-gray-600" />
-            <span className="ml-2 text-md text-gray-600 font-medium">
+            <Repeat size={20} className="text-gray-600 dark:text-gray-300" />
+            <span className="ml-2 text-md text-gray-600 dark:text-gray-300 font-medium">
               {post.amplifyCount || 0}
             </span>
           </button>
 
           {/* Bookmark Button */}
           <button
-            className="flex items-center cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 rounded-lg transition-colors"
             onClick={() =>
               isBookmarked
                 ? handleUnbookmarkPost(post.id)
@@ -681,12 +681,12 @@ const PostCard = ({
             <Bookmark
               size={20}
               className={
-                isBookmarked ? "text-primary fill-current" : "text-gray-600"
+                isBookmarked ? "text-primary fill-current" : "text-gray-600 dark:text-gray-300"
               }
             />
             <span
               className={`ml-2 text-md font-medium ${
-                isBookmarked ? "text-primary" : "text-gray-600"
+                isBookmarked ? "text-primary" : "text-gray-600 dark:text-gray-300"
               }`}
             >
               {post.bookmarkCount || 0}
