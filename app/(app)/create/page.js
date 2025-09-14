@@ -802,7 +802,7 @@ setRandomUsers(uniqueUsers);
 
   if (loading) {
     return (
-      <div className="w-xl min-h-screen bg-gray-50 flex items-center justify-center">
+  <div className="w-xl min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Creating your post...</p>
@@ -812,9 +812,9 @@ setRandomUsers(uniqueUsers);
   }
 
   return (
-   <div className="min-h-screen bg-gray-50 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-950 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
+  <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
         <div className="flex items-center justify-between px-4 py-3 mt-5">
           <button
             className="text-gray-600 transition-transform duration-200 cursor-pointer ease-in-out hover:rotate-180"
@@ -822,7 +822,7 @@ setRandomUsers(uniqueUsers);
           >
             <RefreshCw size={24} />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
             Create New Post
           </h1>
           <button
@@ -841,7 +841,7 @@ setRandomUsers(uniqueUsers);
       </div>
 
       {/* Main Content */}
-      <div className="bg-white mt-4 rounded-lg max-w-2xl w-full mx-auto shadow-sm">
+  <div className="bg-white dark:bg-gray-900 mt-4 rounded-lg max-w-2xl w-full mx-auto shadow-sm">
         {/* User Info Header */}
         <div className="flex items-center px-4 pt-4">
           <Image
@@ -853,7 +853,7 @@ setRandomUsers(uniqueUsers);
           />
           <div className="ml-3 flex-1">
             <div className="flex items-center">
-              <p className="text-base font-bold text-gray-800">
+              <p className="text-base font-bold text-gray-800 dark:text-gray-200">
                 {user?.username || "User"}
               </p>
               {user?.isVerified && (
@@ -875,7 +875,7 @@ setRandomUsers(uniqueUsers);
                   height: 40,
                 }}
               >
-                <div className="bg-white rounded-full w-9 h-9 flex items-center justify-center">
+                <div className="bg-white dark:bg-gray-900 rounded-full w-9 h-9 flex items-center justify-center">
                   <span
                     className={`text-xs font-medium ${
                       isOverLimit
@@ -896,7 +896,7 @@ setRandomUsers(uniqueUsers);
         {/* Input Box */}
         <div className="px-4 py-4 min-h-[180px]">
           <textarea
-            className="w-full text-base text-gray-800 placeholder-gray-400 outline-none resize-none"
+            className="w-full text-base text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder:text-gray-400 outline-none resize-none"
             placeholder="What's on your mind?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -909,14 +909,14 @@ setRandomUsers(uniqueUsers);
         {/* Location Display */}
         {location && (
           <div className="px-4 mb-3">
-            <div className="flex items-center bg-blue-50 rounded-lg p-3">
+            <div className="flex items-center bg-blue-50 dark:bg-blue-900 rounded-lg p-3">
               <MapPin className="text-blue-600" size={16} />
               <span className="text-blue-600 ml-2 font-medium flex-1">
                 {locationName}
               </span>
               <button
                 onClick={clearLocation}
-                className="ml-2 text-blue-500 hover:text-blue-700"
+                className="ml-2 text-blue-500 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-400"
               >
                 <X size={14} />
               </button>
@@ -1007,10 +1007,10 @@ setRandomUsers(uniqueUsers);
               {images.length < MEDIA_LIMIT && (
                 <button
                   onClick={() => setShowMediaOptions(true)}
-                  className="w-28 h-28 rounded-xl border-2 border-dashed border-sky-300 flex flex-col items-center justify-center bg-sky-50 hover:bg-sky-100 flex-shrink-0"
+                  className="w-28 h-28 rounded-xl border-2 border-dashed border-sky-300 flex flex-col items-center justify-center bg-sky-50 dark:bg-sky-900 hover:bg-sky-100 dark:hover:bg-sky-800 flex-shrink-0"
                 >
                   <Plus size={32} className="text-sky-500" />
-                  <span className="text-xs text-sky-500 mt-1 font-medium">
+                  <span className="text-xs text-sky-500 dark:text-sky-300 mt-1 font-medium">
                     Add More
                   </span>
                 </button>
@@ -1022,9 +1022,9 @@ setRandomUsers(uniqueUsers);
         {/* Upload Progress */}
         {uploading && (
           <div className="px-4 mb-3">
-            <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div className="bg-gray-200 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
               <div
-                className="bg-sky-500 h-full transition-all duration-300"
+                className="bg-sky-500 dark:bg-sky-400 h-full transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
@@ -1078,64 +1078,70 @@ setRandomUsers(uniqueUsers);
         </div>
 
         {/* Add to Post Options */}
-        <div className="bg-white px-4 py-3 border-t border-gray-100">
-          <p className="text-sm text-gray-600 mb-3 font-medium">
-            Add to your post:
-          </p>
-          <div className="flex justify-around">
-            <button
-              onClick={() => setShowMediaOptions(true)}
-              disabled={images.length >= MEDIA_LIMIT}
-              className="flex flex-col items-center justify-center disabled:opacity-50"
-            >
-              <div
-                className={`w-12 h-12 rounded-full cursor-pointer flex items-center justify-center ${
-                  images.length >= MEDIA_LIMIT ? "bg-gray-100" : "bg-red-50 hover:bg-red-100"
-                }`}
-              >
-                <ImageIcon
-                  className={images.length >= MEDIA_LIMIT ? "text-gray-400" : "text-red-500"}
-                  size={20}
-                />
-              </div>
-              <span
-                className={`text-xs mt-1 ${images.length >= MEDIA_LIMIT ? "text-gray-400" : "text-gray-600"}`}
-              >
-                Media
-              </span>
-            </button>
+        <div className="bg-white dark:bg-gray-900 px-4 py-3 border-t border-gray-100 dark:border-gray-800">
+  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 font-medium">
+    Add to your post:
+  </p>
+  <div className="flex justify-around">
+    <button
+      onClick={() => setShowMediaOptions(true)}
+      disabled={images.length >= MEDIA_LIMIT}
+      className="flex flex-col items-center justify-center disabled:opacity-50"
+    >
+      <div
+        className={`w-12 h-12 rounded-full cursor-pointer flex items-center justify-center ${
+          images.length >= MEDIA_LIMIT
+            ? "bg-gray-100 dark:bg-gray-800"
+            : "bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800"
+        }`}
+      >
+        <ImageIcon
+          className={images.length >= MEDIA_LIMIT ? "text-gray-400 dark:text-gray-500" : "text-red-500"}
+          size={20}
+        />
+      </div>
+      <span
+        className={`text-xs mt-1 ${
+          images.length >= MEDIA_LIMIT
+            ? "text-gray-400 dark:text-gray-500"
+            : "text-gray-600 dark:text-gray-300"
+        }`}
+      >
+        Media
+      </span>
+    </button>
 
-            <button
-              onClick={() => setShowLocationModal(true)}
-              className="flex flex-col items-center justify-center"
-            >
-              <div className="w-12 h-12 cursor-pointer rounded-full bg-green-50 hover:bg-green-100 flex items-center justify-center">
-                <MapPin size={24} className="text-green-500" />
-              </div>
-              <span className="text-xs mt-1 text-gray-600">Location</span>
-            </button>
+    <button
+      onClick={() => setShowLocationModal(true)}
+      className="flex flex-col items-center justify-center"
+    >
+      <div className="w-12 h-12 cursor-pointer rounded-full bg-green-50 dark:bg-green-900 hover:bg-green-100 dark:hover:bg-green-800 flex items-center justify-center">
+        <MapPin size={24} className="text-green-500 dark:text-green-300" />
+      </div>
+      <span className="text-xs mt-1 text-gray-600 dark:text-gray-300">Location</span>
+    </button>
 
-            <button
-              onClick={() => setShowPeopleTagModal(true)}
-              className="flex flex-col items-center justify-center"
-            >
-              <div className="w-12 h-12 rounded-full bg-blue-50 cursor-pointer hover:bg-blue-100 flex items-center justify-center">
-                <Users size={24} className="text-blue-500" />
-              </div>
-              <span className="text-xs mt-1 text-gray-600">Tag People</span>
-            </button>
+    <button
+      onClick={() => setShowPeopleTagModal(true)}
+      className="flex flex-col items-center justify-center"
+    >
+      <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-800 flex items-center justify-center">
+        <Users size={24} className="text-blue-500 dark:text-blue-300" />
+      </div>
+      <span className="text-xs mt-1 text-gray-600 dark:text-gray-300">Tag People</span>
+    </button>
 
-            <button
-              onClick={() => setShowFeelingModal(true)}
-              className="flex flex-col cursor-pointer items-center justify-center"
-            >
-              <div className="w-12 h-12 rounded-full bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center">
-                <Smile size={24} className="text-indigo-500 " />
-              </div>
-              <span className="text-xs mt-1 text-gray-600">Feeling</span>
-            </button>
-          </div>
-        </div>
+    <button
+      onClick={() => setShowFeelingModal(true)}
+      className="flex flex-col cursor-pointer items-center justify-center"
+    >
+      <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900 hover:bg-indigo-100 dark:hover:bg-indigo-800 flex items-center justify-center">
+        <Smile size={24} className="text-indigo-500 dark:text-indigo-300" />
+      </div>
+      <span className="text-xs mt-1 text-gray-600 dark:text-gray-300">Feeling</span>
+    </button>
+  </div>
+</div>
 
         {/* Error Message for Over Limit */}
         {isOverLimit && (
@@ -1151,12 +1157,11 @@ setRandomUsers(uniqueUsers);
       {/* Media Options Modal */}
       {showMediaOptions && (
         <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
-          <div className="bg-white rounded-t-3xl w-full max-w-lg p-6">
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+<div className="bg-white dark:bg-gray-900 rounded-t-3xl w-full max-w-lg p-6">            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
             <h3 className="text-xl font-bold text-center mb-6">Add Media</h3>
             
-            <div className="space-y-3">
-              <label className="flex items-center bg-gray-50 p-4 rounded-xl cursor-pointer hover:bg-gray-100">
+            <div className="space-y-3 dark:bg-gray-800">
+              <label className="flex items-center bg-gray-50 p-4 rounded-xl dark:bg-gray-800 cursor-pointer ">
                 <input
                   type="file"
                   multiple
@@ -1164,11 +1169,11 @@ setRandomUsers(uniqueUsers);
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mr-4">
-                  <ImageIcon size={24} className="text-blue-500" />
+                <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-gray-800 flex items-center justify-center mr-4">
+                  <ImageIcon size={24} className="text-blue-500 dark:text-blue-400" />
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-800">Choose from gallery</p>
+                <div className="flex-1 dark:bg-gray-800">
+                  <p className="font-medium text-gray-800 dark:bg-gray-800 dark:text-white">Choose from gallery</p>
                   <p className="text-sm text-gray-500">
                     Select up to {MEDIA_LIMIT} images
                   </p>
@@ -1187,23 +1192,23 @@ setRandomUsers(uniqueUsers);
       )}
 
       {/* Location Modal */}
-      {showLocationModal && (
+      {
+      showLocationModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
-          <div className="bg-white rounded-t-3xl w-full max-w-lg p-6">
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+<div className="bg-white dark:bg-gray-900 rounded-t-3xl w-full max-w-lg p-6">            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
             <h3 className="text-xl font-bold text-center mb-6">Add Location</h3>
 
-            <div className="space-y-3">
+            <div className="space-y-3 cursor-pointer">
               <button
                 onClick={getCurrentLocation}
                 disabled={uploading}
-                className="flex items-center bg-gray-50 p-4 rounded-xl w-full hover:bg-gray-100"
+                className="flex items-center bg-gray-50 p-4 dark:bg-gray-800 dark:text-white  rounded-xl w-full hover:bg-black"
               >
-                <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mr-4">
+                <div className="w-12  cursor-pointer h-12 rounded-full dark:bg-gray-800 dark:text-white bg-green-50 flex items-center justify-center mr-4">
                   <MapPin size={24} className="text-green-500" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-medium text-gray-800">
+                  <p className="font-medium dark:text-white text-gray-800">
                     Use current location
                   </p>
                   <p className="text-sm text-gray-500">
@@ -1214,13 +1219,13 @@ setRandomUsers(uniqueUsers);
 
               <button
                 onClick={() => setShowCustomLocationInput(true)}
-                className="flex items-center bg-gray-50 p-4 rounded-xl w-full hover:bg-gray-100"
+                className="flex items-center dark:bg-gray-800 bg-gray-50 p-4 rounded-xl w-full hover:bg-black"
               >
-                <div className="w-12 h-12 rounded-full bg-sky-50 flex items-center justify-center mr-4">
-                  <Search size={24} className="text-sky-500" />
+                <div className="w-12 h-12 rounded-full dark:text-white dark:bg-gray-800 bg-sky-50 flex items-center justify-center mr-4">
+                  <Search size={24} className="text-sky-500  dark:text-sky-300" />
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="font-medium text-gray-800">
+                <div className="flex-1 text-left dark:text-white ">
+                  <p className="font-medium text-gray-800 dark:text-white">
                     Add custom location
                   </p>
                   <p className="text-sm text-gray-500">
@@ -1308,38 +1313,38 @@ setRandomUsers(uniqueUsers);
         </div>
       )}
 
-      {/* People Tag Modal */}
+ {/* People Tag Modal */}
       {showPeopleTagModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
-          <div className="bg-white rounded-t-3xl w-full max-w-lg max-h-[85vh] min-h-[70vh] flex flex-col">
+          <div className="bg-white dark:bg-gray-900 rounded-t-3xl w-full max-w-lg max-h-[85vh] min-h-[70vh] flex flex-col">
             <div className="p-6 pb-0">
               <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold">Tag People</h3>
+                <h3 className="text-xl font-bold dark:text-white">Tag People</h3>
                 <button
                   onClick={() => setShowPeopleTagModal(false)}
-                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center"
                 >
-                  <X size={20} className="text-gray-600 cursor-pointer" />
+                  <X size={20} className="text-gray-600 dark:text-gray-300 cursor-pointer" />
                 </button>
               </div>
 
               {/* Search Input */}
               <div className="relative mb-4">
                 <Search
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
                   size={20}
                 />
                 <input
                   type="text"
-                  className="w-full bg-gray-50 text-gray-800 rounded-xl pl-12 pr-4 py-3 border border-gray-200"
+                  className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-xl pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-700"
                   placeholder="Search for people..."
                   value={userSearchQuery}
                   onChange={(e) => handleUserSearchChange(e.target.value)}
                 />
                 {isSearchingUsers && (
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 dark:border-gray-400"></div>
                   </div>
                 )}
               </div>
@@ -1347,14 +1352,14 @@ setRandomUsers(uniqueUsers);
               {/* Currently Tagged */}
               {taggedPeople.length > 0 && (
                 <div className="mb-4">
-                  <p className="text-sm text-gray-700 mb-3 font-medium">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 font-medium">
                     Tagged ({taggedPeople.length}):
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {taggedPeople.map((person) => (
                       <div
                         key={person.id}
-                        className="flex items-center bg-blue-50 rounded-full px-3 py-2 border border-blue-200"
+                        className="flex items-center bg-blue-50 dark:bg-blue-900 rounded-full px-3 py-2 border border-blue-200 dark:border-blue-700"
                       >
                         <Image
                           src={person.profilePicture || defaultPic}
@@ -1363,14 +1368,14 @@ setRandomUsers(uniqueUsers);
                           height={24}
                           className="rounded-full mr-2"
                         />
-                        <span className="text-blue-700 text-sm font-medium">
+                        <span className="text-blue-700 dark:text-blue-300 text-sm font-medium">
                           @{person.username}
                         </span>
                         <button
                           onClick={() => handleRemoveTaggedUser(person.id)}
-                          className="ml-2 w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center"
+                          className="ml-2 w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 flex items-center justify-center"
                         >
-                          <X size={12} className="text-blue-700" />
+                          <X size={12} className="text-blue-700 dark:text-blue-300" />
                         </button>
                       </div>
                     ))}
@@ -1385,13 +1390,13 @@ setRandomUsers(uniqueUsers);
                 /* Random Users */
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm text-gray-700 font-medium">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
                       Suggested People:
                     </p>
                     {!isLoadingRandomUsers && (
                       <button
                         onClick={fetchRandomUsers}
-                        className="flex items-center  text-gray-600"
+                        className="flex items-center text-gray-600 dark:text-gray-400"
                       >
                         <RefreshCw size={20} className="cursor-pointer" />
                         <span className="text-xs ml-1">Refresh</span>
@@ -1401,15 +1406,15 @@ setRandomUsers(uniqueUsers);
 
                   {isLoadingRandomUsers ? (
                     <div className="flex items-center justify-center py-12">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 dark:border-gray-400"></div>
                     </div>
                   ) : randomUsers.length === 0 ? (
                     <div className="text-center py-12">
-                      <Users size={48} className="text-gray-300 mx-auto mb-2" />
-                      <p className="text-gray-500">No users to suggest</p>
+                      <Users size={48} className="text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                      <p className="text-gray-500 dark:text-gray-400">No users to suggest</p>
                       <button
                         onClick={fetchRandomUsers}
-                        className="mt-3 bg-gray-100 px-4 py-2 rounded-full text-gray-600 font-medium"
+                        className="mt-3 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full text-gray-600 dark:text-gray-300 font-medium"
                       >
                         Try Again
                       </button>
@@ -1420,7 +1425,7 @@ setRandomUsers(uniqueUsers);
                         <button
                           key={user.id || user._id}
                           onClick={() => handleTagUser(user)}
-                          className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:bg-gray-100"
+                          className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Image
                             src={user.profilePicture || defaultPic}
@@ -1430,7 +1435,7 @@ setRandomUsers(uniqueUsers);
                             className="rounded-full mx-auto mb-3"
                           />
                           <div className="flex items-center justify-center mb-1">
-                            <p className="text-sm font-medium text-gray-800 truncate">
+                            <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
                               @{user.username}
                             </p>
                             {user.isVerified && (
@@ -1438,7 +1443,7 @@ setRandomUsers(uniqueUsers);
                             )}
                           </div>
                           {user.bio && (
-                            <p className="text-xs text-gray-500 line-clamp-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                               {user.bio}
                             </p>
                           )}
@@ -1455,18 +1460,18 @@ setRandomUsers(uniqueUsers);
               ) : (
                 /* Search Results */
                 <div>
-                  <p className="text-sm text-gray-700 mb-3 font-medium">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 font-medium">
                     Search Results:
                   </p>
 
                   {isSearchingUsers ? (
                     <div className="flex items-center justify-center py-12">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 dark:border-gray-400"></div>
                     </div>
                   ) : searchedUsers.length === 0 ? (
                     <div className="text-center py-12">
-                      <Search size={48} className="text-gray-300 mx-auto mb-2" />
-                      <p className="text-gray-500">
+                      <Search size={48} className="text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                      <p className="text-gray-500 dark:text-gray-400">
                         No users found for "{userSearchQuery}"
                       </p>
                     </div>
@@ -1476,7 +1481,7 @@ setRandomUsers(uniqueUsers);
                         <button
                           key={user.id || user._id}
                           onClick={() => handleTagUser(user)}
-                          className="flex items-center bg-white rounded-xl p-3 w-full border border-gray-200 hover:bg-gray-50"
+                          className="flex items-center bg-white dark:bg-gray-800 rounded-xl p-3 w-full border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                           <Image
                             src={user.profilePicture || defaultPic}
@@ -1487,7 +1492,7 @@ setRandomUsers(uniqueUsers);
                           />
                           <div className="ml-3 flex-1 text-left">
                             <div className="flex items-center">
-                              <p className="font-medium text-gray-800">
+                              <p className="font-medium text-gray-800 dark:text-white">
                                 @{user.username}
                               </p>
                               {user.isVerified && (
@@ -1495,7 +1500,7 @@ setRandomUsers(uniqueUsers);
                               )}
                             </div>
                             {user.bio && (
-                              <p className="text-sm text-gray-500 line-clamp-2">
+                              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
                                 {user.bio}
                               </p>
                             )}
@@ -1516,59 +1521,40 @@ setRandomUsers(uniqueUsers);
         </div>
       )}
 
-     {/* Feeling Modal */}
-{showFeelingModal && (
-  <>
-    {/* Backdrop */}
-    <div
-      className="fixed inset-0 bg-black/50 z-50"
-      onClick={() => setShowFeelingModal(false)}
-    ></div>
-    <div className="relative z-60">
+      {/* Feeling Modal */}
+      {showFeelingModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-t-3xl w-full max-w-lg p-6">
+            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-center mb-6 dark:text-white">How are you feeling?</h3>
 
-    {/* Modal Content */}
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-lg p-4 shadow-lg">
-      <div className="bg-white rounded-lg p-4 w-full max-w-2xl shadow-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg  text-center w-full">How are you feeling?</h3>
-          <button
-            onClick={() => setShowFeelingModal(false)}
-            className="text-gray-600 hover:text-gray-900 cursor-pointer"
-          >
-            <X size={24} className="cursor-pointer" />
-          </button>
-        </div>
+            <div className="grid grid-cols-2 gap-3">
+              {feelings.map((feeling, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setSelectedFeeling(feeling);
+                    setShowFeelingModal(false);
+                  }}
+                  className="flex items-center justify-center flex-col p-4 bg-gray-50 dark:bg-gray-800 cursor-pointer rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <div className="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900 flex items-center justify-center mb-2">
+                    <Icon icon={feeling.icon} width={24} height={24} color="orange" />
+                  </div>
+                  <span className="text-gray-800 dark:text-white font-medium">{feeling.name}</span>
+                </button>
+              ))}
+            </div>
 
-          <div className="grid grid-cols-2  gap-3">
-            {feelings.map((feeling, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setSelectedFeeling(feeling);
-                  setShowFeelingModal(false);
-                }}
-                className="flex items-center justify-center flex-col p-3 bg-gray-50 cursor-pointer rounded-lg"
-              >
-                <span className="text-2xl text-center bg-amber-100 rounded">
-                  <Icon icon={feeling.icon} width={24} height={24} color="orange" />
-                </span>
-                <span className="text-center ">{feeling.name}</span>
-
-              </button>
-            ))}
             <button
-    onClick={() => setShowFeelingModal(false)}
-    className="col-span-2 cursor-pointer  bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg mt-2"
-  >
-    Cancel
-  </button>
+              onClick={() => setShowFeelingModal(false)}
+              className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-4 rounded-xl mt-6 cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-  </>
-)}
-
+      )}
       {/* Image Editor Modal */}
       {showImageEditor && editingImageIndex !== null && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

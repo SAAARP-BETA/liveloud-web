@@ -51,9 +51,9 @@ const TrendingItem = ({ tag, count, index, onPress }) => {
           .replace(" to-", ", ")})`,
       }}
     >
-      <div className="bg-white rounded-full px-4 py-2">
-        <p className="text-gray-900 font-medium">#{tag}</p>
-        <p className="text-xs text-gray-500">{count.toLocaleString()} posts</p>
+      <div className="bg-white dark:bg-gray-800 rounded-full px-4 py-2">
+        <p className="text-gray-900 dark:text-white font-medium">#{tag}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{count.toLocaleString()} posts</p>
       </div>
     </button>
   );
@@ -63,7 +63,7 @@ const TrendingItem = ({ tag, count, index, onPress }) => {
 const SuggestionItem = ({ item, onPress, showType = true }) => {
   return (
     <button
-      className="flex items-center py-3 px-4 w-full text-left hover:bg-gray-50 border-b border-gray-100 cursor-pointer"
+      className="flex items-center py-3 px-4 w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
       onClick={() => onPress(item)}
     >
       {item.type === "user" ? (
@@ -75,7 +75,7 @@ const SuggestionItem = ({ item, onPress, showType = true }) => {
           />
           <div className="ml-3 flex-1">
             <div className="flex items-center">
-              <span className="text-gray-900 font-medium">{item.username}</span>
+              <span className="text-gray-900 dark:text-white font-medium">{item.username}</span>
               {item.isVerified && (
                 <Verified
                   size={14}
@@ -84,29 +84,29 @@ const SuggestionItem = ({ item, onPress, showType = true }) => {
               )}
             </div>
             {item.bio && (
-              <p className="text-gray-500 text-sm truncate">{item.bio}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm truncate">{item.bio}</p>
             )}
           </div>
           {showType && (
-            <div className="bg-gray-100 rounded-full px-2 py-1">
-              <span className="text-xs text-gray-500 font-medium">Profile</span>
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-1">
+              <span className="text-xs text-gray-500 dark:text-gray-300 font-medium">Profile</span>
             </div>
           )}
         </>
       ) : (
         <>
-          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-            <Hash size={18} className="text-gray-500" />
+          <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+            <Hash size={18} className="text-gray-500 dark:text-gray-400" />
           </div>
           <div className="ml-3 flex-1">
-            <span className="text-gray-900 font-medium">#{item.tag}</span>
+            <span className="text-gray-900 dark:text-white font-medium">#{item.tag}</span>
             <p className="text-gray-500 dark:text-gray-400 text-sm">
               {item.count.toLocaleString()} posts
             </p>
           </div>
           {showType && (
-            <div className="bg-gray-100 rounded-full px-2 py-1">
-              <span className="text-xs text-gray-500 font-medium">Tag</span>
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-1">
+              <span className="text-xs text-gray-500 dark:text-gray-300 font-medium">Tag</span>
             </div>
           )}
         </>
@@ -118,7 +118,7 @@ const SuggestionItem = ({ item, onPress, showType = true }) => {
 // Component for recent search item
 const RecentSearchItem = ({ item, onPress, onRemove }) => {
   return (
-    <div className="flex items-center justify-between py-3 px-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+    <div className="flex items-center justify-between py-3 px-4 border-b border-gray-100 dark:bg-gray-800 dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-black">
       <button
         className="flex items-center flex-1 text-left rounded -m-2 p-2 cursor-pointer"
         onClick={() => onPress(item)}
@@ -130,9 +130,9 @@ const RecentSearchItem = ({ item, onPress, onRemove }) => {
             className="w-4 h-4 rounded-full object-cover mr-3"
           />
         ) : (
-          <Clock size={16} className="text-gray-500" />
+          <Clock size={16} className="text-gray-500 dark:text-gray-400" />
         )}
-        <span className="ml-3 text-gray-700 truncate">
+        <span className="ml-3 text-gray-700 dark:text-gray-300 truncate">
           {item.type === "user"
             ? `@${item.username}`
             : item.type === "tag"
@@ -142,17 +142,18 @@ const RecentSearchItem = ({ item, onPress, onRemove }) => {
       </button>
 
       <button onClick={() => onRemove(item)} className="p-2rounded">
-        <X size={16} className="text-gray-500 cursor-pointer" />
+        <X size={16} className="text-gray-500 dark:text-gray-400 cursor-pointer" />
       </button>
     </div>
   );
 };
 
+
 // Component for post search result
 const PostSearchResult = ({ post, onPress }) => {
   return (
     <div
-      className="bg-white rounded-xl p-4 mb-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+      className="bg-white dark:bg-gray-900 rounded-xl p-4 mb-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
       onClick={() => onPress(post)}
     >
       <div className="flex items-center mb-3">
@@ -163,7 +164,7 @@ const PostSearchResult = ({ post, onPress }) => {
         />
         <div className="ml-2">
           <div className="flex items-center">
-            <span className="text-gray-900 font-medium">
+            <span className="text-gray-900 dark:text-white font-medium">
               {post.user.username}
             </span>
             {post.user.isVerified && (
@@ -171,12 +172,12 @@ const PostSearchResult = ({ post, onPress }) => {
             )}
           </div>
         </div>
-        <span className="text-xs text-gray-500 ml-auto">
+        <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
           {new Date(post.createdAt).toLocaleDateString()}
         </span>
       </div>
 
-      <p className="text-gray-800 mb-2">{post.content}</p>
+      <p className="text-gray-800 dark:text-gray-200 mb-2">{post.content}</p>
 
       {post.media && post.media[0] && (
         <img
@@ -193,7 +194,7 @@ const PostSearchResult = ({ post, onPress }) => {
 const UserSearchResult = ({ user, onPress }) => {
   return (
     <div
-      className="bg-white rounded-xl p-4 mb-4 flex items-center shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+      className="bg-white dark:bg-gray-900 rounded-xl p-4 mb-4 flex items-center shadow-sm cursor-pointer hover:shadow-md transition-shadow"
       onClick={() => onPress(user)}
     >
       <img
@@ -243,6 +244,7 @@ const UserSearchResult = ({ user, onPress }) => {
     </div>
   );
 };
+
 
 // Main Search Page component
 export default function SearchPage() {
@@ -625,21 +627,21 @@ export default function SearchPage() {
   };
 
   return (
-     <div className="min-h-screen bg-gray-50 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-950 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
     <div className="md:w-xl w-90 mx-auto">
         {/* Header */}
         <div className="px-4 pt-6 pb-4">
           <div className="flex items-center">
             <form onSubmit={handleSearch} className="flex-1">
               <div
-                className={`flex items-center bg-white rounded-full transition-colors shadow-sm ${
+                className={`flex items-center bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-full transition-colors shadow-sm ${
                   isSearchFocused ? "ring-2 ring-primary" : ""
                 }`}
               >
                 <Search size={20} className="text-gray-500 ml-3 w-5 h-5" />{" "}
                 {/* Add flex here */}
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 bg-transparent outline-none placeholder-gray-500"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-200 bg-transparent outline-none placeholder-gray-500 dark:placeholder:text-gray-400"
                   placeholder="Search people, post using tags..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
@@ -650,7 +652,7 @@ export default function SearchPage() {
                 />
                 {searchQuery.length > 0 && (
                   <button
-                    className="pr-3 pl-1 hover:bg-gray-100 rounded-3xl p-1"
+                    className="pr-3 pl-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-3xl p-1"
                     onClick={() => setSearchQuery("")}
                     type="button"
                   >
@@ -661,7 +663,7 @@ export default function SearchPage() {
             </form>
             {isSearchFocused && (
               <button
-                className="ml-3 py-2 px-3 text-gray-500  font-medium cursor-pointer"
+                className="ml-3 py-2 px-3 text-gray-500 dark:text-gray-300 font-medium cursor-pointer"
                 onClick={handleCancel}
               >
                 Cancel
@@ -672,13 +674,13 @@ export default function SearchPage() {
           {/* Search Type Tabs */}
           {searchMode === "results" && (
             <div className="flex space-x-2 mt-4 overflow-x-auto">
-              {["users", "posts"].map((tab) => (
+              {['users', 'posts'].map((tab) => (
                 <button
                   key={tab}
                   className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-colors cursor-pointer ${
                     activeTab === tab
                       ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700  hover:bg-gray-200"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                   }`}
                   onClick={() => {
                     setActiveTab(tab);
@@ -701,7 +703,7 @@ export default function SearchPage() {
               {recentSearches.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold text-gray-900">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                       Recent Searches
                     </h2>
                     <button
@@ -728,7 +730,7 @@ export default function SearchPage() {
               {/* Trending Searches */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-bold text-gray-900">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                     Trending Now
                   </h2>
                 </div>

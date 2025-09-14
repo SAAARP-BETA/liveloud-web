@@ -22,7 +22,7 @@ import defaultPic from "../../assets/avatar.png";
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   return (
     <div
-      className="bg-white border-b border-gray-100 sticky top-4 z-10"
+      className="bg-white dark:bg-gray-900 border-b border-white dark:border-gray-800 sticky top-4 z-10"
       style={{
         paddingLeft: 16,
         paddingRight: 16,
@@ -39,8 +39,8 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
             <button
               key={tab.key}
               className={` cursor-pointer mr-3 py-3 px-4 rounded-full flex-shrink-0 transition-all duration-200 ${isActive
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  ? "bg-primary text-white dark:bg-black dark:text-white border-2 border-white"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
               onClick={() => onTabPress(tab.key)}
               style={{
@@ -51,10 +51,9 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
             >
               <div className="flex items-center space-x-2">
                 <Icon
-                  className={`w-4 h-4 ${isActive ? "text-white" : "text-black"
-                    }`}
+                  className={`w-4 h-4 ${isActive ? "text-white dark:text-white" : "text-black dark:text-white"}`}
                 />
-                <span className={`${isActive ? "text-white" : "text-black"}`}>
+                <span className={`${isActive ? "text-white dark:text-white" : "text-black dark:text-white"}`}>
                   {tab.title}
                 </span>
               </div>
@@ -94,26 +93,26 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
     switch (rank) {
       case 1:
         return (
-          <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-            <Crown className="w-4 h-4 cursor-pointer text-white" />
+          <div className="w-8 h-8 bg-yellow-500 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+            <Crown className="w-4 h-4 cursor-pointer text-white dark:text-yellow-300" />
           </div>
         );
       case 2:
         return (
-          <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-            <Medal className="w-4 h-4 cursor-pointer text-white" />
+          <div className="w-8 h-8 bg-gray-400 dark:bg-gray-800 rounded-full flex items-center justify-center">
+            <Medal className="w-4 h-4 cursor-pointer text-white dark:text-gray-300" />
           </div>
         );
       case 3:
         return (
-          <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-            <Medal className="cursor-pointer w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-amber-600 dark:bg-orange-900 rounded-full flex items-center justify-center">
+            <Medal className="cursor-pointer w-4 h-4 text-white dark:text-orange-300" />
           </div>
         );
       default:
         return (
-          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-            <span className="text-gray-600 text-sm font-medium">{rank}</span>
+          <div className="w-8 h-8 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center">
+            <span className="text-gray-600 dark:text-gray-300 text-sm font-medium">{rank}</span>
           </div>
         );
     }
@@ -138,81 +137,81 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
         level: 1,
         title: "Newcomer",
         minPoints: 0,
-        bgColor: "bg-gray-100",
-        textColor: "text-gray-700",
-        borderColor: "border-gray-200",
+        bgColor: "bg-gray-100 dark:bg-gray-800",
+        textColor: "text-gray-700 dark:text-gray-300",
+        borderColor: "border-gray-200 dark:border-gray-700",
       },
       {
         level: 2,
         title: "Active Member",
         minPoints: 100,
-        bgColor: "bg-green-100",
-        textColor: "text-green-700",
-        borderColor: "border-green-200",
+        bgColor: "bg-green-100 dark:bg-green-900",
+        textColor: "text-green-700 dark:text-green-300",
+        borderColor: "border-green-200 dark:border-green-700",
       },
       {
         level: 3,
         title: "Contributor",
         minPoints: 500,
-        bgColor: "bg-blue-100",
-        textColor: "text-blue-700",
-        borderColor: "border-blue-200",
+        bgColor: "bg-blue-100 dark:bg-blue-900",
+        textColor: "text-blue-700 dark:text-blue-100",
+        borderColor: "border-blue-200 dark:border-blue-900",
       },
       {
         level: 4,
         title: "Influencer",
         minPoints: 1000,
-        bgColor: "bg-purple-100",
-        textColor: "text-purple-700",
-        borderColor: "border-purple-200",
+        bgColor: "bg-purple-100 dark:bg-purple-900",
+        textColor: "text-purple-700 dark:text-purple-300",
+        borderColor: "border-purple-200 dark:border-purple-700",
       },
       {
         level: 5,
         title: "Star",
         minPoints: 2500,
-        bgColor: "bg-pink-100",
-        textColor: "text-pink-700",
-        borderColor: "border-pink-200",
+        bgColor: "bg-pink-100 dark:bg-pink-900",
+        textColor: "text-pink-700 dark:text-pink-300",
+        borderColor: "border-pink-200 dark:border-pink-700",
       },
       {
         level: 6,
         title: "Superstar",
         minPoints: 5000,
-        bgColor: "bg-orange-100",
-        textColor: "text-orange-700",
-        borderColor: "border-orange-200",
+        bgColor: "bg-orange-100 dark:bg-orange-900",
+        textColor: "text-orange-700 dark:text-orange-300",
+        borderColor: "border-orange-200 dark:border-orange-700",
       },
       {
         level: 7,
         title: "Icon",
         minPoints: 10000,
-        bgColor: "bg-red-100",
-        textColor: "text-red-700",
-        borderColor: "border-red-200",
+        bgColor: "bg-red-100 dark:bg-red-900",
+        textColor: "text-red-700 dark:text-red-300",
+        borderColor: "border-red-200 dark:border-red-700",
       },
       {
         level: 8,
         title: "Legend",
         minPoints: 25000,
-        bgColor: "bg-yellow-100",
-        textColor: "text-yellow-700",
-        borderColor: "border-yellow-200",
+        bgColor: "bg-yellow-100 dark:bg-yellow-900",
+        textColor: "text-yellow-700 dark:text-yellow-300",
+        borderColor: "border-yellow-200 dark:border-yellow-700",
       },
       {
         level: 9,
         title: "Master",
         minPoints: 50000,
-        bgColor: "bg-indigo-100",
-        textColor: "text-indigo-700",
-        borderColor: "border-indigo-200",
+        bgColor: "bg-indigo-100 dark:bg-indigo-900",
+        textColor: "text-indigo-700 dark:text-indigo-300",
+        borderColor: "border-indigo-200 dark:border-indigo-700",
       },
       {
         level: 10,
         title: "Grandmaster",
         minPoints: 100000,
-        bgColor: "bg-gradient-to-r from-yellow-400 to-orange-500",
-        textColor: "text-white",
-        borderColor: "border-yellow-400",
+        bgColor: "bg-gradient-to-r from-yellow-400 to-orange-500 dark:from-yellow-900 dark:to-orange-900",
+        textColor: "text-white dark:text-yellow-300",
+        borderColor: "border-yellow-400 dark:border-yellow-700",
       },
     ];
 
@@ -225,9 +224,9 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
 
   return (
     <div
-      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg ${isCurrentUser
-          ? "bg-sky-50 border-2 border-primary"
-          : "bg-white shadow-sm hover:shadow-md"
+      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg border-2 border-white dark:border-white ${isCurrentUser
+          ? "bg-sky-50 dark:bg-blue-950"
+          : "bg-white dark:bg-gray-900 shadow-sm hover:shadow-md"
         }`}
       onClick={() => onPress(item)}
     >
@@ -235,7 +234,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
       <div className="mr-4 flex-shrink-0">{getRankIcon()}</div>
 
       {/* Profile Picture */}
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center border-2 border-white flex-shrink-0 relative overflow-hidden">
+  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 dark:from-blue-900 dark:to-blue-700 flex items-center justify-center border-2 border-white dark:border-gray-800 flex-shrink-0 relative overflow-hidden">
         <Image
           src={profilePicture || defaultPic}
           alt={username|| "Profile"}
@@ -246,42 +245,42 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
       </div>
 
       {/* User Info */}
-      <div className="flex-1 ml-4 min-w-0">
-        <div className="flex items-center mb-1">
-          <span className="text-gray-900 text-base font-medium truncate">
-            {username ||
-              item.fullname ||
-              `User #${item?.userId?.slice(-6)}`}
-          </span>
-          {isCurrentUser && (
-            <div className="ml-2 px-2 py-1 bg-primary rounded-full flex-shrink-0">
-              <span className="text-xs text-white font-medium">You</span>
+        <div className="flex-1 ml-4 min-w-0">
+          <div className="flex items-center mb-1">
+            <span className="text-gray-900 dark:text-white text-base font-medium truncate">
+              {username ||
+                item.fullname ||
+                `User #${item?.userId?.slice(-6)}`}
+            </span>
+            {isCurrentUser && (
+              <div className="ml-2 px-2 py-1 bg-primary rounded-full flex-shrink-0">
+                <span className="text-xs text-white font-medium">You</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center space-x-1">
+            <div
+              className={`px-2 py-1 ${levelInfo.bgColor} dark:bg-gray-800 ${levelInfo.borderColor} dark:border-gray-700 rounded-xl border`}
+            >
+              <span className={`text-xs ${levelInfo.textColor} dark:text-white font-medium`}>
+                {/* Mobile: Show L1, L2, etc. */}
+                <span className="sm:hidden">L{levelInfo.level}</span>
+                {/* Desktop: Show Level 1, Level 2, etc. */}
+                <span className="hidden sm:inline">Level {levelInfo.level}</span>
+              </span>
             </div>
-          )}
-        </div>
-        <div className="flex items-center space-x-1">
-          <div
-            className={`px-2 py-1 ${levelInfo.bgColor} ${levelInfo.borderColor} rounded-xl border`}
-          >
-            <span className={`text-xs ${levelInfo.textColor} font-medium`}>
-              {/* Mobile: Show L1, L2, etc. */}
-              <span className="sm:hidden">L{levelInfo.level}</span>
-              {/* Desktop: Show Level 1, Level 2, etc. */}
-              <span className="hidden sm:inline">Level {levelInfo.level}</span>
+            <span className={`text-xs ${levelInfo.textColor} dark:text-white truncate`}>
+              {levelInfo.title}
             </span>
           </div>
-          <span className={`text-xs ${levelInfo.textColor} truncate`}>
-            {levelInfo.title}
-          </span>
         </div>
-      </div>
 
       {/* Points */}
       <div className="text-right flex-shrink-0 ml-4">
-        <div className="text-lg font-semibold text-gray-900">
+        <div className="text-lg font-semibold text-gray-900 dark:text-white">
           {displayPoints.toLocaleString() || "0"}
         </div>
-        <div className="text-xs text-gray-500">{pointsLabel}</div>
+        <div className="text-xs text-gray-500 dark:text-gray-300">{pointsLabel}</div>
       </div>
     </div>
   );
@@ -445,11 +444,11 @@ export default function LeaderboardPage() {
   
 if (isLoading && page === 1) {
   return (
-    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4">
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 dark:bg-gray-950 flex-1 px-4 mx-4">
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 flex justify-center items-center border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading leaderboard...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading leaderboard...</p>
         </div>
       </div>
     </div>
@@ -459,7 +458,7 @@ if (isLoading && page === 1) {
 
 
   return (
-    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl   bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+  <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 dark:bg-gray-900 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
       {/* Tabs */}
       <LeaderboardTabs
         tabs={tabs}
@@ -468,7 +467,7 @@ if (isLoading && page === 1) {
       />
 
       {/* Main Content */}
-      <div className="pb-24 px-4 sm:px-6 lg:px-8">
+  <div className="pb-24 px-4 sm:px-6 lg:px-8">
         {/* My Points Summary */}
         {isAuthenticated && myPoints && (
           <div className="my-6 rounded-xl overflow-hidden shadow-lg">
@@ -525,7 +524,7 @@ if (isLoading && page === 1) {
 
         {/* Header Section */}
         <div className="py-4 flex flex-row justify-between sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-gray-800 text-lg font-semibold">
+          <h2 className="text-gray-800 dark:text-white text-lg font-semibold">
             🏆 Top Users - {tabs.find(tab => tab.key === activeTab)?.title}
 
           </h2>
@@ -562,7 +561,7 @@ if (isLoading && page === 1) {
             <div className="py-4 text-center">
               <button
                 onClick={loadMore}
-                className="bg-white text-primary border border-primary px-6 py-3 rounded-lg hover:bg-sky-50 transition-colors font-medium"
+                className="bg-white dark:bg-gray-900 text-primary border border-primary dark:border-gray-800 px-6 py-3 rounded-lg hover:bg-sky-50 dark:hover:bg-gray-800 transition-colors font-medium"
               >
                 Load More
               </button>
@@ -571,7 +570,7 @@ if (isLoading && page === 1) {
 
           {!hasMore && leaderboardData.length > 0 && (
             <div className="py-6 text-center">
-              <p className="text-gray-500">
+              <p className="text-gray-500 dark:text-gray-300">
                 🎉 You've reached the end of the leaderboard!
               </p>
             </div>
@@ -579,9 +578,9 @@ if (isLoading && page === 1) {
 
           {!isLoading && leaderboardData.length === 0 && (
             <div className="py-12 text-center">
-              <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No users found</p>
-              <p className="text-gray-400 text-sm">
+              <Trophy className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-300 text-lg">No users found</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm">
                 Be the first to earn points!
               </p>
             </div>

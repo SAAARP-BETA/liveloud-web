@@ -900,9 +900,9 @@ const EditPage = () => {
                 Phone
               </label>
               <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <Phone className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+                <Phone className="text-gray-400 dark:text-gray-300 cursor-pointer w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-200 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.phone || ""}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   placeholder="Your phone number"
@@ -916,9 +916,9 @@ const EditPage = () => {
                 Gender
               </label>
               <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <User className="text-gray-400 w-5 h-5 ml-3" />
+                <User className="text-gray-400 dark:text-gray-300 w-5 h-5 ml-3" />
                 <select
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent cursor-pointer"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-200 outline-none bg-transparent dark:bg-gray-800 cursor-pointer"
                   value={profileData.gender || ""}
                   onChange={(e) => handleInputChange("gender", e.target.value)}
                 >
@@ -936,9 +936,9 @@ const EditPage = () => {
                 Occupation
               </label>
               <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <Briefcase className="text-gray-400 w-5 h-5 ml-3" />
+                <Briefcase className="text-gray-400 dark:text-gray-300 w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-200 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.occupation || ""}
                   onChange={(e) =>
                     handleInputChange("occupation", e.target.value)
@@ -953,9 +953,9 @@ const EditPage = () => {
                 Education
               </label>
               <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <Book className="text-gray-400 w-5 h-5 ml-3" />
+                <Book className="text-gray-400 dark:text-gray-300 w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-200 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.education || ""}
                   onChange={(e) =>
                     handleInputChange("education", e.target.value)
@@ -973,7 +973,7 @@ const EditPage = () => {
               </label>
               <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
                 <input
-                  className="flex-1 py-3 px-3 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-3 text-gray-800 dark:text-gray-200 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.interests?.join(", ") || ""}
                   onChange={(e) =>
                     handleInputChange(
