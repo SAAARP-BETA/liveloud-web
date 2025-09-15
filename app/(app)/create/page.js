@@ -802,7 +802,7 @@ setRandomUsers(uniqueUsers);
 
   if (loading) {
     return (
-  <div className="w-xl min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+  <div className="w-xl min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Creating your post...</p>
@@ -812,12 +812,12 @@ setRandomUsers(uniqueUsers);
   }
 
   return (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-950 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
       {/* Header */}
-  <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
+  <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-white max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
         <div className="flex items-center justify-between px-4 py-3 mt-5">
           <button
-            className="text-gray-600 transition-transform duration-200 cursor-pointer ease-in-out hover:rotate-180"
+            className="text-gray-600 transition-transform dark:border-white duration-200 cursor-pointer ease-in-out hover:rotate-180"
             onClick={() => setContent("")}
           >
             <RefreshCw size={24} />
@@ -841,7 +841,7 @@ setRandomUsers(uniqueUsers);
       </div>
 
       {/* Main Content */}
-  <div className="bg-white dark:bg-gray-900 mt-4 rounded-lg max-w-2xl w-full mx-auto shadow-sm">
+  <div className="bg-white dark:bg-gray-900 mt-4 rounded-lg max-w-2xl w-full mx-auto shadow-sm border border-gray-200 dark:border-white">
         {/* User Info Header */}
         <div className="flex items-center px-4 pt-4">
           <Image
@@ -849,7 +849,7 @@ setRandomUsers(uniqueUsers);
             alt="Profile"
             width={48}
             height={48}
-            className="rounded-full w-12 h-12 border-2 border-sky-100"
+            className="rounded-full w-12 h-12 border-2 border-sky-100 dark:border-white"
           />
           <div className="ml-3 flex-1">
             <div className="flex items-center">

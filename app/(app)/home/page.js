@@ -1342,17 +1342,14 @@ useEffect(() => {
         const isActive = activeTab === feedType.key;
         const canAccess = !feedType.requiresAuth || isAuthenticated;
         const isNearMe = feedType.key === "nearme";
-        
         // Show different states for nearme tab
         const getDisplayText = () => {
           if (!isNearMe) return feedType.title;
-          
           if (locationPermission === 'requesting') return 'Near me ';
           if (locationPermission === 'denied') return 'Near me ';
           if (locationPermission === 'granted') return 'Near me ';
           return 'Near me ';
         };
-        
         return (
           <button
             key={feedType.key}
@@ -1364,7 +1361,7 @@ useEffect(() => {
               }
             }}
             className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors flex items-center justify-center
-              ${isActive ? "bg-primary text-white dark:bg-black dark:text-white border-2 border-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-white"}
+              ${isActive ? "bg-primary text-white dark:bg-black dark:text-white border-2 border-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:text-black"}
               ${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
               ${isNearMe && locationPermission === 'denied' ? "opacity-70" : ""}
               sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hidden whitespace-nowrap`}
