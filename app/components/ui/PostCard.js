@@ -205,7 +205,7 @@ const PostCard = ({
     return (
       <div>
         <p className="text-base text-gray-800 dark:text-white leading-6 mb-3 font-normal break-words whitespace-pre-line ">
-          {showTranslation && translatedContent ? translatedContent : processedLines}
+          {processedLines}
         </p>
         
         {/* ADDED: Translation indicator */}
@@ -290,7 +290,7 @@ const PostCard = ({
 
   return (
     <div
-      className={`mb-4 bg-white dark:bg-gray-900 rounded-xl w-full overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 transition-all duration-300 border border-gray-100 dark:border-white ${
+      className={`mb-4 bg-white dark:bg-gray-900 rounded-xl w-full overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 transition-all duration-300 ${
         isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
       }`}
       ref={containerRef}
@@ -539,7 +539,7 @@ const PostCard = ({
                 >
                   {post.media.map((item, index) => (
                     <button
-                      key={`media-${post.id}-${index}`}
+                      key={item}
                       className="flex-shrink-0 w-full snap-start"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -564,9 +564,9 @@ const PostCard = ({
 
                 {/* Image counter dots */}
                 <div className="flex cursor-pointer justify-center mt-3">
-                  {post.media.map((_, index) => (
+                  {post.media.map((item, index) => (
                     <button
-                      key={index}
+                      key={item}
                       onClick={(e) => {
                         e.stopPropagation();
                         const container =

@@ -121,7 +121,7 @@ export default function Signup() {
 
   return (
     <>
-<div className="min-h-screen mt-26 bg-white dark:bg-gray-900 text-black dark:bg-gray-900 text-white px-8 py-10">
+<div className="min-h-screen mt-26 bg-white dark:bg-gray-900 text-black dark:text-white px-8 py-10">
         <div className="relative lg:ml-4 w-[300px] h-[70px] ">
           
           <Image

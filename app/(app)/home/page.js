@@ -1549,7 +1549,7 @@ useEffect(() => {
                   <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
                     {images.map((img, index) => (
                       <div
-                        key={index}
+                        key={img}
                         className="relative w-20 h-20 rounded-lg overflow-hidden"
                       >
                         <Image
@@ -1682,7 +1682,7 @@ useEffect(() => {
                       currentTabData.posts.length === index + 1;
                     return (
                       <div
-                        key={`${post.id}-${activeTab}-${index}`}
+                        key={post.id}
                         ref={isLastPost ? lastPostElementRef : null}
                       >
                         <PostCard
@@ -1798,7 +1798,7 @@ useEffect(() => {
             <div className="space-y-2 dark:bg-gray-900">
               {filteredOptions.map((option, index) => (
                 <button
-                  key={index}
+                  key={option.text}
                   onClick={() => handleMenuOptionPress(option)}
                   className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer  text-gray-800 dark:bg-gray-800 dark:text-white  dark:hover:bg-gray-700
                   `}
