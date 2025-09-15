@@ -127,22 +127,24 @@ const PointsDisplay = ({ points, loading }) => {
   };
 
   return (
-    <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl border border-sky-100">
+    <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-sky-100 dark:border-gray-600">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center">
           <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
             <Trophy size={20} className="text-white" />
           </div>
-          <div className="ml-3">
-            <h3 className="text-2xl font-bold text-gray-900">
+          <div className="ml-3 cursor-pointer">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {points.totalPoints.toLocaleString() || 0}
             </h3>
-            <p className="text-xs text-gray-600">Total Points</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              Total Points
+            </p>
           </div>
         </div>
         <div className="text-right">
           <div className="flex items-center">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Level {currentLevel.level}
             </span>
             <div className="ml-2 px-2 py-1 bg-primary rounded-full">
@@ -155,19 +157,19 @@ const PointsDisplay = ({ points, loading }) => {
       </div>
       <div className="mb-3">
         <div className="flex justify-between mb-1">
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-gray-600 dark:text-gray-400">
             Progress to Level {currentLevel.level + 1}:
           </span>
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-gray-600 dark:text-gray-400">
             {Math.max(
               0,
               currentLevel.pointsToNext -
                 (points.totalPoints - currentLevel.minPoints)
             )}{" "}
-            Pts to go
+            pts to go
           </span>
         </div>
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-sky-400 to-primary rounded-full transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
@@ -176,31 +178,31 @@ const PointsDisplay = ({ points, loading }) => {
       </div>
       <div className="flex justify-between">
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="w-12 h-12 bg-sky-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
             <Edit2 size={16} className="text-primary" />
           </div>
-          <p className="text-base font-bold text-gray-900">
+          <p className="text-base font-bold text-gray-900 dark:text-gray-100">
             {points.creatorPoints || 0}
           </p>
-          <p className="text-xs text-gray-600">Creator</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Creator</p>
         </div>
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="w-12 h-12 bg-green-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
             <Heart size={20} className="text-green-600" />
           </div>
-          <p className="text-base font-bold text-gray-900">
+          <p className="text-base font-bold text-gray-900 dark:text-gray-100">
             {points.fanPoints || 0}
           </p>
-          <p className="text-xs text-gray-600">Fan</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Fan</p>
         </div>
         <div className="flex-1 text-center">
-          <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="w-12 h-12 bg-yellow-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
             <Star size={20} className="text-yellow-600" />
           </div>
-          <p className="text-base font-bold text-gray-900">
+          <p className="text-base font-bold text-gray-900 dark:text-gray-100">
             {points.bonusPoints || 0}
           </p>
-          <p className="text-xs text-gray-600">Bonus</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Bonus</p>
         </div>
       </div>
       <button
@@ -334,9 +336,10 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
-          {/* Use the same container structure as ProfilePage */}
-          <div className="w-full flex flex-col items-center">
+    <div className="min-h-screen bg-white">
+      {/* Use the same container structure as ProfilePage */}
+      <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
+        <div className="w-full flex flex-col items-center bg-gray-50">
           <div className="w-full relative">
             {/* Cover photo skeleton */}
             <div className="w-full h-[150px] bg-gray-200 animate-pulse" />
@@ -434,8 +437,9 @@ const ProfileSkeleton = () => {
           <div className="h-20"></div>
         </div>
       </div>
+    </div>
   );
-}
+};
 
 const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   const router = useRouter();
@@ -1266,11 +1270,11 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   }
 
   return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
-          <div className="flex flex-col items-center relative overflow-hidden w-full">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+      <div className="w-xl flex flex-col items-center relative overflow-hidden">
         {/* Scrollable Content */}
         <div
-          className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
+          className="w-full flex flex-col items-center bg-gray-50 dark:bg-gray-900 overflow-y-auto"
           style={{ width: "100%" }}
           onScroll={handleScroll}
         >
@@ -1321,7 +1325,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
 
           {/* Profile Info */}
           <motion.div
-            className="bg-white border-b border-gray-100 w-full"
+            className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 w-full"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -1329,7 +1333,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
             {/* Profile Info */}
             <div className="mt-4 text-center px-4">
               <div className="flex items-center justify-center">
-                <h2 className="text-2xl font-bold text-gray-900 ml-15">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 ml-15">
                   {user.name || user.username || "User"}
                 </h2>
                 {user.isVerified && (
@@ -1341,11 +1345,11 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                   </span>
                 )}
               </div>
-              <p className="text-base text-gray-500 mt-1">
+              <p className="text-base text-gray-500 dark:text-gray-400 mt-1">
                 @{user.username || "username"}
               </p>
               {user.bio && (
-                <p className="text-gray-700 text-center mt-3 leading-5">
+                <p className="text-gray-700 dark:text-gray-300 text-center mt-3 leading-5">
                   {user.bio}
                 </p>
               )}
@@ -1367,15 +1371,15 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                   <>
                     <Link
                       href="/profile/edit"
-                      className="flex-1 py-2.5 bg-gray-100 rounded-full text-center text-gray-900 font-medium"
+                      className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-full text-center text-gray-900 dark:text-gray-100 font-medium"
                     >
                       Edit Profile
                     </Link>
                     <button
                       onClick={handleShareProfile}
-                      className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center"
+                      className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"
                     >
-                      <Share2 className="text-gray-600 text-lg" />
+                      <Share2 className="text-gray-600 dark:text-gray-400 text-lg" />
                     </button>
                   </>
                 ) : (
@@ -1405,16 +1409,16 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                     {user._id && (
                       <Link
                         href={`/messages/chat/${user._id}`}
-                        className="flex-1 py-2.5 bg-gray-100 rounded-full text-center text-gray-900 font-medium"
+                        className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-full text-center text-gray-900 dark:text-gray-100 font-medium"
                       >
                         Message
                       </Link>
                     )}
                     <button
                       onClick={() => setIsMoreModalVisible(true)}
-                      className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center"
+                      className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"
                     >
-                      <MoreHorizontal className="text-gray-600 text-lg" />
+                      <MoreHorizontal className="text-gray-600 dark:text-gray-400 text-lg" />
                     </button>
                   </>
                 )}
@@ -1428,24 +1432,26 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                 </>
               )}
               {profileStats && (
-                <div className="mt-5 pt-4 border-t border-gray-100">
+                <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
                   {user.location && (
                     <div className="flex items-center mb-2">
-                      <MapPin className="text-gray-600 text-base" />
-                      <span className="ml-2 text-gray-500">
+                      <MapPin className="text-gray-600 dark:text-gray-400 text-base" />
+                      <span className="ml-2 text-gray-500 dark:text-gray-300">
                         {user.location}
                       </span>
                     </div>
                   )}
                   {user.website && (
                     <div className="flex items-center mb-2">
-                      <LinkIcon className="text-gray-600 text-base" />
-                      <span className="ml-2 text-gray-500">{user.website}</span>
+                      <LinkIcon className="text-gray-600 dark:text-gray-400 text-base" />
+                      <span className="ml-2 text-gray-500 dark:text-gray-300">
+                        {user.website}
+                      </span>
                     </div>
                   )}
                   <div className="flex items-center mb-2">
-                    <Calendar className="text-gray-600 text-base" />
-                    <span className="ml-2 text-gray-500">
+                    <Calendar className="text-gray-600 dark:text-gray-400 text-base" />
+                    <span className="ml-2 text-gray-500 dark:text-gray-300">
                       Joined {profileStats.joined}
                     </span>
                   </div>
@@ -1502,11 +1508,11 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                   ))
                 ) : (
                   <div className="flex flex-col max-w-xl items-center justify-center py-12">
-                    <ImageIcon className="text-gray-300 text-5xl" />
-                    <h3 className="mt-4 text-lg font-medium text-gray-700">
+                    <ImageIcon className="text-gray-300 dark:text-gray-500 text-5xl" />
+                    <h3 className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">
                       No posts yet
                     </h3>
-                    <p className="mt-2 text-center text-sm text-gray-500 mx-8">
+                    <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400 mx-8">
                       {isMyProfile
                         ? "Start sharing your thoughts, photos, and experiences with the world."
                         : `${
@@ -1693,26 +1699,28 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           {followersLoading ? (
             <div className="flex flex-col items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent"></div>
-              <p className="mt-4 text-gray-600 text-sm">Loading followers..</p>
+              <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm">
+                Loading followers..
+              </p>
             </div>
           ) : followersList.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
               <div className="bg-gray-100 rounded-full p-3 mb-3">
                 <Users className="w-8 h-8 text-gray-400" />
               </div>
-              <p className="text-lg font-medium text-gray-900 mb-2">
+              <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                 No followers yet
               </p>
-              <p className="text-sm text-gray-500 text-center px-4">
+              <p className="text-sm text-gray-500 text-center px-4 dark:text-gray-400">
                 When people follow this account, they'll appear here.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 p-4">
+            <div className="divide-y divide-gray-100 dark:divide-gray-700 p-4">
               {followersList.map((follower) => (
                 <div
                   key={follower._id}
-                  className="flex items-center py-4 px-1 hover:bg-gray-50"
+                  className="flex items-center py-4 px-1 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <div className="relative w-12 h-12 mr-3 flex-shrink-0">
                     <Image
@@ -1723,11 +1731,11 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium text-gray-900 truncate">
+                    <p className="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
                       {follower.username}
                     </p>
                     {follower.bio && (
-                      <p className="text-sm text-gray-500 mt-0.5 truncate">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                         {follower.bio}
                       </p>
                     )}
@@ -1761,26 +1769,28 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
           {followingLoading ? (
             <div className="flex flex-col items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent"></div>
-              <p className="mt-4 text-gray-600 text-sm">Loading following...</p>
+              <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm">
+                Loading following...
+              </p>
             </div>
           ) : followingList.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
               <div className="bg-gray-100 rounded-full p-3 mb-3">
                 <Users className="w-8 h-8 text-gray-400" />
               </div>
-              <p className="text-lg font-medium text-gray-900 mb-2">
+              <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                 Not following anyone yet
               </p>
-              <p className="text-sm text-gray-500 text-center px-4">
+              <p className="text-sm text-gray-500 text-center px-4 dark:text-gray-400">
                 When this account follows people, they'll appear here.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 p-4">
+            <div className="divide-y divide-gray-100 dark:divide-gray-700 p-4">
               {followingList.map((following) => (
                 <div
                   key={following._id}
-                  className="flex items-center py-4 px-1 hover:bg-gray-50"
+                  className="flex items-center py-4 px-1 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <div className="relative w-12 h-12 mr-3 flex-shrink-0">
                     <Image
@@ -1791,11 +1801,11 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium text-gray-900 truncate">
+                    <p className="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
                       {following.username}
                     </p>
                     {following.bio && (
-                      <p className="text-sm text-gray-500 mt-0.5 truncate">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                         {following.bio}
                       </p>
                     )}
