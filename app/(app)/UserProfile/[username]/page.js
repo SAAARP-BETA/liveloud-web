@@ -334,10 +334,9 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
 // Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Use the same container structure as ProfilePage */}
-      <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
-        <div className="w-full flex flex-col items-center bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
+          {/* Use the same container structure as ProfilePage */}
+          <div className="w-full flex flex-col items-center">
           <div className="w-full relative">
             {/* Cover photo skeleton */}
             <div className="w-full h-[150px] bg-gray-200 animate-pulse" />
@@ -435,9 +434,8 @@ const ProfileSkeleton = () => {
           <div className="h-20"></div>
         </div>
       </div>
-    </div>
   );
-};
+}
 
 const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   const router = useRouter();
@@ -1268,8 +1266,8 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-xl flex flex-col items-center relative overflow-hidden">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
+          <div className="flex flex-col items-center relative overflow-hidden w-full">
         {/* Scrollable Content */}
         <div
           className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"

@@ -623,7 +623,7 @@ const EditPage = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar flex flex-col items-center justify-center">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="flex mt-3 w-xl items-center justify-center  text-gray-600">
           Loading profile
@@ -634,7 +634,7 @@ const EditPage = () => {
 
   if (!profileData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar flex flex-col items-center justify-center">
         <p className="mt-3 text-gray-600">No profile data found</p>
         <button
           className="mt-4 py-2 px-4 bg-primary cursor-pointer rounded-lg text-white hover:bg-sky-600 transition-colors"
@@ -647,9 +647,9 @@ const EditPage = () => {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar relative">
-      <div className="min-h-screen bg-gray-50 flex justify-center">
-  <div className="w-full sm:w-md md:max-w-lg lg:w-xl bg-white dark:bg-gray-800">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar relative">
+      <div className="flex justify-center w-full">
+        <div className="w-full sm:w-md md:max-w-lg lg:w-xl bg-white dark:bg-gray-800">
           <header className="flex flex-row items-center justify-between py-2 sm:py-3 px-2 sm:px-4 border-b dark:bg-gray-800 border-gray-100 fixed sm:sticky max-sm:top-15 top-0 left-0 right-0 sm:left-auto sm:right-auto z-50 backdrop-blur-sm bg-white/95 max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto">
             {" "}
             <h1 className="text-base sm:text-lg text-gray-900 dark:text-gray-100">Edit Profile</h1>
