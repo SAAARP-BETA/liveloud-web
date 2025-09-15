@@ -278,7 +278,7 @@ export default function LeftSidebar() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.2 }}
-                className="absolute cursor-pointer bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white rounded-xl shadow-lg overflow-hidden z-50"
+                className="absolute cursor-pointer bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-50"
               >
                 <button
                   onClick={handleLogout}
@@ -328,7 +328,7 @@ export default function LeftSidebar() {
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
-  <div className="relative bg-white/90 dark:bg-gray-900 backdrop-blur-xl border border-white/50 dark:border-white">
+        <div className="relative bg-white/90 dark:bg-gray-900 backdrop-blur-xl border border-white/50 dark:border-gray-700">
           <div className="flex justify-around items-center px-2 py-3 safe-area-pb">
             {mobileTabs.map((tab, index) => (
               <motion.div
@@ -367,7 +367,7 @@ export default function LeftSidebar() {
 
       {/* Desktop Sidebar */}
       <motion.aside
-  className="hidden custom-scrollbar sm:flex h-screen md:w-80 max-w-80 px-6 py-10 bg-white/80 dark:bg-gray-900 text-white backdrop-blur-md border-r border-white border-l border-l-white shadow-xl flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
+        className="hidden custom-scrollbar sm:flex h-screen md:w-80 max-w-80 px-6 py-10 bg-white/80 dark:bg-gray-900 text-white backdrop-blur-md border-r border-white border-l border-l-white shadow-xl flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}

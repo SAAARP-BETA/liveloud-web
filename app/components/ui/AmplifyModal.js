@@ -95,9 +95,9 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
   if (!visible) return null;
 
   return (
-  <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 rounded-2xl">
-  <div className="absolute cursor-pointer inset-0" onClick={onClose} />
-  <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg mx-4 relative transform transition-all duration-300 border border-gray-200 dark:border-white">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 rounded-2xl">
+      <div className="absolute cursor-pointer inset-0" onClick={onClose} />
+      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg mx-4 relative transform transition-all duration-300 border border-gray-200 dark:border-gray-700">
         <div className="w-full flex items-center justify-center pt-4 pb-2">
           <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded" />
         </div>
@@ -191,7 +191,7 @@ const AmplifyModal = ({ visible, onClose, post, token, onSuccess }) => {
             />
 
             {post && (
-              <div className="border border-gray-200 dark:border-white rounded-xl p-3 mb-3 overflow-hidden">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 mb-3 overflow-hidden">
                 <div className="flex items-center mb-2">
                   <img
                     src={getProfilePicture(post.profilePic)}

@@ -290,7 +290,7 @@ const PostCard = ({
 
   return (
     <div
-      className={`mb-4 bg-white dark:bg-gray-900 rounded-xl w-full overflow-hidden shadow-sm border border-white dark:border-white transition-all duration-300 ${
+      className={`mb-4 bg-white dark:bg-gray-900 rounded-xl w-full overflow-hidden shadow-sm border border-white dark:border-gray-700 transition-all duration-300 ${
         isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
       }`}
       ref={containerRef}
@@ -308,7 +308,7 @@ const PostCard = ({
       )}
 
       {/* Post header */}
-  <div className="p-4 flex items-center justify-between">
+      <div className="p-4 flex items-center justify-between">
         <button
           className="flex items-center flex-1 text-left"
           onClick={handleProfileClick}
@@ -356,7 +356,7 @@ const PostCard = ({
         className="px-4 pb-3 cursor-pointer dark:bg-gray-900 text-white"
         onClick={() => router.push(`/post/${post.id}`)}
       >
-  {renderContent()}
+        {renderContent()}
 
         {/* Tags */}
         {post.tags?.length > 0 && (
@@ -408,19 +408,19 @@ const PostCard = ({
                   {index < post.taggedUsers.length - 1 && ', '}
                 </button>
               );
-            })} 
+            })}
           </div>
         )}
 
         {/* ADDED: Location */}
         {post.location?.source === 'user_input' && (post.location.name || post.location.coordinates) && (
-          <div className="flex flex-row items-center mb-3 bg-green-50 dark:bg-green-950 rounded-lg p-3">
+            <div className="flex flex-row items-center mb-3 bg-green-50 dark:bg-green-950 rounded-lg p-3">
             <MdLocationOn size={16} className="text-green-600 dark:text-green-400" />
-            <span className="text-green-600 dark:text-green-400 ml-2 font-medium">
+              <span className="text-green-600 dark:text-green-400 ml-2 font-medium">
               At {post.location.name || 'Location'}
-            </span>
-          </div>
-        )}
+              </span>
+            </div>
+          )}
 
         {/* ADDED: Feeling */}
         {post.feeling && (
@@ -467,7 +467,7 @@ const PostCard = ({
                 )}
 
                 {post.originalPost.media?.length > 0 && (
-                  <div 
+                  <div
                     className="w-full relative rounded-lg mt-2 overflow-hidden"
                     style={{ height: Math.min(200, Math.max(120, 160)) }}
                   >
@@ -489,9 +489,9 @@ const PostCard = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   const originalPostId = typeof post.originalPost === 'string' 
-                    ? post.originalPost 
+                      ? post.originalPost
                     : (post.originalPost?._id || post.originalPost?.id);
-                  
+
                   if (originalPostId) {
                     router.push(`/post/${originalPostId}`);
                   }
@@ -657,7 +657,7 @@ const PostCard = ({
               {post.commentCount || 0}
             </span>
           </button>
-          
+
           {/* Amplify Button */}
           <button
             className="flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-3 py-2 rounded-lg transition-colors"

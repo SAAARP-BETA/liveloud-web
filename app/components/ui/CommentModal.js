@@ -406,14 +406,14 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
   <div className="fixed inset-0 bg-black/50 dark:bg-black/70 opacity-100 flex items-center justify-center z-50">
     <div className="absolute inset-0" onClick={onClose} />
 
-    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg mx-4 relative animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col border border-gray-200 dark:border-white">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg mx-4 relative animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col border border-gray-200 dark:border-gray-700">
       <div className="w-full flex items-center justify-center pt-4 pb-2">
         <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
       </div>
 
       <div className="p-4 border-b border-gray-100 dark:border-gray-700">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white">Comments</h2>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white">Comments</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full cursor-pointer"
@@ -524,7 +524,7 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
                   </div>
                   {/* Render replies if any */}
                   {comment.replies && comment.replies.length > 0 && (
-                    <div className="mt-3 pl-4 border-l-2 border-gray-200 dark:border-white">
+                    <div className="mt-3 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
                       {comment.replies.map((reply, index) => (
                         <div key={index} className={index < comment.replies.length - 1 ? "mb-2" : ""}>
                           <div className="flex">
