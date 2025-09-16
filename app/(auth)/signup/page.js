@@ -154,7 +154,7 @@ export default function Signup() {
 
         <label className="text-base font-semibold">Email Address</label>
         <input
-          className="border-2 border-blue-200 rounded-xl p-3 mt-1 mb-4 w-full"
+          className="border-2 border-blue-200 dark:border-gray-600 rounded-xl p-3 mt-1 mb-4 w-full bg-white dark:bg-gray-800 text-black dark:text-white"
           placeholder="you@example.com"
           type="email"
           autoCapitalize="none"
@@ -164,9 +164,9 @@ export default function Signup() {
         />
 
         <label className="text-base font-semibold">Password</label> 
-        <div className="border-2 border-blue-200 rounded-xl p-1 mt-1 flex items-center justify-between">
+        <div className="relative">
           <input
-            className="flex-1 p-2 outline-none"
+            className="border-2 border-blue-200 dark:border-gray-600 rounded-xl p-3 mt-1 mb-4 w-full bg-white dark:bg-gray-800 text-black dark:text-white"
             placeholder="Enter your password"
             type={showPassword ? "text" : "password"}
             value={password}
@@ -174,7 +174,7 @@ export default function Signup() {
             disabled={isLoading}
           />
           <button
-            className="px-2 cursor-pointer"
+            className="absolute cursor-pointer right-3 top-5/12 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-non"
             onClick={() => setShowPassword(!showPassword)}
             disabled={isLoading}
           >

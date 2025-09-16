@@ -127,7 +127,7 @@ export default function AuthLayout({ children }) {
           className="w-full lg:w-[50%] xl:w-[55%] flex items-center justify-center overflow-y-auto custom-scrollbar  bg-gray-100 dark:bg-gray-900"
         >
           <div
-            className={`w-full max-w-md bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200 transition-all duration-700 ease-out dark:bg-gray-900 outline-0 ${
+            className={`w-full max-w-md bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 transition-all duration-700 ease-out dark:bg-gray-900 outline-0 ${
               isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
             style={{ transitionDelay: "300ms" }}
