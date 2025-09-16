@@ -367,7 +367,7 @@ export default function LeftSidebar() {
 
       {/* Desktop Sidebar */}
       <motion.aside
-        className="hidden custom-scrollbar sm:flex h-screen md:w-80 max-w-80 px-6 py-10 bg-white/80 dark:bg-gray-900 text-white backdrop-blur-md border-r border-white border-l border-l-white shadow-xl flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
+        className="hidden custom-scrollbar sm:flex h-screen md:w-80 max-w-80 px-6 py-10 bg-white/80 dark:bg-gray-900 dark:text-white backdrop-blur-md border-r border-white dark:border-gray-700 border-l border-l-white dark:border-l-gray-700 shadow-xl flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -388,7 +388,7 @@ export default function LeftSidebar() {
 
         {isAuthenticated && (
           <motion.div
-            className="mt-auto pt-4 border-t border-gray-200"
+            className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: (tabs.length + 1) * 0.1 }}

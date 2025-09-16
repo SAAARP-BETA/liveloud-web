@@ -224,7 +224,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
 
   return (
     <div
-      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg border-2 border-white dark:border-white ${isCurrentUser
+      className={`flex items-center p-5 mx-4 mb-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg border-2 border-white dark:border-gray-700 ${isCurrentUser
           ? "bg-sky-50 dark:bg-blue-950"
           : "bg-white dark:bg-gray-900 shadow-sm hover:shadow-md"
         }`}

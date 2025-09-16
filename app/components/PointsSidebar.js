@@ -186,9 +186,9 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   return (
     <div className="flex h-screen ">
       {/* Sidebar */}
-      <div className="lg:w-80 md:max-w-lg sm:max-w-md bg-white dark:bg-gray-900 shadow-xl border-l border-gray-200 dark:border-white border-r border-r-white hidden lg:flex flex-col overflow-y-auto custom-scrollbar h-screen">
+      <div className="lg:w-80 md:max-w-lg sm:max-w-md bg-white dark:bg-gray-900 shadow-xl border-l border-gray-200 dark:border-gray-700 border-r border-r-white hidden lg:flex flex-col overflow-y-auto custom-scrollbar h-screen">
         {/* Header */}
-        <div className="top-0 bg-white border-b border-gray-100 p-4 dark:bg-gray-900 text-white">
+        <div className="top-0 bg-white border-b border-gray-100 dark:border-gray-700 p-4 dark:bg-gray-900 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Trophy className="w-5 h-5 text-yellow-500" />
@@ -268,7 +268,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
               return (
                 <div
                   key={item.key}
-                  className="bg-white dark:bg-gray-900 rounded-lg border py-5 border-gray-100 dark:border-white p-3 hover:shadow-md dark:hover:bg-gray-800 transition-shadow "
+                  className="bg-white dark:bg-gray-900 rounded-lg border py-5 border-gray-100 dark:border-gray-700 p-3 hover:shadow-md dark:hover:bg-gray-800 transition-shadow "
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">

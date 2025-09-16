@@ -1533,7 +1533,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                           handleDislikePost={postHandlers.handleDislikePost}
                           handleUndislikePost={postHandlers.handleUndislikePost}
                           allowArchivedOptions={false}
-                          className="dark:border-white"
+                          className="dark:border-gray-700"
                           />
                       </div>
                     ))

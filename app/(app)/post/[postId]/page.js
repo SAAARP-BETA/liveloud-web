@@ -148,7 +148,7 @@ const CommentCard = React.memo(
     };
 
     return (
-  <div className="flex items-start space-x-4 p-4 border-t border-red-500 dark:border-white overflow-hidden">
+  <div className="flex items-start space-x-4 p-4 border-t border-red-500 dark:border-red-500 overflow-hidden">
         <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
           <Image
             src={comment.user.profilePicture || defaultPic}
@@ -624,7 +624,7 @@ const PostPage = () => {
   // --- Render Logic ---
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar border border-gray-200 dark:border-white flex flex-col items-center justify-center p-16">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center p-16">
         <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
         <p className="text-lg text-gray-600 dark:text-white">Loading post...</p>
       </div>
@@ -640,7 +640,7 @@ const PostPage = () => {
 
   return (
     <>
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar border border-gray-200 dark:border-white">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar border border-gray-200 dark:border-gray-700">
         {/* <div className="mx-auto p-2 sm:p-4 w-full sm:max-w-lg md:max-w-lg lg:w-xl"> */}
         <PostCard
           post={post}

@@ -1495,7 +1495,7 @@ useEffect(() => {
             </div>
           ) : (
                        <div className="mx-auto">
-              <div className="p-4 min-w-full bg-white dark:bg-gray-900 rounded-xl relative z-10 border border-white">
+              <div className="p-4 min-w-full bg-white dark:bg-gray-900 rounded-xl relative z-10 border dark:border-gray-700">
  <div className="flex items-center mb-2 space-x-3">
                   <Image
                     src={user?.profilePicture || defaultPic}
