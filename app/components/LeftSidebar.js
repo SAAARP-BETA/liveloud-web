@@ -14,17 +14,19 @@ import {
   MoreHorizontal,
   Crown,
   Users,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
 import { API_ENDPOINTS } from "../utils/config";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import defaultPic from "../assets/avatar.png";
 // import combinedLogo from "@/app/assets/Liveloud.png";
+import combinedLogo from "@/app/assets/combinedLogo.png";
 import LogoLiveloud from "@/app/assets/LongLogo.png";
 import mobileLogo from "@/app/assets/mobileLogo.png";
 // import Logo from "@/app/assets/Liveloud.png"
-import combinedLogo from "@/app/assets/combinedLogo.png";
 
 const tabs = [
   { name: "Home", href: "/home", icon: Home },
@@ -32,6 +34,7 @@ const tabs = [
   { name: "Create", href: "/create", icon: PlusCircle },
   { name: "Wallet", href: "/wallet", icon: Wallet },
   { name: "Profile", href: "/profile", icon: User },
+  { name: "Notifications", href: "/notifications", icon: Bell },
   { name: "Leaderboard", href: "/leaderboard", icon: AlignEndHorizontal },
   { name: "Premium", href: "/premium", icon: Crown },
   { name: "Referral", href: "/referral", icon: Users },
@@ -46,6 +49,7 @@ export default function LeftSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { token, logout, isAuthenticated, user } = useAuth();
+  const { unreadCount } = useSocket();
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
   const handleLogout = async () => {
@@ -88,7 +92,7 @@ export default function LeftSidebar() {
         <div className="sm:hidden">
           <Link
             href={tab.href}
-            className="relative flex flex-col items-center justify-center py-2 px-3 min-w-0 flex-1"
+            className="relative flex flex-col  items-center justify-center py-2 px-3 min-w-0 flex-1"
           >
             <AnimatePresence>
               {isActive && (
@@ -107,20 +111,28 @@ export default function LeftSidebar() {
               animate={iconAnimation}
               transition={iconTransition}
             >
-                <Icon
-                  className={`w-6 h-6 ${
-                    isActive ? "text-[#0EA5E9]" : "text-gray-700 dark:text-white group-hover:text-gray-400"
-                  }`}
-                />
+              <Icon
+                className={`w-6 h-6 ${
+                  isActive ? "text-[#0EA5E9]" : "text-gray-700 dark:text-white group-hover:text-gray-400"
+                }`}
+              />
+              {tab.name === "Notifications" && unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold shadow-md border border-white">
+                  <span className="text-[10px]">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                </span>
+              )}
             </motion.div>
             <motion.span
-              className={`text-[11px] font-medium relative z-10 text-center ${isActive ? 'text-[#0EA5E9]' : 'text-gray-700 dark:text-white group-hover:text-gray-400'}`}
+              className={`text-[11px] font-medium relative z-10 text-center  ${isActive ? 'text-[#0EA5E9]' : 'text-gray-700 dark:text-white group-hover:text-gray-400'}`}
               style={{
                 maxWidth: "58px",
                 overflow: "hidden",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 display: "inline-block",
+                color: isActive ? "#0EA5E9" : "#6b7280",
               }}
               animate={{ scale: isActive ? 1.05 : 1 }}
               transition={{ duration: 0.2 }}
@@ -132,7 +144,7 @@ export default function LeftSidebar() {
         </div>
 
         {/* Desktop Tab */}
-        <div className="hidden dark:bg-gray-900 text-white sm:block">
+        <div className="hidden dark:bg-gray-900 dark:text-white sm:block">
           <Link
             href={tab.href}
             className={`group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
@@ -142,7 +154,7 @@ export default function LeftSidebar() {
             }`}
           >
             <motion.div
-              className="flex items-center justify-center"
+              className="flex items-center justify-center relative"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               animate={iconAnimation}
@@ -155,6 +167,13 @@ export default function LeftSidebar() {
                     : "text-gray-700 dark:text-white group-hover:text-gray-400"
                 }`}
               />
+              {tab.name === "Notifications" && unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold shadow-md border border-white">
+                  <span className="text-[10px]">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                </span>
+              )}
             </motion.div>
             <motion.span
               className={`text-base ${isActive ? 'text-[#0EA5E9]' : 'text-gray-700 dark:text-white group-hover:text-gray-400'}`}
@@ -164,6 +183,7 @@ export default function LeftSidebar() {
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 display: "inline-block",
+                color: isActive ? "#0EA5E9" : "#6b7280",
               }}
               transition={{ duration: 0.2 }}
               title={tab.name}
@@ -230,7 +250,7 @@ export default function LeftSidebar() {
 
         {/* Desktop Profile */}
         <div className="hidden sm:block relative">
-          <button className="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-white dark:bg-gray-900 w-full">
+          <button className="group  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white dark:bg-gray-900 w-full">
             <motion.div
               className="flex items-center cursor-pointer justify-center"
               whileHover={{ scale: 1.05 }}
@@ -240,24 +260,24 @@ export default function LeftSidebar() {
                 <img
                   src={user.profilePicture}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200 group-hover:grayscale group-hover:brightness-75"
+                  className="w-10 h-10 rounded-full border-2 border-gray-200  group-hover:grayscale group-hover:brightness-75"
                   onClick={handleProfileClick}
                 />
               ) : (
                 <img
                   src={defaultPic.src}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200 group-hover:grayscale group-hover:brightness-75"
+                  className="w-10 h-10 rounded-full border-2 border-gray-200"
                   onClick={handleProfileClick} // Also added missing onClick
                 />
               )}
             </motion.div>
 
-            <div className="flex-1 min-w-0 text-left ">
+            <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-semibold text-gray-900 truncate dark:text-white">
                 {user?.fullname || user?.username || "User"}
               </p>
-              <p className="text-sm text-gray-500 truncate">
+              <p className="text-sm text-gray-500 truncate ">
                 @{user?.username || "username"}
               </p>
             </div>
@@ -269,6 +289,7 @@ export default function LeftSidebar() {
               />
             </motion.div>
           </button>
+          
 
           {/* Logout Dropdown */}
           <AnimatePresence>
@@ -278,11 +299,11 @@ export default function LeftSidebar() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.2 }}
-                className="absolute cursor-pointer bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-50"
+                className="absolute cursor-pointer bottom-full left-0 dark:bg-gray-900 dark:border-gray-700 right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
               >
                 <button
                   onClick={handleLogout}
-                  className="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors duration-200"
+                  className="w-full cursor-pointer flex dark:hover:bg-gray-800 items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="text-sm font-medium">Logout</span>
@@ -303,6 +324,36 @@ export default function LeftSidebar() {
       </>
     );
   };
+
+  // const Logo = () => {
+  //   const [isMobile, setIsMobile] = useState(false);
+
+  //   useEffect(() => {
+  //     const checkScreenSize = () => {
+  //       setIsMobile(window.innerWidth < 769);
+  //     };
+
+  //     // Check initially
+  //     checkScreenSize();
+
+  //     // Add resize listener
+  //     window.addEventListener("resize", checkScreenSize);
+  //     return () => window.removeEventListener("resize", checkScreenSize);
+  //   }, []);
+
+  //   return (
+  //     <div className="flex justify-center w-[350px] h-[40px] items-center mb-[-10] lg:w-[250px] lg:h-[30px] 5px] sm:h-[15px] sm:w-[150px] hover:bg-gray-100 rounded-xl">
+  //      <Image
+  //         src={isMobile ? mobileLogo : LongLogo}
+  //         alt="Logo"
+  //         width={isMobile ? 180 : 280}
+  //         height={isMobile ? 80 : 60}
+  //         className="object-contain"
+  //         priority
+  //       />
+  //     </div>
+  //   );
+  // };
 
   const Logo = () => (
     <div className="flex justify-center w-[340px] h-[40px] items-center mb-[-10] lg:w-[280px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px]">
@@ -328,7 +379,7 @@ export default function LeftSidebar() {
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
-        <div className="relative bg-white/90 dark:bg-gray-900 backdrop-blur-xl border border-white/50 dark:border-gray-700">
+        <div className="relative bg-white/90  dark:bg-gray-900 backdrop-blur-xl border dark:border-gray-700 border-white/50">
           <div className="flex justify-around items-center px-2 py-3 safe-area-pb">
             {mobileTabs.map((tab, index) => (
               <motion.div
@@ -398,6 +449,22 @@ export default function LeftSidebar() {
         )}
       </motion.aside>
 
+      {/* Mobile Top Logo */}
+      {/* <motion.div
+        className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-200 px-4 py-3 sm:hidden"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      >
+        <div className="flex items-center justify-center">
+
+          <img
+            src={Logo} // Replace with your mobile logo path
+            alt="Logo"
+            className="h-10 w-auto" // Adjust height as needed
+          />
+        </div>
+      </motion.div>/ */}
     </>
   );
 }

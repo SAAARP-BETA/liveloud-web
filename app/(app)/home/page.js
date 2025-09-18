@@ -1677,12 +1677,15 @@ useEffect(() => {
                   {currentTabData.posts.map((post, index) => {
                     const isLastPost =
                       currentTabData.posts.length === index + 1;
+                    // Create a unique key using post.id, post._id, or fallback to index with activeTab
+                    const uniqueKey = post.id || post._id || `${activeTab}-post-${index}`;
                     return (
                       <div
-                        key={post.id}
+                        key={uniqueKey}
                         ref={isLastPost ? lastPostElementRef : null}
                       >
                         <PostCard
+                          key={uniqueKey}
                           post={post}
                           handleLikePost={postHandlers.handleLikePost}
                           handleUnlikePost={postHandlers.handleUnlikePost}

@@ -687,7 +687,7 @@ const PostPage = () => {
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
-                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none text-sm sm:text-base"
+                className="flex-1 p-2 border text-black dark:text-white border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none text-sm sm:text-base"
                 rows="1"
                 disabled={isSubmittingComment || isSubmittingReply}
               />
@@ -723,7 +723,7 @@ const PostPage = () => {
 
         {/* Comments Section */}
   <div className="bg-white dark:bg-gray-900 rounded-xl mt-4 mx-1 sm:mx-0 border border-gray-100 dark:border-gray-700">
-          <h2 className="text-lg font-bold p-4 border-b border-gray-100 dark:border-gray-700 dark:text-white">
+          <h2 className="text-lg font-bold p-4 border-b text-gray-800 border-gray-100 dark:border-gray-700 dark:text-white">
             Comments ({post.commentCount || post.comments?.length || 0})
           </h2>
           {post.comments && post.comments.length > 0 ? (

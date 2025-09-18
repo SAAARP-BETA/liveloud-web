@@ -1,3 +1,48 @@
+// "use client";
+// import { useState, useEffect } from "react";
+// import LeftSidebar from "@/app/components/LeftSidebar";
+// import ProtectedRoute from "@/app/components/routes/ProtectedRoute";
+// import PointsSidebar from "@/app/components/PointsSidebar";
+
+// export default function AppLayout({ children }) {
+//   const [rightSidebarVisible, setRightSidebarVisible] = useState(true);
+
+//   useEffect(() => {
+//     const handleWheel = (e) => {
+//       const mainContent = document.querySelector(".main-scroll-target");
+//       if (mainContent) {
+//         mainContent.scrollTop += e.deltaY;
+//       }
+//     };
+
+//     window.addEventListener("wheel", handleWheel, { passive: true });
+//     return () => window.removeEventListener("wheel", handleWheel);
+//   }, []);
+
+//   return (
+//     <ProtectedRoute>
+//       <div className="flex h-screen bg-gray-50 overflow-hidden justify-center scroll-container">
+//         {/* Container to center the layout */}
+//         <div className="flex max-w-full">
+//           {/* Left Sidebar */}
+//           <LeftSidebar />
+
+//           {/* Main Content */}
+//           <main className="flex-1 w-full p-4 overflow-y-auto main-scroll-target custom-scrollbar">
+//             {children}
+//           </main>
+
+//           {/* Right Sidebar - Points (Hidden on mobile) */}
+//           <PointsSidebar
+//             isVisible={rightSidebarVisible}
+//             onClose={() => setRightSidebarVisible(false)}
+//           />
+//         </div>
+//       </div>
+//     </ProtectedRoute>
+//   );
+// }
+
 "use client";
 import { useState, useEffect } from "react";
 import LeftSidebar from "@/app/components/LeftSidebar";
@@ -9,18 +54,14 @@ import { API_ENDPOINTS } from "../utils/config";
 import { useAuth } from "../context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import NotificationBell from "../components/ui/NotificationBell";
 import Image from "next/image";
-import { useActivityTracker } from "@/app/hooks/useActivityTracker";
-import ThemeToggle from "../components/common/ThemeToggle";
 
 export default function AppLayout({ children }) {
   const { token, logout, isAuthenticated, user } = useAuth();
   const router = useRouter();
   const [rightSidebarVisible, setRightSidebarVisible] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-
-  // Track user activity
-  useActivityTracker(token);
 
   const handleLogout = async () => {
     try {
@@ -66,7 +107,6 @@ export default function AppLayout({ children }) {
 
   return (
     <ProtectedRoute>
-      <ThemeToggle/>
       <div className="flex flex-col h-screen bg-gray-50 overflow-hidden dark:bg-gray-900">
         {/* Mobile Header */}
         {isMobile && (
@@ -92,11 +132,7 @@ export default function AppLayout({ children }) {
                   <Search className="w-5 h-5 text-gray-600" />
                 </button>
               </Link>
-              <Link href="/home">
-                <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
-                  <Bell className="w-5 h-5 text-gray-600" />
-                </button>
-              </Link>
+              <NotificationBell />
 
               <button
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"

@@ -14,6 +14,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@headlessui/react": "^2.2.7",
+    "@heroicons/react": "^2.2.0",
     "@iconify/react": "^6.0.0",
     "@mdi/js": "^7.4.47",
     "@mdi/react": "^1.6.1",
@@ -35,7 +36,8 @@
     "react-calendar": "^6.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

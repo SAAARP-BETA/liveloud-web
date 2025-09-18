@@ -290,7 +290,7 @@ const PostCard = ({
 
   return (
     <div
-      className={`mb-4 bg-white dark:bg-gray-900 rounded-xl w-full overflow-hidden shadow-sm border border-white dark:border-gray-700 transition-all duration-300 ${
+      className={`mb-4 mt-5 bg-white dark:bg-gray-900 rounded-xl w-full overflow-hidden shadow-sm border border-white dark:border-gray-700 transition-all duration-300 ${
         isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
       }`}
       ref={containerRef}
