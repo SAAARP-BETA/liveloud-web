@@ -449,7 +449,7 @@ const NotificationsPage = () => {
                             </p>
                             {notification.post?.content && (
                               <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2 leading-4 sm:leading-5">
-                                "{notification.post.content.substring(0, 80)}..."
+                                {notification.post.content.substring(0, 100)}
                               </p>
                             )}
                             <p className="text-xs sm:text-sm text-gray-500">
