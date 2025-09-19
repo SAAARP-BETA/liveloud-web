@@ -118,22 +118,22 @@ const TabSkeleton = () => (
 const PostsSkeleton = () => (
   <div className="space-y-4">
     {[1, 2, 3].map((i) => (
-      <div key={i} className="bg-white rounded-xl p-4 shadow-sm animate-pulse">
+      <div key={i} className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm animate-pulse">
         <div className="flex items-center mb-3">
-          <div className="w-10 h-10 bg-gray-200 rounded-full" />
+          <div className="w-10 h-10 bg-gray-200 dark:bg-gray-800 rounded-full" />
           <div className="ml-3 flex-1">
-            <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
-            <div className="h-3 bg-gray-200 rounded w-16" />
+            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-24 mb-1" />
+            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-16" />
           </div>
         </div>
         <div className="space-y-2 mb-3">
-          <div className="h-4 bg-gray-200 rounded w-full" />
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
         </div>
         <div className="flex justify-between">
-          <div className="h-8 bg-gray-200 rounded w-16" />
-          <div className="h-8 bg-gray-200 rounded w-16" />
-          <div className="h-8 bg-gray-200 rounded w-16" />
+          <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-16" />
+          <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-16" />
+          <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-16" />
         </div>
       </div>
     ))}
@@ -775,151 +775,6 @@ useEffect(() => {
     setActiveTab(tabKey);
   };
 
-  // const performFetch = async (
-  //   feedType,
-  //   pageNum,
-  //   refresh,
-  //   feedConfig,
-  //   currentTabData
-  // ) => {
-  //   // API call throttling
-  //   const now = Date.now();
-  //   const lastFetch = lastFetchTime[feedType] || 0;
-  //   if (now - lastFetch < MIN_FETCH_INTERVAL && !refresh) {
-  //     setTabData((prev) => ({
-  //       ...prev,
-  //       [feedType]: { ...prev[feedType], loading: false },
-  //     }));
-  //     return;
-  //   }
-
-  //   setLastFetchTime((prev) => ({ ...prev, [feedType]: now }));
-
-  //   try {
-  //     // Set request headers
-  //     const headers = {
-  //       "Content-Type": "application/json",
-  //     };
-  //     if (token && feedConfig.requiresAuth) {
-  //       headers["Authorization"] = `Bearer ${token}`;
-  //     }
-
-  //     const url = `${API_ENDPOINTS.SOCIAL}/posts/feed/${feedConfig.endpoint}?page=${pageNum}&limit=${POST_LIMIT}`;
-
-  //     const response = await fetch(url, {
-  //       headers,
-  //       signal: AbortSignal.timeout(15000),
-  //     });
-
-  //     // Handle auth errors
-  //     if (response.status === 401 || response.status === 403) {
-  //       if (feedConfig.requiresAuth) {
-  //         setTabData((prev) => ({
-  //           ...prev,
-  //           [feedType]: {
-  //             ...prev[feedType],
-  //             error: "Your session has expired. Please log in again.",
-  //             posts: [],
-  //             hasMore: false,
-  //             loading: false,
-  //           },
-  //         }));
-  //         await logout();
-  //         return;
-  //       }
-  //     }
-
-  //     // Handle rate limiting
-  //     if (response.status === 429) {
-  //       setTabData((prev) => ({
-  //         ...prev,
-  //         [feedType]: {
-  //           ...prev[feedType],
-  //           error: "Rate limited. Please wait a moment before refreshing.",
-  //           loading: false,
-  //         },
-  //       }));
-  //       return;
-  //     }
-
-  //     if (!response.ok) {
-  //       throw new Error(`Failed to fetch ${feedType} feed: ${response.status}`);
-  //     }
-
-  //     const responseText = await response.text();
-  //     const data = JSON.parse(responseText);
-
-  //     if (!data.posts || !Array.isArray(data.posts)) {
-  //       throw new Error("Invalid server response format");
-  //     }
-
-  //     // Process posts
-  //     const formattedPosts = data.posts
-  //       .map((post, index) => (post ? formatPostFromApi(post, index) : null))
-  //       .filter(Boolean);
-
-  //     const hasMore = formattedPosts.length === POST_LIMIT;
-
-  //     // Update state with functional update
-  //     setTabData((prev) => {
-  //       const prevTabData = prev[feedType];
-
-  //       if (refresh) {
-  //         return {
-  //           ...prev,
-  //           [feedType]: {
-  //             ...prevTabData,
-  //             posts: formattedPosts,
-  //             page: 1,
-  //             hasMore,
-  //             error: null,
-  //             loading: false,
-  //           },
-  //         };
-  //       } else {
-  //         const existingIds = new Set(prevTabData.posts.map((p) => p.id));
-  //         const uniqueNewPosts = formattedPosts.filter(
-  //           (p) => !existingIds.has(p.id)
-  //         );
-
-  //         return {
-  //           ...prev,
-  //           [feedType]: {
-  //             ...prevTabData,
-  //             posts: [...prevTabData.posts, ...uniqueNewPosts],
-  //             page: pageNum,
-  //             hasMore,
-  //             loading: false,
-  //           },
-  //         };
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error(`Error fetching ${feedType} feed:`, error);
-
-  //     setTabData((prev) => ({
-  //       ...prev,
-  //       [feedType]: {
-  //         ...prev[feedType],
-  //         error: `Failed to load posts: ${error.message}`,
-  //         posts: refresh ? [] : prev[feedType].posts,
-  //         loading: false,
-  //       },
-  //     }));
-
-  //     if (
-  //       error.message &&
-  //       (error.message.includes("unauthorized") ||
-  //         error.message.includes("forbidden") ||
-  //         error.message.includes("authentication")) &&
-  //       feedConfig.requiresAuth
-  //     ) {
-  //       await logout();
-  //     }
-  //   } finally {
-  //     setRefreshing(false);
-  //   }
-  // };
 
   // character count and media upload: create post
   const charCount = text.length;
@@ -1481,23 +1336,20 @@ useEffect(() => {
 
   // Render tab bar
   const renderTabBar = () => (
-  <div className="sticky rounded-lg top-2 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate">
+  <div className="sticky rounded-lg top-2 mb-2 z-50 bg-white border-b overflow-x-auto custom-scrollbar border-gray-200 truncate dark:bg-gray-900">
     <div className="flex justify-center scrollbar-hide truncate overflow-x-auto px-4 py-2 space-x-2 min-w-max max-sm:justify-evenly">
       {FEED_TYPES.map((feedType) => {
         const isActive = activeTab === feedType.key;
         const canAccess = !feedType.requiresAuth || isAuthenticated;
         const isNearMe = feedType.key === "nearme";
-        
         // Show different states for nearme tab
         const getDisplayText = () => {
           if (!isNearMe) return feedType.title;
-          
           if (locationPermission === 'requesting') return 'Near me ';
           if (locationPermission === 'denied') return 'Near me ';
           if (locationPermission === 'granted') return 'Near me ';
           return 'Near me ';
         };
-        
         return (
           <button
             key={feedType.key}
@@ -1509,10 +1361,10 @@ useEffect(() => {
               }
             }}
             className={`px-3 py-2 rounded-full cursor-pointer text-sm font-medium transition-colors flex items-center justify-center
-${isActive ? "bg-primary text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
-${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
-${isNearMe && locationPermission === 'denied' ? "opacity-70" : ""}
-sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hidden whitespace-nowrap`}
+              ${isActive ? "bg-primary text-white dark:bg-black dark:text-white border-2 border-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:text-black"}
+              ${!canAccess ? "opacity-50 cursor-not-allowed" : ""}
+              ${isNearMe && locationPermission === 'denied' ? "opacity-70" : ""}
+              sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hidden whitespace-nowrap`}
             disabled={!canAccess}
             title={getDisplayText()}
           >
@@ -1605,7 +1457,7 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
       toast.error("Please login to view your profile");
       return;
     }
-    router.push(`profile`); // Navigate to user's profile
+    router.push("/profile"); // Navigate to user's profile
   };
   return (
     <div className="flex-1 h-screen max-sm:w-xl/5 min-w-full">
@@ -1642,26 +1494,24 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
               </div>
             </div>
           ) : (
-            <div className="mx-auto ">
-              <div className="p-4 min-w-full bg-white  rounded-xl relative z-10">
-                <div className="flex items-center mb-2 space-x-3">
+                       <div className="mx-auto">
+              <div className="p-4 min-w-full bg-white dark:bg-gray-900 rounded-xl relative z-10 border dark:border-gray-700">
+ <div className="flex items-center mb-2 space-x-3">
                   <Image
-                    src={
-                         user?.profilePicture || defaultPic
-                    }
+                    src={user?.profilePicture || defaultPic}
                     alt="Profile"
                     width={40}
                     height={40}
                     className="rounded-full w-[40] h-[40] cursor-pointer"
                     onClick={handleProfileClick}
                   />
-                  <span className="text-gray-700">
-                    {`@${user.username}`|| "Unknown User" }
+                  <span className="text-gray-700 dark:text-white">
+                    {`@${user.username}` || "Unknown User"}
                   </span>
                 </div>
                 <div className="flex items-start space-x-3">
                   <textarea
-                    className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                    className="flex-1 p-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 placeholder-gray-500 dark:placeholder-gray-400"
                     placeholder="What's on your mind?"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
@@ -1674,13 +1524,13 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                     <button
                       onClick={handleMediaButtonClick}
                       disabled={images.length >= MEDIA_LIMIT}
-                      className={`p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors ${
+                      className={`p-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${
                         images.length >= MEDIA_LIMIT
                           ? "opacity-50 cursor-not-allowed"
                           : ""
                       }`}
                     >
-                      <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600" />
+                      <PhotoIcon className="w-5 h-5 cursor-pointer text-gray-600 dark:text-gray-300" />
                     </button>
                     <input
                       type="file"
@@ -1693,10 +1543,10 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                   </div>
                 </div>
                 {images.length > 0 && (
-                  <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-thin scrollbar-thumb-gray-300">
+                  <div className="mt-2 flex overflow-x-auto space-x-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
                     {images.map((img, index) => (
                       <div
-                        key={index}
+                        key={img}
                         className="relative w-20 h-20 rounded-lg overflow-hidden"
                       >
                         <Image
@@ -1708,12 +1558,8 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                         />
                         <button
                           onClick={() => {
-                            setImages((prev) =>
-                              prev.filter((_, i) => i !== index)
-                            );
-                            setImageFilters((prev) =>
-                              prev.filter((_, i) => i !== index)
-                            );
+                            setImages((prev) => prev.filter((_, i) => i !== index));
+                            setImageFilters((prev) => prev.filter((_, i) => i !== index));
                           }}
                           className="absolute top-1 right-1 bg-black/50 rounded-full p-1"
                         >
@@ -1727,12 +1573,10 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center"
                     style={{
-                      background: `linear-gradient(135deg, ${gradientColors.join(
-                        ", "
-                      )})`,
+                      background: `linear-gradient(135deg, ${gradientColors.join(", ")})`,
                     }}
                   >
-                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
                       <span
                         className={`text-xs font-medium ${
                           isOverLimit
@@ -1740,7 +1584,7 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                             : isApproachingLimit
                             ? "text-yellow-500"
                             : "text-cyan-600"
-                        }`}
+                        } dark:text-white`}
                       >
                         {MAX_CHAR_LIMIT - charCount}
                       </span>
@@ -1748,23 +1592,21 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                   </div>
                   <button
                     onClick={handleCreatePost}
-                    disabled={
-                      (!text.trim() && images.length === 0) || isOverLimit
-                    }
-                    className="p-2 cursor-pointer flex items-center justify-center bg-primary text-white rounded-full hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    disabled={(!text.trim() && images.length === 0) || isOverLimit}
+                    className="p-2 cursor-pointer flex items-center justify-center bg-primary text-white rounded-full hover:bg-sky-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors"
                   >
                     Post
                   </button>
                 </div>
                 {progress > 0 && progress < 100 && (
                   <div className="w-full mt-2">
-                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-gray-200 dark:bg-gray-800 h-2 rounded-full overflow-hidden">
                       <div
                         className="h-2 bg-primary transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                       {Math.floor(progress)}% uploading...
                     </p>
                   </div>
@@ -1835,12 +1677,15 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                   {currentTabData.posts.map((post, index) => {
                     const isLastPost =
                       currentTabData.posts.length === index + 1;
+                    // Create a unique key using post.id, post._id, or fallback to index with activeTab
+                    const uniqueKey = post.id || post._id || `${activeTab}-post-${index}`;
                     return (
                       <div
-                        key={`${post.id}-${activeTab}-${index}`}
+                        key={uniqueKey}
                         ref={isLastPost ? lastPostElementRef : null}
                       >
                         <PostCard
+                          key={uniqueKey}
                           post={post}
                           handleLikePost={postHandlers.handleLikePost}
                           handleUnlikePost={postHandlers.handleUnlikePost}
@@ -1932,7 +1777,7 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
         >
           <div className="p-4">
             {selectedPost && (
-              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl ">
+              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl dark:bg-gray-800">
                 <Image
                   src={getProfilePicture(selectedPost?.profilePic)}
                   alt={selectedPost?.username || "Profile"}
@@ -1941,7 +1786,7 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                   className="rounded-full"
                 />
                 <div className="ml-3">
-                  <p className="font-semibold text-gray-800">
+                  <p className="font-semibold text-gray-800 dark:text-white">
                     {selectedPost.username}
                   </p>
                   <p className="text-sm text-gray-500 truncate line-clamp-2 break-words overflow-hidden">
@@ -1950,20 +1795,15 @@ sm:max-w-[100px] max-w-[40px] sm:w-auto w-10 h-10 sm:h-auto truncate overflow-hi
                 </div>
               </div>
             )}
-            <div className="space-y-2">
+            <div className="space-y-2 dark:bg-gray-900">
               {filteredOptions.map((option, index) => (
                 <button
-                  key={index}
+                  key={option.text}
                   onClick={() => handleMenuOptionPress(option)}
-                  className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer ${
-                    option.text === "Delete Post" ||
-                    option.text === "Block" ||
-                    option.text === "Report"
-                      ? "hover:bg-red-50 text-gray-600"
-                      : "hover:bg-gray-50 text-gray-700"
-                  }`}
+                  className={`w-full flex items-center p-3 rounded-xl text-left transition-colors cursor-pointer  text-gray-800 dark:bg-gray-800 dark:text-white  dark:hover:bg-gray-700
+                  `}
                 >
-                  <option.icon className="w-5 h-5 mr-3" />
+                  <option.icon className="w-5 h-5 mr-3 dark:text-white" />
                   <span className="font-medium">{option.text}</span>
                 </button>
               ))}

@@ -130,16 +130,6 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   const handleLeaderboardClick = () => {
     router.push("/leaderboard");
   };
-
-  // Auto-refresh points every 15 seconds (more frequent for better UX)
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     fetchMyPoints();
-  //   }, 15000); // 15 seconds
-
-  //   return () => clearInterval(interval);
-  // }, [fetchMyPoints]);
-
   // Initial load
   useEffect(() => {
     fetchMyPoints();
@@ -194,19 +184,19 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
   if (!isAuthenticated || !isVisible) return null;
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen ">
       {/* Sidebar */}
-      <div className="lg:w-80 md:max-w-lg sm:max-w-md bg-white shadow-xl border-l border-gray-200 hidden lg:flex flex-col overflow-y-auto custom-scrollbar h-screen">
+      <div className="lg:w-80 md:max-w-lg sm:max-w-md bg-white dark:bg-gray-900 shadow-xl border-l border-gray-200 dark:border-gray-700 border-r border-r-white hidden lg:flex flex-col overflow-y-auto custom-scrollbar h-screen">
         {/* Header */}
-        <div className="top-0 bg-white border-b border-gray-100 p-4">
+        <div className="top-0 bg-white border-b border-gray-100 dark:border-gray-700 p-4 dark:bg-gray-900 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Trophy className="w-5 h-5 text-yellow-500" />
-              <h2 className="text-lg font-semibold text-gray-800">My Points</h2>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">My Points</h2>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1 dark:text-white">
               Last updated: {lastUpdated.toLocaleTimeString()}
             </p>
             {isLoading && (
@@ -263,7 +253,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
 
           {/* Points Breakdown */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+            <h3 className="text-sm font-semibold text-gray-700 flex items-center dark:text-white">
               <TrendingUp className="w-4 h-4 mr-2" />
               Points Breakdown
             </h3>
@@ -278,7 +268,7 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
               return (
                 <div
                   key={item.key}
-                  className="bg-white rounded-lg border py-5 border-gray-100 p-3 hover:shadow-md transition-shadow "
+                  className="bg-white dark:bg-gray-900 rounded-lg border py-5 border-gray-100 dark:border-gray-700 p-3 hover:shadow-md dark:hover:bg-gray-800 transition-shadow "
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -288,17 +278,17 @@ const PointsSidebar = ({ isVisible = true, onClose }) => {
                         <Icon className={`w-5 h-5 ${item.color}`} />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-800">
+                        <p className="text-sm font-medium text-gray-800 dark:text-white">
                           {item.title}
                         </p>
-                        <p className="text-xs text-gray-500">Points Earned</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Points Earned</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-gray-900">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {item.points?.toLocaleString() || "0"}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {percentage.toFixed(1)}%
                       </p>
                     </div>

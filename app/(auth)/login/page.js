@@ -71,7 +71,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6">
+    <div className="min-h-screen bg-white px-6 dark:bg-gray-900 text-black dark:text-white">
       <div className="relative lg:ml-4 w-[300px] h-[100px] ">
           <Image 
             src={Logo} 
@@ -95,7 +95,7 @@ export default function Login() {
       <div className="mt-6">
         <label className="text-base font-semibold">Email Address</label>
         <input
-          className="bg-white rounded-md h-10 px-3 border border-gray-300 mt-1 w-full"
+          className="border-2 border-blue-200 dark:border-gray-600 rounded-xl p-3 mt-1 mb-4 w-full bg-white dark:bg-gray-800 text-black dark:text-white"
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -111,7 +111,7 @@ export default function Login() {
         <label className="text-base font-semibold">Password</label>
         <div className="relative">
           <input
-            className="bg-white rounded-md h-10 px-3 pr-10 border border-gray-300 mt-1 w-full"
+            className="border-2 border-blue-200 dark:border-gray-600 rounded-xl p-3 mt-1 mb-4 w-full bg-white dark:bg-gray-800 text-black dark:text-white"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
@@ -122,7 +122,7 @@ export default function Login() {
             disabled={isLoading}
           />
           <button
-            className="absolute  cursor-pointer right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="absolute cursor-pointer right-3 top-5/12 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isLoading}
                   >

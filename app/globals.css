@@ -1,12 +1,42 @@
-@import "tailwindcss";
+    @import "tailwindcss";
+    @custom-variant dark (&:where(.dark, .dark *));
+
+/* Define CSS custom properties for theming */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* Manual dark mode class override */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+.light {
+  --background: #ffffff;
+  --foreground: #171717;
+}
 
 body {
   font-family: "Geist", sans-serif;
-  overflow: hidden; /* Make main content scroll from anywhere on the page */
+  overflow: hidden;
+  background: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
-.login-scroll{
+
+.login-scroll {
   overflow-y: hidden;
 }
+
 /* Capture scroll events on the entire page and redirect to main */
 .scroll-container {
   height: 100vh;
@@ -17,45 +47,23 @@ body {
   height: 100vh;
   overflow-y: auto;
 }
-/* :root {
-  --background: #ffffff;
-  --foreground: #171717;
+
+@theme {
+  --color-primary: #00a6f4;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-} */
-
-/* src/app/globals.css or equivalent */
-
-/* For Webkit browsers (Chrome, Safari, Edge) */
+/* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 0px; /* Hide vertical scrollbar */
-  height: 0px; /* Hide horizontal scrollbar */
-  background: transparent; /* Make scrollbar track transparent */
+  width: 0px;
+  height: 0px;
+  background: transparent;
 }
 
-/* For Firefox */
 .custom-scrollbar {
-  -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
-  scrollbar-width: none; /* Hide scrollbar in Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
   scrollbar-width: none;  /* Firefox */
@@ -64,9 +72,5 @@ body {
   display: none;  /* Safari and Chrome */
 }
 .main-scroll-target::-webkit-scrollbar {
-  display: none; /* WebKit */
-}
-
-@theme {
-  --color-primary: #00a6f4;
+  display: none;
 }

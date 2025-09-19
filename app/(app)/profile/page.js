@@ -49,6 +49,7 @@ import {
   Settings,
   Shield,
   Archive,
+  Clock,
 } from "lucide-react";
 import ReportModal from "@/app/components/ui/ReportModal";
 
@@ -61,14 +62,14 @@ const PROFILE_IMAGE_MAX_SIZE = 120;
 const PROFILE_IMAGE_MIN_SIZE = 40;
 const SCROLL_SENSITIVITY = 0.5;
 
-// Points Display Component (unchanged)
+// Points Display Component
 const PointsDisplay = ({ points, loading }) => {
   const router = useRouter();
 
   if (loading || !points) {
     return (
-      <div className="mt-4 p-4 bg-gray-100 rounded-xl">
-        <div className="h-20 bg-gray-200 rounded-lg animate-pulse" />
+      <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-xl">
+        <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
       </div>
     );
   }
@@ -114,22 +115,22 @@ const PointsDisplay = ({ points, loading }) => {
   };
 
   return (
-    <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl border border-sky-100">
+    <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-sky-100 dark:border-gray-600">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center">
           <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
             <Trophy size={20} className="text-white" />
           </div>
           <div className="ml-3 cursor-pointer">
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {points.totalPoints.toLocaleString() || 0}
             </h3>
-            <p className="text-xs text-gray-600">Total Points</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Total Points</p>
           </div>
         </div>
         <div className="text-right">
           <div className="flex items-center">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Level {currentLevel.level}
             </span>
             <div className="ml-2 px-2 py-1 bg-primary rounded-full">
@@ -142,10 +143,10 @@ const PointsDisplay = ({ points, loading }) => {
       </div>
       <div className="mb-3">
         <div className="flex justify-between mb-1">
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-gray-600 dark:text-gray-400">
             Progress to Level {currentLevel.level + 1}:
           </span>
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-gray-600 dark:text-gray-400">
             {Math.max(
               0,
               currentLevel.pointsToNext -
@@ -154,7 +155,7 @@ const PointsDisplay = ({ points, loading }) => {
             pts to go
           </span>
         </div>
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-sky-400 to-primary rounded-full transition-all duration-300"
             style={{ width: `${progressPercentage}%` }}
@@ -163,31 +164,31 @@ const PointsDisplay = ({ points, loading }) => {
       </div>
       <div className="flex justify-between">
         <div className="flex-1 text-center">
-          <div className="w-12 cursor-pointer h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="w-12 cursor-pointer h-12 bg-sky-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
             <PenLineIcon size={16} className="text-primary" />
           </div>
-          <p className="text-base font-bold text-gray-900">
+          <p className="text-base font-bold text-gray-900 dark:text-gray-100">
             {points.creatorPoints || 0}
           </p>
-          <p className="text-xs text-gray-600">Creator</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Creator</p>
         </div>
         <div className="flex-1 text-center">
-          <div className="w-12 cursor-pointer h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="w-12 cursor-pointer h-12 bg-green-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
             <Heart size={20} className="text-green-600" />
           </div>
-          <p className="text-base font-bold text-gray-900">
+          <p className="text-base font-bold text-gray-900 dark:text-gray-100">
             {points.fanPoints || 0}
           </p>
-          <p className="text-xs text-gray-600">Fan</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Fan</p>
         </div>
         <div className="flex-1 text-center">
-          <div className="cursor-pointer w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1">
+          <div className="cursor-pointer w-12 h-12 bg-yellow-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-1">
             <Star size={20} className="text-yellow-600" />
           </div>
-          <p className="text-base font-bold text-gray-900">
+          <p className="text-base font-bold text-gray-900 dark:text-gray-100">
             {points.bonusPoints || 0}
           </p>
-          <p className="text-xs text-gray-600">Bonus</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Bonus</p>
         </div>
       </div>
       <button
@@ -200,13 +201,13 @@ const PointsDisplay = ({ points, loading }) => {
   );
 };
 
-// Streak Display Component (unchanged)
+// Streak Display Component
 const StreakDisplay = ({ consecutiveDays }) => {
   if (!consecutiveDays || consecutiveDays === 0) return null;
 
   return (
     <div className="mt-3 flex items-center justify-center">
-      <div className="flex items-center px-3 py-2 bg-orange-50 rounded-full border border-orange-200">
+      <div className="flex items-center px-3 py-2 bg-orange-50 dark:bg-gray-800 rounded-full border border-orange-200 dark:border-gray-600">
         <Flame size={16} className="text-orange-600" />
         <span className="ml-2 text-orange-600 font-semibold">
           {consecutiveDays} Day Streak
@@ -216,10 +217,10 @@ const StreakDisplay = ({ consecutiveDays }) => {
   );
 };
 
-// Tab Bar Component (unchanged)
+// Tab Bar Component
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   return (
-    <div className="flex w-full border justify-center gap-25 border-gray-100 pt-2">
+    <div className="flex w-full border justify-center gap-25 border-gray-100 dark:border-gray-700 pt-2">
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -233,7 +234,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               <Grid
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-primary" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
                 }
               />
             )}
@@ -241,7 +242,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               <ImageIcon
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-primary" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
                 }
               />
             )}
@@ -249,13 +250,13 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               <Archive
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-primary" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
                 }
               />
             )}
             <span
               className={`ml-1 text-sm font-medium ${
-                activeTab === tab.key ? "text-primary" : "text-gray-500"
+                activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
               }`}
             >
               {tab.title}
@@ -267,7 +268,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   );
 };
 
-// User Stats Component (unchanged)
+// User Stats Component
 const UserStats = ({
   followersCount,
   followingCount,
@@ -276,31 +277,31 @@ const UserStats = ({
   onPressFollowing,
 }) => {
   return (
-    <div className="flex justify-center mt-4 space-x-6">
+    <div className="flex justify-center mt-4 space-x-6 dark:text-white">
       <button className="text-center cursor-pointer" onClick={onPressFollowers}>
-        <div className="text-lg font-bold text-gray-800">{followersCount}</div>
-        <div className="text-sm text-gray-500">Followers</div>
+        <div className="text-lg font-bold text-gray-800 dark:text-gray-200">{followersCount}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Followers</div>
       </button>
       <button className="text-center cursor-pointer" onClick={onPressFollowing}>
-        <div className="text-lg font-bold text-gray-800">{followingCount}</div>
-        <div className="text-sm text-gray-500">Following</div>
+        <div className="text-lg font-bold text-gray-800 dark:text-gray-200">{followingCount}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Following</div>
       </button>
       <div className="text-center">
-        <div className="text-lg font-bold text-gray-800">{postsCount}</div>
-        <div className="text-sm text-gray-500">Posts</div>
+        <div className="text-lg font-bold text-gray-800 dark:text-gray-200">{postsCount}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Posts</div>
       </div>
     </div>
   );
 };
 
-// Gallery Grid Component (unchanged)
+// Gallery Grid Component
 const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
   if (!media || media.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <ImageIcon size={48} className="text-gray-300" />
-        <h3 className="mt-4 text-lg font-medium text-gray-700">No media yet</h3>
-        <p className="mt-2 text-center text-sm text-gray-500 mx-8">
+        <ImageIcon size={48} className="text-gray-300 dark:text-gray-600" />
+        <h3 className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">No media yet</h3>
+        <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400 mx-8">
           {emptyStateMessage}
         </p>
       </div>
@@ -326,66 +327,66 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
   );
 };
 
-// Profile Skeleton Component (unchanged)
+// Profile Skeleton Component
 const ProfileSkeleton = () => {
   return (
-    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4">
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 dark:bg-gray-900 flex-1 px-4 mx-4">
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
-        <div className="w-full flex flex-col items-center bg-gray-50">
+        <div className="w-full flex flex-col items-center bg-gray-50 dark:bg-gray-900">
           <div className="w-full relative">
-            <div className="w-full h-[150px] bg-gray-200 animate-pulse" />
+            <div className="w-full h-[150px] bg-gray-200 dark:bg-gray-700 animate-pulse" />
             <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
-              <div className="w-24 h-24 rounded-full bg-gray-300 border-4 border-white animate-pulse" />
+              <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-gray-600 border-4 border-white dark:border-gray-800 animate-pulse" />
             </div>
           </div>
           <div className="h-12"></div>
-          <div className="bg-white border-b border-gray-100 w-full">
+          <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 w-full">
             <div className="mt-4 text-center px-4 space-y-3">
               {/* Name skeleton */}
-              <div className="w-32 h-6 bg-gray-200 rounded-md mx-auto animate-pulse" />
+              <div className="w-32 h-6 bg-gray-200 dark:bg-gray-700 rounded-md mx-auto animate-pulse" />
               {/* Username skeleton */}
-              <div className="w-24 h-4 bg-gray-200 rounded-md mt-2 mx-auto animate-pulse" />
+              <div className="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-2 mx-auto animate-pulse" />
               {/* Bio skeleton */}
-              <div className="w-48 h-4 bg-gray-200 rounded-md mt-4 mx-auto animate-pulse" />
+              <div className="w-48 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-4 mx-auto animate-pulse" />
               {/* Stats skeleton */}
               <div className="flex justify-center mt-4 space-x-6">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-6 bg-gray-200 rounded-md animate-pulse" />
-                  <div className="w-14 h-4 bg-gray-200 rounded-md mt-1 animate-pulse" />
+                  <div className="w-8 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                  <div className="w-14 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-1 animate-pulse" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-6 bg-gray-200 rounded-md animate-pulse" />
-                  <div className="w-14 h-4 bg-gray-200 rounded-md mt-1 animate-pulse" />
+                  <div className="w-8 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                  <div className="w-14 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-1 animate-pulse" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-6 bg-gray-200 rounded-md animate-pulse" />
-                  <div className="w-14 h-4 bg-gray-200 rounded-md mt-1 animate-pulse" />
+                  <div className="w-8 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                  <div className="w-14 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-1 animate-pulse" />
                 </div>
               </div>
               {/* Buttons skeleton */}
               <div className="flex mt-4 w-full max-w-md mx-auto space-x-3">
-                <div className="flex-1 h-10 bg-gray-200 rounded-full animate-pulse" />
-                <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+                <div className="flex-1 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
               </div>
               {/* Points skeleton */}
-              <div className="mt-4 w-full h-32 bg-gray-200 rounded-xl animate-pulse" />
+              <div className="mt-4 w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
               {/* Streak skeleton */}
-              <div className="mt-3 w-32 h-8 bg-gray-200 rounded-full mx-auto animate-pulse" />
+              <div className="mt-3 w-32 h-8 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto animate-pulse" />
               {/* Profile stats skeleton */}
-              <div className="mt-5 pt-4 border-t border-gray-100">
-                <div className="w-40 h-4 bg-gray-200 rounded-md mb-2 animate-pulse" />
-                <div className="w-32 h-4 bg-gray-200 rounded-md mb-2 animate-pulse" />
-                <div className="w-36 h-4 bg-gray-200 rounded-md animate-pulse" />
+              <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <div className="w-40 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mb-2 animate-pulse" />
+                <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mb-2 animate-pulse" />
+                <div className="w-36 h-4 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
               </div>
             </div>
           </div>
           {/* Tab bar skeleton */}
-          <div className="flex w-full border justify-center border-gray-100 pt-2 px-2 sm:px-0">
+          <div className="flex w-full border justify-center border-gray-100 dark:border-gray-700 pt-2 px-2 sm:px-0">
             <div className="flex-1 flex items-center justify-center pb-2">
-              <div className="w-16 h-6 bg-gray-200 rounded-md animate-pulse" />
+              <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
             </div>
             <div className="flex-1 flex items-center justify-center pb-2">
-              <div className="w-16 h-6 bg-gray-200 rounded-md animate-pulse" />
+              <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
             </div>
           </div>
           <div className="px-2 sm:px-4 pt-2 w-full">
@@ -393,20 +394,20 @@ const ProfileSkeleton = () => {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="mb-4 p-4 bg-white rounded-xl border border-gray-100 w-full"
+                className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 w-full"
               >
                 <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
                   <div className="ml-3 flex-1">
-                    <div className="w-24 h-4 bg-gray-200 rounded-md mb-1 animate-pulse" />
-                    <div className="w-16 h-3 bg-gray-200 rounded-md animate-pulse" />
+                    <div className="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mb-1 animate-pulse" />
+                    <div className="w-16 h-3 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
                   </div>
                 </div>
-                <div className="w-full h-40 bg-gray-200 rounded-lg mb-3 animate-pulse" />
+                <div className="w-full h-40 bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 animate-pulse" />
                 <div className="flex justify-between">
-                  <div className="w-16 h-8 bg-gray-200 rounded-full animate-pulse" />
-                  <div className="w-16 h-8 bg-gray-200 rounded-full animate-pulse" />
-                  <div className="w-16 h-8 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+                  <div className="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+                  <div className="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
                 </div>
               </div>
             ))}
@@ -483,7 +484,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [isArchivedLoading, setIsArchivedLoading] = useState(false);
 
   const abortControllerRef = useRef(null);
-  const hasFetchedProfile = useRef(false); // New ref to track initial fetch
+  const hasFetchedProfile = useRef(false);
 
   // Post handlers
   const postHandlers = useMemo(
@@ -505,7 +506,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     () => [
       {
         label: "Share Profile",
-        icon: <Share2 className="text-gray-600 text-xl" />,
+        icon: <Share2 className="text-gray-600 dark:text-gray-400 text-xl" />,
         onPress: () =>
           toast.error(
             `Coming soon! Sharing profile for ${user?.username || "this user"}.`
@@ -514,7 +515,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
       {
         label: isMyProfile ? "Edit Profile" : "Report User",
         icon: isMyProfile ? (
-          <Edit2 className="text-gray-600 text-xl" />
+          <Edit2 className="text-gray-600 dark:text-gray-400 text-xl" />
         ) : (
           <Flag className="text-red-500 text-xl" />
         ),
@@ -532,43 +533,39 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   );
 
   // Fetch archived posts
-  // Fetch archived posts
-const fetchArchivedPosts = useCallback(
-  async (userId) => {
-    if (!userId || !token || !isMyProfile) return;
+  const fetchArchivedPosts = useCallback(
+    async (userId) => {
+      if (!userId || !token || !isMyProfile) return;
 
-    setIsArchivedLoading(true);
-    try {
-      const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/archived`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      setIsArchivedLoading(true);
+      try {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/archived`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch archived posts: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch archived posts: ${response.status}`);
+        }
+
+        const postsData = await response.json();
+        const postsArray = postsData.posts || postsData.data || postsData || [];
+        const formattedPosts = postsArray
+          .map((post, index) => formatPostFromApi(post, index, currentUser?._id))
+          .filter(Boolean);
+
+        setArchivedPosts(formattedPosts);
+      } catch (error) {
+        console.error("Error fetching archived posts:", error);
+        toast.error("Failed to load archived posts.");
+      } finally {
+        setIsArchivedLoading(false);
       }
-
-      const postsData = await response.json();
-      // console.log('Debug: Archived posts response:', postsData); // Debug log
-      const postsArray = postsData.posts || postsData.data || postsData || [];
-      const formattedPosts = postsArray
-        .map((post, index) => formatPostFromApi(post, index, currentUser?._id))
-        .filter(Boolean);
-
-      // console.log('Debug: Formatted archived posts:', formattedPosts); // Debug log
-      setArchivedPosts(formattedPosts);
-    } catch (error) {
-      console.error("Error fetching archived posts:", error);
-      toast.error("Failed to load archived posts.");
-    } finally {
-      setIsArchivedLoading(false);
-    }
-  },
-  [token, isMyProfile, currentUser?._id]
-);
+    },
+    [token, isMyProfile, currentUser?._id]
+  );
 
   // Archive Post handler
   const handleArchivePost = async (postId) => {
-    // console.log("Debug: Attempting to archive post with ID:", postId);
     try {
       const response = await fetch(
         `${API_ENDPOINTS.SOCIAL}/posts/${postId}/archive`,
@@ -597,40 +594,39 @@ const fetchArchivedPosts = useCallback(
         ]);
       }
       toast.success("Post archived successfully.");
-      // console.log("Debug: Post archived successfully, postId:", postId);
     } catch (error) {
       console.error("Error archiving post:", error);
       toast.error(`Failed to archive post: ${error.message}`);
     }
   };
+
   // Unarchive Post handler
-const handleUnarchivePost = async (postId) => {
-  // console.log("Debug: Attempting to unarchive post with ID:", postId);
-  try {
-    const response = await fetch(
-      `${API_ENDPOINTS.SOCIAL}/posts/${postId}/unarchive`,
-      {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
+  const handleUnarchivePost = async (postId) => {
+    try {
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${postId}/unarchive`,
+        {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to unarchive post");
       }
-    );
-    if (!response.ok) {
-      throw new Error("Failed to unarchive post");
+      // Move post from archivedPosts to posts
+      const postToUnarchive = archivedPosts.find((p) => p.id === postId);
+      if (postToUnarchive) {
+        setArchivedPosts((prev) => prev.filter((p) => p.id !== postId));
+        setPosts((prev) => [{ ...postToUnarchive, isArchived: false }, ...prev]);
+        setPostsCount((prev) => prev + 1);
+      }
+      toast.success("Post restored to your profile.");
+    } catch (error) {
+      console.error("Error unarchiving post:", error);
+      toast.error("Failed to unarchive post.");
     }
-    // Move post from archivedPosts to posts
-    const postToUnarchive = archivedPosts.find((p) => p.id === postId);
-    if (postToUnarchive) {
-      setArchivedPosts((prev) => prev.filter((p) => p.id !== postId));
-      setPosts((prev) => [{ ...postToUnarchive, isArchived: false }, ...prev]);
-      setPostsCount((prev) => prev + 1);
-    }
-    toast.success("Post restored to your profile.");
-    // console.log("Debug: Post unarchived successfully, postId:", postId);
-  } catch (error) {
-    console.error("Error unarchiving post:", error);
-    toast.error("Failed to unarchive post.");
-  }
-};
+  };
+
   // Scroll handler with debouncing
   const handleScroll = useCallback(
     (e) => {
@@ -652,6 +648,7 @@ const handleUnarchivePost = async (postId) => {
     },
     [lastScrollY]
   );
+
 
   // Header resize handlers
   const startResizing = useCallback((e) => {
@@ -895,12 +892,28 @@ const handleUnarchivePost = async (postId) => {
       const joinedDate = `${joined.toLocaleString("default", {
         month: "long",
       })} ${joined.getFullYear()}`;
+
+      // Get today's day for dailyTimeSpent
+      const days = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ];
+      const today = new Date();
+      const dayName = days[today.getDay().toString().toLocaleLowerCase()];
+      const todaysTimeSpent = userData.dailyTimeSpent?.[dayName] || 0;
       setProfileStats({
         joined: joinedDate,
         location: userData.location,
         website: userData.website,
         engagement: userData.engagement || "89%",
         responseRate: userData.responseRate || "94%",
+        lifeTimeSpent: userData.lifeTimeSpent || 0,
+        todaysTimeSpent: todaysTimeSpent,
       });
 
       fetchUserPoints(userData._id);
@@ -1246,11 +1259,11 @@ const handleUnarchivePost = async (postId) => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex justify-center">
-      <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
-        <div className="w-full flex flex-col items-center bg-gray-50">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center">
+      <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 dark:bg-gray-900 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+        <div className="w-full flex flex-col items-center bg-gray-50 dark:bg-gray-900">
           <div
-            className="w-full flex flex-col items-center bg-gray-50 overflow-y-auto"
+            className="w-full flex flex-col items-center bg-gray-50 dark:bg-gray-900 overflow-y-auto"
             style={{ width: "100%" }}
             onScroll={handleScroll}
           >
@@ -1296,14 +1309,14 @@ const handleUnarchivePost = async (postId) => {
             <div className="h-12"></div>
 
             <motion.div
-              className="bg-white border-b border-gray-100 w-full"
+              className="bg-white border-b border-gray-100 w-full dark:bg-gray-900 dark:text-white"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="mt-4 text-center px-4">
+              <div className="mt-4 text-center px-4 dark:bg-gray-900 dark:text-white">
                 <div className="flex items-center justify-center">
-                  <h2 className="text-2xl font-bold text-gray-900 ml-15">
+                  <h2 className="text-2xl font-bold text-gray-900 ml-15 dark:text-white">
                     {user.fullname || "User"}
                   </h2>
                   {user.isVerified && (
@@ -1315,7 +1328,7 @@ const handleUnarchivePost = async (postId) => {
                     </span>
                   )}
                 </div>
-                <p className="text-base text-gray-500 mt-1">
+                <p className="text-base text-gray-500 mt-1 ">
                   @{user.username || "username"}
                 </p>
                 {user.bio && (
@@ -1336,26 +1349,26 @@ const handleUnarchivePost = async (postId) => {
                     fetchFollowing(user._id);
                   }}
                 />
-                <div className="flex mt-4 w-full max-w-md mx-auto space-x-3">
+                <div className="flex mt-4 w-full max-w-md mx-auto space-x-3 ">
                   {isMyProfile ? (
                     <>
                       <Link
                         href="/profile/edit"
-                        className="flex-1 py-2.5 bg-gray-100 rounded-full text-center text-gray-900 font-medium cursor-pointer"
+                        className="flex-1 py-2.5 bg-gray-100 rounded-full text-center text-gray-900 font-medium cursor-pointer dark:bg-gray-500 dark:text-white"
                       >
                         Edit Profile
                       </Link>
                       <button
                         onClick={() => setIsSettingsModalVisible(true)}
-                        className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer"
+                        className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer dark:bg-gray-500 "
                       >
-                        <Settings className="text-gray-600 text-lg" />
+                        <Settings className="text-gray-600 text-lg dark:text-white" />
                       </button>
                       <button
                         onClick={handleShareProfile}
-                        className="w-10 h-10 bg-gray-100 cursor-pointer rounded-full flex items-center justify-center"
+                        className="w-10 h-10 bg-gray-100 cursor-pointer rounded-full flex items-center justify-center dark:bg-gray-500"
                       >
-                        <Share2 className="text-gray-600 text-lg" />
+                        <Share2 className="text-gray-600 text-lg dark:text-white" />
                       </button>
                     </>
                   ) : (
@@ -1447,6 +1460,24 @@ const handleUnarchivePost = async (postId) => {
                         Joined {profileStats.joined}
                       </span>
                     </div>
+                    {isMyProfile && profileStats.todaysTimeSpent > 0 && (
+                      <div className="flex items-center mb-2">
+                        <Clock className="text-gray-600 text-base" />
+                        <span className="ml-2 text-gray-500">
+                          Time spent:{" "}
+                          {(profileStats.todaysTimeSpent / 3_600_000).toFixed(2)}h
+                        </span>
+                      </div>
+                    )}
+                    {isMyProfile && profileStats.lifeTimeSpent > 0 && (
+                      <div className="flex items-center mb-2">
+                        <Clock className="text-gray-600 text-base" />
+                        <span className="ml-2 text-gray-500">
+                          Time spent lifetime:{" "}
+                          {(profileStats.lifeTimeSpent / 3_600_000).toFixed(2)}h
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1502,6 +1533,7 @@ const handleUnarchivePost = async (postId) => {
                           handleDislikePost={postHandlers.handleDislikePost}
                           handleUndislikePost={postHandlers.handleUndislikePost}
                           allowArchivedOptions={false}
+                          className="dark:border-gray-700"
                           />
                       </div>
                     ))
@@ -1666,14 +1698,14 @@ const handleUnarchivePost = async (postId) => {
           position="bottom"
           className="sm:items-center"
         >
-          <div className="bg-white p-6 rounded-t-3xl sm:rounded-3xl">
+          <div className="bg-white p-6 rounded-t-3xl sm:rounded-3xl dark:bg-gray-900 dark:text-white">
             <div className="mb-6">
-              <label className="text-base text-gray-700 mb-2 block font-medium">
+              <label className="text-base text-gray-700 mb-2 block font-medium dark:bg-gray-900 dark:text-white">
                 Who can tag you in posts
               </label>
-              <div className="w-full">
+              <div className="w-full dark:bg-black dark:text-white">
                 <select
-                  className="w-full py-2 px-3 border border-gray-300 rounded-md text-gray-800 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
+                  className="w-full py-2 px-3 border cursor-pointer dark:bg-black dark:text-white border-gray-300 rounded-md text-gray-800 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
                   value={profileData.allowTagsFrom || "everyone"}
                   onChange={(e) =>
                     handleInputChange("allowTagsFrom", e.target.value)

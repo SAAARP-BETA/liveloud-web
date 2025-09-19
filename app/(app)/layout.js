@@ -54,6 +54,7 @@ import { API_ENDPOINTS } from "../utils/config";
 import { useAuth } from "../context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import NotificationBell from "../components/ui/NotificationBell";
 import Image from "next/image";
 
 export default function AppLayout({ children }) {
@@ -106,12 +107,12 @@ export default function AppLayout({ children }) {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+      <div className="flex flex-col h-screen bg-gray-50 overflow-hidden dark:bg-gray-900">
         {/* Mobile Header */}
         {isMobile && (
-          <header className="flex items-center justify-between px-4 bg-white border-b border-gray-200 shadow-sm">
+          <header className="flex items-center justify-between px-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
             {/* Logo */}
-            <div className="flex items-center">
+            <div className="flex items-center dark:bg-gray-900">
               <Link href="/home">
                 <Image
                   src={combinedLogo}
@@ -131,11 +132,7 @@ export default function AppLayout({ children }) {
                   <Search className="w-5 h-5 text-gray-600" />
                 </button>
               </Link>
-              <Link href="/home">
-                <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
-                  <Bell className="w-5 h-5 text-gray-600" />
-                </button>
-              </Link>
+              <NotificationBell />
 
               <button
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"

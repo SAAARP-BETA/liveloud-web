@@ -148,7 +148,7 @@ const CommentCard = React.memo(
     };
 
     return (
-      <div className="flex items-start space-x-4 p-4 border-t border-red-500 overflow-hidden">
+  <div className="flex items-start space-x-4 p-4 border-t border-red-500 dark:border-red-500 overflow-hidden">
         <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
           <Image
             src={comment.user.profilePicture || defaultPic}
@@ -159,14 +159,14 @@ const CommentCard = React.memo(
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-sm text-gray-900">
+            <span className="font-bold text-sm text-gray-900 dark:text-white">
               {comment.user.username}
             </span>
-            <span className="text-xs text-gray-500 ml-2">
+            <span className="text-xs text-gray-500 dark:text-gray-300 ml-2">
               {formatTimestamp(comment.createdAt)}
             </span>
           </div>
-          <p className="text-gray-800 mt-1 break-words overflow-wrap-anywhere whitespace-pre-wrap">
+          <p className="text-gray-800 dark:text-white mt-1 break-words overflow-wrap-anywhere whitespace-pre-wrap">
             {comment.content}
           </p>
 
@@ -224,14 +224,14 @@ const CommentCard = React.memo(
 
                     <div className="ml-2 flex-1">
                       <div className="flex items-center">
-                        <span className="font-medium text-xs text-gray-800">
+                        <span className="font-medium text-xs text-gray-800 dark:text-white">
                           {reply.user?.username || "Anonymous"}
                         </span>
                         <span className="text-xs text-gray-500 ml-1">
                           {formatTimestamp(reply.createdAt)}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-800 break-words">
+                      <p className="text-xs text-gray-800 dark:text-white break-words">
                         {reply.content}
                       </p>
                     </div>
@@ -624,9 +624,9 @@ const PostPage = () => {
   // --- Render Logic ---
   if (loading) {
     return (
-      <div className="sm:max-w-lg md:min-w-lg/3 lg:w-xl flex flex-col items-center justify-center p-16">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center p-16">
         <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-        <p className="text-lg text-gray-600">Loading post...</p>
+        <p className="text-lg text-gray-600 dark:text-white">Loading post...</p>
       </div>
     );
   }
@@ -640,7 +640,7 @@ const PostPage = () => {
 
   return (
     <>
-      <div className="mx-auto p-2 sm:p-4 w-full sm:max-w-lg md:max-w-lg lg:min-w-xl/2 lg:w-xl">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar border border-gray-200 dark:border-gray-700">
         {/* <div className="mx-auto p-2 sm:p-4 w-full sm:max-w-lg md:max-w-lg lg:w-xl"> */}
         <PostCard
           post={post}
@@ -659,7 +659,7 @@ const PostPage = () => {
 
         {/* MODIFIED: Comment Submission Form with reply indicator - Don't show for archived posts */}
         {!isArchived && (
-          <div className="p-4 border-t border-gray-200 bg-white rounded-b-xl">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-b-xl">
             {/* ADDED: Reply indicator */}
             {replyTo && (
               <div className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg mb-3">
@@ -687,7 +687,7 @@ const PostPage = () => {
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
-                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none text-sm sm:text-base"
+                className="flex-1 p-2 border text-black dark:text-white border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition resize-none text-sm sm:text-base"
                 rows="1"
                 disabled={isSubmittingComment || isSubmittingReply}
               />
@@ -722,8 +722,8 @@ const PostPage = () => {
         )}
 
         {/* Comments Section */}
-        <div className="bg-white rounded-xl mt-4 mx-1 sm:mx-0">
-          <h2 className="text-lg font-bold p-4 border-b border-gray-100">
+  <div className="bg-white dark:bg-gray-900 rounded-xl mt-4 mx-1 sm:mx-0 border border-gray-100 dark:border-gray-700">
+          <h2 className="text-lg font-bold p-4 border-b text-gray-800 border-gray-100 dark:border-gray-700 dark:text-white">
             Comments ({post.commentCount || post.comments?.length || 0})
           </h2>
           {post.comments && post.comments.length > 0 ? (
@@ -739,7 +739,7 @@ const PostPage = () => {
               />
             ))
           ) : (
-            <p className="px-4 pb-4 text-gray-500">
+            <p className="px-4 pb-4 text-gray-500 dark:text-gray-300">
               No comments yet. Be the first to comment!
             </p>
           )}
@@ -755,7 +755,7 @@ const PostPage = () => {
         >
           <div className="p-4">
             {selectedPost && (
-              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
+              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <img
                   src={getProfilePicture(selectedPost?.profilePic)}
                   alt={selectedPost?.username || "Profile"}
@@ -764,10 +764,10 @@ const PostPage = () => {
                   className="rounded-full"
                 />
                 <div className="ml-3">
-                  <p className="font-semibold text-gray-800">
+                  <p className="font-semibold text-gray-800 dark:text-white">
                     {selectedPost.username || "Unknown User"}
                   </p>
-                  <p className="text-sm text-gray-500 truncate">
+                  <p className="text-sm text-gray-500 dark:text-gray-300 truncate">
                     {selectedPost.content}
                   </p>
                 </div>

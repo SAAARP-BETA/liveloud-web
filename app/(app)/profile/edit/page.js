@@ -553,12 +553,12 @@ const EditPage = () => {
   const handleCustomBottomSheet = () => {
     if (!isBottomSheetVisible) return null;
     return (
-      <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl p-4 w-full max-w-2xl max-h-[70vh] overflow-y-auto transform transition-transform duration-300 ease-in-out">
+      <div className="fixed inset-0 bg-black/50 opacity-100  flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-4 w-full max-w-2xl dark:bg-gray-900 dark:text-white max-h-[70vh] overflow-y-auto transform transition-transform duration-300 ease-in-out">
           <div className="flex flex-col items-center mb-4">
             <div className="w-10 h-1 bg-gray-300 rounded mb-3" />
             <div className="flex justify-between items-center w-full">
-              <h2 className="text-xl font-bold text-gray-800 flex-1 text-center">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white flex-1 text-center">
                 {imageActionType === "profile"
                   ? "Change Profile Picture"
                   : "Change Cover Picture"}
@@ -572,7 +572,7 @@ const EditPage = () => {
             </div>
           </div>
 
-          <label className="flex flex-row items-center py-3 px-4 mb-3 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 transition-colors">
+          <label className="flex flex-row items-center dark:bg-gray-600 py-3 px-4 mb-3 bg-sky-50 rounded-xl cursor-pointer hover:bg-sky-100 dark:hover:bg-black transition-colors">
             <input
               type="file"
               accept="image/*"
@@ -603,10 +603,10 @@ const EditPage = () => {
           ) : null}
 
           <button
-            className="flex items-center cursor-pointer justify-center py-3 px-4 mt-4 bg-gray-100 rounded-xl w-full hover:bg-gray-200 transition-colors"
+            className="flex items-center cursor-pointer justify-center dark:bg-gray-400  py-3 px-4 mt-4 bg-gray-100 rounded-xl w-full hover:bg-gray-200 dark:hover:bg-black  transition-colors"
             onClick={() => setIsBottomSheetVisible(false)}
           >
-            <span className="text-gray-700 font-medium text-base cursor-pointer">
+            <span className="text-gray-700 font-medium text-base  dark:text-white cursor-pointer">
               Cancel
             </span>
           </button>
@@ -623,7 +623,7 @@ const EditPage = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar flex flex-col items-center justify-center">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="flex mt-3 w-xl items-center justify-center  text-gray-600">
           Loading profile
@@ -634,7 +634,7 @@ const EditPage = () => {
 
   if (!profileData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar flex flex-col items-center justify-center">
         <p className="mt-3 text-gray-600">No profile data found</p>
         <button
           className="mt-4 py-2 px-4 bg-primary cursor-pointer rounded-lg text-white hover:bg-sky-600 transition-colors"
@@ -647,12 +647,12 @@ const EditPage = () => {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto h-screen custom-scrollbar relative">
-      <div className="min-h-screen bg-gray-50 flex justify-center">
-        <div className="w-full sm:w-md md:max-w-lg lg:w-xl bg-white">
-          <header className="flex flex-row items-center justify-between py-2 sm:py-3 px-2 sm:px-4 border-b border-gray-100 fixed sm:sticky max-sm:top-15 top-0 left-0 right-0 sm:left-auto sm:right-auto z-50 backdrop-blur-sm bg-white/95 max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar relative">
+      <div className="flex justify-center w-full">
+        <div className="w-full sm:w-md md:max-w-lg lg:w-xl bg-white dark:bg-gray-800">
+          <header className="flex flex-row items-center justify-between py-2 sm:py-3 px-2 sm:px-4 border-b dark:bg-gray-800 border-gray-100 fixed sm:sticky max-sm:top-15 top-0 left-0 right-0 sm:left-auto sm:right-auto z-50 backdrop-blur-sm bg-white/95 max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto">
             {" "}
-            <h1 className="text-base sm:text-lg text-gray-900">Edit Profile</h1>
+            <h1 className="text-base sm:text-lg text-gray-900 dark:text-gray-100">Edit Profile</h1>
             <button
               className={`py-2 px-4 cursor-pointer bg-primary rounded-full hover:bg-sky-600 transition-colors ${
                 submitting ? "opacity-70 cursor-not-allowed" : ""
@@ -735,7 +735,7 @@ const EditPage = () => {
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-3xl text-gray-400">
+                  <span className="text-3xl text-gray-400 dark:text-gray-300">
                     {profileData.fullname
                       ? profileData.fullname.substring(0, 2).toUpperCase()
                       : "U"}
@@ -752,7 +752,7 @@ const EditPage = () => {
           </div>
 
           <form
-            className="p-2 sm:p-4 space-y-3 sm:space-y-4"
+            className="p-2 sm:p-4 space-y-3 sm:space-y-4 dark:bg-gray-900"
             onSubmit={handleUpdateProfile}
           >
             <div>
@@ -760,13 +760,13 @@ const EditPage = () => {
                 Username
               </label>
               <div
-                className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${
+                className={`flex flex-row items-center dark:bg-gray-800 bg-gray-50 border rounded-xl overflow-hidden ${
                   profileErrors.username ? "border-red-500" : "border-gray-200"
                 }`}
               >
-                <AtSign className="text-gray-400 w-5 h-5 ml-3" />
+                <AtSign className="text-gray-400 dark:text-white w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-100 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.username || ""}
                   onChange={(e) =>
                     handleInputChange("username", e.target.value)
@@ -785,13 +785,13 @@ const EditPage = () => {
             <div>
               <label className="text-sm text-gray-500 mb-1.5 block">Name</label>
               <div
-                className={`flex flex-row items-center bg-gray-50 border rounded-xl overflow-hidden ${
+                className={`flex flex-row items-center dark:bg-gray-800 bg-gray-50 border rounded-xl overflow-hidden ${
                   profileErrors.fullname ? "border-red-500" : "border-gray-200"
                 }`}
               >
-                <User className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+                <User className="text-gray-400 dark:text-white cursor-pointer w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-100 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.fullname || ""}
                   onChange={(e) =>
                     handleInputChange("fullname", e.target.value)
@@ -814,8 +814,8 @@ const EditPage = () => {
                 </span>
               </div>
               <textarea
-                className={`bg-gray-50 border rounded-xl p-3 h-24 text-gray-800 w-full resize-none ${
-                  profileErrors.bio ? "border-red-500" : "border-gray-200"
+                className={`bg-gray-50 dark:bg-gray-800 border rounded-xl p-3 h-24 text-gray-800 dark:text-gray-100 w-full resize-none ${
+                  profileErrors.bio ? "border-red-500" : "border-gray-200 dark:border-gray-700"
                 }`}
                 value={profileData.bio || ""}
                 onChange={(e) => handleInputChange("bio", e.target.value)}
@@ -831,10 +831,10 @@ const EditPage = () => {
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Location
               </label>
-              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <MapPin className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+              <div className="flex flex-row items-center  dark:bg-gray-800 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <MapPin className="text-gray-400 dark:text-white cursor-pointer w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-100 outline-none bg-transparent"
                   value={profileData.location || ""}
                   onChange={(e) =>
                     handleInputChange("location", e.target.value)
@@ -848,10 +848,10 @@ const EditPage = () => {
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Website
               </label>
-              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <LinkIcon className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+              <div className="flex flex-row items-center dark:bg-gray-800 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <LinkIcon className="text-gray-400 dark:text-white cursor-pointer w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-100 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.website || ""}
                   onChange={(e) => handleInputChange("website", e.target.value)}
                   placeholder="Your website"
@@ -866,11 +866,11 @@ const EditPage = () => {
               </label>
               <button
                 type="button"
-                className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden w-full"
+                className="flex flex-row items-center dark:bg-gray-800 dark:text-white bg-gray-50 border border-gray-200 rounded-xl overflow-hidden w-full"
                 onClick={() => setIsCalendarVisible(true)}
               >
-                <Calendar className="text-gray-400 w-5 h-5 ml-3" />
-                <span className="flex-1 py-3 px-2 text-gray-800 text-left">
+                <Calendar className="text-gray-400 w-5 dark:text-white h-5 ml-3" />
+                <span className="flex-1 py-3 px-2 dark:text-gray-400 text-gray-800 text-left">
                   {profileData.dob
                     ? formatDate(profileData.dob)
                     : "Select your date of birth"}
@@ -882,10 +882,10 @@ const EditPage = () => {
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Email
               </label>
-              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <Mail className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+              <div className="flex flex-row items-center dark:bg-gray-800 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <Mail className="text-gray-400 dark:text-white cursor-pointer w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-400 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.email || ""}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   placeholder="Your email"
@@ -899,10 +899,10 @@ const EditPage = () => {
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Phone
               </label>
-              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <Phone className="text-gray-400 cursor-pointer w-5 h-5 ml-3" />
+              <div className="flex flex-row items-center dark:bg-gray-800 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                <Phone className="text-gray-400 dark:text-whitw cursor-pointer w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-400 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.phone || ""}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   placeholder="Your phone number"
@@ -915,10 +915,10 @@ const EditPage = () => {
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Gender
               </label>
-              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <User className="text-gray-400 w-5 h-5 ml-3" />
+              <div className="flex flex-row items-center bg-gray-50 border dark:bg-gray-800 border-gray-200 rounded-xl overflow-hidden">
+                <User className="text-gray-400 dark:text-white w-5 h-5 ml-3" />
                 <select
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent cursor-pointer"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-400 outline-none bg-transparent dark:bg-gray-800 cursor-pointer"
                   value={profileData.gender || ""}
                   onChange={(e) => handleInputChange("gender", e.target.value)}
                 >
@@ -935,10 +935,10 @@ const EditPage = () => {
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Occupation
               </label>
-              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <Briefcase className="text-gray-400 w-5 h-5 ml-3" />
+              <div className="flex flex-row items-center bg-gray-50 dark:bg-gray-800 border border-gray-200 rounded-xl overflow-hidden">
+                <Briefcase className="text-gray-400 dark:text-white w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-400 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.occupation || ""}
                   onChange={(e) =>
                     handleInputChange("occupation", e.target.value)
@@ -952,10 +952,10 @@ const EditPage = () => {
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Education
               </label>
-              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                <Book className="text-gray-400 w-5 h-5 ml-3" />
+              <div className="flex flex-row items-center bg-gray-50 border dark:bg-gray-800 border-gray-200 rounded-xl overflow-hidden">
+                <Book className="text-gray-400 dark:text-white w-5 h-5 ml-3" />
                 <input
-                  className="flex-1 py-3 px-2 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-400 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.education || ""}
                   onChange={(e) =>
                     handleInputChange("education", e.target.value)
@@ -971,9 +971,9 @@ const EditPage = () => {
               <label className="text-sm text-gray-500 mb-1.5 block">
                 Interests
               </label>
-              <div className="flex flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+              <div className="flex flex-row items-center bg-gray-50 border  border-gray-200 rounded-xl overflow-hidden">
                 <input
-                  className="flex-1 py-3 px-3 text-gray-800 outline-none bg-transparent"
+                  className="flex-1 py-3 px-3 text-gray-800 dark:text-gray-200 outline-none bg-transparent dark:bg-gray-800"
                   value={profileData.interests?.join(", ") || ""}
                   onChange={(e) =>
                     handleInputChange(

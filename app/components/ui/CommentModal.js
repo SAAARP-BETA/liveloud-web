@@ -403,127 +403,221 @@ const CommentModal = ({ visible, onClose, post, token, onSuccess }) => {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 opacity-100 flex items-center justify-center z-50">
-      <div className="absolute inset-0" onClick={onClose} />
+  <div className="fixed inset-0 bg-black/50 dark:bg-black/70 opacity-100 flex items-center justify-center z-50">
+    <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="bg-white rounded-2xl w-full max-w-lg mx-4 relative animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col">
-        <div className="w-full flex items-center justify-center pt-4 pb-2">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+    <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg mx-4 relative animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col border border-gray-200 dark:border-gray-700">
+      <div className="w-full flex items-center justify-center pt-4 pb-2">
+        <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
+      </div>
+
+      <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+        <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white">Comments</h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full cursor-pointer"
+          >
+            <X size={20} className="text-gray-600 dark:text-gray-300" />
+          </button>
         </div>
 
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-bold text-gray-800">Comments</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
-            >
-              <X size={20} className="text-gray-600" />
-            </button>
-          </div>
+        {/* Original post preview */}
+        {post && (
+          <div className="flex items-center mb-4 p-3 truncate bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden">
+            <img
+              src={getProfilePicture(post.profilePic)}
+              alt="Profile"
+              className="w-8 h-8 rounded-full"
+            />
 
-          {/* Original post preview */}
-          {post && (
-            <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl overflow-hidden">
-              <img
-                src={getProfilePicture(post.profilePic)}
-                alt="Profile"
-                className="w-8 h-8 rounded-full"
-              />
-
-              <div className="ml-3 flex-1 min-w-0">
-                <div className="flex items-center">
-                  <span className="font-medium text-sm text-gray-800">
-                    {post.username}
-                  </span>
-                  <span className="text-xs text-gray-500 ml-2">
-                    {post.timestamp}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1 line-clamp-2 break-words whitespace-pre-wrap overflow-hidden text-ellipsis">
-                  {post.content}
-                </p>
+            <div className="ml-3 flex-1 min-w-0">
+              <div className="flex items-center">
+                <span className="font-medium text-sm text-gray-800 dark:text-white">
+                  {post.username}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-300 ml-2">
+                  {post.timestamp}
+                </span>
               </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2 break-words whitespace-pre-wrap overflow-hidden text-ellipsis">
+                {post.content}
+              </p>
             </div>
-          )}
-        </div>
-
-        {/* Comments list */}
-        <div
-          className="flex-1 overflow-y-auto"
-          onScroll={handleScroll}
-          style={{ maxHeight: "400px" }}
-        >
-          {comments.length === 0 && !loadingComments ? (
-            <EmptyComments />
-          ) : (
-            comments.map((comment) => (
-              <CommentItem key={comment._id} item={comment} />
-            ))
-          )}
-
-          {loadingComments && (
-            <div className="py-4 text-center">
-              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-            </div>
-          )}
-        </div>
-
-        {/* Reply indicator */}
-        {replyTo && (
-          <div className="flex items-center justify-between bg-gray-100 px-4 py-2">
-            <p className="text-xs text-gray-600">
-              Replying to{" "}
-              <span className="font-medium text-primary">
-                @{replyTo.user?.username || "user"}
-              </span>
-            </p>
-            <button
-              onClick={cancelReply}
-              className="p-1 hover:bg-gray-200 rounded cursor-pointer"
-            >
-              <X size={16} className="text-gray-600" />
-            </button>
           </div>
         )}
+      </div>
 
-        {/* Comment input */}
-        <div className="p-4 border-t border-gray-100 bg-white rounded-2xl">
-          <div className="flex items-center ">
-            <textarea
-              className="flex-1 bg-gray-50 rounded-full px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-gray-800"
-              placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              maxLength={500}
-              rows={1}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmitComment();
-                }
-              }}
-            />
-            <button
-              className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${
-                commentText.trim()
-                  ? "bg-primary hover:bg-sky-600"
-                  : "bg-gray-300"
-              }`}
-              onClick={handleSubmitComment}
-              disabled={!commentText.trim() || loading}
-            >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Send size={18} className="text-white" />
-              )}
-            </button>
+      {/* Comments list */}
+      <div
+        className="flex-1 overflow-y-auto"
+        onScroll={handleScroll}
+        style={{ maxHeight: "400px" }}
+      >
+        {comments.length === 0 && !loadingComments ? (
+          <div className="py-8 text-center">
+            <p className="font-medium text-gray-500 dark:text-gray-300">
+              No comments yet. Be the first to comment!
+            </p>
           </div>
+        ) : (
+          comments.map((comment) => (
+            <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+              <div className="flex">
+                <img
+                  src={getProfilePicture(comment.user?.profilePicture)}
+                  alt="Profile"
+                  className="w-8 h-8 rounded-full"
+                />
+                <div className="ml-3 flex-1 min-w-0">
+                  <div className="flex items-center">
+                    <span className="font-medium text-sm text-gray-800 dark:text-white">
+                      {comment.user?.username || "Anonymous"}
+                    </span>
+                    {comment.user?.isVerified && (
+                      <CheckCircle size={14} className="text-primary ml-1" />
+                    )}
+                    <span className="text-xs text-gray-500 dark:text-gray-300 ml-2">
+                      {formatTimestamp(comment.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-800 dark:text-white mt-1 break-words overflow-wrap-anywhere">
+                    {comment.content}
+                  </p>
+                  {/* Comment actions */}
+                  <div className="flex items-center mt-2">
+                    <button
+                      className="flex items-center mr-4 hover:bg-gray-100 dark:hover:bg-gray-800 p-1 rounded cursor-pointer"
+                      onClick={() =>
+                        comment.likes && comment.likes.some((like) => like._id === post.user?._id)
+                          ? handleUnlikeComment(comment._id)
+                          : handleLikeComment(comment._id)
+                      }
+                    >
+                      <Heart
+                        size={12}
+                        className={
+                          comment.likes && comment.likes.some((like) => like._id === post.user?._id)
+                            ? "text-red-500 fill-current"
+                            : "text-gray-500 dark:text-gray-300"
+                        }
+                      />
+                      <span
+                        className={`text-xs ml-1 font-medium ${
+                          comment.likes && comment.likes.some((like) => like._id === post.user?._id)
+                            ? "text-red-500"
+                            : "text-gray-500 dark:text-gray-300"
+                        }`}
+                      >
+                        {comment.likes?.length || 0}
+                      </span>
+                    </button>
+                    <button
+                      className="flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 p-1 rounded cursor-pointer"
+                      onClick={() => handleReplyToComment(comment)}
+                    >
+                      <MessageCircle size={12} className="text-gray-500 dark:text-gray-300" />
+                      <span className="text-xs ml-1 font-medium text-gray-500 dark:text-gray-300">
+                        Reply
+                      </span>
+                    </button>
+                  </div>
+                  {/* Render replies if any */}
+                  {comment.replies && comment.replies.length > 0 && (
+                    <div className="mt-3 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                      {comment.replies.map((reply, index) => (
+                        <div key={index} className={index < comment.replies.length - 1 ? "mb-2" : ""}>
+                          <div className="flex">
+                            <img
+                              src={getProfilePicture(reply.user?.profilePicture)}
+                              alt="Profile"
+                              className="w-6 h-6 rounded-full"
+                            />
+                            <div className="ml-2 flex-1">
+                              <div className="flex items-center">
+                                <span className="font-medium text-xs text-gray-800 dark:text-white">
+                                  {reply.user?.username || "Anonymous"}
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-300 ml-1">
+                                  {formatTimestamp(reply.createdAt)}
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-800 dark:text-white break-words">
+                                {reply.content}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+        {loadingComments && (
+          <div className="py-4 text-center">
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
+        )}
+      </div>
+
+      {/* Reply indicator */}
+      {replyTo && (
+        <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-4 py-2">
+          <p className="text-xs text-gray-600 dark:text-gray-300">
+            Replying to{" "}
+            <span className="font-medium text-primary">
+              @{replyTo.user?.username || "user"}
+            </span>
+          </p>
+          <button
+            onClick={cancelReply}
+            className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded cursor-pointer"
+          >
+            <X size={16} className="text-gray-600 dark:text-gray-300" />
+          </button>
+        </div>
+      )}
+
+      {/* Comment input */}
+      <div className="p-4 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-2xl">
+        <div className="flex items-center ">
+          <textarea
+            className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-full px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-gray-800 dark:text-white"
+            placeholder={replyTo ? "Add your reply..." : "Add a comment..."}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            maxLength={500}
+            rows={1}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmitComment();
+              }
+            }}
+          />
+          <button
+            className={`ml-2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${
+              commentText.trim()
+                ? "bg-primary hover:bg-sky-600"
+                : "bg-gray-300 dark:bg-gray-700"
+            }`}
+            onClick={handleSubmitComment}
+            disabled={!commentText.trim() || loading}
+          >
+            {loading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Send size={18} className="text-white" />
+            )}
+          </button>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default CommentModal;

@@ -14,13 +14,16 @@ import {
   MoreHorizontal,
   Crown,
   Users,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
 import { API_ENDPOINTS } from "../utils/config";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import defaultPic from "../assets/avatar.png";
-import combinedLogo from "@/app/assets/Liveloud.png";
+// import combinedLogo from "@/app/assets/Liveloud.png";
+import combinedLogo from "@/app/assets/combinedLogo.png";
 import LogoLiveloud from "@/app/assets/LongLogo.png";
 import mobileLogo from "@/app/assets/mobileLogo.png";
 // import Logo from "@/app/assets/Liveloud.png"
@@ -31,6 +34,7 @@ const tabs = [
   { name: "Create", href: "/create", icon: PlusCircle },
   { name: "Wallet", href: "/wallet", icon: Wallet },
   { name: "Profile", href: "/profile", icon: User },
+  { name: "Notifications", href: "/notifications", icon: Bell },
   { name: "Leaderboard", href: "/leaderboard", icon: AlignEndHorizontal },
   { name: "Premium", href: "/premium", icon: Crown },
   { name: "Referral", href: "/referral", icon: Users },
@@ -45,6 +49,7 @@ export default function LeftSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { token, logout, isAuthenticated, user } = useAuth();
+  const { unreadCount } = useSocket();
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
   const handleLogout = async () => {
@@ -87,7 +92,7 @@ export default function LeftSidebar() {
         <div className="sm:hidden">
           <Link
             href={tab.href}
-            className="relative flex flex-col items-center justify-center py-2 px-3 min-w-0 flex-1"
+            className="relative flex flex-col  items-center justify-center py-2 px-3 min-w-0 flex-1"
           >
             <AnimatePresence>
               {isActive && (
@@ -108,12 +113,19 @@ export default function LeftSidebar() {
             >
               <Icon
                 className={`w-6 h-6 ${
-                  isActive ? "text-[#0EA5E9]" : "text-gray-400"
+                  isActive ? "text-[#0EA5E9]" : "text-gray-700 dark:text-white group-hover:text-gray-400"
                 }`}
               />
+              {tab.name === "Notifications" && unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold shadow-md border border-white">
+                  <span className="text-[10px]">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                </span>
+              )}
             </motion.div>
             <motion.span
-              className={`text-[11px] font-medium relative z-10 text-center`}
+              className={`text-[11px] font-medium relative z-10 text-center  ${isActive ? 'text-[#0EA5E9]' : 'text-gray-700 dark:text-white group-hover:text-gray-400'}`}
               style={{
                 maxWidth: "58px",
                 overflow: "hidden",
@@ -132,17 +144,17 @@ export default function LeftSidebar() {
         </div>
 
         {/* Desktop Tab */}
-        <div className="hidden sm:block">
+        <div className="hidden dark:bg-gray-900 dark:text-white sm:block">
           <Link
             href={tab.href}
             className={`group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
               isActive
                 ? "bg-[rgba(14,165,233,0.1)] text-[#0EA5E9] font-semibold shadow-sm"
-                : "text-gray-600 hover:bg-gray-100"
+                : "text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
           >
             <motion.div
-              className="flex items-center justify-center"
+              className="flex items-center justify-center relative"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               animate={iconAnimation}
@@ -152,12 +164,19 @@ export default function LeftSidebar() {
                 className={`w-6 h-6 ${
                   isActive
                     ? "text-[#0EA5E9]"
-                    : "text-gray-500 group-hover:text-[#0EA5E9]"
+                    : "text-gray-700 dark:text-white group-hover:text-gray-400"
                 }`}
               />
+              {tab.name === "Notifications" && unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold shadow-md border border-white">
+                  <span className="text-[10px]">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                </span>
+              )}
             </motion.div>
             <motion.span
-              className="text-base"
+              className={`text-base ${isActive ? 'text-[#0EA5E9]' : 'text-gray-700 dark:text-white group-hover:text-gray-400'}`}
               style={{
                 maxWidth: "160px",
                 overflow: "hidden",
@@ -231,7 +250,7 @@ export default function LeftSidebar() {
 
         {/* Desktop Profile */}
         <div className="hidden sm:block relative">
-          <button className="group  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 w-full">
+          <button className="group  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white dark:bg-gray-900 w-full">
             <motion.div
               className="flex items-center cursor-pointer justify-center"
               whileHover={{ scale: 1.05 }}
@@ -241,7 +260,7 @@ export default function LeftSidebar() {
                 <img
                   src={user.profilePicture}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200"
+                  className="w-10 h-10 rounded-full border-2 border-gray-200  group-hover:grayscale group-hover:brightness-75"
                   onClick={handleProfileClick}
                 />
               ) : (
@@ -255,7 +274,7 @@ export default function LeftSidebar() {
             </motion.div>
 
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-semibold text-gray-900 truncate">
+              <p className="text-sm font-semibold text-gray-900 truncate dark:text-white">
                 {user?.fullname || user?.username || "User"}
               </p>
               <p className="text-sm text-gray-500 truncate ">
@@ -270,6 +289,7 @@ export default function LeftSidebar() {
               />
             </motion.div>
           </button>
+          
 
           {/* Logout Dropdown */}
           <AnimatePresence>
@@ -279,11 +299,11 @@ export default function LeftSidebar() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.2 }}
-                className="absolute cursor-pointer bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
+                className="absolute cursor-pointer bottom-full left-0 dark:bg-gray-900 dark:border-gray-700 right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
               >
                 <button
                   onClick={handleLogout}
-                  className="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  className="w-full cursor-pointer flex dark:hover:bg-gray-800 items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
                 >
                   <LogOut className="w-5 h-5" />
                   <span className="text-sm font-medium">Logout</span>
@@ -359,7 +379,7 @@ export default function LeftSidebar() {
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
-        <div className="relative bg-white/90 backdrop-blur-xl border border-white/50">
+        <div className="relative bg-white/90  dark:bg-gray-900 backdrop-blur-xl border dark:border-gray-700 border-white/50">
           <div className="flex justify-around items-center px-2 py-3 safe-area-pb">
             {mobileTabs.map((tab, index) => (
               <motion.div
@@ -398,7 +418,7 @@ export default function LeftSidebar() {
 
       {/* Desktop Sidebar */}
       <motion.aside
-        className="hidden custom-scrollbar sm:flex h-screen md:w-80 max-w-80 px-6 py-10 bg-white/80 backdrop-blur-md border-r border-gray-200 shadow-xl flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
+        className="hidden custom-scrollbar sm:flex h-screen md:w-80 max-w-80 px-6 py-10 bg-white/80 dark:bg-gray-900 dark:text-white backdrop-blur-md border-r border-white dark:border-gray-700 border-l border-l-white dark:border-l-gray-700 shadow-xl flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300"
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -419,7 +439,7 @@ export default function LeftSidebar() {
 
         {isAuthenticated && (
           <motion.div
-            className="mt-auto pt-4 border-t border-gray-200"
+            className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: (tabs.length + 1) * 0.1 }}

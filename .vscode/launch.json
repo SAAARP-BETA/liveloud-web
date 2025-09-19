@@ -1,44 +1,43 @@
 {
-    "version": "0.2.0",
-    "compounds": [
-        {
-            "name": "Next.js: debug full stack",
-            "configurations": [
-                "Next.js: debug server-side only",
-                "Chrome: debug client-side only"
-            ],
-            "presentation": {
-                "hidden": false,
-                "group": "",
-                "order": 1
-            }
-        }
-    ],
-    "configurations": [
-        {
-            "name": "Next.js: debug server-side only",
-            "type": "node-terminal",
-            "request": "launch",
-            "command": "npm run dev",
-            "env": {
-                "NODE_OPTIONS": "--inspect"
-            }
-        },
-        {
-            "name": "Chrome: debug client-side only",
-            "type": "chrome",
-            "request": "launch",
-            "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}",
-            "runtimeArgs": [
-                "--guest",
-                "--no-first-run",
-                "--no-default-browser-check",
-                "--disable-extensions",
-                "--disable-background-networking",
-                "--disable-sync",
-                "--disable-default-apps"
-            ]
-        },
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev"
+    },
+    {
+      "name": "Next.js: debug client-side",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "runtimeArgs": [
+        "--guest",
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--disable-extensions",
+        "--disable-background-networking",
+        "--disable-sync",
+        "--disable-default-apps"
+      ]
+    },
+    {
+      "name": "Next.js: debug full stack",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "serverReadyAction": {
+        "pattern": "- Local: .*(http?://.+)",
+        "action": "startDebugging",
+        "name": "Next.js: debug client-side"
+      },
+      "presentation": {
+        "hidden": false,
+        "group": "",
+        "order": 1
+      }
+    },
+  ]
 }

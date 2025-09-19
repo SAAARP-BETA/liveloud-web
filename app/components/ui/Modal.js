@@ -30,9 +30,9 @@ const CustomModal = ({
 
   const emptyStateContent = (
     <div className="flex flex-col items-center justify-center p-6 text-center">
-      <p className="text-gray-500 text-base mb-4">No options available</p>
+      <p className="text-gray-500 dark:text-gray-300 text-base mb-4">No options available</p>
       <button
-        className="text-primary font-semibold py-2 px-4"
+        className="text-primary font-semibold py-2 px-4 dark:text-white dark:hover:text-gray-800"
         onClick={onClose}
       >
         Close
@@ -48,7 +48,7 @@ const CustomModal = ({
     }[position] || " mb-10";
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center bg-black/50 transition-all">
+  <div className="fixed inset-0 z-50 flex justify-center bg-black/50 transition-all">
       {/* Backdrop */}
       <div
         className="absolute inset-0"
@@ -60,7 +60,7 @@ const CustomModal = ({
       {/* Modal Content */}
       <div
         className={clsx(
-          "relative w-full max-w-lg bg-white rounded-2xl shadow-lg z-50 overflow-hidden transition-all",
+          "relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-lg z-50 overflow-hidden transition-all",
           "max-h-[90vh] flex flex-col",
           positionClass
         )}
@@ -68,26 +68,26 @@ const CustomModal = ({
         {/* Handle indicator (only for bottom modal) */}
         {position === "bottom" && (
           <div className="w-full flex justify-center py-3">
-            <div className="w-10 h-1.5 rounded-full bg-gray-300" />
+            <div className="w-10 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700" />
           </div>
         )}
 
         {/* Header */}
         {showHeader && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white dark:hover:text-gray-800">{title}</h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
               aria-label="Close"
             >
-              <X className="w-5 h-5 cursor-pointer text-gray-600" />
+              <X className="w-5 h-5 cursor-pointer text-gray-600 dark:text-gray-300" />
             </button>
           </div>
         )}
 
         {/* Children or Empty State */}
-        <div className="overflow-y-auto">{children || emptyStateContent}</div>
+  <div className="overflow-y-auto">{children || emptyStateContent}</div>
       </div>
     </div>
   );

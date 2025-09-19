@@ -90,7 +90,9 @@ const Premium = () => {
   const PlanCard = ({ plan }) => (
     <div
       className={`mx-4 mb-6 p-6 rounded-3xl shadow-lg relative ${
-        plan.popular ? "bg-blue-50 border-2 border-sky-500" : "bg-white"
+        plan.popular
+          ? "bg-blue-50 dark:bg-blue-900 border-2 border-sky-500 dark:border-blue-700"
+          : "bg-white dark:bg-gray-900 border dark:border-gray-800"
       }`}
     >
       {plan.popular && (
@@ -105,12 +107,12 @@ const Premium = () => {
       )}
 
       <div className="text-center mb-6 mt-2">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-        <p className="text-gray-600 text-center mb-4">{plan.description}</p>
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
+        <p className="text-gray-600 dark:text-gray-300 text-center mb-4">{plan.description}</p>
         <div className="flex items-baseline justify-center">
-          <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
+          <span className="text-3xl font-bold text-gray-900 dark:text-white">{plan.price}</span>
           {plan.period && (
-            <span className="text-lg text-gray-600 ml-1">{plan.period}</span>
+            <span className="text-lg text-gray-600 dark:text-gray-300 ml-1">{plan.period}</span>
           )}
         </div>
       </div>
@@ -120,9 +122,9 @@ const Premium = () => {
           <div key={index} className="flex items-start mb-3">
             <Check
               size={18}
-              className="text-green-500 mt-0.5 mr-3 flex-shrink-0"
+              className="text-green-500 dark:text-green-400 mt-0.5 mr-3 flex-shrink-0"
             />
-            <span className="text-gray-700 flex-1">{feature}</span>
+            <span className="text-gray-700 dark:text-gray-200 flex-1">{feature}</span>
           </div>
         ))}
       </div>
@@ -137,13 +139,13 @@ const Premium = () => {
         }`}
       >
         {plan.isCurrentPlan ? (
-          <div className="bg-gray-100 p-4 rounded-2xl">
-            <span className="text-gray-800 font-semibold">
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-2xl">
+            <span className="text-gray-800 dark:text-white font-semibold">
               {plan.buttonText}
             </span>
           </div>
         ) : (
-          <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-4 rounded-2xl">
+          <div className="bg-gradient-to-r from-sky-500 to-blue-600 dark:from-blue-700 dark:to-purple-800 p-4 rounded-2xl">
             <span className="text-white font-semibold">{plan.buttonText}</span>
           </div>
         )}
@@ -154,44 +156,44 @@ const Premium = () => {
   const FeatureCard = ({ feature }) => {
     const IconComponent = feature.icon;
     return (
-      <div className="bg-white p-6 rounded-2xl mx-4 mb-4 shadow-sm border border-gray-100">
-        <div className="bg-sky-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-          <IconComponent size={24} className="text-sky-500" />
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl mx-4 mb-4 shadow-sm border border-gray-100 dark:border-gray-800">
+        <div className="bg-sky-100 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+          <IconComponent size={24} className="text-sky-500 dark:text-blue-400" />
         </div>
-        <h4 className="text-lg font-semibold text-gray-900 mb-2">
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
           {feature.title}
         </h4>
-        <p className="text-gray-600">{feature.description}</p>
+        <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
       </div>
     );
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-6 px-4 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl  sm:py-10   mx-auto">
+  <div className="bg-gray-50 dark:bg-gray-950 min-h-screen py-6 px-4 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl  sm:py-10   mx-auto">
       {/* Custom Header */}
-      <div className="bg-white px-4 py-3 flex items-center border-b border-gray-100">
+  <div className="bg-white dark:bg-gray-900 px-4 py-3 flex items-center border-b border-gray-100 dark:border-gray-800">
         <button
-          className="w-10 h-10 rounded-full flex items-center justify-center mr-3 bg-gray-100 hover:bg-gray-200 transition-colors"
+          className="w-10 h-10 rounded-full flex items-center justify-center mr-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           onClick={handleBack}
         >
-          <ChevronLeft size={22} className="text-gray-600" />
+          <ChevronLeft size={22} className="text-gray-600 dark:text-white" />
         </button>
 
-        <h1 className="text-lg font-semibold text-gray-900 flex-1">Premium</h1>
+  <h1 className="text-lg font-semibold text-gray-900 dark:text-white flex-1">Premium</h1>
 
         <div className="w-10" />
       </div>
 
-      <div className="bg-gray-50 pb-8">
+  <div className="bg-gray-50 dark:bg-gray-950 pb-8">
         {/* Header */}
-        <div className="text-center py-8 px-6 bg-gradient-to-b from-sky-50 to-transparent mx-4 rounded-3xl mb-6">
-          <div className="bg-gradient-to-br from-sky-100 to-purple-100 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg mx-auto">
-            <Award size={36} className="text-sky-500" />
+        <div className="text-center py-8 px-6 bg-gradient-to-b from-sky-50 to-transparent dark:from-blue-950 dark:to-transparent mx-4 rounded-3xl mb-6">
+          <div className="bg-gradient-to-br from-sky-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg mx-auto">
+            <Award size={36} className="text-sky-500 dark:text-blue-400" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-4">
             Upgrade to Premium
           </h2>
-          <p className="text-gray-600 text-center text-lg leading-relaxed max-w-sm mx-auto">
+          <p className="text-gray-600 dark:text-gray-300 text-center text-lg leading-relaxed max-w-sm mx-auto">
             Join thousands of creators who have unlocked the full potential of
             LiveLoud
           </p>
@@ -206,7 +208,7 @@ const Premium = () => {
 
         {/* Premium Features */}
         <div className="mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 text-center mb-6 px-6">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-6 px-6">
             Premium Features
           </h3>
           {premiumFeatures.map((feature, index) => (
@@ -215,17 +217,17 @@ const Premium = () => {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white mx-4 p-6 rounded-2xl shadow-sm mb-8 border border-gray-100">
-          <h3 className="text-2xl font-bold text-gray-900 text-center mb-6">
+        <div className="bg-white dark:bg-gray-900 mx-4 p-6 rounded-2xl shadow-sm mb-8 border border-gray-100 dark:border-gray-800">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-6">
             FAQ
           </h3>
 
           <div>
             <div className="mb-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Can I cancel anytime?
               </h4>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 Yes, you can cancel your premium subscription at any time. Your
                 premium features will remain active until the end of your
                 billing period.
@@ -233,20 +235,20 @@ const Premium = () => {
             </div>
 
             <div className="mb-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 What payment methods are accepted?
               </h4>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 We accept all major credit cards, PayPal, and various digital
                 payment methods. Your payment information is securely processed.
               </p>
             </div>
 
             <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Money-back guarantee?
               </h4>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 We offer a 30-day money-back guarantee for new premium
                 subscribers. Contact our support team for a full refund if
                 you're not satisfied.
