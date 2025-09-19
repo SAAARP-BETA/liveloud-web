@@ -1730,7 +1730,12 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
               {followersList.map((follower) => (
                 <div
                   key={follower._id}
-                  className="flex items-center py-4 px-1 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="flex items-center py-4 px-1 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push(`/UserProfile/${follower.username}`);
+                    setIsFollowersModalVisible(false);
+                  }}
                 >
                   <div className="relative w-12 h-12 mr-3 flex-shrink-0">
                     <Image
@@ -1800,7 +1805,12 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
               {followingList.map((following) => (
                 <div
                   key={following._id}
-                  className="flex items-center py-4 px-1 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="flex items-center py-4 px-1 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push(`/UserProfile/${following.username}`);
+                    setIsFollowingModalVisible(false);
+                  }}
                 >
                   <div className="relative w-12 h-12 mr-3 flex-shrink-0">
                     <Image

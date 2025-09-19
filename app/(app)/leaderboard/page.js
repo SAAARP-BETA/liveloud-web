@@ -22,7 +22,7 @@ import defaultPic from "../../assets/avatar.png";
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   return (
     <div
-      className="bg-white dark:bg-gray-900 border-b border-white dark:border-gray-800 sticky top-4 z-10"
+      className="bg-white dark:bg-gray-900 border-b border-white dark:border-gray-800 sticky top-4 z-10 flex justify-center"
       style={{
         paddingLeft: 16,
         paddingRight: 16,
@@ -53,7 +53,8 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
                 <Icon
                   className={`w-4 h-4 ${isActive ? "text-white dark:text-white" : "text-black dark:text-white"}`}
                 />
-                <span className={`${isActive ? "text-white dark:text-white" : "text-black dark:text-white"}`}>
+                {/* Show text only on sm screens and larger (hidden on mobile) */}
+                <span className={`hidden sm:inline ${isActive ? "text-white dark:text-white" : "text-black dark:text-white"}`}>
                   {tab.title}
                 </span>
               </div>

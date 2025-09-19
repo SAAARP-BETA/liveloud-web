@@ -135,7 +135,14 @@ export default function Signup() {
           />
 
         </div>
-        <h1 className="text-primary text-2xl font-bold text-center">
+        {/* Display any authentication errors */}
+      {error ? (
+        <div className="mb-4 p-3 bg-red-100 rounded-md">
+          <span className="text-red-700 text-center block">{error}</span>
+        </div>
+      ) : null}
+      
+      <h1 className="text-primary text-2xl font-bold text-center">
           Create Your Account
         </h1>
         <p className="text-gray-500 text-center mb-6">
@@ -148,7 +155,10 @@ export default function Signup() {
 
           placeholder="Enter your full name"
           value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          onChange={(e) => {
+          setFullName(e.target.value);
+          if (error) clearError();
+        }}
           disabled={isLoading}
         />
 
@@ -159,7 +169,10 @@ export default function Signup() {
           type="email"
           autoCapitalize="none"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+          setEmail(e.target.value);
+          if (error) clearError();
+        }}
           disabled={isLoading}
         />
 
