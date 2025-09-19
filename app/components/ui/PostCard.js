@@ -180,13 +180,13 @@ const PostCard = ({
       const contentWithTags = line.split(/(\s+)/).map((word, i) => {
         if (word.startsWith("#")) {
           return (
-            <span key={`${lineIndex}-${i}`} className="font-medium text-primary">
+            <span key={`${post.id}-${lineIndex}-${i}`} className="font-medium text-primary">
               {word}
             </span>
           );
         } else if (word.startsWith("@")) {
           return (
-            <span key={`${lineIndex}-${i}`} className="font-medium text-primary">
+            <span key={`${post.id}-${lineIndex}-${i}`} className="font-medium text-primary">
               {word}
             </span>
           );
@@ -195,7 +195,7 @@ const PostCard = ({
       });
 
       return (
-        <React.Fragment key={`line-${lineIndex}`}>
+        <React.Fragment key={`${post.id}-line-${lineIndex}`}>
           {contentWithTags}
           {lineIndex < lines.length - 1 && <br />}
         </React.Fragment>
@@ -363,7 +363,7 @@ const PostCard = ({
           <div className="flex flex-wrap mb-3">
             {post.tags.map((tag, index) => (
               <button
-                key={index}
+                key={`${post.id}-tag-${index}-${tag}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/tags/${tag}`);
@@ -393,7 +393,7 @@ const PostCard = ({
 
               return (
                 <button
-                  key={taggedUser._id || taggedUser.id}
+                  key={`${post.id}-tagged-${taggedUser._id || taggedUser.id || index}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     router.push(
@@ -539,7 +539,7 @@ const PostCard = ({
                 >
                   {post.media.map((item, index) => (
                     <button
-                      key={item}
+                      key={`${post.id}-media-${index}`}
                       className="flex-shrink-0 w-full snap-start"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -566,7 +566,7 @@ const PostCard = ({
                 <div className="flex cursor-pointer justify-center mt-3">
                   {post.media.map((item, index) => (
                     <button
-                      key={item}
+                      key={`${post.id}-dot-${index}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         const container =
