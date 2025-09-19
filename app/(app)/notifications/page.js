@@ -341,14 +341,14 @@ const NotificationsPage = () => {
   }, [unreadNotificationsCount, updateUnreadCount]);
 
   return (
-    <div className="min-h-screen bg-white flex justify-center">
-      <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center">
+      <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 dark:bg-gray-900 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
         <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
           <div className="w-full py-6">
 
             
             <div 
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 w-full"
+              className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 w-full"
               
             >
               <div className="flex items-start justify-between gap-3 sm:gap-4">
@@ -370,7 +370,7 @@ const NotificationsPage = () => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 truncate">Notifications</h1>
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-300 truncate">Notifications</h1>
                     <p className="text-xs sm:text-sm md:text-base text-gray-600 truncate">
                       {unreadNotificationsCount > 0 
                         ? `${unreadNotificationsCount} unread notification${unreadNotificationsCount > 1 ? 's' : ''}`
@@ -402,7 +402,7 @@ const NotificationsPage = () => {
 
             {/* Notifications List */}
             <motion.div 
-              className="bg-white rounded-lg shadow-sm border border-gray-200 w-full"
+              className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 w-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
@@ -413,15 +413,15 @@ const NotificationsPage = () => {
                   <p className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-600">Loading notifications...</p>
                 </div>
               ) : combinedNotifications.length === 0 ? (
-                <div className="p-4 sm:p-6 md:p-8 text-center">
-                  <Bell className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 mx-auto mb-3 sm:mb-4 text-gray-300" />
-                  <h3 className="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2">No notifications yet</h3>
+                <div className="p-4 sm:p-6 md:p-8 text-center"> 
+                  <Bell className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 mx-auto mb-3 sm:mb-4 text-gray-900 dark:text-gray-300" />
+                  <h3 className="text-sm sm:text-base md:text-lg font-medium text-gray-900 dark:text-gray-300 mb-2">No notifications yet</h3>
                   <p className="text-xs sm:text-sm md:text-base text-gray-600 px-2 sm:px-4 max-w-sm mx-auto">
                     You'll see notifications here when people interact with your posts or follow you.
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-gray-100 dark:divide-gray-700">
                   {combinedNotifications.map((notification, index) => {
                     const isLastNotification = combinedNotifications.length === index + 1;
                     // Create a unique key - use _id if available, otherwise fallback to index
@@ -435,8 +435,8 @@ const NotificationsPage = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
                         onClick={() => handleNotificationClick(notification)}
-                        className={`p-3 sm:p-4 md:p-6 hover:bg-gray-50 cursor-pointer transition-colors rounded-md ${
-                          !notification.read ? 'bg-blue-50 border border-blue-200 shadow-sm' : 'border border-transparent'
+                        className={`p-3 sm:p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors rounded-md ${
+                          !notification.read ? 'bg-blue-50 dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-sm' : 'border dark:border-gray-700 border-transparent'
                         }`}
                       >
                         <div className="flex items-start space-x-2 sm:space-x-3 md:space-x-4">
@@ -444,21 +444,21 @@ const NotificationsPage = () => {
                             {getNotificationIcon(notification.type)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm sm:text-base font-medium text-gray-900 mb-1 leading-5 sm:leading-6">
+                            <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-300 mb-1 leading-5 sm:leading-6">
                               {getNotificationText(notification)}
                             </p>
                             {notification.post?.content && (
-                              <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2 leading-4 sm:leading-5">
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2 leading-4 sm:leading-5">
                                 {notification.post.content.substring(0, 100)}
                               </p>
                             )}
-                            <p className="text-xs sm:text-sm text-gray-500">
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                               {formatTime(notification.createdAt)}
                             </p>
                           </div>
                           {!notification.read && (
                             <div className="flex-shrink-0 mt-1 sm:mt-2">
-                              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-3 md:h-3 bg-blue-500 rounded-full"></div>
+                              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-3 md:h-3 bg-blue-500 dark:bg-gray-900 rounded-full"></div>
                             </div>
                           )}
                         </div>
@@ -468,7 +468,7 @@ const NotificationsPage = () => {
                   
                   {/* Loading more notifications */}
                   {loadingMore && (
-                    <div className="p-4 sm:p-6 text-center border-t border-gray-100 bg-blue-50">
+                    <div className="p-4 sm:p-6 text-center border-t border-gray-100 dark:border-gray-700 bg-blue-50 dark:bg-gray-900">
                       <div className="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
                       <p className="mt-2 sm:mt-3 text-sm sm:text-base font-medium text-blue-700">Loading more notifications...</p>
                       <p className="text-xs sm:text-sm text-blue-600 mt-1">Please wait</p>
@@ -477,7 +477,7 @@ const NotificationsPage = () => {
                   
                   {/* Manual Load More Button (fallback) */}
                   {hasMore && !loadingMore && !loading && combinedNotifications.length >= LIMIT && (
-                    <div className="p-4 sm:p-6 text-center border-t border-gray-100">
+                    <div className="p-4 sm:p-6 text-center border-t border-gray-100 dark:border-gray-700">
                       <button
                         onClick={loadMoreNotifications}
                         className="bg-primary text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:bg-[#0089c7] transition-colors font-medium text-sm sm:text-base"
@@ -490,12 +490,12 @@ const NotificationsPage = () => {
                   
                   {/* All caught up message */}
                   {!hasMore && combinedNotifications.length > 0 && !loadingMore && (
-                    <div className="p-4 sm:p-6 text-center border-t border-gray-100">
+                    <div className="p-4 sm:p-6 text-center border-t border-gray-100 dark:border-gray-700">
                       <div className="flex items-center justify-center mb-2">
                         <Check className="w-5 h-5 sm:w-6 sm:h-6 text-green-500 mr-2" />
-                        <span className="text-base sm:text-lg font-medium text-gray-700">You're all caught up!</span>
+                        <span className="text-base sm:text-lg font-medium text-gray-700 dark:text-gray-300 ">You're all caught up!</span>
                       </div>
-                      <p className="text-xs sm:text-sm text-gray-500">You've seen all your notifications</p>
+                      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-300">You've seen all your notifications</p>
                     </div>
                   )}
                 </div>

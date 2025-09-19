@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const VISIBILITY_START_DELAY = 5000; // 5 seconds
 const PERSIST_STOP_DELAY = 10000; // 10 seconds
@@ -7,12 +7,14 @@ export function useActivityTracker(token) {
     const visibilityTimerRef = useRef(null);
     const persistTimerRef = useRef(null);
     const activityStartedRef = useRef(false);
+    const [isActive, setIsActive] = useState(false);
 
     const startHeartbeat = () => {
         // Prevent multiple "start" signals .
         if (!token || activityStartedRef.current) return;
 
         activityStartedRef.current = true;
+        setIsActive(true);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity/heartbeat`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
@@ -24,6 +26,7 @@ export function useActivityTracker(token) {
         if (!token || !activityStartedRef.current) return;
 
         activityStartedRef.current = false;
+        setIsActive(false);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity/persist`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
@@ -70,4 +73,6 @@ export function useActivityTracker(token) {
             document.removeEventListener("visibilitychange", handleVisibilityChange);
         };
     }, [token]);
+
+    return isActive;
 }

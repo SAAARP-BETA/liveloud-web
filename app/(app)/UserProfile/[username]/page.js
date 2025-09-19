@@ -14,7 +14,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
-// import { fonts } from "../../utils/fonts";
+import { useActivityTracker } from "../../../hooks/useActivityTracker";
 import CustomModal from "../../../components/ui/Modal";
 import AmplifyModal from "../../../components/ui/AmplifyModal";
 import CommentModal from "../../../components/ui/CommentModal";
@@ -446,6 +446,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   const resolvedParams = use(params);
   const usernameParam = resolvedParams?.username;
   const { user: currentUser, token, isAuthenticated } = useAuth();
+  const isActive = useActivityTracker(token);
 
   // State for resizable header
   const [headerHeight, setHeaderHeight] = useState(HEADER_MAX_HEIGHT);
@@ -1308,6 +1309,15 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                   height={PROFILE_IMAGE_MAX_SIZE}
                   priority
                 />
+                {/* Activity indicator dot -- positioned bottom-right */}
+                {isActive && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 shadow"
+                    title="User is active"
+                  />
+                )}
+                
                 {isMyProfile && (
                   <Link
                     href="/profile/edit"
