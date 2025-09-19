@@ -10,7 +10,7 @@ export function useActivityTracker(token) {
     const [isActive, setIsActive] = useState(false);
 
     const startHeartbeat = () => {
-        // Prevent multiple "start" signals .
+        // Prevent multiple "start" signals.
         if (!token || activityStartedRef.current) return;
 
         activityStartedRef.current = true;
@@ -22,11 +22,11 @@ export function useActivityTracker(token) {
     };
 
     const stopAndPersist = (isUnloading = false) => {
-        // Only persist if an activity session was actually started.
-        if (!token || !activityStartedRef.current) return;
-
         activityStartedRef.current = false;
         setIsActive(false);
+
+        if (!token) return;
+
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity/persist`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
@@ -68,6 +68,10 @@ export function useActivityTracker(token) {
             // Persist immediately on unmount if activity was running.
             if (activityStartedRef.current) {
                 stopAndPersist(true);
+            } else {
+                // Ensure UI is cleared even if we weren't "started"
+                activityStartedRef.current = false;
+                setIsActive(false);
             }
             window.removeEventListener("beforeunload", handleUnload);
             document.removeEventListener("visibilitychange", handleVisibilityChange);
