@@ -522,15 +522,15 @@ if (isLoading && page === 1) {
           {leaderboardData
               ?.filter(item => item && item.totalPoints !== undefined) 
               .map((item, index) => (
-          <LeaderboardItem
-            key={item?.userId || index}
-            item={item}
-            index={index}
-            currentUserId={currentUser?._id}
-            onPress={navigateToProfile}
-            activeTab={activeTab}
-          />
-))}
+            <LeaderboardItem
+              key={item?.userId || index}
+              item={item}
+              index={index}
+              currentUserId={currentUser?._id}
+              onPress={navigateToProfile}
+              activeTab={activeTab}
+            />
+          ))}
           {isLoading && page > 1 && (
             <div className="py-6 text-center ">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -567,5 +567,6 @@ if (isLoading && page === 1) {
           )}
         </div>
       </div>
+    </div>
   );
 }
