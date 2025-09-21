@@ -234,7 +234,7 @@ const StreakDisplay = ({ consecutiveDays }) => {
 // Tab Bar Component (unchanged)
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   return (
-    <div className="flex  w-full  border justify-center gap-25 border-gray-100 pt-2">
+    <div className="flex w-full border justify-center gap-25 border-gray-100 dark:border-gray-700 pt-2">
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -248,7 +248,7 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               <Grid
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-primary" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
                 }
               />
             )}
@@ -256,13 +256,13 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
               <ImageIcon
                 size={18}
                 className={
-                  activeTab === tab.key ? "text-primary" : "text-gray-500"
+                  activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
                 }
               />
             )}
             <span
               className={`ml-1 text-sm font-medium ${
-                activeTab === tab.key ? "text-primary" : "text-gray-500"
+                activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
               }`}
             >
               {tab.title}
@@ -283,18 +283,18 @@ const UserStats = ({
   onPressFollowing,
 }) => {
   return (
-    <div className="flex justify-center mt-4 space-x-6">
+    <div className="flex justify-center mt-4 space-x-6 dark:text-white">
       <button className="text-center cursor-pointer" onClick={onPressFollowers}>
-        <div className="text-lg font-bold text-gray-800">{followersCount}</div>
-        <div className="text-sm text-gray-500">Followers</div>
+        <div className="text-lg font-bold text-gray-800 dark:text-gray-200">{followersCount}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Followers</div>
       </button>
       <button className="text-center cursor-pointer" onClick={onPressFollowing}>
-        <div className="text-lg font-bold text-gray-800">{followingCount}</div>
-        <div className="text-sm text-gray-500">Following</div>
+        <div className="text-lg font-bold text-gray-800 dark:text-gray-200">{followingCount}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Following</div>
       </button>
       <div className="text-center">
-        <div className="text-lg font-bold text-gray-800">{postsCount}</div>
-        <div className="text-sm text-gray-500">Posts</div>
+        <div className="text-lg font-bold text-gray-800 dark:text-gray-200">{postsCount}</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Posts</div>
       </div>
     </div>
   );
@@ -333,102 +333,93 @@ const GalleryGrid = ({ media, onMediaPress, emptyStateMessage }) => {
   );
 };
 
-// Profile Skeleton Component (unchanged)
 const ProfileSkeleton = () => {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Use the same container structure as ProfilePage */}
+    <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 dark:bg-gray-900 flex-1 px-4 mx-4">
       <div className="w-full max-w-sm sm:max-w-lg md:w-lg lg:w-xl mx-auto flex flex-col items-center relative px-2 sm:px-4 min-h-screen">
-        <div className="w-full flex flex-col items-center bg-gray-50">
+        <div className="w-full flex flex-col items-center bg-gray-50 dark:bg-gray-900">
           <div className="w-full relative">
-            {/* Cover photo skeleton */}
-            <div className="w-full h-[150px] bg-gray-200 animate-pulse" />
-
-            {/* Profile image skeleton - positioned like the real component */}
+            <div className="w-full h-[150px] bg-gray-200 dark:bg-gray-700 animate-pulse" />
             <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
-              <div className="w-24 h-24 rounded-full bg-gray-300 border-4 border-white animate-pulse" />
+              <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-gray-600 border-4 border-white dark:border-gray-700 animate-pulse" />
             </div>
           </div>
-
           <div className="h-12"></div>
-
-          {/* Content skeleton matching the real component structure */}
-          <div className="bg-white border-b border-gray-100 w-full">
-            <div className="mt-4 text-center px-4">
+          <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 w-full">
+            <div className="mt-4 text-center px-4 space-y-3">
               {/* Name skeleton */}
-              <div className="w-32 h-6 bg-gray-200 rounded-md mx-auto animate-pulse" />
+              <div className="w-32 h-6 bg-gray-200 dark:bg-gray-700 rounded-md mx-auto animate-pulse" />
               {/* Username skeleton */}
-              <div className="w-24 h-4 bg-gray-200 rounded-md mt-2 mx-auto animate-pulse" />
+              <div className="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-2 mx-auto animate-pulse" />
               {/* Bio skeleton */}
-              <div className="w-48 h-4 bg-gray-200 rounded-md mt-4 mx-auto animate-pulse" />
+              <div className="w-48 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-4 mx-auto animate-pulse" />
 
               {/* Stats skeleton */}
               <div className="flex justify-center mt-4 space-x-6">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-6 bg-gray-200 rounded-md animate-pulse" />
-                  <div className="w-14 h-4 bg-gray-200 rounded-md mt-1 animate-pulse" />
+                  <div className="w-8 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                  <div className="w-14 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-1 animate-pulse" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-6 bg-gray-200 rounded-md animate-pulse" />
-                  <div className="w-14 h-4 bg-gray-200 rounded-md mt-1 animate-pulse" />
+                  <div className="w-8 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                  <div className="w-14 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-1 animate-pulse" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-6 bg-gray-200 rounded-md animate-pulse" />
-                  <div className="w-14 h-4 bg-gray-200 rounded-md mt-1 animate-pulse" />
+                  <div className="w-8 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                  <div className="w-14 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mt-1 animate-pulse" />
                 </div>
               </div>
 
               {/* Buttons skeleton */}
-              <div className="flex justify-center mt-4 space-x-4 sm:space-x-6">
-                <div className="flex-1 h-10 bg-gray-200 rounded-full animate-pulse" />
-                <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+              <div className="flex mt-4 w-full max-w-md mx-auto space-x-3">
+                <div className="flex-1 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
               </div>
 
               {/* Points skeleton */}
-              <div className="mt-4 w-full h-32 bg-gray-200 rounded-xl animate-pulse" />
+              <div className="mt-4 w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
 
               {/* Streak skeleton */}
-              <div className="mt-3 w-32 h-8 bg-gray-200 rounded-full mx-auto animate-pulse" />
+              <div className="mt-3 w-32 h-8 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto animate-pulse" />
 
               {/* Profile stats skeleton */}
-              <div className="mt-5 pt-4 border-t border-gray-100">
-                <div className="w-40 h-4 bg-gray-200 rounded-md mb-2 animate-pulse" />
-                <div className="w-32 h-4 bg-gray-200 rounded-md mb-2 animate-pulse" />
-                <div className="w-36 h-4 bg-gray-200 rounded-md animate-pulse" />
+              <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <div className="w-40 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mb-2 animate-pulse" />
+                <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mb-2 animate-pulse" />
+                <div className="w-36 h-4 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
               </div>
             </div>
           </div>
 
           {/* Tab bar skeleton */}
-          <div className="flex w-full border justify-center border-gray-100 pt-2 px-2 sm:px-0">
+          <div className="flex w-full border justify-center border-gray-100 dark:border-gray-700 pt-2 px-2 sm:px-0">
             <div className="flex-1 flex items-center justify-center pb-2">
-              <div className="w-16 h-6 bg-gray-200 rounded-md animate-pulse" />
+              <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
             </div>
             <div className="flex-1 flex items-center justify-center pb-2">
-              <div className="w-16 h-6 bg-gray-200 rounded-md animate-pulse" />
+              <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
             </div>
           </div>
 
-          {/* Content area skeleton - FIXED to maintain full width */}
           <div className="px-2 sm:px-4 pt-2 w-full">
             {/* Post skeletons */}
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="mb-4 p-4 bg-white rounded-xl border border-gray-100 w-full"
+                className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 w-full"
               >
                 <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
                   <div className="ml-3 flex-1">
-                    <div className="w-24 h-4 bg-gray-200 rounded-md mb-1 animate-pulse" />
-                    <div className="w-16 h-3 bg-gray-200 rounded-md animate-pulse" />
+                    <div className="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded-md mb-1 animate-pulse" />
+                    <div className="w-16 h-3 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
                   </div>
                 </div>
-                <div className="w-full h-40 bg-gray-200 rounded-lg mb-3 animate-pulse" />
+                <div className="w-full h-40 bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 animate-pulse" />
                 <div className="flex justify-between">
-                  <div className="w-16 h-8 bg-gray-200 rounded-full animate-pulse" />
-                  <div className="w-16 h-8 bg-gray-200 rounded-full animate-pulse" />
-                  <div className="w-16 h-8 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+                  <div className="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+                  <div className="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
                 </div>
               </div>
             ))}
@@ -1237,29 +1228,29 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
 
   if (!user && !isLoading) {
     return (
-      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center z-50">
         <div className="w-xl max-sm:w-100 px-6">
           <div className="text-center">
-            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-gray-400 text-3xl">😔</span>
+            <div className="w-20 h-20 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-gray-400 dark:text-gray-200 text-3xl">😔</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">
               Profile Not Found
             </h2>
-            <p className="text-gray-600 mb-6 text-sm leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm leading-relaxed">
               {errorMessage ||
                 "Sorry, we couldn't find this user. They may have deactivated their account or the username might be incorrect."}
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => router.back()}
-                className="w-full px-4 py-2.5 bg-primary text-white rounded-full font-medium hover:bg-sky-600 transition-colors"
+                className="w-full px-4 py-2.5 bg-primary text-white rounded-full font-medium dark:hover:bg-sky-900 dark:hover:text-gray-200 transition-colors"
               >
                 Go Back
               </button>
               <Link
                 href="/home"
-                className="block w-full px-4 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors text-center"
+                className="block w-full px-4 py-2.5 bg-gray-200 text-gray-700 dark:text-gray-900 rounded-full font-medium hover:bg-gray-600 dark:hover:text-gray-200 transition-colors text-center"
               >
                 Go to Home
               </Link>
@@ -1271,8 +1262,9 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-      <div className="w-xl flex flex-col items-center relative overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center">
+      <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 dark:bg-gray-900 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
+        <div className="w-full flex flex-col items-center bg-gray-50 dark:bg-gray-900"></div>
         {/* Scrollable Content */}
         <div
           className="w-full flex flex-col items-center bg-gray-50 dark:bg-gray-900 overflow-y-auto"
@@ -1293,7 +1285,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
             {/* Profile Image */}
             <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
               <motion.div
-                className="border-4 border-white shadow-sm bg-white relative"
+                className="border-4 border-white shadow-sm bg-white dark:bg-gray-900 relative w-full"
                 animate={{
                   height: profileImageSize,
                   width: profileImageSize,
@@ -1321,7 +1313,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                 {isMyProfile && (
                   <Link
                     href="/profile/edit"
-                    className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center"
+                    className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 dark:bg-gray-900 flex items-center justify-center"
                   >
                     <Edit2 className="text-primary text-sm" />
                   </Link>
