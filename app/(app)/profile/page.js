@@ -115,7 +115,7 @@ const PointsDisplay = ({ points, loading }) => {
   };
 
   return (
-    <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-sky-100 dark:border-gray-600">
+    <div className="mt-4 p-4 bg-gradient-to-r from-sky-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-sky-100 dark:border-gray-700">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center">
           <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -207,7 +207,7 @@ const StreakDisplay = ({ consecutiveDays }) => {
 
   return (
     <div className="mt-3 flex items-center justify-center">
-      <div className="flex items-center px-3 py-2 bg-orange-50 dark:bg-gray-800 rounded-full border border-orange-200 dark:border-gray-600">
+      <div className="flex items-center px-3 py-2 bg-orange-50 dark:bg-gray-800 rounded-full border border-orange-200 dark:border-gray-700">
         <Flame size={16} className="text-orange-600" />
         <span className="ml-2 text-orange-600 font-semibold">
           {consecutiveDays} Day Streak
@@ -336,7 +336,7 @@ const ProfileSkeleton = () => {
           <div className="w-full relative">
             <div className="w-full h-[150px] bg-gray-200 dark:bg-gray-700 animate-pulse" />
             <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
-              <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-gray-600 border-4 border-white dark:border-gray-800 animate-pulse" />
+              <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-gray-600 border-4 border-white dark:border-gray-700 animate-pulse" />
             </div>
           </div>
           <div className="h-12"></div>
@@ -1278,7 +1278,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               />
               <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
                 <motion.div
-                  className="border-4 border-white shadow-sm bg-white relative w-full"
+                  className="border-4 border-gray-300 shadow-sm bg-gray-200 relative w-full"
                   animate={{
                     height: profileImageSize,
                     width: profileImageSize,
@@ -1297,7 +1297,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   {isMyProfile && (
                     <Link
                       href="/profile/edit"
-                      className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 flex items-center justify-center cursor-pointer"
+                      className="absolute bottom-0 right-0 w-7 h-7 rounded-full overflow-hidden border-2 border-white bg-white/80 dark:bg-gray-900 flex items-center justify-center cursor-pointer"
                     >
                       <Edit2 className="text-primary text-md" size={20} />
                     </Link>
@@ -1309,7 +1309,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             <div className="h-12"></div>
 
             <motion.div
-              className="bg-white border-b border-gray-100 w-full dark:bg-gray-900 dark:text-white"
+              className="bg-white border-b border-gray-100 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -1428,18 +1428,18 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   </>
                 )}
                 {profileStats && (
-                  <div className="mt-5 pt-4 border-t border-gray-100">
+                  <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
                     {user.location && (
                       <div className="flex items-center mb-2 cursor-pointer">
-                        <MapPin className="text-gray-600 text-base" />
-                        <span className="ml-2 text-gray-500">
+                        <MapPin className="text-gray-600 dark:text-gray-400 text-base" />
+                        <span className="ml-2 text-gray-500 dark:text-gray-300">
                           {user.location}
                         </span>
                       </div>
                     )}
                     {user?.website && (
                       <div className="flex items-center mb-2">
-                        <LinkIcon className="text-gray-600 text-lg" />
+                        <LinkIcon className="text-gray-600 dark:text-gray-400 text-lg" />
                         <Link
                           href={
                             user.website.startsWith("http")
@@ -1455,29 +1455,11 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                       </div>
                     )}
                     <div className="flex items-center mb-2">
-                      <Calendar className="text-gray-600 cursor-pointer text-base" />
-                      <span className="ml-2 text-gray-500">
+                      <Calendar className="text-gray-600 dark:text-gray-400 cursor-pointer text-base" />
+                      <span className="ml-2 text-gray-500 dark:text-gray-300">
                         Joined {profileStats.joined}
                       </span>
                     </div>
-                    {isMyProfile && profileStats.todaysTimeSpent > 0 && (
-                      <div className="flex items-center mb-2">
-                        <Clock className="text-gray-600 text-base" />
-                        <span className="ml-2 text-gray-500">
-                          Time spent:{" "}
-                          {(profileStats.todaysTimeSpent / 3_600_000).toFixed(2)}h
-                        </span>
-                      </div>
-                    )}
-                    {isMyProfile && profileStats.lifeTimeSpent > 0 && (
-                      <div className="flex items-center mb-2">
-                        <Clock className="text-gray-600 text-base" />
-                        <span className="ml-2 text-gray-500">
-                          Time spent lifetime:{" "}
-                          {(profileStats.lifeTimeSpent / 3_600_000).toFixed(2)}h
-                        </span>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -1667,7 +1649,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             {moreOptions.map((option, index) => (
               <button
                 key={index}
-                className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+                className="flex items-center py-4 border-b border-gray-100 dark:border-gray-700 w-full text-left"
                 onClick={() => {
                   setIsMoreModalVisible(false);
                   setTimeout(() => option.onPress(), 300);
@@ -1705,7 +1687,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               </label>
               <div className="w-full dark:bg-black dark:text-white">
                 <select
-                  className="w-full py-2 px-3 border cursor-pointer dark:bg-black dark:text-white border-gray-300 rounded-md text-gray-800 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
+                  className="w-full py-2 px-3 border cursor-pointer dark:bg-black dark:text-white border-gray-300 dark:border-gray-700 rounded-md text-gray-800 bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
                   value={profileData.allowTagsFrom || "everyone"}
                   onChange={(e) =>
                     handleInputChange("allowTagsFrom", e.target.value)
@@ -1863,7 +1845,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     {selectedPost && (
       <>
         <button
-          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          className="flex items-center py-4 border-b border-gray-100 dark:border-gray-700 w-full text-left"
           onClick={() => {
             // console.log('Debug: Save Post clicked, postId:', selectedPost.id);
             setModalVisible(false);
@@ -1878,7 +1860,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           </span>
         </button>
         <button
-          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          className="flex items-center py-4 border-b border-gray-100 dark:border-gray-700 w-full text-left"
           onClick={() => {
             // console.log('Debug: View Comments clicked, postId:', selectedPost.id);
             setModalVisible(false);
@@ -1894,7 +1876,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         </button>
         {isMyProfile && (
   <button
-    className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+    className="flex items-center py-4 border-b border-gray-100 dark:border-gray-700 w-full text-left"
     onClick={() => {
       console.log(
         `Debug: ${selectedPost.isArchived ? "Unarchive" : "Archive"} Post clicked, postId:`,
@@ -1917,7 +1899,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   </button>
 )}
         <button
-          className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+          className="flex items-center py-4 border-b border-gray-100 dark:border-gray-700 w-full text-left"
           onClick={() => {
             // console.log('Debug: Report Post clicked, postId:', selectedPost.id);
             setModalVisible(false);
@@ -1934,7 +1916,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         </button>
         {isMyProfile && (
           <button
-            className="flex items-center py-4 border-b border-gray-100 w-full text-left"
+            className="flex items-center py-4 border-b border-gray-100 dark:border-gray-700 w-full text-left"
             onClick={() => {
               // console.log('Debug: Delete Post clicked, postId:', selectedPost.id);
               setModalVisible(false);

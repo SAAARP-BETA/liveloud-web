@@ -318,7 +318,7 @@ const PostCard = ({
               src={post.profilePic ? post.profilePic : defaultPic}
               alt="Profile"
               fill
-              className="object-cover cursor-pointer"
+              className="object-cover cursor-pointer bg-gray-200"
             />
           </div>
           <div className="ml-3 flex-1">

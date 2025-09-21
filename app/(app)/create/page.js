@@ -814,7 +814,7 @@ setRandomUsers(uniqueUsers);
   return (
   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full md:min-w-[410px] lg:w-[610px] max-w-2xl px-4 flex-1 overflow-y-auto h-screen custom-scrollbar">
       {/* Header */}
-  <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 z-10 mx-auto">
+  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 max-w-2xl w-full rounded-md shadow-md shadow-blue-50 dark:shadow-gray-950 z-10 mx-auto">
         <div className="flex items-center justify-between px-4 py-3 mt-5">
           <button
             className="text-gray-600 transition-transform dark:border-gray-700 duration-200 cursor-pointer ease-in-out hover:rotate-180"
@@ -822,7 +822,7 @@ setRandomUsers(uniqueUsers);
           >
             <RefreshCw size={24} />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Create New Post
           </h1>
           <button
@@ -831,7 +831,7 @@ setRandomUsers(uniqueUsers);
             className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ease-in-out
               ${
                 isSubmitDisabled
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed scale-100"
+                  ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-200 cursor-not-allowed scale-100"
                   : "bg-primary text-white cursor-pointer hover:bg-primary hover:scale-105 active:scale-95"
               }`}
           >
@@ -849,7 +849,7 @@ setRandomUsers(uniqueUsers);
             alt="Profile"
             width={48}
             height={48}
-            className="rounded-full w-12 h-12 border-2 border-sky-100 dark:border-gray-700"
+            className="rounded-full w-12 h-12 border-2 dark:border-gray-200 dark:bg-gray-200"
           />
           <div className="ml-3 flex-1">
             <div className="flex items-center">
@@ -1061,7 +1061,7 @@ setRandomUsers(uniqueUsers);
 
         {/* Trending Tags */}
         <div className="px-4 py-3 mb-2">
-          <p className="text-sm text-gray-600 mb-2 font-medium">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">
             Popular hashtags:
           </p>
           <div className="flex flex-wrap gap-2">
@@ -1069,7 +1069,7 @@ setRandomUsers(uniqueUsers);
               <button
                 key={index}
                 onClick={() => addTag(tag)}
-                className="bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-800"
+                className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 dark:hover:bg-gray-950"
               >
                 #{tag}
               </button>

@@ -183,7 +183,7 @@ export default function LeftSidebar() {
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 display: "inline-block",
-                color: isActive ? "#0EA5E9" : "#6b7280",
+                color: isActive ? "#0EA5E9" : "#6b7280 dark:#e5e7eb",
               }}
               transition={{ duration: 0.2 }}
               title={tab.name}
@@ -220,14 +220,14 @@ export default function LeftSidebar() {
                 <img
                   src={user?.profilePicture}
                   alt="Profile"
-                  className="w-6 h-6 rounded-full border border-gray-300"
+                  className="w-6 h-6 rounded-full border border-gray-300 bg-gray-200"
                   onClick={handleProfileClick}
                 />
               ) : (
                 <img
                   src={defaultPic.src}
                   alt="Profile"
-                  className="w-6 h-6 rounded-full border border-gray-300"
+                  className="w-6 h-6 rounded-full border border-gray-300 bg-gray-200"
                   onClick={handleProfileClick}
                 />
               )}
@@ -260,14 +260,14 @@ export default function LeftSidebar() {
                 <img
                   src={user.profilePicture}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200  group-hover:grayscale group-hover:brightness-75"
+                  className="w-10 h-10 rounded-full border-2 border-gray-300 group-hover:grayscale group-hover:brightness-75"
                   onClick={handleProfileClick}
                 />
               ) : (
                 <img
                   src={defaultPic.src}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200"
+                  className="w-10 h-10 rounded-full border-2 border-gray-300 bg-gray-200"
                   onClick={handleProfileClick} // Also added missing onClick
                 />
               )}
@@ -356,7 +356,7 @@ export default function LeftSidebar() {
   // };
 
   const Logo = () => (
-    <div className="flex justify-center w-[340px] h-[40px] items-center mb-[-10] lg:w-[280px] lg:h-[30px]  md:h-[25px] md:w-[200px] sm:h-[15px] sm:w-[150px]">
+    <div className="flex justify-center w-[340px] h-[40px] items-center mb-[-10] lg:w-[300px] lg:h-[30px]  md:h-[30px] md:w-[250px] sm:h-[20px] sm:w-[200px]">
       <Link href="/home">
         <Image
           src={combinedLogo}
@@ -364,7 +364,7 @@ export default function LeftSidebar() {
           alt="Logo"
           width={250}
           height={20}
-          className="object-contain ml-[-18] mr-26 md:mr-18 sm:mr-10"
+          className="object-contain ml-[-30] mr-26 md:mr-18 sm:mr-10"
           priority
         />
       </Link>
