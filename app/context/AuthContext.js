@@ -32,13 +32,27 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        console.log('AuthContext: Initializing authentication...');
+        
         // First check if we have stored auth data
         const storedAuthData = await getAuthData();
+        console.log('AuthContext: Stored auth data:', { 
+          hasToken: !!storedAuthData.token,
+          hasUser: !!storedAuthData.user,
+          tokenLength: storedAuthData.token?.length,
+          userId: storedAuthData.user?._id 
+        });
         
         if (storedAuthData.token && storedAuthData.user) {
           // We have stored data, try to validate with server
           try {
+            console.log('AuthContext: Validating token with server...');
             const profile = await authService.getProfile();
+            console.log('AuthContext: Profile fetch result:', { 
+              hasProfile: !!profile,
+              profileId: profile?._id 
+            });
+            
             if (profile?._id) {
               setAuthState({
                 user: profile,
@@ -46,15 +60,17 @@ export const AuthProvider = ({ children }) => {
                 isAuthenticated: true,
                 loading: false,
               });
+              console.log('AuthContext: Authentication successful');
               return;
             }
           } catch (err) {
-            console.warn('Stored token invalid, clearing auth data');
+            console.warn('AuthContext: Stored token invalid, clearing auth data:', err);
             await clearAuthData();
           }
         }
         
         // No valid stored data or validation failed
+        console.log('AuthContext: No valid auth data, setting unauthenticated state');
         setAuthState({
           user: null,
           isAuthenticated: false,
@@ -218,6 +234,39 @@ const signup = async (userData) => {
 
   const clearError = () => setError(null);
 
+  // Method to set authentication data directly (for OAuth callbacks)
+  const setAuthData = async (token, user) => {
+    try {
+      console.log('setAuthData called with:', { 
+        hasToken: !!token, 
+        tokenLength: token?.length,
+        hasUser: !!user,
+        userId: user?._id 
+      });
+      
+      await storeAuthData(token, user);
+      
+      // Verify the data was stored
+      const verifyStored = await getAuthData();
+      console.log('Verification - stored data:', { 
+        hasStoredToken: !!verifyStored.token,
+        hasStoredUser: !!verifyStored.user,
+        storedUserId: verifyStored.user?._id 
+      });
+      
+      setAuthState({
+        user: user,
+        token: token,
+        isAuthenticated: true,
+        loading: false
+      });
+      console.log('Auth state set successfully:', { hasUser: !!user, hasToken: !!token });
+    } catch (error) {
+      console.error('Failed to set auth data:', error);
+      setError('Failed to complete authentication');
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -229,6 +278,7 @@ const signup = async (userData) => {
         updateUserInfo,
         getProfile,
         clearError,
+        setAuthData, // Add this new method
       }}
     >
       {children}

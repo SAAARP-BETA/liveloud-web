@@ -14,8 +14,10 @@ import ThemeToggle from "../../components/common/ThemeToggle";
 export default function Signup() {
   const router = useRouter();
   const [fullName, setFullName] = useState("test");
-  const [email, setEmail] = useState("test@test.com");
-  const [password, setPassword] = useState("Azxs@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  // const [email, setEmail] = useState("test@test.com");
+  // const [password, setPassword] = useState("Azxs@123");
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,26 +72,67 @@ export default function Signup() {
     }
   }, []);
 
+  // Function to parse and display specific error messages
+  const getSpecificErrorMessage = (errorMessage) => {
+    if (!errorMessage) return "Please try again";
+    
+    const lowerError = errorMessage.toLowerCase();
+    
+    if (lowerError.includes("username") && (lowerError.includes("taken") || lowerError.includes("already"))) {
+      return "Please try again: Username is already taken. Choose a different username.";
+    }
+    if (lowerError.includes("username") && lowerError.includes("exists")) {
+      return "Please try again: Username already exists. Choose a different username.";
+    }
+    if (lowerError.includes("email") && (lowerError.includes("taken") || lowerError.includes("already") || lowerError.includes("registered"))) {
+      return "Please try again: Email is already taken. Use a different email address.";
+    }
+    if (lowerError.includes("email") && lowerError.includes("exists")) {
+      return "Please try again: Email already exists. Use a different email address.";
+    }
+    if (lowerError.includes("invalid email")) {
+      return "Please try again: Enter a valid email address.";
+    }
+    if (lowerError.includes("password") && lowerError.includes("weak")) {
+      return "Please try again: Password is too weak. Use a stronger password.";
+    }
+    if (lowerError.includes("network") || lowerError.includes("connection")) {
+      return "Please try again: Network error. Check your connection.";
+    }
+    if (lowerError.includes("server") || lowerError.includes("500")) {
+      return "Please try again: Server error occurred.";
+    }
+    
+    // For any other error, add "Please try again: " prefix
+    return `Please try again: ${errorMessage}`;
+  };
+
   const handleSignup = async () => {
     if (!fullName.trim() || !email.trim() || !password.trim()) {
-      toast.error("Please fill in all fields");
+      toast.error('Incomplete Details: Please fill in all fields');
       return;
     }
 
     // Validate password strength
     const validation = validatePassword(password);
     if (!validation.isValid) {
-      toast.error('Please enter a strong password');
+      toast.error('Password Requirements Not Met: ' + validation.errors.join(', '));
       return;
     }
 
     if (!isChecked) {
-      toast.error("Please agree to the Terms and Privacy Policy");
+      toast.error('Terms & Conditions: Please agree to the Terms and Privacy Policy');
       return;
     }
 
     setIsLoading(true);
     try {
+      console.log('Attempting signup with data:', {
+        username: fullName,
+        email,
+        password: '***hidden***'
+      });
+      
       const success = await signup({
         username: fullName,
         email,
@@ -100,19 +143,53 @@ export default function Signup() {
         router.replace("/login");
         toast.success("Signup successful! Please log in.");
       } else {
-        console.error(`Signup failed with error:" ${error}`);
-        toast.error(`Signup Failed: ${error || "Please try again."}`);
+        console.error('Signup failed with error:', error);
+        const specificMessage = getSpecificErrorMessage(error);
+        toast.error(specificMessage, {
+          duration: 6000,
+          style: {
+            background: '#fef2f2',
+            color: '#dc2626',
+            border: '1px solid #fecaca',
+            fontSize: '14px',
+            maxWidth: '400px',
+          },
+        });
       }
     } catch (err) {
-      console.error(`Signup error: ${err}`);
-      toast.error(`Error: ${err.message || "An unexpected error occurred!"}`);
+      console.error('Signup error:', err);
+      const specificMessage = getSpecificErrorMessage(err.message || err);
+      toast.error(specificMessage, {
+        duration: 6000,
+        style: {
+          background: '#fef2f2',
+          color: '#dc2626',
+          border: '1px solid #fecaca',
+          fontSize: '14px',
+          maxWidth: '400px',
+        },
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignup = () => {
-    toast.error("Google signup will be available soon!");
+    // For now, redirect to a simple Google OAuth flow
+    if (typeof window !== 'undefined') {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
+      const scope = 'openid email profile';
+      
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `scope=${encodeURIComponent(scope)}&` +
+        `response_type=code&` +
+        `state=signup`;
+      
+      window.location.href = authUrl;
+    }
   };
 
   const handleWalletConnect = () => {

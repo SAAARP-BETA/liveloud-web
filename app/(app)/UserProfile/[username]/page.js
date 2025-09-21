@@ -731,10 +731,20 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         const data = await response.json();
 
         // Add follow status for each follower
-        const followersWithStatus = await Promise.all(
+        let followersWithStatus = await Promise.all(
           data.followers.map(async (follower) => {
-            if (follower._id === currentUser?.userId) {
-              return { ...follower, isFollowing: false, isCurrentUser: true };
+            // Mark current user
+            const isCurrentUser = follower._id === currentUser?.userId;
+            
+            if (isCurrentUser) {
+              return { 
+                ...follower, 
+                isFollowing: false, 
+                isCurrentUser: true,
+                username: currentUser.username || 'User',
+                profilePicture: currentUser.profilePicture || defaultPic,
+                fullname: currentUser.fullname || currentUser.username || 'User'
+              };
             }
 
             try {
@@ -749,17 +759,34 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                 ...follower,
                 isFollowing: statusData.isFollowing,
                 isCurrentUser: false,
+                username: follower.username || 'User',
+                profilePicture: follower.profilePicture || defaultPic,
+                fullname: follower.fullname || follower.username || 'User'
               };
             } catch (error) {
-              return { ...follower, isFollowing: false, isCurrentUser: false };
+              return { 
+                ...follower,
+                isFollowing: false, 
+                isCurrentUser: false,
+                username: follower.username || 'User',
+                profilePicture: follower.profilePicture || defaultPic,
+                fullname: follower.fullname || follower.username || 'User'
+              };
             }
           })
         );
 
+        // Sort the list to put current user at the top
+        followersWithStatus.sort((a, b) => {
+          if (a.isCurrentUser) return -1;
+          if (b.isCurrentUser) return 1;
+          return 0;
+        });
+        
         setFollowersList(followersWithStatus);
       } catch (error) {
         console.error("Error fetching followers:", error);
-        toast.error("Error", "Failed to load followers");
+        toast.error("Failed to load followers");
       } finally {
         setFollowersLoading(false);
       }
@@ -790,8 +817,15 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         // Add follow status for each user being followed
         const followingWithStatus = await Promise.all(
           data.following.map(async (following) => {
-            if (following._id === currentUser?.userId) {
-              return { ...following, isFollowing: false, isCurrentUser: true };
+            // Mark current user
+            const isCurrentUser = following._id === currentUser?.userId;
+            
+            if (isCurrentUser) {
+              return { 
+                ...following, 
+                isFollowing: false, 
+                isCurrentUser: true 
+              };
             }
 
             try {
@@ -806,17 +840,34 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                 ...following,
                 isFollowing: statusData.isFollowing,
                 isCurrentUser: false,
+                username: following.username || 'User',
+                profilePicture: following.profilePicture || defaultPic,
+                fullname: following.fullname || following.username || 'User'
               };
             } catch (error) {
-              return { ...following, isFollowing: false, isCurrentUser: false };
+              return { 
+                ...following,
+                isFollowing: false, 
+                isCurrentUser: false,
+                username: following.username || 'User',
+                profilePicture: following.profilePicture || defaultPic,
+                fullname: following.fullname || following.username || 'User'
+              };
             }
           })
         );
 
+        // Sort the list to put current user at the top
+        followingWithStatus.sort((a, b) => {
+          if (a.isCurrentUser) return -1;
+          if (b.isCurrentUser) return 1;
+          return 0;
+        });
+
         setFollowingList(followingWithStatus);
       } catch (error) {
         console.error("Error fetching following:", error);
-        toast.error("Error", "Failed to load following");
+        toast.error("Failed to load following");
       } finally {
         setFollowingLoading(false);
       }
@@ -924,7 +975,29 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       setUser(userData);
       setFollowersCount(userData.followersCount || 0);
       setFollowingCount(userData.followingCount || 0);
-      setIsFollowing(userData.isFollowing || false);
+      
+      // Explicitly check follow status for non-profile owners
+      if (!isMyProfile && isAuthenticated) {
+        try {
+          const followStatusResponse = await fetch(
+            `${API_ENDPOINTS.SOCIAL}/followers/${userData._id}/status`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (followStatusResponse.ok) {
+            const { isFollowing: followStatus } = await followStatusResponse.json();
+            setIsFollowing(followStatus);
+          }
+        } catch (error) {
+          console.error("Error checking follow status:", error);
+          setIsFollowing(false);
+        }
+      } else {
+        setIsFollowing(false);
+      }
 
       const joined = new Date(userData.createdAt);
       const joinedDate = `${joined.toLocaleString("default", {
@@ -965,6 +1038,9 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
     const wasFollowing = isFollowing;
     setFollowLoading(true);
 
+    // Clear any existing error states
+    setError(null);
+    
     // Optimistic update
     setIsFollowing(!wasFollowing);
     setFollowersCount((prev) => (wasFollowing ? prev - 1 : prev + 1));
@@ -988,6 +1064,22 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       }
 
       const result = await response.json();
+      
+      // Double check the follow status after the action
+      const followStatusResponse = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/followers/${user._id}/status`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (followStatusResponse.ok) {
+        const { isFollowing: currentStatus } = await followStatusResponse.json();
+        setIsFollowing(currentStatus);
+      }
+
       toast.success(
         wasFollowing
           ? "User unfollowed successfully"
@@ -1012,16 +1104,44 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
       setFollowLoading(false);
     }
   };
+  // Navigate to user profile
+ 
 
   // Follow/unfollow user in modal lists
   const handleModalFollowToggle = async (targetUser) => {
     if (!isAuthenticated) {
-      toast.error("Login Required", "Please login to follow users");
+      toast.error("Please login to follow users");
       return;
     }
 
+    if (!targetUser?._id) {
+      toast.error("Invalid user data");
+      return;
+    }
+
+    // Optimistic update
+    const wasFollowing = targetUser.isFollowing;
+
+    // Update the followers list optimistically
+    setFollowersList((prev) =>
+      prev.map((user) =>
+        user._id === targetUser._id
+          ? { ...user, isFollowing: !wasFollowing }
+          : user
+      )
+    );
+
+    // Update the following list optimistically
+    setFollowingList((prev) =>
+      prev.map((user) =>
+        user._id === targetUser._id
+          ? { ...user, isFollowing: !wasFollowing }
+          : user
+      )
+    );
+
     try {
-      const endpoint = targetUser.isFollowing ? "unfollow" : "follow";
+      const endpoint = wasFollowing ? "unfollow" : "follow";
       const response = await fetch(
         `${API_ENDPOINTS.SOCIAL}/followers/${targetUser._id}/${endpoint}`,
         {
@@ -1523,7 +1643,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                     </p>
                     {isMyProfile && (
                       <Link
-                        href="/create-post"
+                        href="/create"
                         className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium"
                       >
                         Create First Post
@@ -1754,7 +1874,10 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                           ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
                           : "bg-sky-500 text-white hover:bg-sky-600"
                       }`}
-                      onClick={() => handleModalFollowToggle(follower)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleModalFollowToggle(follower);
+                      }}
                     >
                       {follower.isFollowing ? "Following" : "Follow"}
                     </button>
@@ -1829,7 +1952,10 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                           ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
                           : "bg-sky-500 text-white hover:bg-sky-600"
                       }`}
-                      onClick={() => handleModalFollowToggle(following)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleModalFollowToggle(following);
+                      }}
                     >
                       {following.isFollowing ? "Following" : "Follow"}
                     </button>
