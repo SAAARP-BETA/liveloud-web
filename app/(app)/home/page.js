@@ -1005,7 +1005,7 @@ useEffect(() => {
 
       // Update posts in current tab to reflect new following status
       const updatedPosts = getCurrentTabData().posts.map((post) => {
-        if (post.user === userId) {
+        if (post.userId === userId) {
           return { ...post, isFollowing: false };
         }
         return post;

@@ -49,7 +49,21 @@ export default function Login() {
   };
 
   const handleGoogleLogin = () => {
-    toast.error("Google login will be available soon!");
+    // For now, redirect to a simple Google OAuth flow
+    if (typeof window !== 'undefined') {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
+      const scope = 'openid email profile';
+      
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `scope=${encodeURIComponent(scope)}&` +
+        `response_type=code&` +
+        `state=login`;
+      
+      window.location.href = authUrl;
+    }
   };
 
   const handleWalletConnect = () => {

@@ -30,7 +30,7 @@ const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
         paddingBottom: 12,
       }}
     >
-      <div className="flex overflow-x-auto custom-scrollbar">
+      <div className="flex gap-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -120,19 +120,6 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
   };
 
   const getLevelInfo = (points) => {
-    // const levels = [
-    //   { level: 1, title: 'Newcomer', minPoints: 0 },
-    //   { level: 2, title: 'Active Member', minPoints: 100 },
-    //   { level: 3, title: 'Contributor', minPoints: 500 },
-    //   { level: 4, title: 'Influencer', minPoints: 1000 },
-    //   { level: 5, title: 'Star', minPoints: 2500 },
-    //   { level: 6, title: 'Superstar', minPoints: 5000 },
-    //   { level: 7, title: 'Icon', minPoints: 10000 },
-    //   { level: 8, title: 'Legend', minPoints: 25000 },
-    //   { level: 9, title: 'Master', minPoints: 50000 },
-    //   { level: 10, title: 'Grandmaster', minPoints: 100000 },
-    // ];
-
     const levels = [
       {
         level: 1,
@@ -304,9 +291,9 @@ export default function LeaderboardPage() {
 
   const tabs = [
     { key: "total", title: "Overall", icon: Trophy },
-    { key: "creators", title: "Creators", icon: SquarePen },
+    { key: "creators", title: "Creators", icon: Pencil },
     { key: "fans", title: "Fans", icon: Heart },
-    { key: "followers", title: "Followers", icon: Users },
+    { key: "followers", title: "Followers", icon: User },
   ];
 
   // Fetch user's points
@@ -420,14 +407,6 @@ export default function LeaderboardPage() {
     fetchLeaderboard(true);
   };
 
-  // Scroll handler for infinite scroll
-  const handleScroll = (e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    if (scrollHeight - scrollTop <= clientHeight * 1.5) {
-      loadMore();
-    }
-  };
-
   // Initial load
   useEffect(() => {
     fetchLeaderboard(true);
@@ -493,7 +472,7 @@ if (isLoading && page === 1) {
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/20">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                    <PenLine className="w-5 h-5 text-white" />
+                    <Pencil className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-white text-lg font-semibold">
                     {myPoints.creatorPoints || 0}

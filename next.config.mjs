@@ -29,6 +29,11 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "lh3.googleusercontent.com", // Google profile images
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "t3.ftcdn.net",
         pathname: "/**",
       },
