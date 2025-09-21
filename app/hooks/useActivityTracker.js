@@ -1,82 +1,82 @@
-import { useEffect, useRef, useState } from "react";
+// import { useEffect, useRef, useState } from "react";
 
-const VISIBILITY_START_DELAY = 5000; // 5 seconds
-const PERSIST_STOP_DELAY = 10000; // 10 seconds
+// const VISIBILITY_START_DELAY = 5000; // 5 seconds
+// const PERSIST_STOP_DELAY = 10000; // 10 seconds
 
-export function useActivityTracker(token) {
-    const visibilityTimerRef = useRef(null);
-    const persistTimerRef = useRef(null);
-    const activityStartedRef = useRef(false);
-    const [isActive, setIsActive] = useState(false);
+// export function useActivityTracker(token) {
+//     const visibilityTimerRef = useRef(null);
+//     const persistTimerRef = useRef(null);
+//     const activityStartedRef = useRef(false);
+//     const [isActive, setIsActive] = useState(false);
 
-    const startHeartbeat = () => {
-        // Prevent multiple "start" signals.
-        if (!token || activityStartedRef.current) return;
+//     const startHeartbeat = () => {
+//         // Prevent multiple "start" signals.
+//         if (!token || activityStartedRef.current) return;
 
-        activityStartedRef.current = true;
-        setIsActive(true);
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity/heartbeat`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-        }).catch((err) => console.error("Heartbeat failed:", err));
-    };
+//         activityStartedRef.current = true;
+//         setIsActive(true);
+//         fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity/heartbeat`, {
+//             method: "POST",
+//             headers: { Authorization: `Bearer ${token}` },
+//         }).catch((err) => console.error("Heartbeat failed:", err));
+//     };
 
-    const stopAndPersist = (isUnloading = false) => {
-        activityStartedRef.current = false;
-        setIsActive(false);
+//     const stopAndPersist = (isUnloading = false) => {
+//         activityStartedRef.current = false;
+//         setIsActive(false);
 
-        if (!token) return;
+//         if (!token) return;
 
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity/persist`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            keepalive: isUnloading,
-        }).catch((err) => console.error("Persist failed:", err));
-    };
+//         fetch(`${process.env.NEXT_PUBLIC_API_URL}/activity/persist`, {
+//             method: "POST",
+//             headers: { Authorization: `Bearer ${token}` },
+//             keepalive: isUnloading,
+//         }).catch((err) => console.error("Persist failed:", err));
+//     };
 
-    useEffect(() => {
-        if (!token) return;
+//     useEffect(() => {
+//         if (!token) return;
 
-        const clearAllTimers = () => {
-            if (visibilityTimerRef.current) clearTimeout(visibilityTimerRef.current);
-            if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
-            visibilityTimerRef.current = null;
-            persistTimerRef.current = null;
-        };
+//         const clearAllTimers = () => {
+//             if (visibilityTimerRef.current) clearTimeout(visibilityTimerRef.current);
+//             if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
+//             visibilityTimerRef.current = null;
+//             persistTimerRef.current = null;
+//         };
 
-        const handleVisibilityChange = () => {
-            clearAllTimers();
-            if (document.hidden) {
-                // When tab is hidden, wait for a delay before persisting.
-                persistTimerRef.current = setTimeout(() => stopAndPersist(false), PERSIST_STOP_DELAY);
-            } else {
-                // When tab is visible, wait for a delay before sending the start signal.
-                visibilityTimerRef.current = setTimeout(startHeartbeat, VISIBILITY_START_DELAY);
-            }
-        };
+//         const handleVisibilityChange = () => {
+//             clearAllTimers();
+//             if (document.hidden) {
+//                 // When tab is hidden, wait for a delay before persisting.
+//                 persistTimerRef.current = setTimeout(() => stopAndPersist(false), PERSIST_STOP_DELAY);
+//             } else {
+//                 // When tab is visible, wait for a delay before sending the start signal.
+//                 visibilityTimerRef.current = setTimeout(startHeartbeat, VISIBILITY_START_DELAY);
+//             }
+//         };
 
-        const handleUnload = () => stopAndPersist(true);
+//         const handleUnload = () => stopAndPersist(true);
 
-        // Initial check on mount
-        handleVisibilityChange();
+//         // Initial check on mount
+//         handleVisibilityChange();
 
-        window.addEventListener("beforeunload", handleUnload);
-        document.addEventListener("visibilitychange", handleVisibilityChange);
+//         window.addEventListener("beforeunload", handleUnload);
+//         document.addEventListener("visibilitychange", handleVisibilityChange);
 
-        return () => {
-            clearAllTimers();
-            // Persist immediately on unmount if activity was running.
-            if (activityStartedRef.current) {
-                stopAndPersist(true);
-            } else {
-                // Ensure UI is cleared even if we weren't "started"
-                activityStartedRef.current = false;
-                setIsActive(false);
-            }
-            window.removeEventListener("beforeunload", handleUnload);
-            document.removeEventListener("visibilitychange", handleVisibilityChange);
-        };
-    }, [token]);
+//         return () => {
+//             clearAllTimers();
+//             // Persist immediately on unmount if activity was running.
+//             if (activityStartedRef.current) {
+//                 stopAndPersist(true);
+//             } else {
+//                 // Ensure UI is cleared even if we weren't "started"
+//                 activityStartedRef.current = false;
+//                 setIsActive(false);
+//             }
+//             window.removeEventListener("beforeunload", handleUnload);
+//             document.removeEventListener("visibilitychange", handleVisibilityChange);
+//         };
+//     }, [token]);
 
-    return isActive;
-}
+//     return isActive;
+// }

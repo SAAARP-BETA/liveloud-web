@@ -22,7 +22,7 @@ import defaultPic from "../../assets/avatar.png";
 const LeaderboardTabs = ({ tabs, activeTab, onTabPress }) => {
   return (
     <div
-      className="bg-white dark:bg-gray-900 border-b border-white dark:border-gray-800 sticky top-4 z-10 flex justify-center"
+      className="bg-white dark:bg-gray-900 border-b border-white dark:border-gray-700 sticky top-4 z-10 flex justify-center"
       style={{
         paddingLeft: 16,
         paddingRight: 16,

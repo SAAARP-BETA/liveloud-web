@@ -1278,7 +1278,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
               />
               <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
                 <motion.div
-                  className="border-4 border-white shadow-sm bg-white dark:bg-gray-900 relative w-full"
+                  className="border-4 border-gray-300 shadow-sm bg-gray-200 relative w-full"
                   animate={{
                     height: profileImageSize,
                     width: profileImageSize,
@@ -1431,15 +1431,15 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                   <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700">
                     {user.location && (
                       <div className="flex items-center mb-2 cursor-pointer">
-                        <MapPin className="text-gray-600 text-base" />
-                        <span className="ml-2 text-gray-500">
+                        <MapPin className="text-gray-600 dark:text-gray-400 text-base" />
+                        <span className="ml-2 text-gray-500 dark:text-gray-300">
                           {user.location}
                         </span>
                       </div>
                     )}
                     {user?.website && (
                       <div className="flex items-center mb-2">
-                        <LinkIcon className="text-gray-600 text-lg" />
+                        <LinkIcon className="text-gray-600 dark:text-gray-400 text-lg" />
                         <Link
                           href={
                             user.website.startsWith("http")
@@ -1455,29 +1455,11 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                       </div>
                     )}
                     <div className="flex items-center mb-2">
-                      <Calendar className="text-gray-600 cursor-pointer text-base" />
-                      <span className="ml-2 text-gray-500">
+                      <Calendar className="text-gray-600 dark:text-gray-400 cursor-pointer text-base" />
+                      <span className="ml-2 text-gray-500 dark:text-gray-300">
                         Joined {profileStats.joined}
                       </span>
                     </div>
-                    {isMyProfile && profileStats.todaysTimeSpent > 0 && (
-                      <div className="flex items-center mb-2">
-                        <Clock className="text-gray-600 text-base" />
-                        <span className="ml-2 text-gray-500">
-                          Time spent:{" "}
-                          {(profileStats.todaysTimeSpent / 3_600_000).toFixed(2)}h
-                        </span>
-                      </div>
-                    )}
-                    {isMyProfile && profileStats.lifeTimeSpent > 0 && (
-                      <div className="flex items-center mb-2">
-                        <Clock className="text-gray-600 text-base" />
-                        <span className="ml-2 text-gray-500">
-                          Time spent lifetime:{" "}
-                          {(profileStats.lifeTimeSpent / 3_600_000).toFixed(2)}h
-                        </span>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>

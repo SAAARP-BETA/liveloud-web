@@ -14,7 +14,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
-import { useActivityTracker } from "../../../hooks/useActivityTracker";
+// import { useActivityTracker } from "../../../hooks/useActivityTracker";
 import CustomModal from "../../../components/ui/Modal";
 import AmplifyModal from "../../../components/ui/AmplifyModal";
 import CommentModal from "../../../components/ui/CommentModal";
@@ -437,7 +437,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
   const resolvedParams = use(params);
   const usernameParam = resolvedParams?.username;
   const { user: currentUser, token, isAuthenticated } = useAuth();
-  const isActive = useActivityTracker(token);
+  // const isActive = useActivityTracker(token);
 
   // State for resizable header
   const [headerHeight, setHeaderHeight] = useState(HEADER_MAX_HEIGHT);
@@ -1285,7 +1285,7 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
             {/* Profile Image */}
             <div className="absolute left-1/2 -bottom-10 transform -translate-x-1/2 z-20">
               <motion.div
-                className="border-4 border-white shadow-sm bg-white dark:bg-gray-900 relative w-full"
+                className="border-4 border-gray-300 shadow-sm bg-gray-200 relative w-full"
                 animate={{
                   height: profileImageSize,
                   width: profileImageSize,
@@ -1302,13 +1302,13 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
                   priority
                 />
                 {/* Activity indicator dot -- positioned bottom-right */}
-                {isActive && (
+                {/* {isActive && (
                   <span
                     aria-hidden="true"
                     className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 shadow"
                     title="User is active"
                   />
-                )}
+                )} */}
                 
                 {isMyProfile && (
                   <Link

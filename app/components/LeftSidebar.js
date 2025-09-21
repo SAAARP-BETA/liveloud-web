@@ -220,14 +220,14 @@ export default function LeftSidebar() {
                 <img
                   src={user?.profilePicture}
                   alt="Profile"
-                  className="w-6 h-6 rounded-full border border-gray-300"
+                  className="w-6 h-6 rounded-full border border-gray-300 bg-gray-200"
                   onClick={handleProfileClick}
                 />
               ) : (
                 <img
                   src={defaultPic.src}
                   alt="Profile"
-                  className="w-6 h-6 rounded-full border border-gray-300"
+                  className="w-6 h-6 rounded-full border border-gray-300 bg-gray-200"
                   onClick={handleProfileClick}
                 />
               )}
@@ -260,14 +260,14 @@ export default function LeftSidebar() {
                 <img
                   src={user.profilePicture}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200  group-hover:grayscale group-hover:brightness-75"
+                  className="w-10 h-10 rounded-full border-2 border-gray-300 group-hover:grayscale group-hover:brightness-75"
                   onClick={handleProfileClick}
                 />
               ) : (
                 <img
                   src={defaultPic.src}
                   alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200"
+                  className="w-10 h-10 rounded-full border-2 border-gray-300 bg-gray-200"
                   onClick={handleProfileClick} // Also added missing onClick
                 />
               )}
