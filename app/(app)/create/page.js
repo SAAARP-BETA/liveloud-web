@@ -831,7 +831,7 @@ setRandomUsers(uniqueUsers);
             className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ease-in-out
               ${
                 isSubmitDisabled
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed scale-100"
+                  ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-200 cursor-not-allowed scale-100"
                   : "bg-primary text-white cursor-pointer hover:bg-primary hover:scale-105 active:scale-95"
               }`}
           >
@@ -849,7 +849,7 @@ setRandomUsers(uniqueUsers);
             alt="Profile"
             width={48}
             height={48}
-            className="rounded-full w-12 h-12 border-2 border-sky-100 dark:border-gray-700"
+            className="rounded-full w-12 h-12 border-2 dark:border-gray-200 dark:bg-gray-200"
           />
           <div className="ml-3 flex-1">
             <div className="flex items-center">
@@ -1061,7 +1061,7 @@ setRandomUsers(uniqueUsers);
 
         {/* Trending Tags */}
         <div className="px-4 py-3 mb-2">
-          <p className="text-sm text-gray-600 mb-2 font-medium">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">
             Popular hashtags:
           </p>
           <div className="flex flex-wrap gap-2">
@@ -1069,7 +1069,7 @@ setRandomUsers(uniqueUsers);
               <button
                 key={index}
                 onClick={() => addTag(tag)}
-                className="bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-800"
+                className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 dark:hover:bg-gray-950"
               >
                 #{tag}
               </button>
