@@ -50,7 +50,8 @@ export const SocketProvider = ({ children }) => {
         console.log('✅ Socket.io connected:', newSocket.id);
         console.log('🔗 Backend URL:', backendUrl);
         setIsConnected(true);
-        toast.success('Connected to notifications');
+        // toast.success('Connected to notifications');
+        console.info('Connected to notifications');
       });
 
       newSocket.on('disconnect', (reason) => {
@@ -73,9 +74,11 @@ export const SocketProvider = ({ children }) => {
         });
         setIsConnected(false);
         if (error.message.includes('Authentication error')) {
-          toast.error('Authentication failed. Please log in again.');
+          //toast.error('Authentication failed. Please log in again.');
+          console.error('Authentication failed. Please log in again.');
         } else {
-          toast.error('Connection failed. Retrying...');
+          //toast.error('Connection failed. Retrying...');
+          console.error('Connection failed. Retrying...');
         }
       });
 
