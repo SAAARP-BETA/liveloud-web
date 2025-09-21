@@ -49,7 +49,6 @@ import {
   Settings,
   Shield,
   Archive,
-  Clock,
 } from "lucide-react";
 import ReportModal from "@/app/components/ui/ReportModal";
 
@@ -893,27 +892,12 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
         month: "long",
       })} ${joined.getFullYear()}`;
 
-      // Get today's day for dailyTimeSpent
-      const days = [
-        "sunday",
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-      ];
-      const today = new Date();
-      const dayName = days[today.getDay().toString().toLocaleLowerCase()];
-      const todaysTimeSpent = userData.dailyTimeSpent?.[dayName] || 0;
       setProfileStats({
         joined: joinedDate,
         location: userData.location,
         website: userData.website,
         engagement: userData.engagement || "89%",
         responseRate: userData.responseRate || "94%",
-        lifeTimeSpent: userData.lifeTimeSpent || 0,
-        todaysTimeSpent: todaysTimeSpent,
       });
 
       fetchUserPoints(userData._id);
@@ -1460,24 +1444,6 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         Joined {profileStats.joined}
                       </span>
                     </div>
-                    {isMyProfile && profileStats.todaysTimeSpent > 0 && (
-                      <div className="flex items-center mb-2">
-                        <Clock className="text-gray-600 text-base" />
-                        <span className="ml-2 text-gray-500">
-                          Time spent:{" "}
-                          {(profileStats.todaysTimeSpent / 3_600_000).toFixed(2)}h
-                        </span>
-                      </div>
-                    )}
-                    {isMyProfile && profileStats.lifeTimeSpent > 0 && (
-                      <div className="flex items-center mb-2">
-                        <Clock className="text-gray-600 text-base" />
-                        <span className="ml-2 text-gray-500">
-                          Time spent lifetime:{" "}
-                          {(profileStats.lifeTimeSpent / 3_600_000).toFixed(2)}h
-                        </span>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
