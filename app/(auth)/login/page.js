@@ -71,18 +71,22 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 dark:bg-gray-900 text-black dark:text-white">
+   <div className="min-h-screen bg-white px-6 dark:bg-gray-900 text-black dark:text-white">
       <div className="relative lg:ml-4 w-[300px] h-[100px] ">
-          <Image 
-            src={Logo} 
-            alt="Logo" 
-            // width={150}
-            // height={60}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
+  <Image 
+    src={Logo} 
+    alt="Logo" 
+    fill
+    className="object-cover"
+    priority
+  />
+  {/* BETA Badge - positioned to the right of logo */}
+  <div className="absolute top-8 right-4 z-50">
+    <span className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full">
+      BETA
+    </span>
+  </div>
+  </div>
       <h1 className="text-primary text-2xl font-bold  text-center">Login to Your Account</h1>
       <p className="text-gray-500 text-center mt-1">And Say It All Unfiltered</p>
 

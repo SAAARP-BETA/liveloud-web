@@ -198,20 +198,22 @@ export default function Signup() {
 
   return (
     <>
-<div className="min-h-screen mt-26 bg-white dark:bg-gray-900 text-black dark:text-white px-8 py-10">
-        <div className="relative lg:ml-4 w-[300px] h-[70px] ">
-          
-          <Image
-            src={Logo}
-            alt="Logo"
-            // width={150}
-            // height={60}
-            fill
-            className="object-cover"
-            priority
-          />
-
-        </div>
+<div className="min-h-screen bg-white px-6 dark:bg-gray-900 text-black dark:text-white">
+      <div className="relative lg:ml-4 w-[300px] h-[100px] ">
+  <Image 
+    src={Logo} 
+    alt="Logo" 
+    fill
+    className="object-cover"
+    priority
+  />
+  {/* BETA Badge - positioned to the right of logo */}
+  <div className="absolute top-8 right-4 z-50">
+    <span className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full">
+      BETA
+    </span>
+  </div>
+  </div>
         {/* Display any authentication errors */}
       {error ? (
         <div className="mb-4 p-3 bg-red-100 rounded-md">
