@@ -364,9 +364,15 @@ export default function LeftSidebar() {
           alt="Logo"
           width={250}
           height={20}
-          className="object-contain ml-[-30] mr-26 md:mr-18 sm:mr-10"
+          className="object-cover relative ml-[-30] mr-26 md:mr-18 sm:mr-10"
           priority
         />
+        {/* BETA Badge - positioned to the right of logo */}
+  <div className="absolute top-9 right-18 sm:right-8 z-50">
+    <span className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full">
+      BETA
+    </span>
+    </div>
       </Link>
     </div>
   );
