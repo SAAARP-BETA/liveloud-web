@@ -368,7 +368,7 @@ export default function LeftSidebar() {
           priority
         />
         {/* BETA Badge - positioned to the right of logo */}
-  <div className="absolute top-9 right-18 sm:right-8 z-50">
+  <div className="absolute top-10 right-18 sm:right-8 z-50">
     <span className="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full">
       BETA
     </span>
