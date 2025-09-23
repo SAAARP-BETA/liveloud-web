@@ -15,9 +15,11 @@ import {
   Crown,
   Users,
   Bell,
+  MessageCircle,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
+import { useMessages } from "../utils/useMessages";
 import { API_ENDPOINTS } from "../utils/config";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -32,6 +34,7 @@ const tabs = [
   { name: "Home", href: "/home", icon: Home },
   { name: "Explore", href: "/explore", icon: Search },
   { name: "Create", href: "/create", icon: PlusCircle },
+  { name: "Messages", href: "/messages", icon: MessageCircle },
   { name: "Wallet", href: "/wallet", icon: Wallet },
   { name: "Profile", href: "/profile", icon: User },
   { name: "Notifications", href: "/notifications", icon: Bell },
@@ -40,9 +43,9 @@ const tabs = [
   { name: "Referral", href: "/referral", icon: Users },
 ];
 
-// Mobile tabs - only Home, Explore, Wallet, Create
+// Mobile tabs - only Home, Explore, Messages, Create, Wallet
 const mobileTabs = tabs.filter((tab) =>
-  ["Home", "Explore", "Create", "Wallet"].includes(tab.name)
+  ["Home", "Explore", "Messages", "Create", "Wallet"].includes(tab.name)
 );
 
 export default function LeftSidebar() {
@@ -50,6 +53,7 @@ export default function LeftSidebar() {
   const router = useRouter();
   const { token, logout, isAuthenticated, user } = useAuth();
   const { unreadCount } = useSocket();
+  const { unreadMessageCount } = useMessages();
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
   const handleLogout = async () => {
@@ -174,6 +178,13 @@ export default function LeftSidebar() {
                   </span>
                 </span>
               )}
+                {tab.name === "Messages" && unreadMessageCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold shadow-md border border-white">
+                    <span className="text-[10px]">
+                      {unreadMessageCount > 99 ? "99+" : unreadMessageCount}
+                    </span>
+                  </span>
+                )}
             </motion.div>
             <motion.span
               className={`text-base ${isActive ? 'text-[#0EA5E9]' : 'text-gray-700 dark:text-white group-hover:text-gray-400'}`}
