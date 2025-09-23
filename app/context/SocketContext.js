@@ -10,9 +10,11 @@ const SocketContext = createContext({
   isConnected: false,
   notifications: [],
   unreadCount: 0,
+  unreadMessageCount: 0,
   markNotificationAsRead: () => {},
   clearNotifications: () => {},
-  updateUnreadCount: () => {}
+  updateUnreadCount: () => {},
+  updateUnreadMessageCount: () => {}
 });
 
 export const SocketProvider = ({ children }) => {
@@ -21,6 +23,7 @@ export const SocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   // Initialize Socket.io connection
   useEffect(() => {
@@ -105,6 +108,22 @@ export const SocketProvider = ({ children }) => {
         }
       });
 
+      // Message event handlers
+      newSocket.on('new_message', (message) => {
+        console.log('💬 Received new message:', message);
+        console.log('👤 From:', message.sender?.username);
+        
+        // Increment unread message count
+        setUnreadMessageCount(prev => prev + 1);
+        
+        // Show toast notification for new message
+        const senderName = message.sender?.username || 'Someone';
+        toast.success(`New message from ${senderName}`, {
+          duration: 3000,
+          position: 'top-right'
+        });
+      });
+
       // Room management events
       newSocket.on('joined_room', (roomName) => {
         console.log('Joined room:', roomName);
@@ -185,6 +204,18 @@ export const SocketProvider = ({ children }) => {
     setUnreadCount(count);
   };
 
+  // Update unread message count (for API-fetched messages)
+  const updateUnreadMessageCount = (count) => {
+    setUnreadMessageCount(count);
+  };
+
+  // Mark message as read (when user opens a chat)
+  const markMessagesAsRead = (userId) => {
+    // This could be enhanced to mark specific conversation as read
+    // For now, we'll rely on the API call to get updated counts
+    console.log('Marking messages as read for user:', userId);
+  };
+
   // Join a specific room
   const joinRoom = (roomName) => {
     if (socket && isConnected) {
@@ -211,9 +242,12 @@ export const SocketProvider = ({ children }) => {
     isConnected,
     notifications,
     unreadCount,
+    unreadMessageCount,
     markNotificationAsRead,
     clearNotifications,
     updateUnreadCount,
+    updateUnreadMessageCount,
+    markMessagesAsRead,
     joinRoom,
     leaveRoom,
     emit

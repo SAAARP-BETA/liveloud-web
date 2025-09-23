@@ -89,7 +89,7 @@ const LeaderboardItem = ({ item, index, currentUserId, onPress, activeTab }) => 
     }
   };
   const displayPoints = getPointsForTab(item, activeTab);
-  const pointsLabel = activeTab === 'followers' ? 'followers' : 'points';
+  const pointsLabel = activeTab === 'followers' ? 'Followers' : 'Points';
   const getRankIcon = () => {
     switch (rank) {
       case 1:
