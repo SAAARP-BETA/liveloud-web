@@ -1293,8 +1293,7 @@ useEffect(() => {
   const handleMenuOptionPress = (option) => {
     if (!selectedPost) return;
 
-    const userId = selectedPost?.user;
-
+    const userId = selectedPost?.user._id;
     switch (option.text) {
       case "Follow":
         if (isAuthenticated) {
