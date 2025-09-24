@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 import ThemeToggle from "../../components/common/ThemeToggle";
 export default function Signup() {
   const router = useRouter();
-  const [fullName, setFullName] = useState("test");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   // const [email, setEmail] = useState("test@test.com");
