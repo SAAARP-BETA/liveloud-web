@@ -945,39 +945,43 @@ useEffect(() => {
 
   // User interaction handlers
   const handleFollowUser = async (userId) => {
-    if (!isAuthenticated) {
-      toast.error("Please login to follow users");
-      return;
-    }
+  if (!isAuthenticated) {
+    toast.error("Please login to follow users");
+    return;
+  }
 
-    try {
-      const response = await fetch(
-        `${API_ENDPOINTS.SOCIAL}/followers/${userId}/follow`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to follow user");
+  try {
+    const response = await fetch(
+      `${API_ENDPOINTS.SOCIAL}/followers/${userId}/follow`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
 
-      toast.success("You are now following this user");
-
-      // Update posts in current tab to reflect new following status
-      const updatedPosts = getCurrentTabData().posts.map((post) =>
-        post.userId === userId ? { ...post, isFollowing: true } : post
-      );
-      updateTabData(activeTab, { posts: updatedPosts });
-    } catch (error) {
-      console.error("Error following user:", error);
-      toast.error(`Failed to follow user: ${error.message}`);
+    if (!response.ok) {
+      throw new Error("Failed to follow user");
     }
-  };
+
+    toast.success("You are now following this user");
+
+    // Update the state for all posts by this user
+    const updatedPosts = getCurrentTabData().posts.map((post) => {
+      if (post.user?._id === userId || post.userId === userId) {
+        return { ...post, isFollowing: true };
+      }
+      return post;
+    });
+    updateTabData(activeTab, { posts: updatedPosts });
+      
+  } catch (error) {
+    console.error("Error following user:", error);
+    toast.error(`Failed to follow user: ${error.message}`);
+  }
+};
 
   const handleUnfollowUser = async (userId) => {
     if (!isAuthenticated) {
@@ -1003,19 +1007,20 @@ useEffect(() => {
 
       toast.success("You have unfollowed this user");
 
-      // Update posts in current tab to reflect new following status
-      const updatedPosts = getCurrentTabData().posts.map((post) => {
-        if (post.userId === userId) {
-          return { ...post, isFollowing: false };
-        }
-        return post;
-      });
-      updateTabData(activeTab, { posts: updatedPosts });
-    } catch (error) {
-      console.error("Error unfollowing user:", error);
-      toast.error(`Failed to unfollow user: ${error.message}`);
-    }
-  };
+    // Update the state for all posts by this user
+    const updatedPosts = getCurrentTabData().posts.map((post) => {
+      if (post.user?._id === userId || post.userId === userId) {
+        return { ...post, isFollowing: false };
+      }
+      return post;
+    });
+    updateTabData(activeTab, { posts: updatedPosts });
+
+  } catch (error) {
+    console.error("Error unfollowing user:", error);
+    toast.error(`Failed to unfollow user: ${error.message}`);
+  }
+};
 
   const handleViewProfile = (userId) => {
     router.push(`/UserProfile/${userId}`);
@@ -1129,68 +1134,58 @@ useEffect(() => {
   ];
 
   // Load menu options based on post and user context
-  const loadMenuOptions = async () => {
-    if (!selectedPost || !selectedPost.user) {
-      console.log(selectedPost);
-      console.log("Missing post data for menu options");
+const loadMenuOptions = async () => {
+  if (!selectedPost) {
+    console.log("Missing post data for menu options");
+    setFilteredOptions([]);
+    return;
+  }
+
+  try {
+    // FIX 1: Correctly determine the post's author ID.
+    const postAuthorId = selectedPost.user?._id || selectedPost.userId;
+    if (!postAuthorId) {
+      console.error("Could not determine post author ID from selectedPost:", selectedPost);
       setFilteredOptions([]);
       return;
     }
 
-    try {
-      // Determine if this is the user's own post
-      const isOwnPost =
-        isAuthenticated && user && selectedPost.user === user._id;
+    // FIX 2: More reliable check for own post.
+    const isOwnPost = isAuthenticated && user && postAuthorId === user._id;
 
-      // Check follow status if needed
-      let isFollowing = selectedPost.isFollowing;
-      if (isAuthenticated && !isOwnPost && isFollowing === undefined) {
-        try {
-          console.log("Checking follow status for:", selectedPost.user);
-          isFollowing = await checkFollowStatus(selectedPost.user);
+    // Start with the follow status from the post object itself.
+    // This makes the UI feel instant if it was already updated.
+    let isFollowing = selectedPost.isFollowing;
 
-          // Update post with follow status in current tab
-          const updatedPosts = getCurrentTabData().posts.map((post) => {
-            if (post.id === selectedPost._id) {
-              return { ...post, isFollowing };
-            }
-            return post;
-          });
-          updateTabData(activeTab, { posts: updatedPosts });
-        } catch (error) {
-          console.error("Error fetching follow status:", error);
-          isFollowing = false;
-        }
-      }
-
-      // Filter menu options based on conditions
-      const filtered = menuOptions.filter((option) => {
-        if (option.text === "Follow") {
-          return !isOwnPost && !isFollowing;
-        }
-        if (option.text === "Unfollow") {
-          return !isOwnPost && isFollowing;
-        }
-        if (option.text === "Block") {
-          return !isOwnPost;
-        }
-        if (option.text === "Delete Post") {
-          return isOwnPost;
-        }
-        return true;
-      });
-
-      console.log("Filtered options:", filtered.length);
-      setFilteredOptions(filtered);
-    } catch (error) {
-      console.error("Error loading menu options:", error);
-      // Set default options if there's an error
-      setFilteredOptions([
-        { icon: Flag, text: "Report" },
-        { icon: EyeOff, text: "Hide" },
-      ]);
+    // For other users' posts, re-validate the follow status with the server
+    // to ensure it's up-to-date.
+    if (isAuthenticated && !isOwnPost) {
+      isFollowing = await checkFollowStatus(postAuthorId);
     }
-  };
+    
+    // Filter menu options based on the definitive conditions
+    const filtered = menuOptions.filter((option) => {
+      if (option.text === "Follow") {
+        return !isOwnPost && !isFollowing;
+      }
+      if (option.text === "Unfollow") {
+        return !isOwnPost && isFollowing;
+      }
+      if (option.text === "Block") {
+        return !isOwnPost;
+      }
+      if (option.text === "Delete Post") {
+        return isOwnPost;
+      }
+      return true; // Keep other options like "Report"
+    });
+
+    setFilteredOptions(filtered);
+  } catch (error) {
+    console.error("Error loading menu options:", error);
+    setFilteredOptions([{ icon: Flag, text: "Report" }]); // Fallback
+  }
+};
   const [showConfirm, setShowConfirm] = useState(false);
   const [postIdToDelete, setPostIdToDelete] = useState(null);
 
@@ -1290,45 +1285,48 @@ useEffect(() => {
   };
 
   // Handle menu option selection
-  const handleMenuOptionPress = (option) => {
-    if (!selectedPost) return;
+const handleMenuOptionPress = (option) => {
+  if (!selectedPost) return;
 
-    const userId = selectedPost?.user._id;
-    switch (option.text) {
-      case "Follow":
-        if (isAuthenticated) {
-          handleFollowUser(userId);
-        } else {
-          toast.error("Please login to follow users");
-        }
-        break;
-      case "Unfollow":
-        handleUnfollowUser(userId);
-        break;
-      case "Report":
-        // postHandlers.handleInitiateReport(selectedPost);
-        break;
-      case "Hide":
-        handleHidePost(selectedPost.id);
-        break;
-      case "Block":
-        // handleBlockUser(userId);
-        break;
-      case "About this account":
-        handleViewProfile(userId);
-        break;
-      case "Delete Post":
-        if (isAuthenticated) {
-          setPostIdToDelete(selectedPost.id);
-          setShowConfirm(true); // SHOW MODAL
-          console.log("Deleting post with ID:", selectedPost.id);
-        } else {
-          toast.error("Please login to delete posts");
-        }
-        break;
+  // FIX: Reliably get the user ID from the post object.
+  const userId = selectedPost.user?._id || selectedPost.userId;
 
-      default:
-    }
+  // Ensure userId was found before proceeding
+  if (!userId && (option.text === "Follow" || option.text === "Unfollow" || option.text === "Block")) {
+      toast.error("Could not identify the user. Please try again.");
+      setModalVisible(false);
+      return;
+  }
+
+  switch (option.text) {
+    case "Follow":
+      handleFollowUser(userId);
+      break;
+    case "Unfollow":
+      handleUnfollowUser(userId);
+      break;
+    case "Report":
+      // postHandlers.handleInitiateReport(selectedPost);
+      break;
+    case "Hide":
+      handleHidePost(selectedPost.id);
+      break;
+    case "Block":
+      handleBlockUser(userId);
+      break;
+    case "About this account":
+      handleViewProfile(userId);
+      break;
+    case "Delete Post":
+      if (isAuthenticated) {
+        setPostIdToDelete(selectedPost.id);
+        setShowConfirm(true);
+      } else {
+        toast.error("Please login to delete posts");
+      }
+      break;
+    default:
+  }
 
     setModalVisible(false);
   };
