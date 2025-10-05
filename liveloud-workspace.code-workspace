@@ -1,0 +1,38 @@
+{
+	"folders": [
+		{
+			"name": "LiveLoud Web",
+			"path": "."
+		},
+		{
+			"name": "LiveLoud Mobile",
+			"path": "../liveloudMobile"
+		},
+		{
+			"name": "Backend",
+			"path": "../backend"
+		}
+	],
+	"settings": {
+		"cloudChanges.enabled": false,
+		"files.exclude": {
+			"**/app/api/liveloudMobile": true,
+			"**/.DS_Store": true
+		},
+		"search.exclude": {
+			"**/app/api/liveloudMobile": true,
+			"**/node_modules": true
+		},
+		"git.ignoreLimitWarning": true,
+		"extensions.experimental.affinity": {
+			"ms-vsliveshare.vsliveshare": 1
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"bradlc.vscode-tailwindcss",
+			"ms-vscode.vscode-typescript-next",
+			"esbenp.prettier-vscode"
+		]
+	}
+}

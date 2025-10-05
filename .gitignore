@@ -26,6 +26,9 @@ package-lock.json
 .DS_Store
 *.pem
 
+# Exclude nested mobile project that should be separate
+/app/api/liveloudMobile/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

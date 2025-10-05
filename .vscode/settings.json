@@ -1,0 +1,28 @@
+{
+  "files.exclude": {
+    "**/app/api/liveloudMobile": true,
+    "**/app/api/liveloudMobile/**": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/app/api/liveloudMobile": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  "files.watcherExclude": {
+    "**/app/api/liveloudMobile/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "git.ignoreLimitWarning": true,
+  "extensions.ignoreRecommendations": false,
+  "workbench.settings.enableNaturalLanguageSearch": false,
+  "cloudChanges.enabled": false,
+  "terminal.integrated.enablePersistentSessions": false
+}
