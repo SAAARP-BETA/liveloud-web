@@ -29,12 +29,36 @@ const NotificationsPage = () => {
   const [markingAsRead, setMarkingAsRead] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
   const LIMIT = 10;
 
   // Intersection Observer refs
   const observer = useRef(null);
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
+
+  // Fetch total unread count from API
+  const fetchUnreadCount = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3009';
+      const response = await axios.get(`${backendUrl}/api/notifications/unread-count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      const count = response.data.unreadCount || 0;
+      setTotalUnreadCount(count);
+      
+      // Update socket context's unread count
+      if (updateUnreadCount) {
+        updateUnreadCount(count);
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+      setTotalUnreadCount(0);
+    }
+  }, [token, updateUnreadCount]);
 
   // Fetch notifications from API
   const fetchNotifications = useCallback(async (pageNum = 1, isLoadMore = false) => {
@@ -110,6 +134,7 @@ const NotificationsPage = () => {
 
   useEffect(() => {
     fetchNotifications();
+    fetchUnreadCount();
   }, [token]);
 
   // Keep refs in sync with state
@@ -186,10 +211,10 @@ const NotificationsPage = () => {
   // Update hasMore when new socket notifications arrive
   useEffect(() => {
     if (notifications.length > 0) {
-      // Reset pagination when new notifications arrive via socket
-      // This ensures new notifications are shown immediately
+      // When new notifications arrive via socket, refresh the unread count
+      fetchUnreadCount();
     }
-  }, [notifications]);
+  }, [notifications, fetchUnreadCount]);
 
   const handleNotificationClick = async (notification) => {
     // First mark as read if not already read
@@ -208,6 +233,14 @@ const NotificationsPage = () => {
             notif._id === notification._id ? { ...notif, read: true } : notif
           )
         );
+        
+        // Decrement total unread count
+        setTotalUnreadCount(prev => Math.max(0, prev - 1));
+        
+        // Update socket context's unread count
+        if (updateUnreadCount) {
+          updateUnreadCount(Math.max(0, totalUnreadCount - 1));
+        }
         
       } catch (error) {
         console.error('Error marking notification as read:', error);
@@ -284,6 +317,14 @@ const NotificationsPage = () => {
         }))
       );
       
+      // Reset total unread count to 0
+      setTotalUnreadCount(0);
+      
+      // Update socket context's unread count
+      if (updateUnreadCount) {
+        updateUnreadCount(0);
+      }
+      
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     } finally {
@@ -331,15 +372,6 @@ const NotificationsPage = () => {
     return `${Math.floor(diffInSeconds / 86400)}d ago`;
   };
 
-  const unreadNotificationsCount = combinedNotifications.filter(n => !n.read).length;
-
-  // Update socket context's unread count whenever combined notifications change
-  useEffect(() => {
-    if (updateUnreadCount) {
-      updateUnreadCount(unreadNotificationsCount);
-    }
-  }, [unreadNotificationsCount, updateUnreadCount]);
-
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 flex justify-center">
       <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-gray-50 dark:bg-gray-900 flex-1 px-4 mx-4 overflow-y-auto h-screen custom-scrollbar">
@@ -353,18 +385,18 @@ const NotificationsPage = () => {
             >
               <div className="flex items-start justify-between gap-3 sm:gap-4">
                 <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
-                  <div className="relative flex-shrink-0">
-                    {unreadNotificationsCount > 0 ? (
+                                    <div className="relative flex-shrink-0">
+                    {totalUnreadCount > 0 ? (
                       <div>
                         <BellRing className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-primary" />
                       </div>
                     ) : (
                       <Bell className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-gray-600" />
                     )}
-                    {unreadNotificationsCount > 0 && (
+                    {totalUnreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center font-semibold shadow-md border border-white">
                         <span className="text-[10px] sm:text-xs">
-                          {unreadNotificationsCount > 99 ? "99+" : unreadNotificationsCount}
+                          {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
                         </span>
                       </span>
                     )}
@@ -372,15 +404,15 @@ const NotificationsPage = () => {
                   <div className="flex-1 min-w-0">
                     <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-300 truncate">Notifications</h1>
                     <p className="text-xs sm:text-sm md:text-base text-gray-600 truncate">
-                      {unreadNotificationsCount > 0 
-                        ? `${unreadNotificationsCount} unread notification${unreadNotificationsCount > 1 ? 's' : ''}`
+                      {totalUnreadCount > 0 
+                        ? `${totalUnreadCount} unread notification${totalUnreadCount > 1 ? 's' : ''}`
                         : 'All caught up'}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-2 sm:space-x-3 flex-shrink-0">
-                  {unreadNotificationsCount > 0 && (
+                  {totalUnreadCount > 0 && (
                     <button
                       onClick={handleMarkAllAsRead}
                       disabled={markingAsRead}

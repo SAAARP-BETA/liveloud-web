@@ -25,6 +25,34 @@ export const SocketProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
+  // Fetch initial unread count from API
+  const fetchInitialUnreadCount = async () => {
+    if (!token || !isAuthenticated) {
+      console.log('❌ Cannot fetch unread count - no token or not authenticated');
+      return;
+    }
+    
+    console.log('🔄 Fetching initial unread count...');
+    
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3009';
+      const response = await fetch(`${backendUrl}/api/notifications/unread-count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const count = data.unreadCount || 0;
+        setUnreadCount(count);
+        console.log('📊 Initial unread count fetched and set:', count);
+      } else {
+        console.error('❌ Failed to fetch unread count:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching initial unread count:', error);
+    }
+  };
+
   // Initialize Socket.io connection
   useEffect(() => {
     if (isAuthenticated && token && user) {
@@ -55,6 +83,9 @@ export const SocketProvider = ({ children }) => {
         setIsConnected(true);
         // toast.success('Connected to notifications');
         console.info('Connected to notifications');
+        
+        // Fetch initial unread count when connected
+        fetchInitialUnreadCount();
       });
 
       newSocket.on('disconnect', (reason) => {
@@ -154,6 +185,17 @@ export const SocketProvider = ({ children }) => {
       }
     }
   }, [isAuthenticated, token, user?._id]);
+
+  // Fetch unread count immediately when user logs in
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchInitialUnreadCount();
+    } else {
+      // Reset counts when user logs out
+      setUnreadCount(0);
+      setUnreadMessageCount(0);
+    }
+  }, [isAuthenticated, token]);
 
   // Helper function to generate notification messages
   const getNotificationMessage = (notification) => {
