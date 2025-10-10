@@ -309,7 +309,6 @@ const EditPage = () => {
   dob: data.dob ? new Date(data.dob) : new Date(1990, 0, 1),
   email: data.email || user?.email || "",
   phone: data.phone || "",
-  gender: data.gender || "",
   isPrivate: data.isPrivate || false,
   interests: data.interests || [],
   occupation: data.occupation || "",
@@ -337,7 +336,6 @@ const EditPage = () => {
         dob: data.dob ? new Date(data.dob) : new Date(1990, 0, 1),
         email: data.email || user?.email || "",
         phone: data.phone || "",
-        gender: data.gender || "",
         isPrivate: data.isPrivate || false,
         interests: data.interests || [],
         occupation: data.occupation || "",
@@ -908,26 +906,6 @@ const EditPage = () => {
                   placeholder="Your phone number"
                   keyboardType="phone-pad"
                 />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm text-gray-500 mb-1.5 block">
-                Gender
-              </label>
-              <div className="flex flex-row items-center bg-gray-50 border dark:bg-gray-800 border-gray-200 rounded-xl overflow-hidden">
-                <User className="text-gray-400 dark:text-white w-5 h-5 ml-3" />
-                <select
-                  className="flex-1 py-3 px-2 text-gray-800 dark:text-gray-400 outline-none bg-transparent dark:bg-gray-800 cursor-pointer"
-                  value={profileData.gender || ""}
-                  onChange={(e) => handleInputChange("gender", e.target.value)}
-                >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
-                </select>
               </div>
             </div>
 
