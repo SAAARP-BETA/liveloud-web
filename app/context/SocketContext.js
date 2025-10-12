@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { ActivityProvider } from './ActivityContext';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 
@@ -255,7 +256,9 @@ export const SocketProvider = ({ children }) => {
 
   return (
     <SocketContext.Provider value={value}>
-      {children}
+      <ActivityProvider>
+        {children}
+      </ActivityProvider>
     </SocketContext.Provider>
   );
 };
