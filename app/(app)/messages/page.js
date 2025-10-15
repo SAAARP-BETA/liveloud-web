@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '../../context/AuthContext';
 import { messagingService } from '../../utils/messagingService';
+import defaultAvatar from '@/app/assets/avatar.png';
+
 
 export default function MessagesIndex() {
   const [conversations, setConversations] = useState([]);
@@ -156,7 +158,7 @@ export default function MessagesIndex() {
             >
               <div className="relative">
                 <Image
-                  src={item.participant.profilePicture || '/placeholder-avatar.png'}
+                  src={item.participant.profilePicture || defaultAvatar}
                   alt={item.participant.username}
                   width={40}
                   height={40}

@@ -6,6 +6,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { messagingService } from '../../../../utils/messagingService';
 import { chatManager, messageUtils } from '../../../../utils/chatUtils';
 import { useToast } from '../../../../components/ui/Toast';
+import defaultAvatar from '@/app/assets/avatar.png';
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([]);
@@ -264,7 +265,7 @@ export default function ChatScreen() {
 
           <div className="flex items-center flex-1">
             <Image
-              src={recipient?.profilePicture || '/placeholder-avatar.png'}
+              src={recipient?.profilePicture || defaultAvatar}
               alt={recipient?.username || 'User'}
               width={32}
               height={32}
@@ -341,7 +342,7 @@ export default function ChatScreen() {
                 <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
                   {!isMyMessage && showAvatar && (
                     <Image
-                      src={item.sender.profilePicture || '/placeholder-avatar.png'}
+                      src={item.sender.profilePicture || defaultAvatar}
                       alt={item.sender.username}
                       width={24}
                       height={24}
