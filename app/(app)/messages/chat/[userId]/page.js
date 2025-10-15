@@ -7,6 +7,7 @@ import { messagingService } from '../../../../utils/messagingService';
 import { chatManager, messageUtils } from '../../../../utils/chatUtils';
 import { useToast } from '../../../../components/ui/Toast';
 import defaultAvatar from '@/app/assets/avatar.png';
+import { useActivityTracker } from '@/app/hooks/useActivityTracker';
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([]);
@@ -25,6 +26,7 @@ export default function ChatScreen() {
   const { showToast, ToastComponent } = useToast();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const { isUserOnline } = useActivityTracker();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -263,14 +265,24 @@ export default function ChatScreen() {
             </svg>
           </button>
 
-          <div className="flex items-center flex-1">
-            <Image
-              src={recipient?.profilePicture || defaultAvatar}
-              alt={recipient?.username || 'User'}
-              width={32}
-              height={32}
-              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-3 object-cover"
-            />
+          <div className="flex items-center flex-1 min-w-0">
+            <div className="relative mr-3">
+              <Image
+                src={recipient?.profilePicture || defaultAvatar}
+                alt={recipient?.username || 'User'}
+                width={32}
+                height={32}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
+              />
+              {/* Activity indicator dot */}
+              {isUserOnline(recipient?._id) && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 shadow"
+                    title="User is active"
+                  />
+              )}
+            </div>
             <div className="flex-1 min-w-0">
               <h2 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
                 {recipient?.username || 'Loading...'}

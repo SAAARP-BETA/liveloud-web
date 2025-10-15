@@ -14,13 +14,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
-// import { useActivityTracker } from "../../../hooks/useActivityTracker";
-import { useActivityTracker } from '../../../hooks/useActivityTracker';
 import CustomModal from "../../../components/ui/Modal";
 import AmplifyModal from "../../../components/ui/AmplifyModal";
 import CommentModal from "../../../components/ui/CommentModal";
 import ReportModal from "../../../components/ui/ReportModal"; // ADDED: Import ReportModal
 import toast from "react-hot-toast";
+import { useActivityTracker } from '@/app/hooks/useActivityTracker';
 
 import {
   createPostHandlers,
