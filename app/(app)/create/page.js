@@ -58,6 +58,102 @@ const CreatePost = () => {
   const MAX_CHAR_LIMIT = 1000;
   const MEDIA_LIMIT = 4;
 
+  const PollModal = ({ onClose, onCreate }) => {
+    const [question, setQuestion] = useState("");
+    const [options, setOptions] = useState(["", ""]);
+
+    const handleOptionChange = (index, value) => {
+      const newOptions = [...options];
+      newOptions[index] = value;
+      setOptions(newOptions);
+    };
+
+    const addOption = () => {
+      setOptions([...options, ""]);
+    };
+
+    const removeOption = (index) => {
+      if (options.length > 2) {
+        const newOptions = [...options];
+        newOptions.splice(index, 1);
+        setOptions(newOptions);
+      }
+    };
+
+    const handleCreatePoll = () => {
+      if (question.trim() && options.every(opt => opt.trim())) {
+        onCreate({
+          question: question.trim(),
+          options: options.map(opt => ({ text: opt.trim() })),
+        });
+        onClose();
+      } else {
+        toast.error("Please fill out the question and all options.");
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 m-4">
+          <h3 className="text-xl font-bold mb-4">Create a Poll</h3>
+              
+            <div className="mb-4">
+              <label className="text-sm text-gray-600 mb-2 font-medium block">Poll Question</label>
+              <input
+                type="text"
+                className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700"
+                placeholder="e.g., What's your favorite color?"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="text-sm text-gray-600 mb-2 font-medium block">Options</label>
+              <div className="space-y-2">
+                {options.map((option, index) => (
+                  <div key={index} className="flex items-center">
+                    <input
+                      type="text"
+                      className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700"
+                      placeholder={`Option ${index + 1}`}
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                    />
+                    {options.length > 2 && (
+                      <button onClick={() => removeOption(index)} className="ml-2 text-red-500">
+                      <X size={20} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                </div>
+                {options.length < 5 && (
+                  <button onClick={addOption} className="mt-2 text-blue-500 text-sm font-medium">
+                      + Add option
+                  </button>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreatePoll}
+                className="px-4 py-2 rounded-lg bg-blue-500 text-white font-medium"
+              >
+                Create Poll
+              </button>
+          </div>
+        </div>
+      </div>
+    );
+};
+
   // Sample feelings data - matching Expo version
  
 
@@ -108,6 +204,8 @@ const CreatePost = () => {
   const [showFeelingModal, setShowFeelingModal] = useState(false);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageIndex, setEditingImageIndex] = useState(null);
+  const [poll, setPoll] = useState(null);
+  const [showPollModal, setShowPollModal] = useState(false);
 
   // User search state
   // const [userSearchQuery, setUserSearchQuery] = useState("");
@@ -761,6 +859,11 @@ setRandomUsers(uniqueUsers);
         postData.feeling = selectedFeeling.name;
       }
 
+      // Add poll if available
+      if (poll) {
+        postData.poll = poll;
+      }
+
       // Create the post
       const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts`, {
         method: "POST",
@@ -798,6 +901,7 @@ setRandomUsers(uniqueUsers);
     router,
     uploadMedia,
     imageMetadata,
+    poll,
   ]);
 
   if (loading) {
@@ -977,6 +1081,27 @@ setRandomUsers(uniqueUsers);
   </div>
 )}
 
+{poll && (
+    <div className="px-4 mb-3">
+        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <h3 className="font-bold text-lg mb-2">{poll.question}</h3>
+            <div className="space-y-2">
+                {poll.options.map((option, index) => (
+                    <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-md p-2 text-center">
+                        {option.text}
+                    </div>
+                ))}
+            </div>
+            <button
+                onClick={() => setPoll(null)}
+                className="mt-4 text-red-500 text-sm"
+            >
+                Remove Poll
+            </button>
+        </div>
+    </div>
+)}
+
         {/* Image Preview Section */}
         {images.length > 0 && (
           <div className="px-4 mb-3">
@@ -1139,6 +1264,16 @@ setRandomUsers(uniqueUsers);
         <Smile size={24} className="text-indigo-500 dark:text-indigo-300" />
       </div>
       <span className="text-xs mt-1 text-gray-600 dark:text-gray-300">Feeling</span>
+    </button>
+
+    <button
+      onClick={() => setShowPollModal(true)}
+      className="flex flex-col items-center justify-center"
+    >
+      <div className="w-12 h-12 rounded-full bg-yellow-50 dark:bg-yellow-900 hover:bg-yellow-100 dark:hover:bg-yellow-800 flex items-center justify-center">
+        <Icon icon="mdi:poll" width={24} height={24} className="text-yellow-500 dark:text-yellow-300" />
+      </div>
+      <span className="text-xs mt-1 text-gray-600 dark:text-gray-300">Poll</span>
     </button>
   </div>
 </div>
@@ -1610,6 +1745,15 @@ setRandomUsers(uniqueUsers);
             </button>
           </div>
         </div>
+      )}
+      {showPollModal && (
+        <PollModal
+            onClose={() => setShowPollModal(false)}
+            onCreate={(newPoll) => {
+                setPoll(newPoll);
+                setShowPollModal(false);
+            }}
+        />
       )}
     </div>
   );
