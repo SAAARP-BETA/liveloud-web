@@ -2,8 +2,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import defaultAvatar from '@/assets/default-avatar.jpg';
 import { useAuth } from '../../context/AuthContext';
 import { messagingService } from '../../utils/messagingService';
+
 
 export default function MessagesIndex() {
   const [conversations, setConversations] = useState([]);
@@ -21,8 +23,7 @@ export default function MessagesIndex() {
     try {
       if (!token) return;
 
-      console.log('Fetching conversations for user:', user?.username, 'User ID:', user?._id);
-      console.log('Token (first 20 chars):', token?.substring(0, 20) + '...');
+      // fetching conversations
 
       if (isRefresh) {
         setRefreshing(true);
@@ -148,49 +149,57 @@ export default function MessagesIndex() {
             </p>
           </div>
         ) : (
-          conversations.map((item) => (
-            <div
-              key={item._id}
-              onClick={() => router.push(`/messages/chat/${item.participant._id}`)}
-              className="flex items-center px-4 sm:px-6 lg:px-8 py-3 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-            >
-              <div className="relative">
-                <Image
-                  src={item.participant.profilePicture || '/placeholder-avatar.png'}
-                  alt={item.participant.username}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
-                />
-                {item.unreadCount > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full min-w-4 h-4 sm:min-w-5 sm:h-5 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold px-1">
-                      {item.unreadCount > 99 ? '99+' : item.unreadCount}
-                    </span>
-                  </div>
-                )}
-              </div>
+          conversations.map((item) => {
+            const isGroup = !!item.isGroup;
+            const title = isGroup ? (item.name || item.participant?.username || 'Group') : (item.participant?.username || 'Unknown');
+            const avatarSrc = isGroup ? (item.groupProfilePicture || defaultAvatar) : (item.participant?.profilePicture || defaultAvatar);
+            const subtitle = item.lastMessage ? item.lastMessage.content : (isGroup ? `${item.totalParticipants || (item.participants?.length || 0)} participants` : 'No messages yet');
+            const clickId = isGroup ? item._id : item.participant?._id || item._id;
 
-              <div className="flex-1 ml-3 min-w-0">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
-                    {item.participant.username}
-                  </h3>
-                  <span className="text-gray-500 dark:text-gray-400 text-xs flex-shrink-0 ml-2">
-                    {item.lastMessage ? formatTime(item.lastMessage.createdAt) : ''}
-                  </span>
+            return (
+              <div
+                key={item._id}
+                onClick={() => router.push(`/messages/chat/${clickId}`)}
+                className="flex items-center px-4 sm:px-6 lg:px-8 py-3 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+              >
+                <div className="relative">
+                  <Image
+                    src={avatarSrc}
+                    alt={title}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                  />
+                  {item.unreadCount > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full min-w-4 h-4 sm:min-w-5 sm:h-5 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold px-1">
+                        {item.unreadCount > 99 ? '99+' : item.unreadCount}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <p className={`text-gray-600 dark:text-gray-300 mt-1 truncate text-sm ${item.unreadCount > 0 ? 'font-semibold' : ''}`}>
-                  {item.lastMessage ? item.lastMessage.content : 'No messages yet'}
-                </p>
-              </div>
+                <div className="flex-1 ml-3 min-w-0">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
+                      {title}
+                    </h3>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs flex-shrink-0 ml-2">
+                      {item.lastMessage ? formatTime(item.lastMessage.createdAt) : ''}
+                    </span>
+                  </div>
 
-              <svg className="w-4 h-4 text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          ))
+                  <p className={`text-gray-600 dark:text-gray-300 mt-1 truncate text-sm ${item.unreadCount > 0 ? 'font-semibold' : ''}`}>
+                    {subtitle}
+                  </p>
+                </div>
+
+                <svg className="w-4 h-4 text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            );
+          })
         )}
 
         {hasMore && conversations.length > 0 && (

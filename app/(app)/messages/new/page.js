@@ -2,8 +2,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import defaultAvatar from '@/assets/default-avatar.jpg';
 import { useAuth } from '../../../context/AuthContext';
 import { API_ENDPOINTS } from '../../../utils/config';
+import { messagingService } from '../../../utils/messagingService';
 import { useToast } from '../../../components/ui/Toast';
 
 export default function NewMessageScreen() {
@@ -15,6 +17,12 @@ export default function NewMessageScreen() {
   const { token, user } = useAuth();
   const router = useRouter();
   const { showToast, ToastComponent } = useToast();
+
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [selectedParticipants, setSelectedParticipants] = useState([]);
+  const [groupName, setGroupName] = useState('');
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [groupMode, setGroupMode] = useState(false);
 
   // Utility function to truncate bio (added since it was missing)
   const truncateBio = (bio, maxLength = 50) => {
@@ -31,7 +39,6 @@ export default function NewMessageScreen() {
 
     try {
       setSearching(true);
-      console.log('Searching for:', query);
       const response = await fetch(
         `${API_ENDPOINTS.SEARCH}/search?query=${encodeURIComponent(query.trim())}&type=users&limit=20`,
         {
@@ -47,10 +54,8 @@ export default function NewMessageScreen() {
       }
 
       const data = await response.json();
-      console.log('Search results:', data);
       // Filter out current user from results
       const filteredUsers = data.users?.filter(u => u._id !== user._id) || [];
-      console.log('Search results users:', filteredUsers.length);
       setUsers(filteredUsers);
     } catch (error) {
       console.error('Error searching users:', error);
@@ -80,7 +85,6 @@ export default function NewMessageScreen() {
       }
 
       const data = await response.json();
-      console.log('Suggested users loaded:', data.length);
       setUsers(data || []);
     } catch (error) {
       console.error('Error loading suggested users:', error);
@@ -114,8 +118,69 @@ export default function NewMessageScreen() {
   }, []); // Only run on mount, removed loadSuggestedUsers dependency
 
   const selectUser = (selectedUser) => {
-    console.log('Navigating to chat with user:', selectedUser.username);
+    if (groupMode) {
+      addParticipant(selectedUser);
+      return;
+    }
+
     router.push(`/messages/chat/${selectedUser._id}`);
+  };
+
+  const toggleGroupModal = () => {
+    setShowGroupModal(s => !s);
+  };
+
+  const toggleGroupMode = () => {
+    setGroupMode(g => {
+      const next = !g;
+      if (!next) {
+        // leaving group mode, reset temporary state
+        setSelectedParticipants([]);
+        setGroupName('');
+      }
+      return next;
+    });
+  };
+
+  const addParticipant = (u) => {
+    setSelectedParticipants(prev => {
+      if (prev.find(p => p._id === u._id)) return prev;
+      return [...prev, u];
+    });
+    showToast(`${u.username} added`, 'info');
+  };
+
+  const removeParticipant = (id) => {
+    setSelectedParticipants(prev => prev.filter(p => p._id !== id));
+  };
+
+  const createGroup = async () => {
+    if (!groupName.trim() || selectedParticipants.length === 0) {
+      showToast('Please provide a group name and at least one participant', 'error');
+      return;
+    }
+
+    try {
+      setCreatingGroup(true);
+      const participantIds = selectedParticipants.map(p => p._id);
+      const data = await messagingService.createConversation(participantIds, groupName.trim(), token);
+      showToast('Group created', 'success');
+      // Try to find created conversation id
+      const convoId = data?.conversation?._id || data?.conversation?.id || data?._id;
+      if (convoId) {
+        router.push(`/messages/chat/${convoId}`);
+      }
+      // Reset modal state
+      setShowGroupModal(false);
+      setSelectedParticipants([]);
+      setGroupName('');
+      setGroupMode(false);
+    } catch (err) {
+      console.error('Failed to create group', err);
+      showToast('Failed to create group', 'error');
+    } finally {
+      setCreatingGroup(false);
+    }
   };
 
   const followUser = async (userId) => {
@@ -165,8 +230,51 @@ export default function NewMessageScreen() {
           </button>
           
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white flex-1">New Message</h1>
+          <div className="ml-2">
+            {!groupMode ? (
+              <button onClick={toggleGroupMode} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm">Create Group</button>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <button onClick={createGroup} disabled={creatingGroup || selectedParticipants.length===0 || !groupName.trim()} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm">
+                  {creatingGroup ? 'Creating...' : `Create (${selectedParticipants.length})`}
+                </button>
+                <button onClick={toggleGroupMode} className="px-3 py-1 rounded-md border text-sm">Cancel</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Inline Group Panel (visible in group mode) */}
+      {groupMode && (
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+          <div className="mb-2">
+            <label className="text-sm text-gray-600 dark:text-gray-300">Group name</label>
+            <input
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+              placeholder="Group name (required)"
+              className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-gray-600 dark:text-gray-300">Selected participants</label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {selectedParticipants.length === 0 ? (
+                <div className="text-sm text-gray-500">No participants yet — tap user rows to add</div>
+              ) : (
+                selectedParticipants.map(p => (
+                  <div key={p._id} className="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-2 py-1 rounded-full">
+                    <img src={p.profilePicture || defaultAvatar} className="w-6 h-6 rounded-full mr-2 object-cover" alt={p.username} />
+                    <span className="text-sm mr-2">{p.username}</span>
+                    <button onClick={() => removeParticipant(p._id)} className="text-xs text-red-500">Remove</button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search Input */}
       <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
@@ -247,7 +355,7 @@ export default function NewMessageScreen() {
                     className="flex items-center flex-1 text-left hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-2 -m-2 transition-colors"
                   >
                     <Image
-                      src={item.profilePicture || '/placeholder-avatar.png'}
+                      src={item.profilePicture || defaultAvatar}
                       alt={item.username}
                       width={48}
                       height={48}
@@ -270,6 +378,15 @@ export default function NewMessageScreen() {
 
                   {/* Follow/Message Buttons */}
                   <div className="flex items-center ml-2 space-x-2 flex-shrink-0">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); addParticipant(item); }}
+                        className="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-green-500 rounded-full transition-colors"
+                        title="Add to group"
+                      >
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14M5 12h14" />
+                        </svg>
+                      </button>
                     <button
                       onClick={() => followUser(item._id)}
                       className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium transition-colors"
@@ -293,6 +410,64 @@ export default function NewMessageScreen() {
         )}
       </div>
     </div>
+    
+    {/* Create Group Modal */}
+    {showGroupModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-lg mx-4 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold">Create Group</h3>
+            <button onClick={toggleGroupModal} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+              ✕
+            </button>
+          </div>
+
+          <div className="mb-3">
+            <label className="text-sm text-gray-600 dark:text-gray-300">Group name</label>
+            <input
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+              placeholder="e.g. Weekend Hike Crew"
+              className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="text-sm text-gray-600 dark:text-gray-300">Selected participants</label>
+            <div className="flex flex-wrap mt-2 gap-2">
+              {selectedParticipants.length === 0 ? (
+                <div className="text-sm text-gray-500">No participants selected</div>
+              ) : (
+                selectedParticipants.map(p => (
+                  <div key={p._id} className="flex items-center bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+                    <img src={p.profilePicture || defaultAvatar} className="w-6 h-6 rounded-full mr-2 object-cover" alt={p.username} />
+                    <span className="text-sm mr-2">{p.username}</span>
+                    <button onClick={() => removeParticipant(p._id)} className="text-xs text-red-500">Remove</button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end space-x-2">
+            <button onClick={toggleGroupModal} className="px-3 py-1 rounded-md border">Cancel</button>
+            <button onClick={createGroup} disabled={creatingGroup} className="px-4 py-1 bg-blue-600 text-white rounded-md">
+              {creatingGroup ? 'Creating...' : 'Create Group'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Floating Create Group Button */}
+    <div className="fixed bottom-6 right-6 z-40">
+      <button onClick={toggleGroupModal} className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg">
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
+    </div>
+
     </>
   );
 }

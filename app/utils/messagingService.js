@@ -123,6 +123,147 @@ export class MessagingService {
       return { unreadCount: 0 }; // Return proper structure on error
     }
   }
+
+  // Send a message to a conversation (group)
+  async sendToConversation(conversationId, content, token) {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGING.replace(/\/+$/,'')}/messages/conversations/${conversationId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to send message to conversation');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending to conversation:', error);
+      throw error;
+    }
+  }
+
+  // Get a single conversation's metadata
+  async getConversation(conversationId, token) {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGING.replace(/\/+$/,'')}/messages/conversations/${conversationId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to fetch conversation');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching conversation:', error);
+      throw error;
+    }
+  }
+
+  // Create a new conversation (group)
+  async createConversation(participantIds = [], name = '', token) {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGING.replace(/\/+$/,'')}/messages/conversations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ participantIds, name }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to create conversation');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      throw error;
+    }
+  }
+
+  // Update conversation (e.g., rename group)
+  async updateConversation(conversationId, payload = {}, token) {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGING.replace(/\/+$/,'')}/messages/conversations/${conversationId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to update conversation');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating conversation:', error);
+      throw error;
+    }
+  }
+
+  // Add a participant to a conversation
+  async addParticipant(conversationId, userId, token) {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGING.replace(/\/+$/,'')}/messages/conversations/${conversationId}/participants`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to add participant');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding participant:', error);
+      throw error;
+    }
+  }
+
+  // Remove a participant from a conversation
+  async removeParticipant(conversationId, userId, token) {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGING.replace(/\/+$/,'')}/messages/conversations/${conversationId}/participants/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to remove participant');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error removing participant:', error);
+      throw error;
+    }
+  }
+
 }
 
 // Create and export a singleton instance

@@ -1,9 +1,12 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
+import defaultAvatar from '@/assets/default-avatar.jpg';
 import { useAuth } from '../../../../context/AuthContext';
 import { messagingService } from '../../../../utils/messagingService';
+import { API_ENDPOINTS } from '../../../../utils/config';
 import { chatManager, messageUtils } from '../../../../utils/chatUtils';
 import { useToast } from '../../../../components/ui/Toast';
 
@@ -15,6 +18,43 @@ export default function ChatScreen() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [recipient, setRecipient] = useState(null);
+  const [conversationInfo, setConversationInfo] = useState(null);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renameName, setRenameName] = useState('');
+  const [renaming, setRenaming] = useState(false);
+  const renameInputRef = useRef(null);
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [addQuery, setAddQuery] = useState('');
+  const [addResults, setAddResults] = useState([]);
+  const [addSearching, setAddSearching] = useState(false);
+  const addTimerRef = useRef(null);
+
+  const openAddMember = () => {
+    setShowAddMember(prev => {
+      return true;
+    });
+  };
+
+  const openRenameModal = () => {
+    if (!conversationInfo || !conversationInfo.isGroup) {
+      showToast('Only group conversations can be renamed', 'warning');
+      return;
+    }
+    setRenameName(conversationInfo?.name || '');
+    setShowRenameModal(prev => {
+      return true;
+    });
+  };
+
+  useEffect(() => {
+    if (showRenameModal) {
+      // focus the input a tick after render
+      setTimeout(() => {
+        try { renameInputRef.current?.focus(); } catch (e) { /* focus failed silently */ }
+      }, 50);
+    }
+  }, [showRenameModal]);
+  
   const [lastMessageId, setLastMessageId] = useState(null);
 
   const router = useRouter();
@@ -24,6 +64,130 @@ export default function ChatScreen() {
   const { showToast, ToastComponent } = useToast();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+
+  // Pre-render Add Member portal so it can show even if component returns early (loading state)
+  const addMemberPortal = showAddMember && typeof document !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40" style={{ zIndex: 2147483647 }} role="dialog" aria-modal="true">
+      <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-lg mx-4 p-4 shadow-xl" style={{ zIndex: 2147483648 }}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold">Add Member</h3>
+          <button onClick={() => setShowAddMember(false)} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">✕</button>
+        </div>
+
+        {/* Participants list (show current members with remove action) */}
+        <div className="mb-3">
+          <label className="text-sm text-gray-600 dark:text-gray-300">Participants</label>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {(conversationInfo?.participants || []).map(p => (
+              <div key={p._id} className="flex items-center space-x-2 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">
+                <Image src={p.profilePicture || defaultAvatar} width={28} height={28} className="w-7 h-7 rounded-full object-cover" alt={p.username} />
+                <div className="text-sm">{p.username}</div>
+                {p._id !== user._id && (
+                  <button onClick={async () => {
+                    try {
+                      showToast('Removing member...', 'info');
+                      await messagingService.removeParticipant(userId, p._id, token);
+                      setConversationInfo(prev => ({ ...(prev||{}), participants: (prev?.participants||[]).filter(x => x._id !== p._id) }));
+                      showToast('Member removed', 'success');
+                    } catch (err) {
+                      console.error('Failed to remove member', err);
+                      showToast(err?.message || 'Failed to remove member', 'error');
+                    }
+                  }} className="ml-2 text-red-600 px-2 py-1 rounded border">Remove</button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-3">
+          <label className="text-sm text-gray-600 dark:text-gray-300">Search users</label>
+          <input
+            value={addQuery}
+            onChange={(e) => setAddQuery(e.target.value)}
+            placeholder="Type a username to search"
+            className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          />
+        </div>
+
+        <div className="max-h-64 overflow-y-auto">
+          {addSearching ? (
+            <div className="py-6 text-center">Searching...</div>
+          ) : (
+            addResults.map(u => (
+              <div key={u._id} className="flex items-center justify-between px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                <div className="flex items-center">
+                  <Image src={u.profilePicture || defaultAvatar} width={36} height={36} className="w-9 h-9 rounded-full mr-3 object-cover" alt={u.username} />
+                  <div>
+                    <div className="font-medium text-sm">{u.username}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{u.fullname || ''}</div>
+                  </div>
+                </div>
+                <div>
+                  <button onClick={async () => {
+                    try {
+                      showToast('Adding member...', 'info');
+                      const res = await messagingService.addParticipant(userId, u._id, token);
+                      const updated = res?.conversation || res;
+                      if (updated && updated.participants) {
+                        setConversationInfo(prev => ({ ...(prev||{}), ...updated }));
+                      } else {
+                        setConversationInfo(prev => ({ ...(prev||{}), participants: [...(prev?.participants||[]), u] }));
+                      }
+                      showToast('Member added', 'success');
+                      setShowAddMember(false);
+                    } catch (err) {
+                      console.error('Failed to add member', err);
+                      showToast(err?.message || 'Failed to add member', 'error');
+                    }
+                  }} className="px-3 py-1 bg-blue-600 text-white rounded-md">Add</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="flex items-center justify-end mt-3">
+          <button onClick={() => setShowAddMember(false)} className="px-3 py-1 rounded-md border">Close</button>
+        </div>
+      </div>
+    </div>, document.body
+  ) : null;
+
+  // Search users for adding to conversation (debounced)
+  useEffect(() => {
+    if (addTimerRef.current) clearTimeout(addTimerRef.current);
+    if (!addQuery || addQuery.trim().length < 2) {
+      setAddResults([]);
+      setAddSearching(false);
+      return;
+    }
+
+    setAddSearching(true);
+    addTimerRef.current = setTimeout(async () => {
+      try {
+        const resp = await fetch(`${API_ENDPOINTS.SEARCH}/search?query=${encodeURIComponent(addQuery)}&type=users&limit=20`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        if (!resp.ok) throw new Error('Search failed');
+        const data = await resp.json();
+        const filtered = (data.users || []).filter(u => u._id !== user._id);
+        setAddResults(filtered);
+      } catch (err) {
+        console.error('Add member search error', err);
+        setAddResults([]);
+      } finally {
+        setAddSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(addTimerRef.current);
+  }, [addQuery, token, user._id]);
+
+  useEffect(() => {}, [showAddMember]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,15 +209,28 @@ export default function ChatScreen() {
 
     const refreshMessages = async () => {
       try {
-        const response = await messagingService.getMessages(userId, 1, 20, token);
-        
-        if (response.messages.length > 0) {
-          const newestMessageId = response.messages[0]._id;
-          if (newestMessageId !== lastMessageId) {
-            setMessages(response.messages.reverse());
-            setLastMessageId(newestMessageId);
-            // Scroll to bottom if there are new messages
-            setTimeout(scrollToBottom, 100);
+        // Try conversation endpoint first (groups), fallback to user messages
+        try {
+          const data = await messagingService.getConversation(userId, token);
+          if (data.messages && data.messages.length > 0) {
+            const newestMessageId = data.messages[0]._id;
+            if (newestMessageId !== lastMessageId) {
+              setMessages(data.messages.reverse());
+              setLastMessageId(newestMessageId);
+              setConversationInfo(data.conversation || data);
+              setTimeout(scrollToBottom, 100);
+            }
+          }
+        } catch (err) {
+          // not a conversation id — fallback to user messages
+          const response = await messagingService.getMessages(userId, 1, 20, token);
+          if (response.messages.length > 0) {
+            const newestMessageId = response.messages[0]._id;
+            if (newestMessageId !== lastMessageId) {
+              setMessages(response.messages.reverse());
+              setLastMessageId(newestMessageId);
+              setTimeout(scrollToBottom, 100);
+            }
           }
         }
       } catch (error) {
@@ -78,27 +255,51 @@ export default function ChatScreen() {
         setLoading(true);
       }
 
-      const response = await messagingService.getMessages(userId, pageNum, 20, token);
-      
-      if (!isLoadMore) {
-        const reversedMessages = response.messages.reverse();
-        setMessages(reversedMessages);
-        setLastMessageId(reversedMessages[0]?._id || null);
-        
-        // Get recipient info from first message if available
-        if (response.messages.length > 0) {
-          const firstMessage = response.messages[0];
-          const recipientInfo = firstMessage.sender._id === user._id 
-            ? firstMessage.recipient 
-            : firstMessage.sender;
-          setRecipient(recipientInfo);
-        }
-      } else {
-        setMessages(prev => [...response.messages.reverse(), ...prev]);
-      }
+      // Try conversation endpoint first (groups)
+      try {
+        const data = await messagingService.getConversation(userId, token);
 
-      setHasMore(pageNum < response.totalPages);
-      setPage(pageNum);
+        if (!isLoadMore) {
+          const reversedMessages = (data.messages || []).reverse();
+          setMessages(reversedMessages);
+          setLastMessageId(reversedMessages[0]?._id || null);
+          setConversationInfo(data.conversation || data.conversationInfo || data);
+
+          // For 1:1 fallback recipient still may be present on messages
+          if (data.messages && data.messages.length > 0) {
+            const firstMessage = data.messages[0];
+            const recipientInfo = firstMessage.sender._id === user._id ? firstMessage.recipient : firstMessage.sender;
+            setRecipient(recipientInfo);
+          }
+        } else {
+          setMessages(prev => [...(data.messages || []).reverse(), ...prev]);
+        }
+
+        setHasMore(pageNum < (data.totalPages || 1));
+        setPage(pageNum);
+      } catch (err) {
+        // Not a conversation or conversation endpoint failed — fallback to user messages
+        const response = await messagingService.getMessages(userId, pageNum, 20, token);
+
+        if (!isLoadMore) {
+          const reversedMessages = response.messages.reverse();
+          setMessages(reversedMessages);
+          setLastMessageId(reversedMessages[0]?._id || null);
+
+          if (response.messages.length > 0) {
+            const firstMessage = response.messages[0];
+            const recipientInfo = firstMessage.sender._id === user._id 
+              ? firstMessage.recipient 
+              : firstMessage.sender;
+            setRecipient(recipientInfo);
+          }
+        } else {
+          setMessages(prev => [...response.messages.reverse(), ...prev]);
+        }
+
+        setHasMore(pageNum < response.totalPages);
+        setPage(pageNum);
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
       showToast('Failed to load messages', 'error');
@@ -112,6 +313,28 @@ export default function ChatScreen() {
       fetchMessages();
     }
   }, [fetchMessages, userId, token, user]);
+
+  // Try to load conversation metadata (for groups) if not already populated
+  useEffect(() => {
+    if (!userId || !token) return;
+    if (conversationInfo) return; // already have it
+
+    const loadConversation = async () => {
+      try {
+        const data = await messagingService.getConversation(userId, token);
+        // response might be the conversation object or { conversation: { ... } }
+        if (data) {
+          if (data.conversation) setConversationInfo(data.conversation);
+          else setConversationInfo(data);
+        }
+      } catch (err) {
+        // Not a group or no metadata available; ignore
+        // console.debug('No conversation metadata for', userId, err);
+      }
+    };
+
+    loadConversation();
+  }, [userId, token, conversationInfo]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -139,19 +362,38 @@ export default function ChatScreen() {
       setMessageText('');
 
       // Create optimistic message for immediate UI update
-      optimisticMessage = messageUtils.createOptimisticMessage(content, user._id, userId);
+      // Determine whether this is a conversation (group) and call the right endpoint
+      const isConversation = !!conversationInfo || (messages.length > 0 && (messages[0].conversation || messages[0].conversationId));
+
+      // Build optimistic message depending on type
+      if (isConversation) {
+        optimisticMessage = {
+          _id: `temp_${Date.now()}`,
+          content,
+          sender: { _id: user._id, username: user.username, profilePicture: user.profilePicture || '' },
+          recipient: null,
+          conversation: userId,
+          createdAt: new Date().toISOString(),
+          isOptimistic: true
+        };
+      } else {
+        optimisticMessage = messageUtils.createOptimisticMessage(content, user._id, userId);
+      }
+
       setMessages(prev => [...prev, optimisticMessage]);
-      
+
       // Scroll to bottom immediately
       setTimeout(scrollToBottom, 50);
 
-      const response = await messagingService.sendMessage(userId, content, [], token);
-      
+      const response = isConversation
+        ? await messagingService.sendToConversation(userId, content, token)
+        : await messagingService.sendMessage(userId, content, [], token);
+
       // Replace optimistic message with real message
       setMessages(prev => prev.map(msg => 
         msg._id === optimisticMessage._id ? response : msg
       ));
-      
+
       setLastMessageId(response._id);
 
     } catch (error) {
@@ -175,6 +417,32 @@ export default function ChatScreen() {
       setMessageText(content); // Restore message text on error
     } finally {
       setSending(false);
+    }
+  };
+
+  // Rename conversation (group)
+  const saveRename = async () => {
+    if (!renameName.trim() || !token) {
+      showToast('Please provide a valid name', 'warning');
+      return;
+    }
+
+    try {
+      setRenaming(true);
+      const data = await messagingService.updateConversation(userId, { name: renameName.trim() }, token);
+      // update response received
+      // Response might be { conversation: { ... } } or the conversation object
+      const newConv = data?.conversation || data;
+      if (newConv) {
+        setConversationInfo(prev => ({ ...(prev || {}), ...newConv }));
+      }
+      showToast('Conversation renamed', 'success');
+      setShowRenameModal(false);
+    } catch (err) {
+      console.error('Failed to rename conversation', err);
+      showToast('Failed to rename conversation', 'error');
+    } finally {
+      setRenaming(false);
     }
   };
 
@@ -242,6 +510,126 @@ export default function ChatScreen() {
           </div>
         </div>
       </div>
+      {/* Rename Modal (portal) */}
+      {showRenameModal && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40" style={{ zIndex: 2147483647 }} role="dialog" aria-modal="true">
+          <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-md mx-4 p-4 shadow-xl" style={{ zIndex: 2147483648 }}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Rename Group</h3>
+              <button onClick={() => setShowRenameModal(false)} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">✕</button>
+            </div>
+
+            <div className="mb-3">
+              <label className="text-sm text-gray-600 dark:text-gray-300">New group name</label>
+              <input
+                ref={renameInputRef}
+                value={renameName}
+                onChange={(e) => setRenameName(e.target.value)}
+                placeholder="Enter new group name"
+                className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div className="flex items-center justify-end space-x-2">
+              <button onClick={() => setShowRenameModal(false)} className="px-3 py-1 rounded-md border">Cancel</button>
+              <button onClick={saveRename} disabled={renaming} className="px-4 py-1 bg-blue-600 text-white rounded-md">
+                {renaming ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Add Member Modal (portal) */}
+      {showAddMember && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40" style={{ zIndex: 2147483647 }} role="dialog" aria-modal="true">
+          <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-lg mx-4 p-4 shadow-xl" style={{ zIndex: 2147483648 }}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Add Member</h3>
+              <button onClick={() => setShowAddMember(false)} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">✕</button>
+            </div>
+
+            {/* Participants list (show current members with remove action) */}
+            <div className="mb-3">
+              <label className="text-sm text-gray-600 dark:text-gray-300">Participants</label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {(conversationInfo?.participants || []).map(p => (
+                  <div key={p._id} className="flex items-center space-x-2 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">
+                    <Image src={p.profilePicture || defaultAvatar} width={28} height={28} className="w-7 h-7 rounded-full object-cover" alt={p.username} />
+                    <div className="text-sm">{p.username}</div>
+                    {p._id !== user._id && (
+                      <button onClick={async () => {
+                        try {
+                          showToast('Removing member...', 'info');
+                          await messagingService.removeParticipant(userId, p._id, token);
+                          setConversationInfo(prev => ({ ...(prev||{}), participants: (prev?.participants||[]).filter(x => x._id !== p._id) }));
+                          showToast('Member removed', 'success');
+                        } catch (err) {
+                          console.error('Failed to remove member', err);
+                          showToast(err?.message || 'Failed to remove member', 'error');
+                        }
+                      }} className="ml-2 text-red-600 px-2 py-1 rounded border">Remove</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="text-sm text-gray-600 dark:text-gray-300">Search users</label>
+              <input
+                value={addQuery}
+                onChange={(e) => setAddQuery(e.target.value)}
+                placeholder="Type a username to search"
+                className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div className="max-h-64 overflow-y-auto">
+              {addSearching ? (
+                <div className="py-6 text-center">Searching...</div>
+              ) : (
+                addResults.map(u => (
+                  <div key={u._id} className="flex items-center justify-between px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                    <div className="flex items-center">
+                      <Image src={u.profilePicture || defaultAvatar} width={36} height={36} className="w-9 h-9 rounded-full mr-3 object-cover" alt={u.username} />
+                      <div>
+                        <div className="font-medium text-sm">{u.username}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{u.fullname || ''}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <button onClick={async () => {
+                        try {
+                          showToast('Adding member...', 'info');
+                          const res = await messagingService.addParticipant(userId, u._id, token);
+                          const updated = res?.conversation || res;
+                          if (updated && updated.participants) {
+                            setConversationInfo(prev => ({ ...(prev||{}), ...updated }));
+                          } else {
+                            // optimistic: append user if not present
+                            setConversationInfo(prev => ({ ...(prev||{}), participants: [...(prev?.participants||[]), u] }));
+                          }
+                          showToast('Member added', 'success');
+                          setShowAddMember(false);
+                        } catch (err) {
+                          console.error('Failed to add member', err);
+                          showToast(err?.message || 'Failed to add member', 'error');
+                        }
+                      }} className="px-3 py-1 bg-blue-600 text-white rounded-md">Add</button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex items-center justify-end mt-3">
+              <button onClick={() => setShowAddMember(false)} className="px-3 py-1 rounded-md border">Close</button>
+            </div>
+          </div>
+        </div>, document.body
+      )}
       </>
     );
   }
@@ -249,6 +637,92 @@ export default function ChatScreen() {
   return (
     <>
       <ToastComponent />
+      {showAddMember && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40" style={{ zIndex: 2147483647 }} role="dialog" aria-modal="true">
+          <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-lg mx-4 p-4 shadow-xl" style={{ zIndex: 2147483648 }}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Add Member</h3>
+              <button onClick={() => setShowAddMember(false)} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">✕</button>
+            </div>
+            {/* Participants list (show current members with remove action) */}
+            <div className="mb-3">
+              <label className="text-sm text-gray-600 dark:text-gray-300">Participants</label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {(conversationInfo?.participants || []).map(p => (
+                  <div key={p._id} className="flex items-center space-x-2 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">
+                    <Image src={p.profilePicture || defaultAvatar} width={28} height={28} className="w-7 h-7 rounded-full object-cover" alt={p.username} />
+                    <div className="text-sm">{p.username}</div>
+                    {p._id !== user._id && (
+                      <button onClick={async () => {
+                        try {
+                          showToast('Removing member...', 'info');
+                          await messagingService.removeParticipant(userId, p._id, token);
+                          setConversationInfo(prev => ({ ...(prev||{}), participants: (prev?.participants||[]).filter(x => x._id !== p._id) }));
+                          showToast('Member removed', 'success');
+                        } catch (err) {
+                          console.error('Failed to remove member', err);
+                          showToast(err?.message || 'Failed to remove member', 'error');
+                        }
+                      }} className="ml-2 text-red-600 px-2 py-1 rounded border">Remove</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="text-sm text-gray-600 dark:text-gray-300">Search users</label>
+              <input
+                value={addQuery}
+                onChange={(e) => setAddQuery(e.target.value)}
+                placeholder="Type a username to search"
+                className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div className="max-h-64 overflow-y-auto">
+              {addSearching ? (
+                <div className="py-6 text-center">Searching...</div>
+              ) : (
+                addResults.map(u => (
+                  <div key={u._id} className="flex items-center justify-between px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                    <div className="flex items-center">
+                      <Image src={u.profilePicture || defaultAvatar} width={36} height={36} className="w-9 h-9 rounded-full mr-3 object-cover" alt={u.username} />
+                      <div>
+                        <div className="font-medium text-sm">{u.username}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{u.fullname || ''}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <button onClick={async () => {
+                        try {
+                          showToast('Adding member...', 'info');
+                          const res = await messagingService.addParticipant(userId, u._id, token);
+                          const updated = res?.conversation || res;
+                          if (updated && updated.participants) {
+                            setConversationInfo(prev => ({ ...(prev||{}), ...updated }));
+                          } else {
+                            setConversationInfo(prev => ({ ...(prev||{}), participants: [...(prev?.participants||[]), u] }));
+                          }
+                          showToast('Member added', 'success');
+                          setShowAddMember(false);
+                        } catch (err) {
+                          console.error('Failed to add member', err);
+                          showToast(err?.message || 'Failed to add member', 'error');
+                        }
+                      }} className="px-3 py-1 bg-blue-600 text-white rounded-md">Add</button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex items-center justify-end mt-3">
+              <button onClick={() => setShowAddMember(false)} className="px-3 py-1 rounded-md border">Close</button>
+            </div>
+          </div>
+        </div>, document.body
+      )}
       <div className="min-h-screen w-full md:min-w-[410px] lg:w-[580px] max-w-2xl bg-white dark:bg-gray-900 flex-1 px-4 mx-4 flex flex-col overflow-y-auto h-screen custom-scrollbar">
       {/* Header */}
       <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-10">
@@ -264,22 +738,33 @@ export default function ChatScreen() {
 
           <div className="flex items-center flex-1">
             <Image
-              src={recipient?.profilePicture || '/placeholder-avatar.png'}
-              alt={recipient?.username || 'User'}
+              src={conversationInfo?.groupProfilePicture || recipient?.profilePicture || defaultAvatar}
+              alt={conversationInfo?.name || recipient?.username || 'User'}
               width={32}
               height={32}
               className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-3 object-cover"
             />
             <div className="flex-1 min-w-0">
               <h2 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
-                {recipient?.username || 'Loading...'}
+                {conversationInfo?.name || recipient?.username || 'Loading...'}
               </h2>
               <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm truncate">
-                {recipient?.fullname || ''}
+                {conversationInfo?.subtitle || recipient?.fullname || ''}
               </p>
             </div>
           </div>
 
+          <button onClick={openRenameModal} className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" title="Edit group name">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3z" />
+            </svg>
+          </button>
+          <button onClick={openAddMember} className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" title="Add member">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9a3 3 0 11-6 0 3 3 0 016 0zM6 12a4 4 0 014-4h1" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 21v-2a4 4 0 014-4h1" />
+            </svg>
+          </button>
           <button className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
             <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -287,6 +772,25 @@ export default function ChatScreen() {
           </button>
         </div>
       </div>
+
+      {/* Inline fallback Rename Panel (shows inside page if portal/modal not visible) */}
+      {showRenameModal && (
+        <div className="px-4 py-3 bg-yellow-50 dark:bg-yellow-900 border-b border-yellow-200 dark:border-yellow-800">
+          <div className="flex items-center gap-3">
+            <input
+              ref={renameInputRef}
+              value={renameName}
+              onChange={(e) => setRenameName(e.target.value)}
+              placeholder="Rename group..."
+              className="flex-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            />
+            <button onClick={saveRename} disabled={renaming} className="px-3 py-2 bg-blue-600 text-white rounded-md">
+              {renaming ? 'Saving...' : 'Save'}
+            </button>
+            <button onClick={() => setShowRenameModal(false)} className="px-3 py-2 rounded-md border">Cancel</button>
+          </div>
+        </div>
+      )}
 
       {/* Messages Container */}
       <div 
@@ -341,7 +845,7 @@ export default function ChatScreen() {
                 <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
                   {!isMyMessage && showAvatar && (
                     <Image
-                      src={item.sender.profilePicture || '/placeholder-avatar.png'}
+                      src={item.sender.profilePicture || defaultAvatar}
                       alt={item.sender.username}
                       width={24}
                       height={24}
