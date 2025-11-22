@@ -828,7 +828,14 @@ export default function ChatScreen() {
         ) : (
           messages.map((item, index) => {
             const isMyMessage = item.sender._id === user._id;
-            const showAvatar = !isMyMessage && messageUtils.shouldShowAvatar(item, messages[index + 1], user._id);
+            // Determine whether this message belongs to a group conversation. conversationInfo may be
+            const isGroup = !!(
+              conversationInfo?.isGroup ||
+              (conversationInfo?.participants && conversationInfo.participants.length > 2) ||
+              item.conversation ||
+              item.conversationId
+            );
+            const showAvatar = !isMyMessage && (isGroup || messageUtils.shouldShowAvatar(item, messages[index + 1], user._id));
             const showTime = messageUtils.shouldShowTimestamp(item, messages[index - 1]);
             const isOptimistic = item.isOptimistic;
 
@@ -844,13 +851,18 @@ export default function ChatScreen() {
                 
                 <div className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
                   {!isMyMessage && showAvatar && (
-                    <Image
-                      src={item.sender.profilePicture || defaultAvatar}
-                      alt={item.sender.username}
-                      width={24}
-                      height={24}
-                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mr-2 object-cover"
-                    />
+                    <div className="flex flex-col items-center mr-2">
+                      <Image
+                        src={item.sender.profilePicture || defaultAvatar}
+                        alt={item.sender.username}
+                        width={32}
+                        height={32}
+                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover"
+                      />
+                      {isGroup && (
+                        <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1 text-center">{item.sender.username}</div>
+                      )}
+                    </div>
                   )}
                   
                   {!isMyMessage && !showAvatar && (
@@ -869,6 +881,7 @@ export default function ChatScreen() {
                       opacity: isOptimistic ? 0.7 : 1
                     }}
                   >
+                    {/* username shown under avatar */}
                     <p className={`${isMyMessage ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
                       {item.content}
                     </p>
