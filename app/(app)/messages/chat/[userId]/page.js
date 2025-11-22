@@ -30,9 +30,19 @@ export default function ChatScreen() {
   const addTimerRef = useRef(null);
 
   const openAddMember = () => {
-    setShowAddMember(prev => {
-      return true;
-    });
+    // Only allow adding members on group conversations. conversationInfo may not be
+    // populated yet, so also check messages for conversation metadata.
+    const isGroupConv = !!(
+      conversationInfo?.isGroup ||
+      (conversationInfo?.participants && conversationInfo.participants.length > 2)
+    );
+
+    if (!isGroupConv) {
+      showToast('Add member is only available for group conversations', 'warning');
+      return;
+    }
+
+    setShowAddMember(true);
   };
 
   const openRenameModal = () => {
@@ -470,6 +480,14 @@ export default function ChatScreen() {
     }
   };
 
+  // Determine at render-time whether this conversation is a group. We use this to
+  // hide group-only actions (rename/add) when viewing a 1:1 chat. conversationInfo may
+  // be empty until loaded, so also detect per-message conversation metadata.
+  const isGroupConv = !!(
+    conversationInfo?.isGroup ||
+    (conversationInfo?.participants && conversationInfo.participants.length > 2)
+  );
+
   if (loading && messages.length === 0) {
     return (
       <>
@@ -754,17 +772,25 @@ export default function ChatScreen() {
             </div>
           </div>
 
-          <button onClick={openRenameModal} className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" title="Edit group name">
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3z" />
-            </svg>
-          </button>
-          <button onClick={openAddMember} className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" title="Add member">
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9a3 3 0 11-6 0 3 3 0 016 0zM6 12a4 4 0 014-4h1" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 21v-2a4 4 0 014-4h1" />
-            </svg>
-          </button>
+          {isGroupConv && (
+            <>
+              {isGroupConv && (
+                <>
+                  <button onClick={openRenameModal} className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" title="Edit group name">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3z" />
+                    </svg>
+                  </button>
+                  <button onClick={openAddMember} className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" title="Add member">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9a3 3 0 11-6 0 3 3 0 016 0zM6 12a4 4 0 014-4h1" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 21v-2a4 4 0 014-4h1" />
+                    </svg>
+                  </button>
+                </>
+              )}
+            </>
+          )}
           <button className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
             <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
