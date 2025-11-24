@@ -372,8 +372,12 @@ export default function ChatScreen() {
       setMessageText('');
 
       // Create optimistic message for immediate UI update
-      // Determine whether this is a conversation (group) and call the right endpoint
-      const isConversation = !!conversationInfo || (messages.length > 0 && (messages[0].conversation || messages[0].conversationId));
+      // Determine whether this is a group conversation. Only use the conversation
+      // endpoint for real group conversations (conversationInfo.isGroup or participants>2).
+      const isConversation = !!(
+        conversationInfo?.isGroup ||
+        (conversationInfo?.participants && conversationInfo.participants.length > 2)
+      );
 
       // Build optimistic message depending on type
       if (isConversation) {
