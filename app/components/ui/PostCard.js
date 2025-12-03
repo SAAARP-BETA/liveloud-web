@@ -19,6 +19,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import FilteredImage from "../common/FilteredImage";
 import { MdLocationOn, MdMood, MdPeople, MdTranslate, MdVerified } from 'react-icons/md';
+import Poll from './Poll';
 import { fonts } from "@/app/utils/fonts";
 
 const PostCard = ({
@@ -584,6 +585,19 @@ const PostCard = ({
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {/* ADDED: Poll */}
+        {post.poll && (
+          <div className="mb-3">
+            <Poll
+              postId={post.id}
+              question={post.poll.question}
+              initialOptions={post.poll.options.map(opt => ({ text: opt.option, votes: opt.votes }))}
+              initialOptions={post.poll.options}
+              pollId={post.poll._id}
+            />
           </div>
         )}
 

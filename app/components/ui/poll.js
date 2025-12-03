@@ -1,19 +1,40 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { API_ENDPOINTS } from '../../utils/config';
+import toast from 'react-hot-toast';
 
-const Poll = ({ question, initialOptions }) => {
+const Poll = ({ postId, pollId, question, initialOptions }) => {
   const [options, setOptions] = useState(initialOptions);
   const [selectedOption, setSelectedOption] = useState(null);
   const [voted, setVoted] = useState(false);
+  const { user, token } = useAuth();
 
   const totalVotes = options.reduce((acc, option) => acc + option.votes, 0);
 
-  const handleVote = () => {
-    if (selectedOption !== null) {
-      const newOptions = [...options];
-      newOptions[selectedOption].votes++;
-      setOptions(newOptions);
-      setVoted(true);
+  const handleVote = async () => {
+    if (selectedOption !== null && postId) {
+      try {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}/poll/vote`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ optionId: options[selectedOption]._id }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to vote');
+        }
+
+        const updatedPoll = await response.json();
+        setOptions(updatedPoll.options.map(opt => ({ text: opt.option, votes: opt.votes, _id: opt._id })));
+        setVoted(true);
+      } catch (error) {
+        toast.error(error.message);
+      }
     }
   };
 
@@ -24,7 +45,7 @@ const Poll = ({ question, initialOptions }) => {
         <div className="mt-5">
           {options.map((option, index) => {
             const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
-            return (
+            return ( 
               <div key={index} className="mb-2.5">
                 <div className="flex justify-between mb-1.5">
                   <span>{option.text}</span>

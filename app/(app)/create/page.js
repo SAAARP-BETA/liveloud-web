@@ -61,6 +61,7 @@ const CreatePost = () => {
   const PollModal = ({ onClose, onCreate }) => {
     const [question, setQuestion] = useState("");
     const [options, setOptions] = useState(["", ""]);
+    const [expiresAt, setExpiresAt] = useState("");
 
     const handleOptionChange = (index, value) => {
       const newOptions = [...options];
@@ -69,90 +70,61 @@ const CreatePost = () => {
     };
 
     const addOption = () => {
-      setOptions([...options, ""]);
+      if (options.length < 5){
+        setOptions([...options, ""]);
+      }
     };
 
     const removeOption = (index) => {
-      if (options.length > 2) {
-        const newOptions = [...options];
-        newOptions.splice(index, 1);
-        setOptions(newOptions);
-      }
-    };
+        if (options.length > 2) {
+          setOptions(options.filter((_, i) => i !== index));
+        }
+      };
 
     const handleCreatePoll = () => {
-      if (question.trim() && options.every(opt => opt.trim())) {
-        onCreate({
-          question: question.trim(),
-          options: options.map(opt => ({ text: opt.trim() })),
-        });
-        onClose();
-      } else {
-        toast.error("Please fill out the question and all options.");
-      }
-    };
+        if (question.trim() && options.every(opt => opt.trim())) {
+          onCreate({
+            question: question.trim(),
+            options: options.map(opt => ({ option: opt.trim() })),
+            expiresAt: expiresAt || undefined,
+          });
+        } else {
+          toast.error("Please fill out the poll question and all options.");
+        }
+      };
 
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 m-4">
-          <h3 className="text-xl font-bold mb-4">Create a Poll</h3>
-              
-            <div className="mb-4">
-              <label className="text-sm text-gray-600 mb-2 font-medium block">Poll Question</label>
-              <input
-                type="text"
-                className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700"
-                placeholder="e.g., What's your favorite color?"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="text-sm text-gray-600 mb-2 font-medium block">Options</label>
-              <div className="space-y-2">
-                {options.map((option, index) => (
-                  <div key={index} className="flex items-center">
-                    <input
-                      type="text"
-                      className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700"
-                      placeholder={`Option ${index + 1}`}
-                      value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
-                    />
-                    {options.length > 2 && (
-                      <button onClick={() => removeOption(index)} className="ml-2 text-red-500">
-                      <X size={20} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                </div>
-                {options.length < 5 && (
-                  <button onClick={addOption} className="mt-2 text-blue-500 text-sm font-medium">
-                      + Add option
-                  </button>
-              )}
-            </div>
-
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreatePoll}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white font-medium"
-              >
-                Create Poll
-              </button>
-          </div>
-        </div>
-      </div>
-    );
-};
+       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+         <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 shadow-xl">
+           <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Create a Poll</h3>
+           <div className="mb-4">
+             <label className="text-sm text-gray-600 dark:text-gray-300 mb-2 font-medium block">Poll Question</label>
+             <input type="text" className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700" placeholder="e.g., What's your favorite color?" value={question} onChange={(e) => setQuestion(e.target.value)} />
+           </div>
+           <div className="mb-4">
+             <label className="text-sm text-gray-600 dark:text-gray-300 mb-2 font-medium block">Options</label>
+             <div className="space-y-2">
+               {options.map((option, index) => (
+                 <div key={index} className="flex items-center">
+                   <input type="text" className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700" placeholder={`Option ${index + 1}`} value={option} onChange={(e) => handleOptionChange(index, e.target.value)} />
+                   {options.length > 2 && (<button onClick={() => removeOption(index)} className="ml-2 text-red-500"><X className="h-6 w-6" /></button>)}
+                 </div>
+               ))}
+             </div>
+             {options.length < 5 && (<button onClick={addOption} className="mt-3 text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline">+ Add option</button>)}
+           </div>
+           <div className="mb-6">
+             <label className="text-sm text-gray-600 dark:text-gray-300 mb-2 font-medium block">Expires At (Optional)</label>
+             <input type="datetime-local" className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
+           </div>
+           <div className="flex justify-end space-x-3">
+             <button onClick={onClose} className="px-5 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium">Cancel</button>
+             <button onClick={handleCreatePoll} className="px-5 py-2.5 rounded-lg bg-blue-500 text-white font-medium">Create Poll</button>
+           </div>
+         </div>
+       </div>
+     );
+   };
 
   // Sample feelings data - matching Expo version
  
@@ -841,6 +813,24 @@ setRandomUsers(uniqueUsers);
         mediaMetadata: imageMetadata, // Changed from metadata to mediaMetadata
       };
 
+      // If there's a poll, create it first
+      if (poll) {
+        const pollResponse = await fetch(`${API_ENDPOINTS.POLLS}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(poll),
+        });
+
+        if (!pollResponse.ok) {
+          throw new Error('Failed to create the poll.');
+        }
+        const pollResult = await pollResponse.json();
+        postData.poll = pollResult.pollId; // Attach poll ID to the post
+      }
+
       // Add location data if available
       if (location) {
         postData.location = {
@@ -857,11 +847,6 @@ setRandomUsers(uniqueUsers);
       // Add feeling if selected
       if (selectedFeeling) {
         postData.feeling = selectedFeeling.name;
-      }
-
-      // Add poll if available
-      if (poll) {
-        postData.poll = poll;
       }
 
       // Create the post
@@ -1088,7 +1073,7 @@ setRandomUsers(uniqueUsers);
             <div className="space-y-2">
                 {poll.options.map((option, index) => (
                     <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-md p-2 text-center">
-                        {option.text}
+                        {option.option}
                     </div>
                 ))}
             </div>
