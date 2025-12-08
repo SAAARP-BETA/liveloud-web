@@ -1729,19 +1729,19 @@ const ProfilePage = ({ params, initialUser, initialPosts, initialPoints }) => {
         >
           <div className="p-4">
             {selectedPost && (
-              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
+              <div className="flex items-center mb-4 p-3 truncate bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <Image
                   src={getProfilePicture(selectedPost?.profilePic)}
                   alt={selectedPost?.username || "Profile"}
                   width={40}
                   height={40}
-                  className="rounded-full"
+                  className="rounded-full dark:bg-gray-300"
                 />
                 <div className="ml-3">
-                  <p className="font-semibold text-gray-800">
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">
                     {selectedPost.username}
                   </p>
-                  <p className="text-sm text-gray-500 truncate">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                     {selectedPost.content}
                   </p>
                 </div>

@@ -1824,7 +1824,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
 >
   <div className="bg-white p-4">
     {selectedPost && (
-      <div className="flex items-center mb-4 p-3 truncate bg-gray-50 rounded-xl">
+      <div className="flex items-center mb-4 p-3 truncate bg-gray-50 dark:bg-gray-700 rounded-xl">
         <Image
           src={selectedPost.profilePic || defaultPic}
           alt="Profile"
@@ -1833,10 +1833,10 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           height={40}
         />
         <div className="ml-3">
-          <h3 className="text-base font-medium text-gray-800">
+          <h3 className="text-base font-medium text-gray-800 dark:text-gray-300">
             {selectedPost.username}
           </h3>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-300">
             {selectedPost.timestamp}
           </p>
         </div>
