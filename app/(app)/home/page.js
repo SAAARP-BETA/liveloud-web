@@ -1191,18 +1191,18 @@ const loadMenuOptions = async () => {
 
   const ConfirmModal = ({ message, onConfirm, onCancel }) => (
     <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-sm w-full">
         <p className="text-lg font-medium mb-4">{message}</p>
         <div className="flex justify-end space-x-4">
           <button
             onClick={onCancel}
-            className="px-4 cursor-pointer py-2 bg-gray-300 rounded"
+            className="px-4 cursor-pointer py-2 bg-gray-300 dark:bg-gray-700 rounded"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 cursor-pointer bg-red-500 text-white rounded"
+            className="px-4 py-2 cursor-pointer bg-red-500 dark:bg-red-600 text-white rounded"
           >
             Delete
           </button>
@@ -1783,10 +1783,10 @@ const handleMenuOptionPress = (option) => {
                   className="rounded-full"
                 />
                 <div className="ml-3">
-                  <p className="font-semibold text-gray-800 dark:text-white">
+                  <p className="font-semibold text-gray-800 dark:text-gray-300">
                     {selectedPost.username}
                   </p>
-                  <p className="text-sm text-gray-500 truncate line-clamp-2 break-words overflow-hidden">
+                  <p className="text-sm text-gray-500 dark:text-gray-300 truncate line-clamp-2 break-words overflow-hidden">
                     {selectedPost.content}
                   </p>
                 </div>

@@ -502,6 +502,7 @@ export const formatPostFromApi = (post, index, currentUserId) => {
     hasDisliked: currentUserId ? post.dislikes?.includes(currentUserId) : false,
     hasBookmarked: currentUserId ? post.bookmarks?.includes(currentUserId) : false,
     isArchived: post.archived || false,
+    poll: post.poll || null
   };
   // console.log('Debug: Formatted post:', formattedPost); // Debug log
   return formattedPost;
