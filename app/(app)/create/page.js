@@ -813,22 +813,9 @@ setRandomUsers(uniqueUsers);
         mediaMetadata: imageMetadata, // Changed from metadata to mediaMetadata
       };
 
-      // If there's a poll, create it first
+      // If there's a poll, add it to the post data
       if (poll) {
-        const pollResponse = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/polls`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(poll),
-        });
-
-        if (!pollResponse.ok) {
-          throw new Error('Failed to create the poll.');
-        }
-        const pollResult = await pollResponse.json();
-        postData.poll = pollResult.pollId; // Attach poll ID to the post
+        postData.poll = poll;
       }
 
       // Add location data if available

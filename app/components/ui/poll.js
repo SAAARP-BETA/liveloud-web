@@ -30,7 +30,7 @@ const Poll = ({ postId, pollId, question, initialOptions }) => {
         }
 
         const updatedPoll = await response.json();
-        setOptions(updatedPoll.options.map(opt => ({ text: opt.option, votes: opt.votes, _id: opt._id })));
+        setOptions(updatedPoll.options);
         setVoted(true);
       } catch (error) {
         toast.error(error.message);
@@ -48,7 +48,7 @@ const Poll = ({ postId, pollId, question, initialOptions }) => {
             return ( 
               <div key={index} className="mb-2.5">
                 <div className="flex justify-between mb-1.5">
-                  <span>{option.text}</span>
+                  <span>{option.option}</span>
                   <span>{percentage.toFixed(1)}%</span>
                 </div>
                 <div className="bg-gray-200 rounded h-5">
@@ -60,9 +60,6 @@ const Poll = ({ postId, pollId, question, initialOptions }) => {
               </div>
             );
           })}
-          <button onClick={() => setVoted(false)} className="bg-blue-500 text-white rounded px-5 py-2.5 text-base cursor-pointer mt-5 w-full">
-            Vote Again
-          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
@@ -81,7 +78,7 @@ const Poll = ({ postId, pollId, question, initialOptions }) => {
                 onChange={() => setSelectedOption(index)}
                 className="mr-2.5"
               />
-              <label htmlFor={`option-${index}`}>{option.text}</label>
+              <label htmlFor={`option-${index}`}>{option.option}</label>
             </div>
           ))}
           <button
