@@ -593,10 +593,10 @@ const PostCard = ({
           <div className="mb-3">
             <Poll
               postId={post.id}
-              question={post.poll.question}
-              initialOptions={post.poll.options.map(opt => ({ text: opt.option, votes: opt.votes }))}
               initialOptions={post.poll.options}
               pollId={post.poll._id}
+              question={post.poll.question}
+              usersVoted={post.poll.usersVoted}
             />
           </div>
         )}

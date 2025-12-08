@@ -4,11 +4,17 @@ import { useAuth } from '../../context/AuthContext';
 import { API_ENDPOINTS } from '../../utils/config';
 import toast from 'react-hot-toast';
 
-const Poll = ({ postId, pollId, question, initialOptions }) => {
+const Poll = ({ postId, pollId, question, initialOptions, usersVoted = [] }) => {
   const [options, setOptions] = useState(initialOptions);
   const [selectedOption, setSelectedOption] = useState(null);
   const [voted, setVoted] = useState(false);
   const { user, token } = useAuth();
+
+  useEffect(() => {
+    if (user && usersVoted.includes(user._id)) {
+      setVoted(true);
+    }
+  }, [user, usersVoted]);
 
   const totalVotes = options.reduce((acc, option) => acc + option.votes, 0);
 
@@ -39,21 +45,21 @@ const Poll = ({ postId, pollId, question, initialOptions }) => {
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg p-5 shadow-md max-w-md mx-auto my-5 font-sans">
-      <h2 className="text-2xl mb-5 text-gray-800">{question}</h2>
+    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-5 shadow-sm border border-gray-200 dark:border-gray-700 max-w-md mx-auto my-5 font-sans">
+      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">{question}</h2>
       {voted ? (
-        <div className="mt-5">
+        <div className="mt-4 space-y-3">
           {options.map((option, index) => {
             const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
             return ( 
-              <div key={index} className="mb-2.5">
-                <div className="flex justify-between mb-1.5">
+              <div key={index}>
+                <div className="flex justify-between mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                   <span>{option.option}</span>
                   <span>{percentage.toFixed(1)}%</span>
                 </div>
-                <div className="bg-gray-200 rounded h-5">
+                <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                   <div
-                    className="bg-blue-500 h-full rounded transition-all ease-in-out duration-500"
+                    className="bg-primary h-2.5 rounded-full transition-all ease-out duration-500"
                     style={{ width: `${percentage}%` }}
                   ></div>
                 </div>
@@ -62,29 +68,29 @@ const Poll = ({ postId, pollId, question, initialOptions }) => {
           })}
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-3 mt-4">
           {options.map((option, index) => (
             <div
               key={index}
-              className={`bg-white border border-gray-300 rounded p-2.5 cursor-pointer flex items-center transition-colors hover:bg-gray-100 ${selectedOption === index ? 'bg-blue-100 border-blue-500' : ''}`}
+              className={`border rounded-lg p-3 cursor-pointer flex items-center transition-all duration-200 ${selectedOption === index ? 'border-primary bg-primary/10' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'}`}
               onClick={() => setSelectedOption(index)}
             >
               <input
                 type="radio"
-                id={`option-${index}`}
-                name="poll"
+                id={`option-${index}-${pollId}`}
+                name={`poll-${pollId}`}
                 value={index}
                 checked={selectedOption === index}
                 onChange={() => setSelectedOption(index)}
-                className="mr-2.5"
+                className="w-4 h-4 text-primary bg-gray-100 border-gray-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
               />
-              <label htmlFor={`option-${index}`}>{option.option}</label>
+              <label htmlFor={`option-${index}-${pollId}`} className="ml-3 w-full text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">{option.option}</label>
             </div>
           ))}
           <button
             onClick={handleVote}
             disabled={selectedOption === null}
-            className="bg-blue-500 text-white rounded px-5 py-2.5 text-base cursor-pointer mt-5 w-full disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="bg-primary hover:bg-primary/90 text-white rounded-lg px-5 py-2.5 text-sm font-semibold cursor-pointer mt-4 w-full disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             Vote
           </button>
