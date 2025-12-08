@@ -815,7 +815,7 @@ setRandomUsers(uniqueUsers);
 
       // If there's a poll, create it first
       if (poll) {
-        const pollResponse = await fetch(`${API_ENDPOINTS.POLLS}`, {
+        const pollResponse = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/polls`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
