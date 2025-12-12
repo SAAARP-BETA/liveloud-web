@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import defaultAvatar from '@/assets/default-avatar.jpg';
 import { useAuth } from '../../../../context/AuthContext';
+import { useSocket } from '../../../../context/SocketContext';
 import { messagingService } from '../../../../utils/messagingService';
 import { API_ENDPOINTS } from '../../../../utils/config';
 import { chatManager, messageUtils } from '../../../../utils/chatUtils';
@@ -71,6 +72,7 @@ export default function ChatScreen() {
   const params = useParams();
   const userId = params.userId; // This gets the dynamic route parameter
   const { token, user } = useAuth();
+  const { markMessagesAsRead, refetchUnreadMessageCount } = useSocket();
   const { showToast, ToastComponent } = useToast();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -315,14 +317,39 @@ export default function ChatScreen() {
       showToast('Failed to load messages', 'error');
     } finally {
       setLoading(false);
+      
+      // Backend marks messages as read when fetching them, so update the counter
+      if (!isLoadMore && pageNum === 1) {
+        // Small delay to ensure backend has processed the read status
+        setTimeout(() => {
+          refetchUnreadMessageCount();
+        }, 300);
+      }
     }
-  }, [token, userId, user?._id]);
+  }, [token, userId, user?._id, refetchUnreadMessageCount]);
 
   useEffect(() => {
     if (userId && token && user) {
       fetchMessages();
     }
   }, [fetchMessages, userId, token, user]);
+
+  // Mark messages as read when opening the chat
+  useEffect(() => {
+    if (userId && token) {
+      // Mark messages as read via socket to notify other clients
+      markMessagesAsRead(userId);
+      
+      // The backend automatically marks messages as read when fetching them
+      // via GET /messages/:recipientId, so we just need to refetch the counter
+      // after a short delay to ensure the backend has processed it
+      const timer = setTimeout(() => {
+        refetchUnreadMessageCount();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [userId, token, markMessagesAsRead, refetchUnreadMessageCount]);
 
   // Try to load conversation metadata (for groups) if not already populated
   useEffect(() => {

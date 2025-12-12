@@ -15,7 +15,9 @@ const SocketContext = createContext({
   markNotificationAsRead: () => {},
   clearNotifications: () => {},
   updateUnreadCount: () => {},
-  updateUnreadMessageCount: () => {}
+  updateUnreadMessageCount: () => {},
+  markMessagesAsRead: () => {},
+  refetchUnreadMessageCount: () => {}
 });
 
 export const SocketProvider = ({ children }) => {
@@ -37,20 +39,36 @@ export const SocketProvider = ({ children }) => {
     
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3009';
-      const response = await fetch(`${backendUrl}/api/notifications/unread-count`, {
+      
+      // Fetch notification unread count
+      const notificationResponse = await fetch(`${backendUrl}/api/notifications/unread-count`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (response.ok) {
-        const data = await response.json();
+      if (notificationResponse.ok) {
+        const data = await notificationResponse.json();
         const count = data.unreadCount || 0;
         setUnreadCount(count);
-        console.log('📊 Initial unread count fetched and set:', count);
+        console.log('📊 Initial notification unread count fetched and set:', count);
       } else {
-        console.error('❌ Failed to fetch unread count:', response.status, response.statusText);
+        console.error('❌ Failed to fetch notification unread count:', notificationResponse.status, notificationResponse.statusText);
+      }
+
+      // Fetch message unread count
+      const messageResponse = await fetch(`${backendUrl}/api/messages/unread/count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (messageResponse.ok) {
+        const data = await messageResponse.json();
+        const count = data.unreadCount || 0;
+        setUnreadMessageCount(count);
+        console.log('📊 Initial message unread count fetched and set:', count);
+      } else {
+        console.error('❌ Failed to fetch message unread count:', messageResponse.status, messageResponse.statusText);
       }
     } catch (error) {
-      console.error('❌ Error fetching initial unread count:', error);
+      console.error('❌ Error fetching initial unread counts:', error);
     }
   };
 
@@ -156,6 +174,21 @@ export const SocketProvider = ({ children }) => {
         });
       });
 
+      // Listen for messages read event
+      newSocket.on('messages_read', (data) => {
+        console.log('📖 Messages marked as read:', data);
+        // Refetch the unread count from API
+        fetchInitialUnreadCount();
+      });
+
+      // Listen for message count update event
+      newSocket.on('message_count_update', (data) => {
+        console.log('🔢 Message count updated:', data);
+        if (typeof data.unreadCount === 'number') {
+          setUnreadMessageCount(data.unreadCount);
+        }
+      });
+
       // Room management events
       newSocket.on('joined_room', (roomName) => {
         console.log('Joined room:', roomName);
@@ -254,9 +287,17 @@ export const SocketProvider = ({ children }) => {
 
   // Mark message as read (when user opens a chat)
   const markMessagesAsRead = (userId) => {
-    // This could be enhanced to mark specific conversation as read
-    // For now, we'll rely on the API call to get updated counts
     console.log('Marking messages as read for user:', userId);
+    if (socket && isConnected) {
+      socket.emit('mark_messages_read', { userId });
+    }
+    // Also refetch the count from API
+    fetchInitialUnreadCount();
+  };
+
+  // Refetch unread message count from API
+  const refetchUnreadMessageCount = async () => {
+    fetchInitialUnreadCount();
   };
 
   // Join a specific room
@@ -291,6 +332,7 @@ export const SocketProvider = ({ children }) => {
     updateUnreadCount,
     updateUnreadMessageCount,
     markMessagesAsRead,
+    refetchUnreadMessageCount,
     joinRoom,
     leaveRoom,
     emit

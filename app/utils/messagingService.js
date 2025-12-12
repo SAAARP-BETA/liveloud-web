@@ -165,7 +165,8 @@ export class MessagingService {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching conversation:', error);
+      // Don't log here - let the caller decide if this is an error
+      // (It's expected to fail when trying to fetch a user ID as conversation)
       throw error;
     }
   }
@@ -260,6 +261,28 @@ export class MessagingService {
       return await response.json();
     } catch (error) {
       console.error('Error removing participant:', error);
+      throw error;
+    }
+  }
+
+  // Mark messages as read for a conversation or user
+  async markAsRead(conversationOrUserId, token) {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MESSAGING}/messages/${conversationOrUserId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to mark messages as read');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
       throw error;
     }
   }

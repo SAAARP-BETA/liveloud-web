@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import defaultAvatar from '@/assets/default-avatar.jpg';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { messagingService } from '../../utils/messagingService';
 
 
@@ -16,6 +17,7 @@ export default function MessagesIndex() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const { token, user } = useAuth();
+  const { refetchUnreadMessageCount } = useSocket();
   const router = useRouter();
 
   // Fetch conversations
@@ -31,7 +33,7 @@ export default function MessagesIndex() {
         setLoading(true);
       }
 
-      const response = await messagingService.getConversations(pageNum, 10, token);
+      const response = await messagingService.getConversations(pageNum, 30, token);
       
       if (isRefresh || pageNum === 1) {
         setConversations(response.conversations);
@@ -64,7 +66,8 @@ export default function MessagesIndex() {
   useEffect(() => {
     fetchConversations();
     fetchUnreadCount();
-  }, [fetchConversations, fetchUnreadCount]);
+    refetchUnreadMessageCount();
+  }, [fetchConversations, fetchUnreadCount, refetchUnreadMessageCount]);
 
   const onRefresh = () => {
     fetchConversations(1, true);

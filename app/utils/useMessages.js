@@ -7,7 +7,7 @@ import { messagingService } from './messagingService';
 
 export const useMessages = () => {
   const { token } = useAuth();
-  const { updateUnreadMessageCount, unreadMessageCount } = useSocket();
+  const { updateUnreadMessageCount, unreadMessageCount, refetchUnreadMessageCount } = useSocket();
 
   // Fetch unread message count on mount
   useEffect(() => {
@@ -45,6 +45,7 @@ export const useMessages = () => {
 
   return {
     unreadMessageCount,
-    refetchUnreadCount
+    refetchUnreadCount,
+    refetchUnreadMessageCount
   };
 };
