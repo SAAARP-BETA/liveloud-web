@@ -148,7 +148,7 @@ const CommentCard = React.memo(
     };
 
     return (
-  <div className="flex items-start space-x-4 p-4 border-t border-red-500 dark:border-red-500 overflow-hidden">
+  <div className="flex items-start space-x-4 p-4 border-t border-gray-500 dark:border-gray-500 overflow-hidden">
         <div className="w-10 h-10 rounded-full relative overflow-hidden flex-shrink-0">
           <Image
             src={comment.user.profilePicture || defaultPic}

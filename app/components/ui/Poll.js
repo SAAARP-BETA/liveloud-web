@@ -5,18 +5,18 @@ import { API_ENDPOINTS } from '../../utils/config';
 import toast from 'react-hot-toast';
 
 const Poll = ({ postId, pollId, question, initialOptions, usersVoted = [] }) => {
-  const [options, setOptions] = useState(initialOptions);
+  const [options, setOptions] = useState(initialOptions || []);
   const [selectedOption, setSelectedOption] = useState(null);
   const [voted, setVoted] = useState(false);
   const { user, token } = useAuth();
 
   useEffect(() => {
-    if (user && usersVoted.includes(user._id)) {
+    if (user && usersVoted?.includes(user._id)) {
       setVoted(true);
     }
   }, [user, usersVoted]);
 
-  const totalVotes = options.reduce((acc, option) => acc + option.votes, 0);
+  const totalVotes = options?.reduce((acc, option) => acc + option.votes, 0) || 0;
 
   const handleVote = async () => {
     if (selectedOption !== null && postId) {
@@ -49,7 +49,7 @@ const Poll = ({ postId, pollId, question, initialOptions, usersVoted = [] }) => 
       <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">{question}</h2>
       {voted ? (
         <div className="mt-4 space-y-3">
-          {options.map((option, index) => {
+          {options?.map((option, index) => {
             const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
             return ( 
               <div key={index}>
@@ -69,7 +69,7 @@ const Poll = ({ postId, pollId, question, initialOptions, usersVoted = [] }) => 
         </div>
       ) : (
         <div className="flex flex-col gap-3 mt-4">
-          {options.map((option, index) => (
+          {options?.map((option, index) => (
             <div
               key={index}
               className={`border rounded-lg p-3 cursor-pointer flex items-center transition-all duration-200 ${selectedOption === index ? 'border-primary bg-primary/10' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500'}`}

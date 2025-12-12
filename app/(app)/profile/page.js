@@ -1822,7 +1822,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   }}
   title="Post Options"
 >
-  <div className="bg-white p-4">
+  <div className="p-4">
     {selectedPost && (
       <div className="flex items-center mb-4 p-3 truncate bg-gray-50 dark:bg-gray-700 rounded-xl">
         <Image
@@ -1855,7 +1855,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           <div className="w-8">
             <Bookmark className="text-gray-600 text-xl" />
           </div>
-          <span className="text-base text-gray-800 font-medium">
+          <span className="text-base text-gray-800 font-medium dark:text-gray-300">
             Save Post
           </span>
         </button>
@@ -1870,7 +1870,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
           <div className="w-8">
             <MessageCircle className="text-gray-600 text-xl" />
           </div>
-          <span className="text-base text-gray-800 font-medium">
+          <span className="text-base text-gray-800 font-medium dark:text-gray-300">
             View Comments
           </span>
         </button>
@@ -1893,7 +1893,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     <div className="w-8">
       <Archive className="text-gray-600 text-xl" />
     </div>
-    <span className="text-base text-gray-800 font-medium">
+    <span className="text-base text-gray-800 font-medium dark:text-gray-300">
       {selectedPost.isArchived ? "Unarchive Post" : "Archive Post"}
     </span>
   </button>
