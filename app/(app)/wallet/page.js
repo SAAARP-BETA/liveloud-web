@@ -10,7 +10,7 @@ export default function WalletPage() {
   const [xpRecipient, setXpRecipient] = useState("");
   const [cryptoAmount, setCryptoAmount] = useState("");
   const [cryptoRecipient, setCryptoRecipient] = useState("");
-  const [selectedCrypto, setSelectedCrypto] = useState("BTC");
+  const [selectedCrypto, setSelectedCrypto] = useState("LILO");
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -280,23 +280,23 @@ export default function WalletPage() {
             from="@friend"
             date="Today, 10:30 AM"
           />
-          <TransactionItem 
+          {/* <TransactionItem 
             type="Sent"
             amount="0.00005 BTC"
             to="0x1a2b3c..."
             date="Yesterday, 2:15 PM"
-          />
+          /> */}
           <TransactionItem 
             type="Top Up"
             amount="200 XP"
             date="Feb 25, 2025"
           />
-          <TransactionItem 
+          {/* <TransactionItem 
             type="Received"
             amount="0.001 ETH"
             from="@user123"
             date="Feb 24, 2025"
-          />
+          /> */}
           <TransactionItem 
             type="Sent"
             amount="100 XP"
@@ -388,22 +388,22 @@ export default function WalletPage() {
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm mb-6 border border-gray-100 dark:border-gray-800">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold text-gray-800 dark:text-white">Crypto Wallet</h2>
-          <button 
+          {/* <button 
             className="text-sm text-primary cursor-pointer font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             onClick={() => handleViewChange("crypto-details")}
           >
             View Details
-          </button>
+          </button> */}
         </div>
         <div className="flex justify-between mb-4">
           <span className="text-sm text-gray-600 dark:text-gray-400">
             Your {selectedCrypto} balance is:
           </span>
           <span className="text-base font-semibold text-gray-900 dark:text-white">
-            {selectedCrypto === "BTC" ? "0.00001 BTC" : "0.0001 ETH"}
+            {selectedCrypto === "LILO" ? "0.00001 LILO" : "0.0001 LILO"}
           </span>
         </div>
-        <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 my-4 gap-2">
+        {/* <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 my-4 gap-2">
           {['BTC', 'ETH'].map((type) => (
             <button
               key={type}
@@ -417,7 +417,7 @@ export default function WalletPage() {
               {type}
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
       {/* Transaction History Section */}
       <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm mb-6 lg:max-w-xl mx-auto max-w-full border border-gray-100 dark:border-gray-800">
@@ -437,12 +437,12 @@ export default function WalletPage() {
           from="@friend"
           date="Today, 10:30 AM"
         />
-        <TransactionItem 
+        {/* <TransactionItem 
           type="Sent"
           amount="0.00005 BTC"
           to="0x1a2b3c..."
           date="Yesterday, 2:15 PM"
-        />
+        /> */}
         <TransactionItem 
           type="Top Up"
           amount="200 XP"
