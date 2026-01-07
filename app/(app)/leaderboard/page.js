@@ -288,6 +288,7 @@ export default function LeaderboardPage() {
   const [hasMore, setHasMore] = useState(true);
   const [userPosition, setUserPosition] = useState(null);
   const [myPoints, setMyPoints] = useState(null);
+  const [currentUserRank, setCurrentUserRank] = useState(null);
 
   const tabs = [
     { key: "total", title: "Overall", icon: Trophy },
@@ -296,12 +297,14 @@ export default function LeaderboardPage() {
     { key: "followers", title: "Followers", icon: User },
   ];
 
-  // Fetch user's points
+  // Fetch user's points and rank
   const fetchMyPoints = useCallback(async () => {
     if (!isAuthenticated || !currentUser) return;
 
     try {
       const headers = { Authorization: `Bearer ${token}` };
+      
+      // Fetch user's points
       const response = await fetch(`${API_ENDPOINTS.POINTS}/my-summary`, {
         headers,
       });
@@ -309,11 +312,31 @@ export default function LeaderboardPage() {
       if (response.ok) {
         const data = await response.json();
         setMyPoints(data);
+        
+        // Calculate user's rank by fetching enough of the leaderboard
+        const leaderboardResponse = await fetch(
+          `${API_ENDPOINTS.POINTS}/leaderboard?type=${activeTab}&page=1&limit=100`,
+          { headers }
+        );
+        
+        if (leaderboardResponse.ok) {
+          const leaderboardData = await leaderboardResponse.json();
+          const userIndex = leaderboardData.leaderboard?.findIndex(
+            item => (item.user?._id || item.user) === currentUser._id
+          );
+          
+          if (userIndex !== -1) {
+            setCurrentUserRank(userIndex + 1);
+          } else {
+            // If user not in top 100, they're ranked > 100
+            setCurrentUserRank(null);
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching my points:", error);
     }
-  }, [isAuthenticated, currentUser, token]);
+  }, [isAuthenticated, currentUser, token, activeTab]);
 
   // Fetch leaderboard data
   const fetchLeaderboard = useCallback(
@@ -465,6 +488,15 @@ if (isLoading && page === 1) {
                   <p className="text-white cursor-pointer text-center sm:text-center text-2xl font-bold mt-1">
                     {myPoints.totalPoints?.toLocaleString() || "0"}
                   </p>
+                  {currentUserRank && (
+                    <div className="flex items-center justify-center mt-2">
+                      <div className="bg-white/20 px-3 py-1 rounded-full">
+                        <p className="text-white text-xs font-medium">
+                          Rank #{currentUserRank}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
