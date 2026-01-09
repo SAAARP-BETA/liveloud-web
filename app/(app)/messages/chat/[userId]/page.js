@@ -971,7 +971,7 @@ export default function ChatScreen() {
                     }}
                   >
                     {/* username shown under avatar */}
-                    <p className={`${isMyMessage ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                    <p className={`${isMyMessage ? 'text-white' : 'text-gray-900 dark:text-white'} break-words`}>
                       {item.content}
                     </p>
                   </div>
