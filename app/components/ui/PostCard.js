@@ -593,10 +593,12 @@ const PostCard = ({
           <div className="mb-3">
             <Poll
               postId={post.id}
+              postOwnerId={post.user}
               initialOptions={post.poll.options}
               pollId={post.poll._id}
               question={post.poll.question}
               usersVoted={post.poll.usersVoted}
+              expiresAt={post.poll.expiresAt}
             />
           </div>
         )}

@@ -12,6 +12,13 @@ import { chatManager, messageUtils } from '../../../../utils/chatUtils';
 import { useToast } from '../../../../components/ui/Toast';
 
 export default function ChatScreen() {
+  const router = useRouter();
+  const params = useParams();
+  const userId = params.userId; // This gets the dynamic route parameter
+  const { token, user } = useAuth();
+  const { markMessagesAsRead, refetchUnreadMessageCount } = useSocket();
+  const { showToast, ToastComponent } = useToast();
+
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -30,14 +37,14 @@ export default function ChatScreen() {
   const [addSearching, setAddSearching] = useState(false);
   const addTimerRef = useRef(null);
 
+  const isGroupConv = !!(
+    conversationInfo?.isGroup ||
+    (conversationInfo?.participants && conversationInfo.participants.length > 2)
+  );
+
   const openAddMember = () => {
     // Only allow adding members on group conversations. conversationInfo may not be
     // populated yet, so also check messages for conversation metadata.
-    const isGroupConv = !!(
-      conversationInfo?.isGroup ||
-      (conversationInfo?.participants && conversationInfo.participants.length > 2)
-    );
-
     if (!isGroupConv) {
       showToast('Add member is only available for group conversations', 'warning');
       return;
@@ -68,12 +75,6 @@ export default function ChatScreen() {
   
   const [lastMessageId, setLastMessageId] = useState(null);
 
-  const router = useRouter();
-  const params = useParams();
-  const userId = params.userId; // This gets the dynamic route parameter
-  const { token, user } = useAuth();
-  const { markMessagesAsRead, refetchUnreadMessageCount } = useSocket();
-  const { showToast, ToastComponent } = useToast();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
@@ -514,11 +515,6 @@ export default function ChatScreen() {
   // Determine at render-time whether this conversation is a group. We use this to
   // hide group-only actions (rename/add) when viewing a 1:1 chat. conversationInfo may
   // be empty until loaded, so also detect per-message conversation metadata.
-  const isGroupConv = !!(
-    conversationInfo?.isGroup ||
-    (conversationInfo?.participants && conversationInfo.participants.length > 2)
-  );
-
   if (loading && messages.length === 0) {
     return (
       <>
@@ -786,13 +782,49 @@ export default function ChatScreen() {
           </button>
 
           <div className="flex items-center flex-1">
-            <Image
-              src={conversationInfo?.groupProfilePicture || recipient?.profilePicture || defaultAvatar}
-              alt={conversationInfo?.name || recipient?.username || 'User'}
-              width={32}
-              height={32}
-              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-3 object-cover"
-            />
+            {conversationInfo?.groupProfilePicture ? (
+              <Image
+                src={conversationInfo.groupProfilePicture}
+                alt={conversationInfo.name || 'Group'}
+                width={32}
+                height={32}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-3 object-cover"
+              />
+            ) : isGroupConv && conversationInfo?.participants?.length > 1 ? (
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 mr-3">
+                {conversationInfo.participants
+                  .filter(p => p._id !== user?._id)
+                  .slice(0, 3)
+                  .map((p, i) => (
+                    <div
+                      key={p._id}
+                      className="absolute rounded-full border border-white dark:border-gray-900 overflow-hidden"
+                      style={{
+                        width: '60%',
+                        height: '60%',
+                        left: i === 0 ? '0' : i === 1 ? '30%' : '15%',
+                        top: i === 0 ? '0' : i === 1 ? '0' : '30%',
+                        zIndex: 3 - i
+                      }}
+                    >
+                      <Image
+                        src={p.profilePicture || defaultAvatar}
+                        alt={p.username}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <Image
+                src={recipient?.profilePicture || defaultAvatar}
+                alt={recipient?.username || 'User'}
+                width={32}
+                height={32}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full mr-3 object-cover"
+              />
+            )}
             <div className="flex-1 min-w-0">
               <h2 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
                 {conversationInfo?.name || recipient?.username || 'Loading...'}
@@ -939,7 +971,7 @@ export default function ChatScreen() {
                     }}
                   >
                     {/* username shown under avatar */}
-                    <p className={`${isMyMessage ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                    <p className={`${isMyMessage ? 'text-white' : 'text-gray-900 dark:text-white'} break-words`}>
                       {item.content}
                     </p>
                   </div>

@@ -82,14 +82,23 @@ const CreatePost = () => {
       };
 
     const handleCreatePoll = () => {
-        if (question.trim() && options.every(opt => opt.trim())) {
+        const trimmedQuestion = question.trim();
+        if (trimmedQuestion.length < 5) {
+          toast.error("Poll question must be at least 5 characters long.");
+          return;
+        }
+        if (trimmedQuestion.length > 500) {
+          toast.error("Poll question cannot exceed 500 characters.");
+          return;
+        }
+        if (trimmedQuestion && options.every(opt => opt.trim())) {
           onCreate({
-            question: question.trim(),
+            question: trimmedQuestion,
             options: options.map(opt => ({ option: opt.trim() })),
             expiresAt: expiresAt || undefined,
           });
         } else {
-          toast.error("Please fill out the poll question and all options.");
+          toast.error("Please fill out all options.");
         }
       };
 
@@ -99,7 +108,7 @@ const CreatePost = () => {
            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Create a Poll</h3>
            <div className="mb-4">
              <label className="text-sm text-gray-600 dark:text-gray-300 mb-2 font-medium block">Poll Question</label>
-             <input type="text" className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700" placeholder="e.g., What's your favorite color?" value={question} onChange={(e) => setQuestion(e.target.value)} />
+             <input type="text" minLength={5} maxLength={500} className="w-full bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700" placeholder="e.g., What's your favorite color?" value={question} onChange={(e) => setQuestion(e.target.value)} />
            </div>
            <div className="mb-4">
              <label className="text-sm text-gray-600 dark:text-gray-300 mb-2 font-medium block">Options</label>
