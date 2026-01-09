@@ -155,7 +155,6 @@ export default function MessagesIndex() {
           conversations.map((item) => {
             const isGroup = !!item.isGroup;
             const title = isGroup ? (item.name || item.participant?.username || 'Group') : (item.participant?.username || 'Unknown');
-            const avatarSrc = isGroup ? (item.groupProfilePicture || defaultAvatar) : (item.participant?.profilePicture || defaultAvatar);
             const subtitle = item.lastMessage ? item.lastMessage.content : (isGroup ? `${item.totalParticipants || (item.participants?.length || 0)} participants` : 'No messages yet');
             const clickId = isGroup ? item._id : item.participant?._id || item._id;
 
@@ -166,15 +165,43 @@ export default function MessagesIndex() {
                 className="flex items-center px-4 sm:px-6 lg:px-8 py-3 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
               >
                 <div className="relative">
-                  <Image
-                    src={avatarSrc}
-                    alt={title}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
-                  />
+                  {isGroup && !item.groupProfilePicture && item.participants?.length > 1 ? (
+                    <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+                      {item.participants
+                        .filter(p => p._id !== user?._id)
+                        .slice(0, 3)
+                        .map((p, i) => (
+                          <div
+                            key={p._id}
+                            className="absolute rounded-full border border-white dark:border-gray-900 overflow-hidden"
+                            style={{
+                              width: '60%',
+                              height: '60%',
+                              left: i === 0 ? '0' : i === 1 ? '30%' : '15%',
+                              top: i === 0 ? '0' : i === 1 ? '0' : '30%',
+                              zIndex: 3 - i
+                            }}
+                          >
+                            <Image
+                              src={p.profilePicture || defaultAvatar}
+                              alt={p.username || 'User'}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <Image
+                      src={isGroup ? (item.groupProfilePicture || defaultAvatar) : (item.participant?.profilePicture || defaultAvatar)}
+                      alt={title}
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                    />
+                  )}
                   {item.unreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full min-w-4 h-4 sm:min-w-5 sm:h-5 flex items-center justify-center">
+                    <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full min-w-4 h-4 sm:min-w-5 sm:h-5 flex items-center justify-center" style ={{zIndex: 3}}>
                       <span className="text-white text-xs font-bold px-1">
                         {item.unreadCount > 99 ? '99+' : item.unreadCount}
                       </span>
