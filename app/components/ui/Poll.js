@@ -4,23 +4,32 @@ import { useAuth } from '../../context/AuthContext';
 import { API_ENDPOINTS } from '../../utils/config';
 import toast from 'react-hot-toast';
 
-const Poll = ({ postId, pollId, question, initialOptions, usersVoted = [] }) => {
+const Poll = ({ postId, postOwnerId, pollId, question, initialOptions, usersVoted = [], expiresAt }) => {
   const [options, setOptions] = useState(initialOptions || []);
   const [selectedOption, setSelectedOption] = useState(null);
   const [voted, setVoted] = useState(false);
   const { user, token } = useAuth();
+
+  const isPostOwner = user && postOwnerId === user._id;
 
   const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
 
   useEffect(() => {
     if (user && usersVoted?.includes(user._id)) {
       setVoted(true);
+    } else {
+      setVoted(false);
     }
   }, [user, usersVoted]);
 
   const totalVotes = options?.reduce((acc, option) => acc + option.votes, 0) || 0;
 
   const handleVote = async () => {
+    if (isExpired) {
+        toast.error("Poll Expired!");
+        return;
+    }
+
     if (selectedOption !== null && postId) {
       try {
         const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/${postId}/poll/vote`, {
@@ -97,6 +106,16 @@ const Poll = ({ postId, pollId, question, initialOptions, usersVoted = [] }) => 
             Vote
           </button>
         </div>
+      )}
+      {isExpired && (
+          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-3 italic">
+              *Voting time has expired.
+          </div>
+      )}
+      {isPostOwner && expiresAt && (
+          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-3 text-center">
+              Expiry time: {new Date(expiresAt).toLocaleString()}
+          </div>
       )}
     </div>
   );
