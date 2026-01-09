@@ -10,6 +10,8 @@ const Poll = ({ postId, pollId, question, initialOptions, usersVoted = [] }) => 
   const [voted, setVoted] = useState(false);
   const { user, token } = useAuth();
 
+  const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
+
   useEffect(() => {
     if (user && usersVoted?.includes(user._id)) {
       setVoted(true);
@@ -45,7 +47,7 @@ const Poll = ({ postId, pollId, question, initialOptions, usersVoted = [] }) => 
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-5 shadow-sm border border-gray-200 dark:border-gray-700 max-w-md mx-auto my-5 font-sans">
+    <div className="w-full bg-gray-50 dark:bg-gray-800/50 rounded-lg p-5 shadow-sm border border-gray-200 dark:border-gray-700">
       <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">{question}</h2>
       {voted ? (
         <div className="mt-4 space-y-3">
