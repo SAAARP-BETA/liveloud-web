@@ -1,5 +1,5 @@
 "use client";
-import defaultCover from "../../../assets/Profilepic1.png";
+import defaultCover from "@/assets/default-avatar.jpg";
 import defaultPic from "../../../assets/avatar.png";
 import React, {
   useState,

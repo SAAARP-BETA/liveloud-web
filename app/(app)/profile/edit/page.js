@@ -25,7 +25,7 @@ import {
   ChevronRight,
   Shield,
 } from "lucide-react";
-import defaultCover from "../../../assets/Profilepic1.png";
+import defaultCover from "@/assets/default-avatar.jpg";
 import defaultPic from "../../../assets/avatar.png";
 const PROFILE_IMAGE_MAX_SIZE = 120;
 
