@@ -220,7 +220,7 @@ const StreakDisplay = ({ consecutiveDays }) => {
 // Tab Bar Component
 const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
   return (
-    <div className="flex w-full border justify-center gap-25 border-gray-100 dark:border-gray-700 pt-2">
+    <div className="flex w-full border justify-center gap-1 border-gray-100 dark:border-gray-700 pt-2">
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -248,6 +248,14 @@ const TabBarAnimated = ({ tabs, activeTab, onTabPress }) => {
             )}
             {tab.key === "archived" && (
               <Archive
+                size={18}
+                className={
+                  activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
+                }
+              />
+            )}
+            {tab.key === "bookmarks" && (
+              <Bookmark
                 size={18}
                 className={
                   activeTab === tab.key ? "text-primary" : "text-gray-500 dark:text-gray-400"
@@ -482,6 +490,8 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   const [deleteUserDataOption, setDeleteUserDataOption] = useState(false);
   const [archivedPosts, setArchivedPosts] = useState([]);
   const [isArchivedLoading, setIsArchivedLoading] = useState(false);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+  const [isBookmarksLoading, setIsBookmarksLoading] = useState(false);
 
   const abortControllerRef = useRef(null);
   const hasFetchedProfile = useRef(false);
@@ -564,6 +574,38 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     [token, isMyProfile, currentUser?._id]
   );
 
+  // Fetch bookmarked posts
+  const fetchBookmarkedPosts = useCallback(
+    async (userId) => {
+      if (!userId || !token || !isMyProfile) return;
+
+      setIsBookmarksLoading(true);
+      try {
+        const response = await fetch(`${API_ENDPOINTS.SOCIAL}/posts/bookmarks`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch bookmarked posts: ${response.status}`);
+        }
+
+        const bookmarksData = await response.json();
+        const postsArray = bookmarksData.posts || bookmarksData.data || bookmarksData || [];
+        const formattedPosts = postsArray
+          .map((post, index) => formatPostFromApi(post, index, currentUser?._id))
+          .filter(Boolean);
+
+        setBookmarkedPosts(formattedPosts);
+      } catch (error) {
+        console.error("Error fetching bookmarked posts:", error);
+        toast.error("Failed to load bookmarked posts.");
+      } finally {
+        setIsBookmarksLoading(false);
+      }
+    },
+    [token, isMyProfile, currentUser?._id]
+  );
+
   // Archive Post handler
   const handleArchivePost = async (postId) => {
     try {
@@ -624,6 +666,75 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
     } catch (error) {
       console.error("Error unarchiving post:", error);
       toast.error("Failed to unarchive post.");
+    }
+  };
+
+  // Bookmark Post handler for bookmarks tab
+  const handleBookmarkPost = async (postId) => {
+    try {
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${postId}/bookmark`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setPosts((prev) =>
+          prev.map((post) =>
+            post.id === postId ? { ...post, isBookmarked: true } : post
+          )
+        );
+        setArchivedPosts((prev) =>
+          prev.map((post) =>
+            post.id === postId ? { ...post, isBookmarked: true } : post
+          )
+        );
+        setBookmarkedPosts((prev) =>
+          prev.map((post) =>
+            post.id === postId ? { ...post, isBookmarked: true } : post
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error bookmarking post:", error);
+    }
+  };
+
+  // Unbookmark Post handler for bookmarks tab
+  const handleUnbookmarkPost = async (postId) => {
+    try {
+      const response = await fetch(
+        `${API_ENDPOINTS.SOCIAL}/posts/${postId}/unbookmark`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setPosts((prev) =>
+          prev.map((post) =>
+            post.id === postId ? { ...post, isBookmarked: false } : post
+          )
+        );
+        setArchivedPosts((prev) =>
+          prev.map((post) =>
+            post.id === postId ? { ...post, isBookmarked: false } : post
+          )
+        );
+        setBookmarkedPosts((prev) => prev.filter((post) => post.id !== postId));
+        toast.success("Removed from bookmarks");
+      }
+    } catch (error) {
+      console.error("Error unbookmarking post:", error);
     }
   };
 
@@ -1213,8 +1324,9 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
   if (user?._id && isMyProfile) {
     // console.log('Debug: Fetching archived posts for user:', user._id); // Debug log
     fetchArchivedPosts(user._id);
+    fetchBookmarkedPosts(user._id);
   }
-}, [user?._id, isMyProfile, fetchArchivedPosts]);
+}, [user?._id, isMyProfile, fetchArchivedPosts, fetchBookmarkedPosts]);
   // Trigger initial profile fetch
   useEffect(() => {
     if (!hasFetchedProfile.current) {
@@ -1470,7 +1582,10 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                 { key: "posts", title: "Posts", icon: "grid" },
                 { key: "media", title: "Media", icon: "image" },
                 ...(isMyProfile
-                  ? [{ key: "archived", title: "Archived", icon: "archive" }]
+                  ? [
+                      { key: "archived", title: "Archived", icon: "archive" },
+                      { key: "bookmarks", title: "Bookmarks", icon: "bookmark" },
+                    ]
                   : []),
               ]}
               activeTab={activeTab}
@@ -1632,6 +1747,65 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
                         Only you can see your archived posts. Use the post
                         options menu to archive something.
                       </p>
+                    </div>
+                  )}
+                </>
+              )}
+              {activeTab === "bookmarks" && isMyProfile && (
+                <>
+                  {isBookmarksLoading ? (
+                    <div className="flex justify-center items-center py-12 w-full">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    </div>
+                  ) : bookmarkedPosts.length > 0 ? (
+                    bookmarkedPosts.map((post, index) => (
+                      <div key={post.id || index}>
+                        <PostCard
+                          post={post}
+                          handleLikePost={postHandlers.handleLikePost}
+                          handleUnlikePost={postHandlers.handleUnlikePost}
+                          handleCommentPost={postHandlers.handleCommentPost}
+                          handleAmplifyPost={postHandlers.handleAmplifyPost}
+                          handleBookmarkPost={handleBookmarkPost}
+                          handleUnbookmarkPost={handleUnbookmarkPost}
+                          handleDislikePost={postHandlers.handleDislikePost}
+                          handleUndislikePost={postHandlers.handleUndislikePost}
+                          handleArchivePost={handleArchivePost}
+                          handleUnarchivePost={handleUnarchivePost}
+                          setSelectedPost={setSelectedPost}
+                          setModalVisible={setModalVisible}
+                          allowArchivedOptions={false}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 w-full min-h-[200px]">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                        />
+                      </svg>
+                      <h3 className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+                        No bookmarked posts
+                      </h3>
+                      <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400 mx-8">
+                        Posts you bookmark will appear here. Tap the bookmark icon on any post to save it for later.
+                      </p>
+                      <Link
+                        href="/home"
+                        className="mt-6 px-6 py-2.5 bg-primary rounded-full text-white font-medium cursor-pointer hover:bg-sky-600 transition-colors"
+                      >
+                        Explore Posts
+                      </Link>
                     </div>
                   )}
                 </>
