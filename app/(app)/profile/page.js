@@ -1876,7 +1876,7 @@ const ProfilePage = ({ initialUser, initialPosts, initialPoints }) => {
             <div className="flex flex-col gap-3 mb-4">
               <button
                 className="w-full py-2  cursor-pointer rounded bg-rose-100 text-rose-700 font-semibold hover:bg-rose-200 transition"
-                onClick={() => setShowDeleteDialog(true)}
+                onClick={() => router.push('/profile/delete-account')}
               >
                 Delete Account
               </button>
